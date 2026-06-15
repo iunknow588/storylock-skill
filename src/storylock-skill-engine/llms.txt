@@ -1,0 +1,21 @@
+StoryLock Skill Engine
+
+Entry:
+- SKILL.md
+
+Capabilities:
+- references/story-assist.md
+- references/strength-review.md
+- references/password-fill.md
+- references/challenge-sign.md
+
+Support:
+- references/boundary.md
+- references/demo.md
+- references/invocation.md
+- references/rust-wasm.md
+
+Assets:
+- assets/schemas/
+- assets/templates/
+- agents/openai.yaml

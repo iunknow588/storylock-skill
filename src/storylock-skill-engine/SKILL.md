@@ -47,6 +47,7 @@ Use these directories as part of the runtime contract:
 2. `assets/schemas/` contains stable input and output schemas.
 3. `assets/templates/` contains reusable request templates.
 4. `agents/openai.yaml` contains agent integration metadata.
+5. `llms.txt` provides a compact package index for LLM-oriented discovery.
 
 ## Working Rules
 
