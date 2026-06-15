@@ -45,7 +45,7 @@ Use these directories as part of the runtime contract:
 
 1. `references/` contains machine-readable operator guidance for each capability.
 2. `assets/schemas/` contains stable input and output schemas.
-3. `assets/templates/` contains reusable request templates.
+3. `assets/templates/` contains reusable request templates for story drafting, password fill, and challenge sign.
 4. `agents/openai.yaml` contains agent integration metadata.
 5. `llms.txt` provides a compact package index for LLM-oriented discovery.
 

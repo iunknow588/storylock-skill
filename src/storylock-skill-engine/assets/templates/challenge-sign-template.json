@@ -1,0 +1,16 @@
+{
+  "identityId": "founder_signing",
+  "keyId": "wallet-key",
+  "algorithm": "ed25519",
+  "payload": "sign this payload",
+  "resourceId": "eth-main",
+  "primaryRole": "private_key",
+  "includeKeyMaterial": false,
+  "attachments": [
+    {
+      "attachmentId": "wallet-password",
+      "role": "keystore_password"
+    }
+  ],
+  "answers": []
+}

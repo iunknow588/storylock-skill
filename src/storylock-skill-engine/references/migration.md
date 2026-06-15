@@ -2,22 +2,22 @@
 
 ## Overview
 
-This package is a migrated skill-layer bundle, not a full rewrite of `story-lock`.
+This page records the migrated package boundary and current packaging status.
 
-## Migration targets
+## Migration Targets
 
-1. keep the same high-level skill names
-2. keep input validation behavior
-3. keep demo paths runnable inside the new package
-4. keep Rust/WASM packaging visible but separated from the JS skill-layer
+1. `src/adapters/skills/`
+2. `src/adapters/agent/`
+3. `examples/04-skill-layer-demo.mjs`
 
-## Current status
+## Current Status
 
-1. JS skill-layer is locally runnable
-2. demo and selftest are package-local
-3. Rust/WASM artifacts are buildable and self-testable
-4. full in-package runtime replacement is still incomplete
+1. the JS skill layer is runnable
+2. demo and self-test commands are present
+3. Rust/WASM build and dist validation are wired in
+4. full WASM-host replacement is not complete
 
-## Notes for review
+## Agent Guidelines
 
-Use this file when checking whether a change is packaging-only or behavior-changing.
+1. Use this page for status reporting only.
+2. Keep migration status separate from capability behavior.

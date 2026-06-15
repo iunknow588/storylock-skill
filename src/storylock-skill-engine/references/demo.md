@@ -1,33 +1,27 @@
 # StoryLock Skill Demo
 
-## Minimal demo source
+## Overview
 
-Use:
+Use this page to run and explain the package-local demo path.
 
-1. `assets/migrated/examples/04-skill-layer-demo.mjs`
-2. `scripts/demo.mjs`
+## Demo Entry
 
-This is now a locally runnable migrated demo path inside the skill package.
+1. `scripts/demo.mjs`
+2. `assets/migrated/examples/04-skill-layer-demo.mjs`
 
-## Demo purpose
+## What the Demo Shows
 
-The demo shows:
+1. story drafting
+2. password-fill authorization packaging
+3. challenge-sign authorization packaging
+4. stable package-local invocation
 
-1. draft assist
-2. local password-fill packaging
-3. challenge-signing packaging
-
-## Suggested validation
-
-Run:
+## Validation Commands
 
 1. `npm run demo`
 2. `npm run selftest`
 
-Then compare imports and behavior against:
+## Agent Guidelines
 
-1. `assets/migrated/skills/`
-2. `assets/migrated/agent/`
-3. `index.js`
-
-When talking about the result, describe it as a stable high-level invocation surface, not as proof that the core protocol changed.
+1. Use the demo to verify package behavior, not to infer new security semantics.
+2. Keep demo output structured when reporting results.

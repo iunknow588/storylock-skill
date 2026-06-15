@@ -1,34 +1,34 @@
 # StoryLock Skill Boundary
 
-This migrated bundle preserves the same boundary as the source `story-lock` project.
+## Overview
 
-## What this layer is
+This page defines the responsibility split for the StoryLock skill package.
 
-The skill layer is the high-level interface layer above StoryLock core.
+## What This Skill Does
 
-It is responsible for:
+1. draft and refine story material
+2. review question-set strength
+3. package login-field authorization results
+4. package challenge-sign authorization results
+5. provide stable demo and invocation surfaces
 
-1. drafting and refining story material
-2. reviewing question-set readiness
-3. packaging authorized login-fill output
-4. packaging authorized signing output
-5. providing stable demo and integration-facing invocation surfaces
+## What This Skill Does Not Do
 
-## What this layer is not
+1. replace StoryLock core security semantics
+2. store secrets as its own persistence layer
+3. turn cloud storage or blockchain storage into the skill's security boundary
+4. claim that Rust/WASM host replacement is complete
 
-It does not:
+## Required Host Surface
 
-1. redefine `6-of-24`, `12-of-24`, or `22-of-24`
-2. change root-key derivation or recovery semantics
-3. replace host UI, deployment policy, or production credential handling
-4. bypass challenge verification or scope enforcement
-
-## Required host surface
-
-Authorization-oriented skills still depend on the host:
+Authorization-oriented capabilities still depend on the host:
 
 1. `createChallenge(identityId, scope)`
 2. `submitChallengeAnswers(identityId, challengeId, answers)`
 3. `readSecretObject(identityId, sessionId, secretObjectId)`
 
-So this layer is orchestration and packaging, not the core authorization engine.
+## Agent Guidelines
+
+1. Treat the skill package as an interface layer.
+2. Keep storage security separate from StoryLock authorization.
+3. Use this page whenever you need to explain scope or safety limits.

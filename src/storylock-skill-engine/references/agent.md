@@ -2,26 +2,24 @@
 
 ## Overview
 
-This page maps the migrated package's agent-style orchestration example.
+This page maps the package's orchestration example.
 
-It corresponds to:
+## Orchestration Example
 
 1. `assets/migrated/agent/video-publish-demo.js`
 2. `VideoPublishAgentDemo`
 
-## What it does
+## What It Does
 
-The demo combines:
-
-1. login authorization
-2. challenge signing authorization
-3. a simple publish plan output
+1. builds login authorization
+2. builds signing authorization
+3. returns a publish-plan style result
 
 ## Usage
 
-Prefer this when you need to show how the skill-layer can orchestrate multiple skill calls in sequence.
+Use this page when you need to explain multi-step skill orchestration.
 
-## Notes
+## Agent Guidelines
 
-1. It is still a JS-side orchestration example.
-2. It does not mean the full Rust/WASM runtime has been re-hosted.
+1. Treat this as an example flow, not a primary skill capability.
+2. Do not confuse orchestration with core authorization.

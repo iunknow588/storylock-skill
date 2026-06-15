@@ -19,3 +19,8 @@ Assets:
 - assets/schemas/
 - assets/templates/
 - agents/openai.yaml
+
+Templates:
+- assets/templates/story-template.json
+- assets/templates/password-fill-template.json
+- assets/templates/challenge-sign-template.json
