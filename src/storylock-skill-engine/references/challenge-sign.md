@@ -64,6 +64,10 @@ Input schema:
 
 1. `assets/schemas/challenge-sign-input.schema.json`
 
+Output schema:
+
+1. `assets/schemas/challenge-sign-output.schema.json`
+
 ## Output Parsing
 
 The signing result is assembled by the skill implementation and includes authorization state plus signing output. Agents should preserve at least:

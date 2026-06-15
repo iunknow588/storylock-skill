@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StrengthReviewOutput",
+  "type": "object",
+  "required": [
+    "productionReady",
+    "rootKdfMeetsProductionMinimum",
+    "answerKdfMeetsProductionMinimum",
+    "formalEligibleQuestionCount",
+    "requiredBasicQuestionCount",
+    "basicMinChallengeBits",
+    "strongestBasicChallengeBits",
+    "strongestBasicChallengeMeetsMinimum",
+    "issues",
+    "questionSetReady",
+    "recommendedActions"
+  ],
+  "properties": {
+    "productionReady": { "type": "boolean" },
+    "rootKdfMeetsProductionMinimum": { "type": "boolean" },
+    "answerKdfMeetsProductionMinimum": { "type": "boolean" },
+    "formalEligibleQuestionCount": { "type": "integer", "minimum": 0 },
+    "requiredBasicQuestionCount": { "type": "integer", "minimum": 0 },
+    "basicMinChallengeBits": { "type": "integer", "minimum": 0 },
+    "strongestBasicChallengeBits": { "type": "integer", "minimum": 0 },
+    "strongestBasicChallengeMeetsMinimum": { "type": "boolean" },
+    "issues": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "questionSetReady": { "type": "boolean" },
+    "recommendedActions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

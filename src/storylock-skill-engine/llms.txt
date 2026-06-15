@@ -20,6 +20,14 @@ Assets:
 - assets/templates/
 - agents/openai.yaml
 
+Schemas:
+- assets/schemas/story-draft-input.schema.json
+- assets/schemas/password-fill-input.schema.json
+- assets/schemas/password-fill-output.schema.json
+- assets/schemas/challenge-sign-input.schema.json
+- assets/schemas/challenge-sign-output.schema.json
+- assets/schemas/strength-review-output.schema.json
+
 Templates:
 - assets/templates/story-template.json
 - assets/templates/password-fill-template.json

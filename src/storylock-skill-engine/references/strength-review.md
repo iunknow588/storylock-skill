@@ -28,6 +28,10 @@ const result = await skill.run({
 
 Each question object is expected to provide the fields required by the analyzer, including valid answers, distractors, and optional verify-policy fields.
 
+Output schema:
+
+1. `assets/schemas/strength-review-output.schema.json`
+
 ## Output Parsing
 
 The result includes:
