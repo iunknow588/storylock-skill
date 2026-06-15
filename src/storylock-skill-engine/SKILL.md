@@ -1,67 +1,63 @@
 ---
 name: storylock-skill-engine
-description: Package and reuse the StoryLock skill-layer from the story-lock project without changing its existing behavior. Use when Codex needs a reusable StoryLock skill version for demo, documentation, packaging, invocation guidance, or migration into a Pharos-style skill bundle with SKILL.md, references, and assets.
+description: StoryLock skill package for AI agents. Use when an agent needs to draft story material, review question-set strength, produce authorized login fields, or produce a challenge-signing authorization result through the migrated StoryLock skill layer.
 ---
 
-# StoryLock Skill Engine
+# StoryLock Skill
 
-Use this package as the reusable skill-layer bundle migrated from `E:/2026OPC大赛/story-lock`.
+This package is the self-describing StoryLock skill bundle. Agents should rely on this directory's `SKILL.md`, `references/`, `assets/`, and `agents/` files as the primary interface contract.
 
 ## Scope
 
-This bundle covers the existing StoryLock high-level interfaces only:
+This skill package covers four agent-facing capabilities:
 
-1. story drafting and refining helpers
+1. story draft assistance
 2. question-set strength review
-3. local password-fill authorization packaging
-4. challenge-signing authorization packaging
-5. the current agent-style orchestration example above those skills
+3. password-fill authorization packaging
+4. challenge-sign authorization packaging
 
-Keep behavior aligned with the source project. Do not redefine StoryLock core security semantics here.
-
-Current packaging status:
-
-1. the JS skill-layer in this package is locally runnable
-2. the package has its own demo and selftest entry
-3. Rust / WASM core packaging is not finished yet in this directory
-
-## Source mapping
-
-Treat these source paths in `story-lock` as the authority for the migrated version:
-
-1. `src/adapters/skills/`
-2. `src/adapters/agent/`
-3. `examples/04-skill-layer-demo.mjs`
-4. `src/adapters/skills/README.md`
-5. `src/adapters/agent/README.md`
+This package does not redefine StoryLock core security semantics. It documents and packages the current migrated JS skill layer, plus the current Rust/WASM build path.
 
 ## Capability Index
 
-| User Need | Capability | Detailed Instructions |
-| --- | --- | --- |
-| Explain StoryLock skill-layer boundaries | skill boundary and scope | `references/boundary.md` |
-| Show available StoryLock skills | skill surface and exports | `references/invocation.md` |
-| Run a minimal StoryLock skill demo | skill-layer runnable example | `references/demo.md` |
-| Build or verify Rust/WASM packaging | wasm build and dist validation | `references/rust-wasm.md` |
-| Package StoryLock into a reusable skill bundle | migrated package structure | `references/migration.md` |
-| Show the current agent-style orchestration example | `VideoPublishAgentDemo` mapping | `references/agent.md` |
+| User Intent | Capability | Reference File | Key Parameters |
+| --- | --- | --- | --- |
+| "Help me draft a story" | story draft generation | `references/story-assist.md` | `objective`, `audience`, `tone`, `constraints` |
+| "Check whether these 24 questions are strong enough" | strength review | `references/strength-review.md` | `questions` |
+| "Fill login fields for this identity and site" | password fill | `references/password-fill.md` | `identityId`, `siteId`, `bindings`, `answers` |
+| "Sign this challenge payload" | challenge sign | `references/challenge-sign.md` | `identityId`, `keyId`, `algorithm`, `payload`, `answers` |
+| "Explain boundaries and safety limits" | skill boundary | `references/boundary.md` | none |
+| "Run the package demo or self-test" | demo and verification | `references/demo.md` | none |
+| "Check current Rust/WASM packaging status" | wasm packaging status | `references/rust-wasm.md` | none |
 
-## Working rules
+## Write Operation Pre-checks
 
-1. Prefer the migrated files in `assets/migrated/` for packaging and review.
-2. Prefer the original `story-lock` repo when behavior needs verification.
-3. Keep the distinction between core authorization and skill packaging explicit.
-4. Describe this bundle as a reusable interface layer, not as the security boundary.
-5. When the user asks for product-facing modes, highlight:
-   - `LocalPasswordFillSkill`
-   - `ChallengeSigningAuthorizationSkill`
-6. Use the `assets/` schemas and template files when you need a stable input/output shape.
+Before any authorization-oriented write or signing flow, verify all of the following:
 
-## Verification path
+1. Identity context: `identityId` exists and matches the intended user context.
+2. Challenge lifecycle: a fresh challenge was created before answers are submitted.
+3. Session validity: the returned authorization includes a valid `sessionId` before secrets are read or signing output is assembled.
+4. Scope coverage: the requested scope and object references match the target resource, site, key, and attachments.
 
-For a minimal runnable example, use the demo entry described in `references/demo.md`.
+## Package Layout
 
-Current local commands:
+Use these directories as part of the runtime contract:
+
+1. `references/` contains machine-readable operator guidance for each capability.
+2. `assets/schemas/` contains stable input and output schemas.
+3. `assets/templates/` contains reusable request templates.
+4. `agents/openai.yaml` contains agent integration metadata.
+
+## Working Rules
+
+1. Prefer capability-specific reference files before improvising parameters or output claims.
+2. Keep the distinction between skill packaging and StoryLock core authorization explicit.
+3. Treat `assets/migrated/` as the packaged implementation source for this bundle.
+4. Describe the current runtime honestly: the JS skill layer is runnable, while full Rust-host replacement is not yet complete.
+
+## Verification Path
+
+For local validation, use:
 
 1. `npm run demo`
 2. `npm run selftest`

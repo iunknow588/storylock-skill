@@ -1,0 +1,20 @@
+version: 1
+skill:
+  name: storylock-skill-engine
+  entry: SKILL.md
+  references:
+    - references/story-assist.md
+    - references/strength-review.md
+    - references/password-fill.md
+    - references/challenge-sign.md
+    - references/boundary.md
+    - references/demo.md
+    - references/rust-wasm.md
+defaults:
+  execution_mode: structured
+  preferred_output: json
+guidelines:
+  - Read SKILL.md before selecting a capability.
+  - Use the capability index to route the request to the correct reference file.
+  - Run write-operation pre-checks before password-fill or challenge-sign actions.
+  - Preserve structured outputs instead of flattening them into prose.
