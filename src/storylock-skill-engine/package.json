@@ -1,0 +1,14 @@
+{
+  "name": "storylock-skill-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable StoryLock skill-layer package migrated from story-lock",
+  "main": "index.js",
+  "scripts": {
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "demo": "node scripts/demo.mjs",
+    "selftest": "node scripts/selftest.mjs",
+    "selftest:wasm": "node scripts/selftest-wasm-dist.mjs"
+  }
+}

@@ -1,0 +1,7 @@
+interface:
+  display_name: "StoryLock Skill Guide"
+  short_description: "Explain, demo, and review the StoryLock skill package state."
+  default_prompt: "Use $storylock-skill-guide to explain StoryLock skill boundaries, show runnable package-local demo paths, and clarify current JS packaging versus Rust/WASM integration status."
+
+policy:
+  allow_implicit_invocation: true

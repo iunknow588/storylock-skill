@@ -1,0 +1,70 @@
+{
+  "generated": "E:\\2026OPC大赛\\skill\\docs\\_build\\build_index.py",
+  "generated_at": "2026-06-15T20:11:15",
+  "total_files": 5,
+  "groups": {
+    "ref": "参考 · 研究 · 归档"
+  },
+  "files": [
+    {
+      "path": "ref/01-参赛概览.md",
+      "group": "ref",
+      "label": "StoryLock 参赛概览",
+      "title": "StoryLock 参赛概览",
+      "size": 3037,
+      "size_str": "3.0KB",
+      "version": null,
+      "date": null,
+      "star": false,
+      "desc": "StoryLock 参赛概览"
+    },
+    {
+      "path": "ref/02-技术映射说明.md",
+      "group": "ref",
+      "label": "StoryLock 与 Pharos Skill Engine 的技术映射说明",
+      "title": "StoryLock 与 Pharos Skill Engine 的技术映射说明",
+      "size": 3789,
+      "size_str": "3.7KB",
+      "version": null,
+      "date": null,
+      "star": false,
+      "desc": "StoryLock 与 Pharos Skill Engine 的技术映射说明"
+    },
+    {
+      "path": "ref/03-演示与调用说明.md",
+      "group": "ref",
+      "label": "StoryLock 演示与调用说明",
+      "title": "StoryLock 演示与调用说明",
+      "size": 2238,
+      "size_str": "2.2KB",
+      "version": null,
+      "date": null,
+      "star": false,
+      "desc": "StoryLock 演示与调用说明"
+    },
+    {
+      "path": "ref/04-提交材料清单.md",
+      "group": "ref",
+      "label": "StoryLock 提交材料清单",
+      "title": "StoryLock 提交材料清单",
+      "size": 1814,
+      "size_str": "1.8KB",
+      "version": null,
+      "date": null,
+      "star": false,
+      "desc": "StoryLock 是一个本地优先的授权访问内核，同时提供可调用的 Skill 层。其将基于故事记忆的本地验证封装为可复用的登录填充与挑战签名能力，同时将正式安全边界保留在本地授权核心，而非置于 Demo 或编排层中。"
+    },
+    {
+      "path": "ref/README.md",
+      "group": "ref",
+      "label": "StoryLock x Pharos 黑客松文档",
+      "title": "StoryLock x Pharos 黑客松文档",
+      "size": 2120,
+      "size_str": "2.1KB",
+      "version": null,
+      "date": null,
+      "star": true,
+      "desc": "StoryLock x Pharos 黑客松文档"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "objective": "Describe what the StoryLock skill should help with",
+  "audience": "Pharos reviewer",
+  "tone": "clear and concrete",
+  "constraints": [
+    "keep core and skill-layer separate",
+    "do not overclaim Rust completion"
+  ]
+}

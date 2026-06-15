@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StoryDraftAssistInput",
+  "type": "object",
+  "required": ["objective"],
+  "properties": {
+    "objective": { "type": "string", "minLength": 1 },
+    "audience": { "type": "string" },
+    "tone": { "type": "string" },
+    "constraints": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}
