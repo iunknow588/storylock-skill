@@ -166,6 +166,51 @@ export class StoryLockRemoteGateway {
     });
   }
 
+  async requestPasswordFill(payload) {
+    const envelope = normalizeEnvelope(payload, {
+      requestedRetention: 'audit_meta_only',
+      policyHints: { minAccessLevel: 'L4', noRemoteSecretReturn: true },
+    });
+    return this.invoke({
+      requestId: envelope.requestId,
+      capability: 'requestPasswordFill',
+      scope: 'password_fill_basic',
+      payload: {
+        identityId: ensureString(payload.identityId, 'identityId'),
+        credentialRef: ensureString(payload.credentialRef, 'credentialRef'),
+        targetOrigin: ensureString(payload.targetOrigin, 'targetOrigin'),
+        purpose: payload.purpose ?? 'remote_password_fill',
+      },
+      policyHints: envelope.policyHints,
+      requestedRetention: envelope.requestedRetention,
+      nonce: envelope.nonce,
+      expiry: ensureExpiry(envelope.expiry),
+    });
+  }
+
+  async requestLocalStoryAssist(payload) {
+    const envelope = normalizeEnvelope(payload, {
+      requestedRetention: 'result_only',
+      policyHints: { localProcessingOnly: true },
+    });
+    return this.invoke({
+      requestId: envelope.requestId,
+      capability: 'requestLocalStoryAssist',
+      scope: 'story_assist_basic',
+      payload: {
+        identityId: ensureString(payload.identityId, 'identityId'),
+        storyObjectId: payload.storyObjectId ? ensureString(payload.storyObjectId, 'storyObjectId') : null,
+        assistType: ensureString(payload.assistType, 'assistType'),
+        prompt: ensureString(payload.prompt, 'prompt'),
+        context: payload.context ?? {},
+      },
+      policyHints: envelope.policyHints,
+      requestedRetention: envelope.requestedRetention,
+      nonce: envelope.nonce,
+      expiry: ensureExpiry(envelope.expiry),
+    });
+  }
+
   async queryStoryMetadata(payload) {
     const envelope = normalizeEnvelope(payload, {
       requestedRetention: 'result_only',

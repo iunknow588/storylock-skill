@@ -44,6 +44,7 @@ await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
   const read = new StoryReadAccessSkill({ dbPath, secretStore });
   ctx.hosts = [read.host];
+  read.host.enrollAnswers('id-1', ['correct answer']);
   const result = await read.run({
     identityId: 'id-1',
     storyObjectId: 'story-001',
@@ -63,6 +64,7 @@ await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
   const read = new StoryReadAccessSkill({ dbPath, secretStore });
   ctx.hosts = [read.host];
+  read.host.enrollAnswers('id-1', ['correct answer']);
   const first = await read.run({
     identityId: 'id-1',
     storyObjectId: 'story-001',
@@ -75,14 +77,40 @@ await withDb(async (ctx) => {
     identityId: 'id-1',
     storyObjectId: 'story-001',
     answers: [{ answer: 'correct answer' }],
-    requestId: 'req-replay',
-    nonce: 'nonce-replay-b',
+    requestId: 'req-replay-b',
+    nonce: 'nonce-replay-a',
     expiry: Date.now() + 10_000,
   });
   assert.equal(first.status, 'success');
   assert.equal(replay.status, 'error');
   assert.equal(replay.error.code, 'SLG-008');
   pass('replay-rejected');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const read = new StoryReadAccessSkill({ dbPath, secretStore });
+  ctx.hosts = [read.host];
+  read.host.enrollAnswers('id-1', ['correct answer']);
+  const first = await read.run({
+    identityId: 'id-1',
+    storyObjectId: 'story-001',
+    answers: [{ answer: 'correct answer' }],
+    requestId: 'req-idempotent',
+    nonce: 'nonce-idempotent-a',
+    expiry: Date.now() + 10_000,
+  });
+  const replay = await read.run({
+    identityId: 'id-1',
+    storyObjectId: 'story-001',
+    answers: [{ answer: 'correct answer' }],
+    requestId: 'req-idempotent',
+    nonce: 'nonce-idempotent-b',
+    expiry: Date.now() + 10_000,
+  });
+  assert.equal(first.status, 'success');
+  assert.deepEqual(replay, first);
+  pass('request-id-idempotent-replay');
 });
 
 await withDb(async (ctx) => {
@@ -110,6 +138,7 @@ await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
   const write = new StoryWriteAccessSkill({ dbPath, secretStore });
   ctx.hosts = [write.host];
+  write.host.enrollAnswers('id-1', ['correct answer']);
   const result = await write.run({
     identityId: 'id-1',
     storyObjectId: 'story-selftest-write',
@@ -126,8 +155,54 @@ await withDb(async (ctx) => {
 
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
+  const write = new StoryWriteAccessSkill({ dbPath, secretStore });
+  ctx.hosts = [write.host];
+  write.host.enrollAnswers('id-1', ['correct answer']);
+  const result = await write.run({
+    identityId: 'id-1',
+    storyObjectId: 'story-sensitive-write',
+    content: {
+      title: 'Sensitive title',
+      content: 'Body',
+      email: 'reader@example.com',
+    },
+    answers: [{ answer: 'correct answer' }],
+    requestId: 'req-sensitive-write',
+    nonce: 'nonce-sensitive-write',
+    expiry: Date.now() + 10_000,
+  });
+  assert.equal(result.status, 'success');
+  assert.equal(result.auditMeta.hasHighSensitivityFields, true);
+  assert.equal(result.result.writeResult.title, undefined);
+  pass('write-high-sensitivity-redaction');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
   const read = new StoryReadAccessSkill({ dbPath, secretStore });
   ctx.hosts = [read.host];
+  read.host.enrollAnswers('id-1', ['correct answer']);
+  const result = await read.run({
+    identityId: 'id-1',
+    storyObjectId: 'story-001',
+    answers: [{ answer: 'correct answer' }],
+    redactionLevel: 'full',
+    requestId: 'req-full-redaction',
+    nonce: 'nonce-full-redaction',
+    expiry: Date.now() + 10_000,
+  });
+  assert.equal(result.status, 'success');
+  assert.equal(result.result.storyObject.title, '[redacted]');
+  assert.equal(result.result.storyObject.contentSummary, '[redacted]');
+  assert.equal(result.auditMeta.redactionLevel, 'full');
+  pass('read-full-redaction');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const read = new StoryReadAccessSkill({ dbPath, secretStore });
+  ctx.hosts = [read.host];
+  read.host.enrollAnswers('id-1', ['correct answer']);
   await read.run({
     identityId: 'id-1',
     storyObjectId: 'story-001',
@@ -137,10 +212,47 @@ await withDb(async (ctx) => {
     expiry: Date.now() + 10_000,
   });
   const db = new DatabaseSync(dbPath);
-  const rows = db.prepare('SELECT event_type, result FROM audit_log ORDER BY audit_id').all();
+  const rows = db.prepare('SELECT event_type, result, redaction_level, has_high_sensitivity_fields FROM audit_log ORDER BY audit_id').all();
   db.close();
-  assert.deepEqual(rows.map((row) => row.event_type), ['replay_registered', 'challenge_verified', 'story_read']);
+  assert.deepEqual(rows.map((row) => row.event_type), ['replay_registered', 'challenge_verified', 'story_read', 'story_read_redaction_applied']);
+  assert.equal(rows.at(-1).redaction_level, 'partial');
+  assert.equal(rows.at(-1).has_high_sensitivity_fields, 0);
   pass('audit-log-written');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const legacy = new DatabaseSync(dbPath);
+  legacy.exec(`
+    CREATE TABLE request_store (
+      request_id TEXT PRIMARY KEY,
+      nonce TEXT NOT NULL,
+      expiry INTEGER NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+    CREATE TABLE audit_log (
+      audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_type TEXT NOT NULL,
+      identity_id TEXT,
+      story_object_id TEXT,
+      request_id TEXT,
+      result TEXT,
+      created_at INTEGER NOT NULL
+    );
+  `);
+  legacy.close();
+
+  const read = new StoryReadAccessSkill({ dbPath, secretStore });
+  ctx.hosts = [read.host];
+  const db = new DatabaseSync(dbPath);
+  const requestColumns = new Set(db.prepare('PRAGMA table_info(request_store)').all().map((row) => row.name));
+  const auditColumns = new Set(db.prepare('PRAGMA table_info(audit_log)').all().map((row) => row.name));
+  db.close();
+  assert.equal(requestColumns.has('request_hash'), true);
+  assert.equal(requestColumns.has('response_json'), true);
+  assert.equal(auditColumns.has('redaction_level'), true);
+  assert.equal(auditColumns.has('meta_json'), true);
+  pass('sqlite-legacy-schema-migrated');
 });
 
 assert.throws(

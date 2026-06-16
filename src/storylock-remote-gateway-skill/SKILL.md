@@ -18,6 +18,9 @@ This package defines the third layer of StoryLock: remote request packaging, del
 | "查询能力状态" | delegated capability status | `references/boundary.md` | `identityId`, `capability`, `requestId`, `nonce`, `expiry` |
 | "解释远程网关边界" | gateway boundary | `references/boundary.md` | none |
 
+| "Remote password fill request" | delegated password fill | `references/boundary.md` | `identityId`, `credentialRef`, `targetOrigin`, `requestId`, `nonce`, `expiry` |
+| "Remote local story assist request" | delegated local story assist | `references/boundary.md` | `identityId`, `assistType`, `prompt`, `requestId`, `nonce`, `expiry` |
+
 ## Working Rules
 
 1. This package is remote-facing.

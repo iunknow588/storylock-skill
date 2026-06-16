@@ -36,6 +36,34 @@ const status = await gateway.requestCapabilityStatus({
 assert.equal(status.capability, 'requestCapabilityStatus');
 assert.equal(status.scope, 'capability_status_basic');
 
+const passwordFill = await gateway.requestPasswordFill({
+  requestId: 'req-password-fill',
+  nonce: 'nonce-password-fill',
+  expiry: Date.now() + 10_000,
+  identityId: 'id-1',
+  credentialRef: 'cred-1',
+  targetOrigin: 'https://example.com',
+});
+
+assert.equal(passwordFill.capability, 'requestPasswordFill');
+assert.equal(passwordFill.scope, 'password_fill_basic');
+assert.equal(passwordFill.requestedRetention, 'audit_meta_only');
+assert.equal(passwordFill.policyHints.noRemoteSecretReturn, true);
+
+const assist = await gateway.requestLocalStoryAssist({
+  requestId: 'req-assist',
+  nonce: 'nonce-assist',
+  expiry: Date.now() + 10_000,
+  identityId: 'id-1',
+  storyObjectId: 'story-001',
+  assistType: 'summarize',
+  prompt: 'Summarize locally',
+});
+
+assert.equal(assist.capability, 'requestLocalStoryAssist');
+assert.equal(assist.scope, 'story_assist_basic');
+assert.equal(assist.policyHints.localProcessingOnly, true);
+
 await assert.rejects(
   () => gateway.requestChallengeSign({
     requestId: 'req-bad-alg',
@@ -57,5 +85,5 @@ await assert.rejects(
   /requestId must be a non-empty string/,
 );
 
-assert.equal(calls.length, 2);
+assert.equal(calls.length, 4);
 console.log('StoryLock remote gateway selftest passed.');

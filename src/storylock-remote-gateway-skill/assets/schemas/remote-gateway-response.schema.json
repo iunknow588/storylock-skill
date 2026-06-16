@@ -19,7 +19,9 @@
         "requestStoryWrite",
         "requestChallengeSign",
         "queryStoryMetadata",
-        "requestCapabilityStatus"
+        "requestCapabilityStatus",
+        "requestPasswordFill",
+        "requestLocalStoryAssist"
       ]
     },
     "executionLocation": {

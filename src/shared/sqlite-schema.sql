@@ -31,7 +31,11 @@ CREATE TABLE IF NOT EXISTS request_store (
   request_id TEXT PRIMARY KEY,
   nonce TEXT NOT NULL,
   expiry INTEGER NOT NULL,
-  created_at INTEGER NOT NULL
+  request_hash TEXT NOT NULL,
+  response_json TEXT,
+  response_status TEXT,
+  created_at INTEGER NOT NULL,
+  response_created_at INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS nonce_store (
@@ -71,6 +75,10 @@ CREATE TABLE IF NOT EXISTS audit_log (
   story_object_id TEXT,
   request_id TEXT,
   result TEXT,
+  redaction_level TEXT,
+  has_high_sensitivity_fields INTEGER NOT NULL DEFAULT 0,
+  error_code TEXT,
+  meta_json TEXT,
   created_at INTEGER NOT NULL
 );
 

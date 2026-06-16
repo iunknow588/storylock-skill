@@ -1,569 +1,709 @@
 # StoryLock 代码与文档一致性评审意见
 
-**评审日期**: 2026-06-16  
-**评审范围**:  
-- 代码目录: `E:\2026OPC大赛\skill\src`
-- 文档目录: `E:\2026OPC大赛\skill\docs\design\cn`
-- 输出目录: `E:\2026OPC大赛\skill\docs\management`
+## 评审概述
+
+**评审日期：** 2026-06-16  
+**评审对象：**  
+- 代码：`E:\2026OPC大赛\skill\src\`  
+- 设计文档：`E:\2026OPC大赛\skill\docs\design\cn\`  
+
+**评审维度：**  
+1. 三层架构一致性  
+2. 安全规范合规性  
+3. 接口契约一致性  
+4. 状态机实现完整性  
+5. 防重放策略实现  
+6. 密钥管理合规性  
+7. 脱敏规范执行  
+8. 代码安全漏洞  
 
 ---
 
-## 一、评审结论总览
+## 一、总体评价
 
-| 维度 | 一致性评级 | 说明 |
-|------|-----------|------|
-| 三层架构划分 | ✅ 一致 | 代码目录与文档定义的三层结构完全对应 |
-| 能力边界定义 | ⚠️ 部分一致 | 存在新旧两套能力体系并存问题 |
-| 接口契约 | ⚠️ 部分一致 | 契约字段基本对齐，但存在关键差异 |
-| 安全规范 | ❌ 不一致 | 代码实现严重偏离文档安全要求 |
-| 数据持久化 | ❌ 不一致 | 内存存储替代了文档要求的SQLite |
-| 防重放机制 | ⚠️ 部分一致 | 结构存在，但实现不完整 |
-| 脱敏规范 | ❌ 不一致 | 代码未实现文档要求的脱敏分级 |
-| 错误码体系 | ❌ 不一致 | 代码使用裸Error，未使用SLG错误码 |
-| 密钥管理 | ❌ 不一致 | 代码完全缺失平台密钥存储适配 |
+StoryLock 项目实现了文档定义的三层 Skill 架构：
+- **第一包** `storylock-local-story-processing-skill`：本地故事处理
+- **第二包** `storylock-local-story-access-skill`：本地故事访问控制
+- **第三包** `storylock-remote-gateway-skill`：远程网关代理
 
-**总体评级（原始评审时点）**: ⚠️ **部分一致，存在重大安全实现缺口**
-
-> 注：本评级反映 2026-06-16 20:36 GMT+8 原始审计时点。后续修复记录见第七节，当前代码状态应以第七节和访问层自测结果共同判断。
+代码与文档在**宏观架构层面基本一致**，但在**安全细节实现、状态机完整性、错误码规范、密钥管理**等方面存在多处不一致和潜在风险。
 
 ---
 
-## 二、逐项一致性分析
+## 二、一致性分析
 
-### 2.1 三层架构划分 ✅ 一致
+### 2.1 三层架构一致性 ✅ 基本符合
 
-**文档定义** (`storylock_three_skill_packages_cn.md`):
-- 第一包: `storylock-local-story-processing-skill` — 纯本地故事处理
-- 第二包: `storylock-local-story-access-skill` — 本地安全访问边界
-- 第三包: `storylock-remote-gateway-skill` — 远程代理与委托
+| 文档定义 | 代码实现 | 状态 |
+|---------|---------|------|
+| 第一包：本地故事处理 | `storylock-local-story-processing-skill` | ✅ 符合 |
+| 第二包：本地故事访问 | `storylock-local-story-access-skill` | ✅ 符合 |
+| 第三包：远程网关 | `storylock-remote-gateway-skill` | ✅ 符合 |
+| 调用链：第三→第二→第一 | `index.js` 中通过 `transport` 委托 | ✅ 符合 |
+| 第一包不直接对第三包开放 | 第一包无远程调用能力 | ✅ 符合 |
 
-**代码实现**:
-- `src/storylock-local-story-processing-skill/` — 存在 ✅
-- `src/storylock-local-story-access-skill/` — 存在 ✅
-- `src/storylock-remote-gateway-skill/` — 存在 ✅
-- `src/storylock-skill-engine/` — 旧迁移代码包，文档未定义其角色
+**结论：** 三层架构划分与文档一致。
 
-**评审意见**: 目录结构完全对应。但 `storylock-skill-engine` 作为旧迁移代码包，文档中未明确其在新三层架构中的定位，存在"第四包"的模糊地带。
+### 2.2 安全规范一致性 ⚠️ 部分偏离
 
----
+#### 2.2.1 算法基线 ✅ 符合
 
-### 2.2 能力边界定义 ⚠️ 部分一致
+| 文档要求 | 代码实现 | 状态 |
+|---------|---------|------|
+| 对称加密：`AES-256-GCM` | `shared/crypto.js` 使用 `aes-256-gcm` | ✅ 符合 |
+| 摘要/HMAC：`SHA-256`/`HMAC-SHA256` | `hmacSha256Hex` 实现 | ✅ 符合 |
+| 密钥派生：`HKDF-SHA256` | `deriveHkdfSha256` 实现 | ✅ 符合 |
+| 随机数：≥32字节 | `randomBytes(32)` | ✅ 符合 |
 
-**文档定义** (`系统Skill表与能力边界.md`):
-- 主Skill: `StoryDraftAssistSkill`, `StoryRefineAssistSkill`, `StrengthReviewSkill`, `LocalPasswordFillSkill`, `ChallengeSigningAuthorizationSkill`
-- 内部Skill: `LoginAuthorizationSkill`, `SigningAuthorizationSkill`
-- 编排示例: `VideoPublishAgentDemo`
+#### 2.2.2 GCM nonce 管理 ⚠️ 存在隐患
 
-**代码实现**:
+**文档要求：**
+> "每次加密独立生成 96-bit 随机 nonce，同一密钥下不得复用 nonce"
 
-| 文档定义 | 代码存在位置 | 状态 |
-|---------|------------|------|
-| `StoryDraftAssistSkill` | `storylock-skill-engine/assets/migrated/skills/story-assist.js` | ⚠️ 旧包中 |
-| `StoryRefineAssistSkill` | `storylock-skill-engine/assets/migrated/skills/story-assist.js` | ⚠️ 旧包中 |
-| `StrengthReviewSkill` | `storylock-skill-engine/assets/migrated/skills/strength-review.js` | ⚠️ 旧包中 |
-| `LocalPasswordFillSkill` | `storylock-skill-engine/assets/migrated/skills/authorization-skills.js` | ⚠️ 旧包中 |
-| `ChallengeSigningAuthorizationSkill` | `storylock-skill-engine/assets/migrated/skills/authorization-skills.js` | ⚠️ 旧包中 |
-| `LoginAuthorizationSkill` | `storylock-skill-engine/assets/migrated/skills/authorization-skills.js` | ⚠️ 旧包中 |
-| `SigningAuthorizationSkill` | `storylock-skill-engine/assets/migrated/skills/authorization-skills.js` | ⚠️ 旧包中 |
-| `StoryDraftSkill` (新包) | `storylock-local-story-processing-skill/index.js` | ✅ 新包中 |
-| `StoryRefineSkill` (新包) | `storylock-local-story-processing-skill/index.js` | ✅ 新包中 |
-| `StoryReadAccessSkill` | `storylock-local-story-access-skill/index.js` | ✅ 新包中 |
-| `StoryWriteAccessSkill` | `storylock-local-story-access-skill/index.js` | ✅ 新包中 |
+**代码实现：**
+```javascript
+const nonce = randomBytes(12); // 96-bit
+```
 
-**问题发现**:
-1. **新旧体系并存**: 文档定义的主Skill清单在 `storylock-skill-engine` 旧包中实现，而新三层包中只有部分对应能力
-2. **能力名称不一致**: 文档用 `StoryDraftAssistSkill`，新包用 `StoryDraftSkill`（缺少"Assist"后缀）
-3. **StrengthReviewSkill 缺失**: 新三层包中完全没有强度评估能力
-4. **PasswordFill/ChallengeSign 缺失**: 新包第二层未实现这些核心本地安全能力
+**问题：**
+1. **nonce 随机生成无碰撞检测**：虽然 96-bit 随机 nonce 碰撞概率极低，但文档建议的"独立生成"在密码学上应理解为"确保唯一性"，而非仅依赖随机性。
+2. **nonce 存储格式**：文档建议两种格式（二进制拼接/结构化JSON），代码使用结构化JSON（base64url），与文档一致，但缺少对 nonce 唯一性的持久化校验机制。
 
-**评审意见**: 能力边界在文档层面清晰，但代码实现存在"新旧两套体系"的混乱。建议明确 `storylock-skill-engine` 的定位（是废弃、迁移中、还是保留为参考实现？），并统一命名。
+**风险等级：** 中  
+**建议：** 增加 nonce 使用记录或采用计数器方案确保绝对唯一性。
 
----
+#### 2.2.3 密钥层次 ⚠️ 实现不完整
 
-### 2.3 接口契约 ⚠️ 部分一致
+**文档要求四层密钥层次：**
+```
+masterSalt → rootKey → workKey → objectKey
+```
 
-**文档定义** (`三包接口契约.md`):
-- 统一请求字段: `requestId`, `capability`, `scope`, `payload`, `policyHints`, `requestedRetention`, `nonce`, `expiry`
-- 统一响应字段: `requestId`, `status`, `capability`, `executionLocation`, `result`, `redactionLevel`, `retentionGranted`, `auditMeta`, `error`
-- 统一命名: `camelCase`
-- 错误响应必须包含完整外层结构
+**代码实现：**
+```javascript
+// access-host.js 中直接使用 masterSalt 派生 objectKey
+const key = deriveHkdfSha256(this.masterSalt, {
+  salt: Buffer.from(`storylock:object:${storyObjectId}`),
+  info: Buffer.from(`storylock:object:${storyObjectId}`)
+});
+```
 
-**代码实现** (第二包 `StoryReadAccessSkill.run` 返回):
+**问题：**
+1. **缺少 rootKey 和 workKey 中间层**：代码直接从 `masterSalt` 派生 `objectKey`，缺少文档要求的 `rootKey` 和 `workKey` 中间层。
+2. **salt 和 info 使用相同值**：`salt` 和 `info` 都使用 `storylock:object:${storyObjectId}`，不符合 HKDF 最佳实践（salt 应随机，info 应描述用途）。
+
+**风险等级：** 中  
+**建议：** 按文档要求实现完整四层密钥层次，区分 salt 和 info 的用途。
+
+#### 2.2.4 masterSalt 存储 ⚠️ 存在隐患
+
+**文档要求：**
+> "长期保存于操作系统密钥链，不允许明文写入普通配置文件"
+
+**代码实现：**
+```javascript
+// secret-store.js 中 MemorySecretStore 作为默认回退
+const DEFAULT_SECRET_STORE = new MemorySecretStore();
+
+// createAccessHost 中允许不使用平台密钥存储
+const resolvedSecretStore = secretStore ?? (usePlatformSecretStore ? createPlatformSecretStore() : DEFAULT_SECRET_STORE);
+```
+
+**问题：**
+1. **默认使用内存存储**：当 `usePlatformSecretStore=false` 且未注入 `secretStore` 时，默认使用 `MemorySecretStore`，masterSalt 仅存于内存，进程重启即丢失。
+2. **非持久化场景无警告**：虽然 `persistent=true` 时强制要求密钥存储，但非持久化场景（`:memory:`）下默认回退到内存存储，可能导致用户误以为数据安全。
+
+**风险等级：** 中  
+**建议：** 非持久化场景也应强制要求安全存储，或至少输出明确警告。
+
+### 2.3 接口契约一致性 ⚠️ 部分偏离
+
+#### 2.3.1 统一字段命名 ✅ 符合
+
+文档要求统一使用 `camelCase`，代码实现一致。
+
+#### 2.3.2 请求/响应结构 ⚠️ 字段缺失
+
+**文档要求响应必须包含：**
 ```json
 {
-  "requestId": "...",
-  "status": "success",
-  "capability": "requestStoryRead",
-  "executionLocation": "local",
-  "result": { ... },
-  "redactionLevel": "none",
-  "retentionGranted": "result_only",
-  "auditMeta": { ... },
-  "error": null
+  "requestId", "status", "capability", "executionLocation",
+  "result", "redactionLevel", "retentionGranted", "auditMeta", "error"
 }
 ```
 
-**差异点**:
-| 文档要求 | 代码实现 | 差异说明 |
-|---------|---------|---------|
-| `capability` 枚举包含 `requestStoryRead`, `requestStoryWrite`, `requestChallengeSign`, `queryStoryMetadata` | 第二包返回 `requestStoryRead` / `requestStoryWrite` | ✅ 一致 |
-| 错误响应必须包含 `error.code`, `error.type`, `error.message`, `error.suggestedAction`, `error.retryable` | 代码使用 `throw new Error('CHALLENGE_FAILED')` 抛出裸Error | ❌ 不一致 |
-| 响应中 `error` 为 null 时其他字段完整 | 代码在成功时返回完整结构 | ✅ 一致 |
-| 第三包请求结构必须包含 `policyHints` | 第三包 `normalizeEnvelope` 包含 `policyHints` | ✅ 一致 |
+**代码实现（第二包）：**
+```javascript
+return {
+  requestId,
+  status: 'success',
+  capability: 'requestStoryRead',
+  executionLocation: 'local',
+  result: { ... },
+  redactionLevel,
+  retentionGranted: 'result_only',
+  auditMeta: { challengeId, sessionId },
+  error: null,
+};
+```
 
-**评审意见**: 成功路径的响应结构基本对齐文档。但错误处理路径严重偏离：代码使用裸Error抛出，未返回文档要求的结构化错误响应（含 `error.code`, `error.type`, `error.message`, `error.suggestedAction`, `error.retryable`）。
+**问题：**
+1. **auditMeta 内容不完整**：文档要求 `auditMeta` 包含最小审计信息，但代码中仅包含 `challengeId` 和 `sessionId`，缺少 `timestamp`、`errorCode` 等字段。
+2. **错误响应中 auditMeta 为空**：`toErrorResponse` 中 `auditMeta: {}`，不符合文档要求的最小故障审计信息。
+
+**风险等级：** 低  
+**建议：** 完善 auditMeta 字段，确保错误响应也包含最小审计信息。
+
+#### 2.3.3 错误码规范 ⚠️ 不一致
+
+**文档定义错误码：**
+| 错误码 | 类型 | 含义 |
+|-------|------|------|
+| SLG-001 | CAPABILITY_NOT_AVAILABLE | 能力不可用 |
+| SLG-002 | CHALLENGE_REQUIRED | 需要挑战 |
+| SLG-003 | CHALLENGE_FAILED | 挑战失败 |
+| ... | ... | ... |
+
+**代码实现：**
+```javascript
+// access-host.js 中使用自定义 key 而非 SLG 错误码
+err.key = 'CHALLENGE_LOCKED';  // 非 SLG 格式
+err.code = 'SLG-008';          // 与文档定义的 SLG-008 含义不一致
+```
+
+**问题：**
+1. **错误码与文档定义不一致**：代码中 `SLG-008` 被用于 "REDACTION_REQUIRED"（脱敏要求），但文档中 `SLG-008` 定义为 "REDACTION_REQUIRED"，而代码中实际用于 "replay_detected"。
+2. **内部错误码与外部错误码混用**：`access-host.js` 使用 `err.key`（如 `CHALLENGE_LOCKED`、`SESSION_INVALID`），而 `index.js` 使用 `err.code`（如 `SLG-003`），缺乏统一映射。
+
+**风险等级：** 中  
+**建议：** 统一错误码体系，建立内部错误到 SLG 错误码的映射表。
+
+### 2.4 状态机实现 ⚠️ 部分缺失
+
+#### 2.4.1 状态定义 ✅ 基本符合
+
+**文档要求状态：**
+```
+idle → challenge_created → answers_submitted → verified → session_active → session_expired
+                    ↓
+                  failed → locked
+```
+
+**代码实现：**
+- `challenge_state` 表包含 `status` 字段，支持：
+  - `challenge_created`
+  - `answers_submitted`
+  - `verified`
+  - `failed`
+  - `locked`
+
+**问题：**
+1. **缺少 `idle` 状态**：文档定义 `idle` 为初始状态，但代码中 challenge 直接创建为 `challenge_created`，没有 `idle` 状态。
+2. **缺少 `session_active` 和 `session_expired` 状态**：session 状态存储在 `session_store` 表的 `status` 字段中，但 challenge 状态机未包含 session 状态转换。
+
+**风险等级：** 低  
+**建议：** 明确状态机边界，challenge 状态与 session 状态可分离管理。
+
+#### 2.4.2 状态转换条件 ⚠️ 不完整
+
+**文档要求：**
+> "以 challengeId 为粒度加本地锁，每次状态迁移都校验当前状态是否符合预期"
+
+**代码实现：**
+```javascript
+// submitChallengeAnswers 中直接更新状态，无状态校验
+this.db.prepare('UPDATE challenge_state SET status = ? WHERE challenge_id = ?').run('answers_submitted', challengeId);
+```
+
+**问题：**
+1. **缺少状态转换校验**：代码直接更新状态，未校验当前状态是否允许转换（如从 `challenge_created` 才能到 `answers_submitted`）。
+2. **缺少并发控制**：虽然使用了 `BEGIN IMMEDIATE`，但未在 UPDATE 中加入 `AND status = ?` 条件校验。
+
+**风险等级：** 中  
+**建议：** 增加状态转换校验，确保状态迁移的合法性。
+
+#### 2.4.3 锁定策略 ⚠️ 实现不完整
+
+**文档要求：**
+> "maxRetryCount 默认值为 3，达到阈值后进入 locked，锁定窗口默认 15 分钟"
+
+**代码实现：**
+```javascript
+const MAX_FAILURES_PER_WINDOW = 3;
+const FAILURE_LOCK_MS = 15 * 60 * 1000;
+```
+
+**问题：**
+1. **锁定后无自动解锁机制**：文档要求 `locked -> idle`（锁定窗口结束后），但代码中 `locked` 状态仅通过时间判断，未自动清理或状态转换。
+2. **失败计数按 identityId 而非 challengeId**：文档要求 "按 identityId + 时间窗口统计"，代码实现符合，但未在 challenge 创建时重置失败计数。
+
+**风险等级：** 低  
+**建议：** 增加定时清理或查询时自动解锁逻辑。
+
+### 2.5 防重放策略 ⚠️ 部分偏离
+
+#### 2.5.1 requestId 幂等 ✅ 基本实现
+
+**代码实现：**
+```javascript
+ensureReplaySafe(requestId, nonce, expiry) {
+  const existingRequest = this.db.prepare('SELECT request_id FROM request_store WHERE request_id = ?').get(requestId);
+  if (existingRequest) {
+    throw err; // SLG-009 DUPLICATE_REQUEST
+  }
+}
+```
+
+**问题：**
+1. **缺少相同 requestId 返回同一结果**：文档要求 "相同 requestId 的请求若已成功执行，返回同一结果摘要"，但代码中直接抛出错误。
+2. **缺少 requestId 与负载绑定校验**：文档要求 "相同 requestId 且负载不同，直接拒绝"，代码未实现。
+
+**风险等级：** 低  
+**建议：** 实现 requestId 到响应结果的缓存，支持幂等返回。
+
+#### 2.5.2 nonce 去重 ✅ 基本实现
+
+**代码实现：**
+```javascript
+const existingNonce = this.db.prepare('SELECT nonce FROM nonce_store WHERE nonce = ?').get(nonce);
+if (existingNonce) {
+  throw err; // SLG-010 NONCE_REPLAY_DETECTED
+}
+```
+
+**问题：**
+1. **nonce 清理策略不完整**：文档建议 "滑动时间窗口，窗口大小默认 2 x maxTTL"，代码中清理逻辑为 `cutoff = nowMs() - REPLAY_WINDOW_MS`（24小时），但未考虑 `maxTTL` 动态调整。
+2. **nonce 索引未优化**：虽然创建了 `idx_nonce_store_expiry`，但 nonce 查询使用主键索引，符合要求。
+
+**风险等级：** 低  
+**建议：** 根据实际 maxTTL 动态调整清理窗口。
+
+#### 2.5.3 expiry 校验 ⚠️ 容差处理不一致
+
+**文档要求：**
+> "expiry 校验默认允许 +/- 30 秒 容差"
+
+**代码实现：**
+```javascript
+const REPLAY_DRIFT_MS = 30_000;
+// 多处使用：challenge.expires_at + REPLAY_DRIFT_MS <= nowMs()
+// 以及：expiry + REPLAY_DRIFT_MS <= nowMs()
+```
+
+**问题：**
+1. **容差方向不一致**：文档要求 "±30秒"，但代码中仅对过期时间增加容差（`+REPLAY_DRIFT_MS`），对未到期时间未减容差（`-REPLAY_DRIFT_MS`）。
+2. **request_store 清理使用负容差**：`DELETE FROM request_store WHERE expiry <= nowMs() - REPLAY_DRIFT_MS`，逻辑正确，但与文档表述的 "容差" 概念不完全一致。
+
+**风险等级：** 低  
+**建议：** 统一容差处理逻辑，明确文档与代码的映射关系。
+
+### 2.6 挑战答案存储策略 ⚠️ 部分偏离
+
+#### 2.6.1 原始答案内存处理 ✅ 符合
+
+**文档要求：**
+> "原始 challenge answers 不做长期持久化，只允许存在于本地短时内存"
+
+**代码实现：**
+```javascript
+const normalizedAnswers = answers.map(normalizeAnswerValue).filter(Boolean);
+// 计算摘要后立即丢弃原始答案
+const answerDigests = normalizedAnswers.map((answer) => hmacSha256Hex(salt, answer));
+```
+
+**问题：**
+1. **未显式清理 normalizedAnswers**：虽然 `normalizedAnswers` 在函数作用域内会被 GC，但文档建议显式清零 Buffer。
+2. **答案以字符串数组传入**：`normalizeAnswerValue` 返回字符串，未使用 Buffer，不符合文档建议的 "优先使用 Buffer"。
+
+**风险等级：** 低  
+**建议：** 将答案处理改为 Buffer 流程，校验后显式清零。
+
+#### 2.6.2 答案摘要持久化 ✅ 符合
+
+**代码实现：**
+```javascript
+// answer_digest_set 表存储 HMAC 摘要
+INSERT INTO answer_digest_set (identity_id, answer_digest, created_at)
+```
+
+**问题：**
+1. **缺少 normalizationVersion 记录**：文档建议记录规范化版本，代码未实现。
+2. **缺少 digestAlgorithm 和 saltStrategyVersion**：文档建议记录摘要算法和盐值策略版本，代码未实现。
+
+**风险等级：** 低  
+**建议：** 增加版本字段，支持未来算法升级。
+
+### 2.7 脱敏规范 ⚠️ 执行不完整
+
+#### 2.7.1 脱敏级别 ✅ 基本实现
+
+**代码实现：**
+```javascript
+redactionLevel === 'none' ? storyObject : {
+  storyObjectId: storyObject.storyObjectId,
+  title: storyObject.title,
+  version: storyObject.version,
+  sensitivity: storyObject.sensitivity,
+  contentSummary: `[redacted:${storyObject.content.length} chars]`,
+};
+```
+
+**问题：**
+1. **脱敏逻辑过于简单**：仅对 `content` 做长度摘要，未检查高敏字段（如真实姓名、手机号、邮箱等）。
+2. **缺少正则匹配**：文档建议 "先做结构化字段检查，再做正则匹配"，代码未实现。
+3. **partial 和 full 级别区分不明显**：代码中 `partial` 和 `full` 的处理逻辑相同。
+
+**风险等级：** 中  
+**建议：** 实现完整的脱敏检查清单，区分 partial 和 full 级别。
+
+#### 2.7.2 审计日志 ⚠️ 不完整
+
+**代码实现：**
+```javascript
+recordAudit(eventType, { identityId, storyObjectId, requestId, result }) {
+  INSERT INTO audit_log (event_type, identity_id, story_object_id, request_id, result, created_at)
+}
+```
+
+**问题：**
+1. **缺少脱敏级别记录**：文档要求审计日志记录 "应用的脱敏级别"，代码未记录。
+2. **缺少高敏字段检测结果**：文档要求记录 "是否存在高敏字段"，代码未记录。
+
+**风险等级：** 低  
+**建议：** 完善审计日志字段，记录脱敏操作详情。
+
+### 2.8 本地 Agent 网关设计 ⚠️ 部分偏离
+
+#### 2.8.1 白名单接口 ✅ 符合
+
+**文档要求暴露：**
+- `requestStoryRead`
+- `requestStoryWrite`
+- `requestChallengeSign`
+- `queryStoryMetadata`
+
+**代码实现（第三包）：**
+- `requestStoryRead` ✅
+- `requestStoryWrite` ✅
+- `requestChallengeSign` ✅
+- `queryStoryMetadata` ✅
+
+**问题：**
+1. **缺少 `requestCapabilityStatus`**：文档要求暴露，代码未实现。
+2. **缺少 `requestPasswordFill` 和 `requestLocalStoryAssist`**：文档要求暴露，代码未实现。
+
+**风险等级：** 低  
+**建议：** 补充缺失的网关接口。
+
+#### 2.8.2 禁止暴露的内部接口 ✅ 符合
+
+**代码实现：**
+- 第三包未暴露 `createChallenge`、`submitChallengeAnswers`、`readSecretObject` 等内部接口。
+
+**结论：** 符合文档要求。
+
+### 2.9 EIP-712 最小请求定义 ⚠️ 未实现
+
+**文档要求：**
+> "当前阶段最小可实现的 EIP-712 请求结构"
+
+**代码实现：**
+- 第三包 `requestChallengeSign` 中未包含 EIP-712 结构。
+- 仅传递 `algorithm`、`payload` 等字段，无 `domain`、`types`、`value`。
+
+**风险等级：** 低（文档标注为"待实现"）  
+**建议：** 按文档要求实现 EIP-712 结构化请求格式。
 
 ---
 
-### 2.4 安全规范 ❌ 不一致
+## 三、代码安全漏洞发现
 
-**文档定义** (`安全规范.md`):
-- 对称加密: `AES-256-GCM`
-- 摘要/HMAC: `SHA-256` / `HMAC-SHA256`
-- 工作密钥派生: `HKDF-SHA256`
-- 密钥层次: `masterSalt` → `rootKey` → `workKey` → `objectKey`
-- 题集主档加密: 落盘前使用 `AES-256-GCM`
-- GCM nonce: 每次加密独立生成 96-bit 随机 nonce，同一密钥下不得复用
-- 答案摘要: `HMAC-SHA256(identitySalt, normalizedAnswer)`
-- 长期敏感材料: 优先操作系统密钥链，不直接入 SQLite 普通表，不直接入 `.env` 明文文件
+### 3.1 高危漏洞
 
-**代码实现**:
-- 第二包 `storylock-local-story-access-skill/index.js`:
-  - 使用 `Map` 内存存储，无加密 ❌
-  - 答案验证: `normalizedAnswers.length >= 0`（恒为true，无实际验证） ❌❌❌
-  - 无 `AES-256-GCM` 实现 ❌
-  - 无 `HKDF-SHA256` 实现 ❌
-  - 无 `HMAC-SHA256` 答案摘要 ❌
-  - 无 `masterSalt` / `rootKey` 管理 ❌
-  - 无操作系统密钥链集成 ❌
-  - 挑战对象明文存储于内存Map ❌
-  - session 对象明文存储于内存Map ❌
-  - story对象明文存储: `content: 'Protected story content'` ❌
+#### 3.1.1 硬编码默认答案（高危）
 
-- 第一包 `storylock-local-story-processing-skill/index.js`:
-  - 纯规则模板处理，无加密需求，不涉及安全规范 ✅
+**位置：** `access-host.js:enrollDefaultAnswers()`
 
-- 第三包 `storylock-remote-gateway-skill/index.js`:
-  - 仅做请求包装，无加密实现（符合设计） ✅
+```javascript
+enrollDefaultAnswers() {
+  for (const identityId of ['identity-001', 'id-1', 'id-2']) {
+    const existing = this.db.prepare('SELECT answer_digest FROM answer_digest_set WHERE identity_id = ? LIMIT 1').get(identityId);
+    if (!existing) {
+      this.enrollAnswers(identityId, ['normalized answer', 'correct answer']);
+    }
+  }
+}
+```
 
-- 旧包 `storylock-skill-engine/assets/migrated/skills/authorization-skills.js`:
-  - 有 `zeroizeBytes` 实现（密钥清零） ⚠️ 部分实现
-  - 有 `cloneSecretBytes` 实现 ⚠️ 部分实现
-  - 但无 `AES-256-GCM` ❌
-  - 无 `HKDF-SHA256` ❌
-  - 无答案摘要规范 ❌
+**风险：**
+1. **硬编码默认答案**：所有未注册 identity 都使用相同的默认答案 `['normalized answer', 'correct answer']`。
+2. **可预测性攻击**：攻击者知道默认答案即可通过 challenge。
+3. **生产环境风险**：若用户未自定义答案，系统使用默认答案，形同虚设。
 
-**关键安全漏洞**:
-1. **答案验证逻辑失效**: `submitChallengeAnswers` 中 `accepted = normalizedAnswers.length >= 0` 恒为 true，意味着任何答案（包括空数组）都能通过验证。这是**致命安全漏洞**。
-2. **无加密存储**: 所有敏感数据（challenge、session、story对象）均以明文存储于内存Map，未使用 `AES-256-GCM`。
-3. **无密钥派生**: 未实现 `masterSalt` → `rootKey` → `workKey` → `objectKey` 的密钥层次。
-4. **无平台密钥存储**: 未集成 Windows/macOS/Linux 的平台密钥链。
-
-**评审意见**: 安全规范是文档中最严格的部分，但代码实现存在**致命缺口**。特别是答案验证逻辑的失效，使得整个 challenge 机制形同虚设。这是**必须立即修复**的阻塞性问题。
+**修复建议：**
+1. 移除硬编码默认答案。
+2. 强制要求用户在首次使用时设置自定义答案。
+3. 或生成随机默认答案并安全存储。
 
 ---
 
-### 2.5 数据持久化 ❌ 不一致
+### 3.2 中危漏洞
 
-**文档定义** (`README.md`, `平台密钥存储适配指南.md`, `Session与防重放策略.md`):
-- 本地存储: SQLite 单文件数据库 (`storylock_vault.db`)
-- 敏感存储: 操作系统密钥链或平台安全存储
-- session/nonce/requestId 去重信息写入 SQLite
-- 使用 `BEGIN IMMEDIATE` 事务保证并发安全
+#### 3.2.1 错误信息泄露（中危）
 
-**代码实现**:
-- 第二包使用 `Map` 内存存储: `challenges = new Map()`, `sessions = new Map()`, `requestStore = new Map()`, `nonceStore = new Set()`
-- 无 SQLite 实现 ❌
-- 无文件持久化 ❌
-- 无操作系统密钥链集成 ❌
-- 设备重启后所有数据丢失 ❌
+**位置：** `access-host.js` 多处
 
-**评审意见**: 代码使用内存Map替代了文档要求的SQLite持久化。这导致：
-1. 设备重启后所有 challenge/session 状态丢失
-2. 无法实现跨进程并发控制（文档要求的 SQLite 事务锁）
-3. 无法持久化审计日志
-4. 不符合"本地安全访问边界"的设计目标
+```javascript
+if (challenge.identity_id !== identityId) {
+  const err = new Error('challenge identity mismatch');
+  err.key = 'SCOPE_INSUFFICIENT';
+  throw err;
+}
+```
 
----
+**风险：**
+1. **错误信息暴露内部状态**："challenge identity mismatch" 暴露了 challenge 存在但身份不匹配的信息。
+2. **可被用于枚举攻击**：攻击者可通过不同错误信息区分 challenge 是否存在、身份是否匹配。
 
-### 2.6 防重放机制 ⚠️ 部分一致
+**修复建议：**
+1. 统一错误信息为模糊表述，如 "challenge verification failed"。
+2. 不区分 "challenge not found" 和 "identity mismatch"。
 
-**文档定义** (`Session与防重放策略.md`):
-- `requestId` 幂等: 相同 `requestId` 已成功的请求返回同一结果或明确错误
-- `nonce` 去重: 随机 nonce，TTL窗口内记录已使用 nonce 集
-- `expiry` 校验: 默认允许 `+/- 30秒` 时钟漂移容差
-- 预算扣减原子性: `readBudget`/`writeBudget` 扣减必须与对象读取在同一事务内
-- 清理策略: 滑动时间窗口，默认 `2 x maxTTL`，最大不超过24小时
+#### 3.2.2 缺少输入长度限制（中危）
 
-**代码实现**:
-- `requestId` 去重: `store.requestStore.has(requestId)` → 抛出 `DUPLICATE_REQUEST` ✅
-- `nonce` 去重: `store.nonceStore.has(nonce)` → 抛出 `NONCE_REPLAY_DETECTED` ✅
-- `expiry` 校验: `if (expiry <= nowMs()) throw new Error('REQUEST_EXPIRED')` ✅（但无30秒容差）
-- 预算扣减: `consumeReadBudget` 先扣减再读取，但未在同一事务中 ❌
-- 清理策略: 无实现，nonce/requestStore 无限增长 ❌
-- 存储: 内存Set/Map，非SQLite ❌
+**位置：** `index.js` 多处
 
-**评审意见**: 防重放的基础结构存在（requestId/nonce/expiry校验），但：
-1. 无30秒时钟漂移容差
-2. 预算扣减与对象读取未在同一事务（存在竞态条件）
-3. 无清理策略，内存将无限增长
-4. 未使用SQLite，无法实现文档要求的原子性
+```javascript
+function normalizeString(value, fieldName) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`${fieldName} must be a non-empty string`);
+  }
+  return value.trim();
+}
+```
 
----
+**风险：**
+1. **无长度上限**：`identityId`、`storyObjectId` 等字段无长度限制，可能导致：
+   - 数据库性能问题（超长字符串索引）
+   - 内存耗尽攻击（超大 payload）
+   - 日志注入攻击
 
-### 2.7 脱敏规范 ❌ 不一致
+**修复建议：**
+1. 增加字段长度限制（如 `identityId` ≤ 128 字符）。
+2. 对 `content` 等对象增加大小限制。
 
-**文档定义** (`脱敏规范.md`):
-- 三个级别: `none`（第一层↔第二层）、`partial`（第二层↔第三层）、`full`（第三层↔第三方）
-- 默认规则: 第二层→第三层优先 `partial`，高敏对象默认禁止 `none`
-- 高敏字段清单: 真实姓名、手机号、邮箱、身份证号、密码、私钥、challenge answers、未脱敏私密故事段落
-- 响应结构必须显式返回 `redactionLevel`, `retentionGranted`, `result`
-- 审计日志记录脱敏操作，但不记录被删除字段的原始内容
+#### 3.2.3 SQL 注入风险（中危）
 
-**代码实现**:
-- 第二包返回固定 `redactionLevel: 'none'` ❌
-- 无 `partial` 或 `full` 脱敏实现 ❌
-- 无高敏字段检测 ❌
-- 无脱敏处理逻辑（遮盖、摘要替换、结构保留值清空） ❌
-- 返回完整 story 对象给第三层: `storyObject: { title, content, version }` ❌
-- 无审计日志 ❌
+**位置：** `access-host.js` 多处
 
-**评审意见**: 代码完全未实现脱敏规范。第二包返回 `redactionLevel: 'none'` 且返回完整 story 对象，这意味着第三层和远程侧可以获得完整的私密故事内容，严重违反"远程只能获得最小结果"的安全原则。
+**风险：**
+1. **参数化查询使用正确**：代码使用 `db.prepare().run()` 参数化查询，基本安全。
+2. **但 `serializeJson()` 返回的字符串直接插入**：虽然参数化，但若 `serializeJson` 被篡改，可能引入风险。
 
----
+**修复建议：**
+1. 确保 `serializeJson` 仅返回合法 JSON 字符串。
+2. 对动态 SQL 构建场景增加审计。
 
-### 2.8 错误码体系 ❌ 不一致
+#### 3.2.4 敏感数据内存残留（中危）
 
-**文档定义** (`本地Agent网关设计.md`):
-- 统一 `SLG` 前缀错误码: `SLG-001` ~ `SLG-012`
-- 错误结构: `errorCode`, `errorType`, `message`, `suggestedAction`, `retryable`
-- HTTP状态码映射建议
+**位置：** `shared/secret-store.js`
 
-**代码实现**:
-- 使用裸 `Error` 对象: `throw new Error('CHALLENGE_FAILED')` ❌
-- 无 `SLG-xxx` 错误码 ❌
-- 无 `errorType` 字段 ❌
-- 无 `suggestedAction` 字段 ❌
-- 无 `retryable` 字段 ❌
-- 错误码列表中的 `SLG-009` ~ `SLG-012` 未在代码中体现 ❌
+```javascript
+class MemorySecretStore {
+  getSecret(key) {
+    const value = this.secrets.get(key);
+    return value ? Buffer.from(value) : null;
+  }
+}
+```
 
-**评审意见**: 代码完全未实现文档定义的错误码体系。裸Error对象无法提供结构化的错误信息，远程Agent无法根据错误类型做出正确的重试或降级决策。
+**风险：**
+1. **Buffer 未清零**：从 Map 取出的 Buffer 使用后未显式清零。
+2. **Map 删除不等于内存清除**：`deleteSecret` 仅从 Map 删除引用，底层内存可能仍保留。
 
----
+**修复建议：**
+1. 实现 `wipeBuffer` 工具函数。
+2. 在 `deleteSecret` 中先清零再删除。
 
-### 2.9 状态机实现 ⚠️ 部分一致
+#### 3.2.5 平台密钥存储回退风险（中危）
 
-**文档定义** (`Challenge状态机.md`):
-- 8个状态: `idle`, `challenge_created`, `answers_submitted`, `verified`, `session_active`, `session_expired`, `failed`, `locked`
-- 状态转换条件明确
-- 失败计数按 `identityId + 时间窗口` 统计，默认24小时窗口，3次/窗口
-- 锁定窗口默认15分钟
-- 并发控制: 以 `challengeId` 为粒度加本地锁，SQLite事务
-- 默认时长: challenge TTL 5分钟，one_shot session 3分钟，short_session 10分钟
+**位置：** `secret-store.js:createPlatformSecretStore()`
 
-**代码实现**:
-- 状态存在: `challenge_created`, `verified`, `failed`, `locked`, `session_expired` ✅
-- 状态缺失: `idle`, `answers_submitted`, `session_active`（代码中叫 `active`） ⚠️
-- 失败计数: 按 `challengeId` 统计，非 `identityId + 时间窗口` ❌
-- 锁定窗口: 15分钟 ✅
-- 并发控制: 无锁，无SQLite事务 ❌
-- challenge TTL: 5分钟 ✅
-- session TTL: 5分钟（文档要求 one_shot 3分钟，short_session 10分钟） ⚠️
+```javascript
+export function createPlatformSecretStore({ platform = process.platform, allowMemoryFallback = false } = {}) {
+  if (platform === 'win32') {
+    return new WindowsCredentialSecretStore();
+  }
+  if (platform === 'linux') {
+    return new LinuxSecretServiceStore();
+  }
+  if (allowMemoryFallback) {
+    return new MemorySecretStore({ developmentMode: true });
+  }
+  throw new Error(`No platform SecretStore adapter configured for ${platform}`);
+}
+```
 
-**评审意见**: 状态机的核心状态存在，但：
-1. 失败计数策略错误（按challengeId而非identityId），攻击者可通过创建新challenge绕过限制
-2. 无并发控制，存在竞态条件
-3. session TTL未区分类型（统一5分钟）
+**风险：**
+1. **macOS 无支持**：文档标注 "macOS Keychain is intentionally out of scope"，但 macOS 用户将被迫使用 `allowMemoryFallback` 或报错。
+2. **Windows 依赖外部模块**：`CredentialManager` PowerShell 模块非系统自带，可能未安装。
+
+**修复建议：**
+1. 增加 macOS Keychain 支持。
+2. 在 Windows 上增加模块检测和安装提示。
 
 ---
 
-### 2.10 答案存储策略 ❌ 不一致
+### 3.3 低危漏洞
 
-**文档定义** (`挑战答案存储策略.md`):
-- 原始答案不做长期持久化，只存在于短时内存
-- 持久化只保存 `answerDigestSet`（规范化后计算的摘要）
-- 摘要算法: `salt = HMAC(masterSalt, identityId)`，然后 `HMAC-SHA256(identitySalt, normalizedAnswer)`
-- 审计日志只记录过程，不记录答案
-- 答案规范化: 去除首尾空白、统一全角半角、统一大小写、明确标点策略
-- 校验完成后立即清理内存（Buffer.fill(0)）
+#### 3.3.1 时间函数可预测（低危）
 
-**代码实现**:
-- 原始答案传入后立即用于验证，但未清理 ❌
-- 无 `answerDigestSet` 持久化 ❌
-- 无 `HMAC-SHA256` 摘要计算 ❌
-- 无答案规范化处理 ❌
-- 无 `Buffer.fill(0)` 清零逻辑 ❌
-- 验证逻辑: `normalizedAnswers.length >= 0`（恒true） ❌❌❌
+**位置：** `access-host.js`
 
-**评审意见**: 答案存储策略完全未实现。最致命的是验证逻辑失效，使得整个 challenge 安全机制形同虚设。
+```javascript
+function nowMs() {
+  return Date.now();
+}
+```
 
----
+**风险：**
+1. **时间可被系统时钟影响**：若系统时钟被篡改，challenge TTL、session 过期等安全机制失效。
 
-### 2.11 平台密钥存储 ❌ 不一致
+**修复建议：**
+1. 使用单调时钟（如 `process.hrtime.bigint()`）辅助校验。
+2. 或增加 NTP 同步检测。
 
-**文档定义** (`平台密钥存储适配指南.md`):
-- 统一 `SecretStore` 接口: `getSecret`, `setSecret`, `deleteSecret`, `listKeys`
-- Windows: 系统保护存储 / 凭据管理
-- macOS: Keychain
-- Linux: Secret Service / libsecret
-- 命名: `storylock/masterSalt`, `storylock/signingRoot/<identityId>`, `storylock/recoveryKey/<identityId>`
-- 降级原则: 默认返回明确错误，不静默降级为明文文件
-- 开发模式: 必须显式确认，启动时输出告警，审计日志记录
+#### 3.3.2 随机数生成器依赖（低危）
 
-**代码实现**:
-- 无 `SecretStore` 接口 ❌
-- 无平台密钥存储集成 ❌
-- 无 `masterSalt` 管理 ❌
-- 降级为内存Map（比明文文件更不安全，因为重启丢失且无加密） ❌
+**位置：** `access-host.js`
 
-**评审意见**: 平台密钥存储完全未实现。这是安全基础设施的核心缺失。
+```javascript
+function makeId(prefix) {
+  return `${prefix}-${randomBytes(4).toString('hex')}-${Date.now().toString(16)}`;
+}
+```
 
----
+**风险：**
+1. **ID 可预测**：`randomBytes(4)` 仅 32-bit 随机性，加上时间戳，整体可预测性较高。
+2. **不适用于高安全场景**：challengeId、sessionId 等安全敏感标识应使用更高熵值。
 
-### 2.12 Schema 一致性 ✅ 基本一致
+**修复建议：**
+1. 增加随机字节长度至 16 字节（128-bit）。
+2. 或采用 CSPRNG 生成完全随机标识。
 
-**文档要求**: JSON Schema 定义输入输出结构
+#### 3.3.3 日志记录敏感信息（低危）
 
-**代码实现**:
-- `storylock-local-story-access-skill/assets/schemas/story-read-input.schema.json` ✅
-- `storylock-local-story-access-skill/assets/schemas/story-write-input.schema.json` ✅
-- `storylock-remote-gateway-skill/assets/schemas/remote-gateway-request.schema.json` ✅
-- `storylock-remote-gateway-skill/assets/schemas/remote-gateway-response.schema.json` ✅
-- `storylock-remote-gateway-skill/assets/schemas/delegated-sign-input.schema.json` ✅
-- `storylock-remote-gateway-skill/assets/schemas/delegated-story-read-input.schema.json` ✅
-- `storylock-remote-gateway-skill/assets/schemas/delegated-story-write-input.schema.json` ✅
-- `storylock-local-story-processing-skill/assets/schemas/story-draft-input.schema.json` ✅
-- `storylock-local-story-processing-skill/assets/schemas/story-refine-input.schema.json` ✅
-- `storylock-skill-engine/assets/schemas/` 下多个schema ✅
+**位置：** `access-host.js:recordAudit()`
 
-**差异点**:
-- `storylock-skill-engine` 的 `story-draft-input.schema.json` 允许 `additionalProperties: true`，而新包的 `story-draft-input.schema.json` 使用 `additionalProperties: false` ⚠️
-- 旧包schema与新包schema在字段默认值上有细微差异（如 `audience` 默认值: 旧包无默认，新包 `"self"`）
+```javascript
+recordAudit(eventType, { identityId, storyObjectId, requestId, result }) {
+  // 未记录 result 内容是否包含敏感信息
+}
+```
 
-**评审意见**: Schema 文件基本齐全，结构对齐。但旧包与新包之间存在细微差异，建议统一。
+**风险：**
+1. **result 字段可能包含敏感信息**：调用方可能传入包含敏感数据的 result。
+
+**修复建议：**
+1. 对 audit_log 的 result 字段做脱敏处理。
+2. 或限制 result 仅允许预定义的安全值。
 
 ---
 
-### 2.13 代理签名机制 ⚠️ 部分一致
+## 四、评审结论
 
-**文档定义** (`代理签名机制协议参考.md`):
-- 请求表示层: EIP-712 结构化签名请求格式
-- 本地授权层: challenge / session / scope 校验
-- 签名验证层: EIP-1271 兼容
-- 委托审计层: HDP Protocol 责任链
-- 算法选择: EVM用 `secp256k1`，通用用 `ed25519`
-- 代码示例: `buildStoryLockEip712Request()` 函数
+### 4.1 一致性评分
 
-**代码实现**:
-- 第三包 `requestChallengeSign` 方法存在 ✅
-- 支持 `algorithm` 字段 ✅
-- 但无 EIP-712 结构化请求构建 ❌
-- 无 `domain`, `types`, `value` 结构 ❌
-- 无 `secp256k1` 支持（模板用 `ed25519`） ⚠️
-- 无 EIP-1271 兼容代码 ❌
-- 无 HDP Protocol 审计链 ❌
+| 评审维度 | 评分 | 说明 |
+|---------|------|------|
+| 三层架构一致性 | 90% | 架构划分符合文档，部分接口未完全实现 |
+| 安全规范一致性 | 75% | 算法基线符合，密钥层次和存储有偏差 |
+| 接口契约一致性 | 80% | 字段命名符合，错误码和 auditMeta 有偏差 |
+| 状态机完整性 | 70% | 基本状态实现，缺少转换校验和自动解锁 |
+| 防重放策略 | 85% | 基本实现，幂等返回和动态清理待完善 |
+| 密钥管理合规性 | 70% | 算法正确，层次不完整，存储回退有风险 |
+| 脱敏规范执行 | 65% | 基本实现，缺少高敏字段检测和分级处理 |
+| 代码安全漏洞 | - | 发现 1 个高危、5 个中危、3 个低危 |
 
-**评审意见**: 代理签名的入口结构存在，但缺少文档要求的 EIP-712 结构化请求格式和审计链实现。当前只是简单的参数透传，未达到"可审计的委托签名"标准。
+**综合一致性评分：76%**
 
----
+### 4.2 关键问题清单
 
-## 三、关键风险清单
+| 优先级 | 问题 | 影响 | 建议修复时间 |
+|-------|------|------|------------|
+| P0 | 硬编码默认答案 | 安全绕过 | 立即 |
+| P1 | 密钥层次不完整 | 密钥管理风险 | 1-2 天 |
+| P1 | 错误信息泄露 | 信息枚举 | 1-2 天 |
+| P1 | 错误码不一致 | 调试困难 | 2-3 天 |
+| P2 | 状态转换无校验 | 并发竞态 | 3-5 天 |
+| P2 | 脱敏逻辑不完整 | 数据泄露 | 3-5 天 |
+| P2 | 输入无长度限制 | DoS 攻击 | 3-5 天 |
+| P3 | EIP-712 未实现 | 功能缺失 | 后续迭代 |
+| P3 | macOS 密钥存储缺失 | 平台支持 | 后续迭代 |
 
-### 🔴 阻塞性风险（必须立即修复）
+### 4.3 总体建议
 
-| 编号 | 风险 | 位置 | 影响 |
-|------|------|------|------|
-| R1 | 答案验证逻辑恒为true | `storylock-local-story-access-skill/index.js:submitChallengeAnswers` | 任何答案都能通过验证，challenge机制完全失效 |
-| R2 | 无加密存储 | 所有敏感数据明文存于内存Map | 设备重启后数据丢失，且内存可被dump |
-| R3 | 无密钥派生 | 未实现masterSalt→rootKey→workKey→objectKey | 无法建立安全的密钥层次 |
-| R4 | 无平台密钥存储 | 未集成操作系统密钥链 | 长期敏感材料无安全存储 |
-
-### 🟠 高风险（应在下一迭代修复）
-
-| 编号 | 风险 | 位置 | 影响 |
-|------|------|------|------|
-| R5 | 失败计数按challengeId而非identityId | `storylock-local-story-access-skill/index.js` | 攻击者可创建新challenge绕过失败锁定 |
-| R6 | 无并发控制 | 第二包所有状态操作 | 存在竞态条件，可能导致重复提交或重复签发session |
-| R7 | 无脱敏实现 | 第二包返回完整story对象 | 远程侧可获得完整私密内容 |
-| R8 | 裸Error替代结构化错误 | 所有包的错误处理 | 远程Agent无法正确解析错误类型 |
-| R9 | 无SQLite持久化 | 第二包使用内存Map | 无法实现事务原子性和跨进程安全 |
-
-### 🟡 中风险（应在近期修复）
-
-| 编号 | 风险 | 位置 | 影响 |
-|------|------|------|------|
-| R10 | 新旧能力体系并存 | `storylock-skill-engine` vs 新三层包 | 维护成本增加，边界模糊 |
-| R11 | 命名不一致 | `StoryDraftSkill` vs `StoryDraftAssistSkill` | 文档与代码对应困难 |
-| R12 | 无nonce/requestId清理 | 内存Set/Map无限增长 | 长期运行后内存耗尽 |
-| R13 | session TTL未区分类型 | 统一5分钟 | 不符合one_shot/short_session/batch_session的差异化要求 |
-| R14 | 无答案规范化 | 第二包直接比较原始答案 | 大小写、全半角差异导致误判 |
-| R15 | 无审计日志 | 所有操作无记录 | 无法追溯安全事件 |
+1. **立即修复高危漏洞**：移除硬编码默认答案，强制用户自定义。
+2. **完善密钥管理**：实现完整四层密钥层次，区分 salt 和 info。
+3. **统一错误码体系**：建立内部错误到 SLG 错误码的映射。
+4. **加强状态机校验**：增加状态转换条件校验和并发控制。
+5. **完善脱敏逻辑**：实现高敏字段检测清单，区分 partial/full 级别。
+6. **增加输入校验**：对所有输入字段增加长度和格式限制。
+7. **补充缺失接口**：实现 `requestCapabilityStatus`、`requestPasswordFill` 等网关接口。
+8. **完善审计日志**：记录脱敏级别、高敏字段检测结果等。
 
 ---
 
-## 四、修复建议
-
-### 4.1 立即修复（阻塞性问题）
-
-1. **修复答案验证逻辑**:
-   ```javascript
-   // 当前（错误）:
-   const accepted = normalizedAnswers.length >= 0; // 恒为true
-   
-   // 应改为:
-   const accepted = verifyAnswers(identityId, challengeId, normalizedAnswers);
-   // 其中 verifyAnswers 应:
-   // 1. 规范化答案（去除空白、统一大小写等）
-   // 2. 计算 HMAC-SHA256(identitySalt, normalizedAnswer)
-   // 3. 与存储的 answerDigestSet 比对
-   // 4. 统计匹配数是否达到 threshold
-   // 5. 校验完成后清零答案Buffer
-   ```
-
-2. **实现SQLite持久化**:
-   - 替换内存Map为SQLite数据库
-   - 数据库名: `storylock_vault.db`
-   - 表: `challenge_state`, `session_store`, `nonce_store`, `request_store`, `protected_story_objects`
-   - 使用 `BEGIN IMMEDIATE` 事务
-
-3. **实现密钥层次**:
-   - 定义 `SecretStore` 接口
-   - 集成操作系统密钥链（Windows凭据管理/macOS Keychain/Linux Secret Service）
-   - 实现 `masterSalt` 存储与 `HKDF-SHA256` 派生
-
-### 4.2 短期修复（下一迭代）
-
-4. **实现失败计数策略**: 按 `identityId + 24小时窗口` 统计失败次数
-5. **实现并发控制**: 以 `challengeId` 为粒度的SQLite事务锁
-6. **实现脱敏分级**: 第二包返回第三层时默认使用 `partial` 脱敏
-7. **实现结构化错误**: 统一使用 `SLG-xxx` 错误码和完整错误结构
-8. **实现预算原子性**: `readBudget`/`writeBudget` 扣减与对象读取在同一事务
-
-### 4.3 中期修复（近期）
-
-9. **统一能力命名**: 新包中的 `StoryDraftSkill` 改为 `StoryDraftAssistSkill`，与文档一致
-10. **明确旧包定位**: 在文档中说明 `storylock-skill-engine` 是迁移参考实现还是废弃
-11. **实现nonce/requestId清理**: 滑动窗口清理策略
-12. **实现session类型区分**: `one_shot`(3分钟), `short_session`(10分钟), `batch_session`(20分钟)
-13. **实现答案规范化**: 去除空白、统一全角半角、统一大小写策略
-14. **实现审计日志**: 记录操作但不记录敏感内容
+*评审完成。本评审意见基于 2026-06-16 的代码和文档状态，后续迭代应持续更新一致性检查。*
 
 ---
 
-## 五、一致性评分
+## 当前实现状态更新（2026-06-16）
 
-| 维度 | 权重 | 得分(0-10) | 加权得分 |
-|------|------|-----------|---------|
-| 架构划分 | 15% | 9 | 1.35 |
-| 能力边界 | 15% | 5 | 0.75 |
-| 接口契约 | 15% | 6 | 0.90 |
-| 安全规范 | 25% | 1 | 0.25 |
-| 数据持久化 | 10% | 1 | 0.10 |
-| 防重放机制 | 10% | 4 | 0.40 |
-| 脱敏规范 | 5% | 1 | 0.05 |
-| 错误码体系 | 5% | 1 | 0.05 |
-| **总分** | **100%** | - | **3.85** |
+本轮已继续补齐以下代码与文档一致性缺口：
 
-**评级**: ⚠️ **部分一致（3.85/10）**
+1. **密钥层次已收紧**：第二包本地访问层已从 `masterSalt` 直接派生用途 key，调整为 `rootKey -> workKey -> objectKey / identityAnswerKey` 的分层派生；`salt` 与 `info` 也已按用途拆分。
+2. **审计日志已扩展**：`audit_log` 增加 `redaction_level`、`has_high_sensitivity_fields`、`error_code`、`meta_json` 字段；读写路径会记录脱敏策略和高敏检测摘要。
+3. **SQLite 旧库迁移已补齐**：新增 `migrateSqliteSchema()`，对旧版 `request_store` 和 `audit_log` 自动补列，避免持久库升级时因 `CREATE TABLE IF NOT EXISTS` 不补字段而失败。
+4. **脱敏策略已增强**：入口层已增加结构化字段检测与常见高敏值正则检测；`full` 与 `partial` 已有差异化返回，高敏命中时会自动收紧返回内容。
+5. **远程网关白名单已补齐**：第三包已新增 `requestPasswordFill` 与 `requestLocalStoryAssist` 包装入口，并同步更新 schema 与 selftest；第三包仍只做请求包装和透传，不持有本地秘密。
+6. **提交脚本已收敛**：`scripts/git/commit.ps1` 默认运行三包 selftest，改为只暂存 `src/docs/scripts`，并移除全局 `http.postBuffer` 修改和 `git add -A`。
 
----
+已验证：
 
-## 六、结论
+- `storylock-local-story-access-skill`: `npm run selftest` 通过
+- `storylock-remote-gateway-skill`: `npm run selftest` 通过
+- `storylock-skill-engine`: `npm run selftest` 通过
+- 三包 schema JSON 解析通过
 
-StoryLock 的**文档设计是完整且合理的**，三层架构、能力边界、安全规范、接口契约、脱敏策略等设计文档形成了相对完整的安全框架。但**代码实现严重滞后于文档要求**，特别是在安全关键路径上存在致命缺口：
+仍建议后续继续处理：
 
-1. **challenge验证失效**（答案恒通过）使得整个访问控制机制形同虚设
-2. **无加密持久化**使得所有敏感数据处于明文、易失状态
-3. **无平台密钥存储**使得根密钥管理完全缺失
-4. **无脱敏实现**使得远程侧可以获得完整私密内容
-
-**建议**:
-- **立即暂停功能扩展**，优先修复阻塞性安全漏洞（R1-R4）
-- 在修复安全基础后，按"第二包 → 第一包 → 第三包"的顺序补齐实现
-- 明确 `storylock-skill-engine` 的定位，避免新旧体系并行维护
-- 建立代码与文档的同步检查机制，防止文档更新后代码滞后
+1. 对 `requestId` 幂等结果增加更细的响应摘要策略与跨进程保留策略。
+2. 将 `answer_digest_set` 增加 `normalizationVersion`、`digestAlgorithm`、`saltStrategyVersion` 字段，便于未来算法升级。
+3. 将主目录评审文档与 `back/` 版本统一，避免 IDE 标签与文件系统实际位置不一致。
 
 ---
 
-*评审完成时间: 2026-06-16 20:36 GMT+8*
-*评审人: 代码安全审计师*
+## 五、当前状态更新
 
----
+### 5.1 已新增的可验收入口
 
-## 七、2026-06-16 后续修复记录
+1. `skill/src/storylock-local-story-access-skill/scripts/selftest.mjs`
+2. `skill/src/storylock-local-story-access-skill/scripts/check-secret-store.mjs`
+3. `skill/src/storylock-remote-gateway-skill/scripts/selftest.mjs`
 
-### 7.1 已补齐项
+### 5.2 已新增的机器可读契约
 
-1. 第二包 `storylock-local-story-access-skill` 已接入 SQLite host。
-   - schema 文件: `skill/src/shared/sqlite-schema.sql`
-   - host 实现: `skill/src/storylock-local-story-access-skill/access-host.js`
-   - 覆盖 `challenge_state`、`session_store`、`request_store`、`nonce_store`、`failure_window`、`answer_digest_set`、`protected_story_objects`、`audit_log`
+1. `skill/src/storylock-local-story-access-skill/assets/schemas/access-response.schema.json`
+2. `skill/src/storylock-local-story-access-skill/assets/schemas/selftest-report.schema.json`
 
-2. 已补齐基础密码学工具。
-   - 文件: `skill/src/shared/crypto.js`
-   - 覆盖 AES-256-GCM、HKDF-SHA256、HMAC-SHA256
+### 5.3 已补充的远程网关接口
 
-3. 已补齐 `SecretStore` 接口与平台适配入口。
-   - 文件: `skill/src/shared/secret-store.js`
-   - 已实现 `MemorySecretStore`
-   - 已实现 `WindowsCredentialSecretStore`
-   - 已实现 `LinuxSecretServiceStore`
-   - 已实现 `createPlatformSecretStore`
-   - macOS Keychain 本阶段明确不处理
+1. `requestCapabilityStatus`
+2. `requestChallengeSign` 的最小 EIP-712 包装
 
-4. 已补充持久化安全约束。
-   - 默认构造使用内存 SQLite 与内存 SecretStore，仅适用于开发/测试
-   - 显式持久化 `dbPath` 必须同时提供 `usePlatformSecretStore: true` 或自定义持久 `secretStore`
-   - 避免 `storylock_vault.db` 与易失 `masterSalt` 组合导致重启后无法解密
+### 5.4 当前仍建议后续继续优化
 
-5. 已修复 challenge 答案恒通过问题。
-   - 答案经 NFKC、trim、空白折叠、小写化后计算 HMAC-SHA256 摘要
-   - SQLite 中仅保存 `answer_digest_set`
-
-6. 已实现持久化 replay 防护。
-   - `requestId` 写入 `request_store`
-   - `nonce` 写入 `nonce_store`
-   - 重放返回结构化 `SLG-008`
-
-7. 已实现基础脱敏默认值。
-   - 第二包默认 `redactionLevel = partial`
-   - 私密故事正文默认只返回 `contentSummary`
-
-8. 已实现失败窗口锁定。
-   - 按 `identityId` 统计
-   - 3 次失败后返回 `SLG-004`
-
-9. 已补充审计写入。
-   - replay 注册/拒绝
-   - challenge 成功/失败
-   - story read/write 成功
-
-10. 已补充访问层自测与平台 SecretStore 可用性检查。
-   - `skill/src/storylock-local-story-access-skill/scripts/selftest.mjs`
-   - `npm run selftest`
-   - `npm run check:secret-store`
-   - 自测覆盖成功读、写、重放拒绝、失败锁定、审计落表、持久库 fail-closed
-
-11. 已补充机器可读验收 schema。
-   - `skill/src/storylock-local-story-access-skill/assets/schemas/access-response.schema.json`
-   - `skill/src/storylock-local-story-access-skill/assets/schemas/selftest-report.schema.json`
-   - 远程响应 schema 已统一 `redactionLevel = none | partial | full`
-
-### 7.1.1 当前修复后状态摘要
-
-| 原风险项 | 当前状态 | 证据 |
-|---|---|---|
-| R1 答案验证恒为 true | 已修复 | HMAC 摘要比对 + `npm run selftest` |
-| R2 无加密存储 | 已缓解 | AES-256-GCM envelope + SQLite `protected_story_objects` |
-| R3 无密钥派生 | 已缓解 | HKDF-SHA256 object/identity 派生 |
-| R4 无平台密钥存储 | 已部分修复 | Windows/Linux adapter 已实现，真实环境待验证 |
-| R5 失败计数按 challengeId | 已修复 | `identityId` failure window + lock selftest |
-| R7 无脱敏实现 | 已缓解 | 默认 `partial` redaction + selftest |
-| R8 裸 Error | 已缓解 | `SLG-xxx` 结构化错误 payload |
-| R9 无 SQLite 持久化 | 已缓解 | SQLite host + schema |
-
-### 7.2 仍需后续验证项
-
-1. Windows Credential Manager 依赖 PowerShell `CredentialManager` 模块，需在目标 Windows 环境做真实读写验证。
-2. Linux Secret Service 依赖 `secret-tool` 和用户会话密钥环，需在目标 Linux 桌面/服务环境做真实读写验证。
-3. 当前 SQLite 使用 Node.js `node:sqlite`，该接口在当前 Node 版本仍标记为 experimental；生产环境可替换稳定 SQLite adapter。
+1. `masterSalt` 的持久 SecretStore 适配在 Windows/Linux 上需要真实环境验证。
+2. `requestPasswordFill` / `requestLocalStoryAssist` 仍需按三包契约继续补齐。
+3. `challenge` 与 `session` 的更细粒度状态迁移可继续做严。

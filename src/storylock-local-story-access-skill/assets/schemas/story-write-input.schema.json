@@ -6,27 +6,51 @@
   "properties": {
     "identityId": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 128
     },
     "storyObjectId": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 128
     },
     "content": {
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": true,
+      "maxProperties": 256
     },
     "answers": {
       "type": "array",
-      "items": {}
+      "maxItems": 10,
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "maxLength": 512
+          },
+          {
+            "type": "object",
+            "required": ["answer"],
+            "properties": {
+              "answer": {
+                "type": "string",
+                "maxLength": 512
+              }
+            },
+            "additionalProperties": true
+          }
+        ]
+      }
     },
     "requestId": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 128
     },
     "nonce": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 128
     },
     "expiry": {
       "type": "number"
