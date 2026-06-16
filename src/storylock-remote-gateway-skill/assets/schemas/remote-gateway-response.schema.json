@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RemoteGatewayResponse",
+  "type": "object",
+  "required": ["requestId", "status", "capability", "executionLocation", "result", "error"],
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "error"]
+    },
+    "capability": {
+      "type": "string",
+      "enum": [
+        "requestStoryRead",
+        "requestStoryWrite",
+        "requestChallengeSign",
+        "queryStoryMetadata",
+        "requestCapabilityStatus"
+      ]
+    },
+    "executionLocation": {
+      "type": "string",
+      "enum": ["local", "remote_gateway"]
+    },
+    "result": {},
+    "redactionLevel": {
+      "type": "string",
+      "enum": ["none", "partial", "full"]
+    },
+    "retentionGranted": {
+      "type": "string",
+      "enum": ["none", "result_only", "audit_meta_only"]
+    },
+    "auditMeta": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "error": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": ["code", "type", "message", "suggestedAction", "retryable"],
+          "properties": {
+            "code": {
+              "type": "string",
+              "pattern": "^SLG-[0-9]{3}$"
+            },
+            "type": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            },
+            "suggestedAction": {
+              "type": "string",
+              "minLength": 1
+            },
+            "retryable": {
+              "type": "boolean"
+            },
+            "retryAfter": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

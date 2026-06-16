@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DelegatedStoryReadInput",
+  "type": "object",
+  "required": ["identityId", "storyObjectId", "requestId", "nonce", "expiry"],
+  "properties": {
+    "identityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "storyObjectId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "answers": {
+      "type": "array",
+      "items": {},
+      "default": []
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expiry": {
+      "type": "number"
+    },
+    "requestedRetention": {
+      "type": "string",
+      "enum": ["none", "result_only", "audit_meta_only"],
+      "default": "result_only"
+    },
+    "policyHints": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+  "additionalProperties": false
+}

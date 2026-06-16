@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StoryDraftInput",
+  "type": "object",
+  "required": ["objective"],
+  "properties": {
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 1,
+      "default": "self"
+    },
+    "tone": {
+      "type": "string",
+      "minLength": 1,
+      "default": "neutral"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "source": {
+      "type": "string",
+      "enum": ["approved_local_input", "manual_local_input", "template_only"],
+      "default": "approved_local_input"
+    }
+  },
+  "additionalProperties": false
+}

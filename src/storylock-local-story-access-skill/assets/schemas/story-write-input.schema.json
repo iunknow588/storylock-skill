@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StoryWriteInput",
+  "type": "object",
+  "required": ["identityId", "storyObjectId", "content"],
+  "properties": {
+    "identityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "storyObjectId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "answers": {
+      "type": "array",
+      "items": {}
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expiry": {
+      "type": "number"
+    },
+    "redactionLevel": {
+      "type": "string",
+      "enum": ["none", "partial", "full"],
+      "default": "partial"
+    },
+    "policyHints": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+  "additionalProperties": false
+}

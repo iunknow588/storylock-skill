@@ -1,0 +1,32 @@
+StoryLock Local Story Access Skill
+
+Entry:
+- SKILL.md
+
+Capabilities:
+- references/story-read.md
+- references/story-write.md
+- references/infrastructure.md
+- references/boundary.md
+
+Infrastructure:
+- index.js
+- access-host.js
+- errors.js
+- scripts/selftest.mjs
+- scripts/check-secret-store.mjs
+- ../shared/crypto.js
+- ../shared/secret-store.js
+- ../shared/sqlite-schema.sql
+
+Schemas:
+- assets/schemas/story-read-input.schema.json
+- assets/schemas/story-write-input.schema.json
+- assets/schemas/access-response.schema.json
+- assets/schemas/selftest-report.schema.json
+
+Platform SecretStore:
+- WindowsCredentialSecretStore
+- LinuxSecretServiceStore
+- createPlatformSecretStore
+- macOS Keychain out of scope for current phase

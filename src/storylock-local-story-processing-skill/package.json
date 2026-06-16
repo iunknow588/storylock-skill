@@ -1,0 +1,8 @@
+{
+  "name": "storylock-local-story-processing-skill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local StoryLock story processing skill package",
+  "main": "index.js"
+}

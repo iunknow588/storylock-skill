@@ -1,0 +1,8 @@
+{
+  "objective": "Describe what story should be created",
+  "audience": "private local user",
+  "tone": "clear and concrete",
+  "constraints": [
+    "keep private context local"
+  ]
+}

@@ -3,20 +3,28 @@ name: storylock-skill-engine
 description: StoryLock skill package for AI agents. Use when an agent needs to draft story material, review question-set strength, produce authorized login fields, or produce a challenge-signing authorization result through the migrated StoryLock skill layer.
 ---
 
-# StoryLock Skill
+# StoryLock Skill Engine
 
-This package is the self-describing StoryLock skill bundle. Agents should rely on this directory's `SKILL.md`, `references/`, `assets/`, and `agents/` files as the primary interface contract.
+This package is the migrated compatibility and reference bundle for the earlier StoryLock skill layer.
+
+New development should treat the three current runtime packages as authoritative:
+
+1. `storylock-local-story-processing-skill`
+2. `storylock-local-story-access-skill`
+3. `storylock-remote-gateway-skill`
+
+This package remains useful for legacy demos, migrated assets, and compatibility schemas, but it is not a fourth runtime security layer.
 
 ## Scope
 
-This skill package covers four agent-facing capabilities:
+This compatibility package covers four agent-facing capabilities:
 
 1. story draft assistance
 2. question-set strength review
 3. password-fill authorization packaging
 4. challenge-sign authorization packaging
 
-This package does not redefine StoryLock core security semantics. It documents and packages the current migrated JS skill layer, plus the current Rust/WASM build path.
+This package does not redefine StoryLock core security semantics. It documents and packages the migrated JS skill layer, plus the current Rust/WASM build path. Security-sensitive access decisions must be delegated to `storylock-local-story-access-skill`.
 
 ## Capability Index
 
@@ -52,9 +60,9 @@ Use these directories as part of the runtime contract:
 ## Working Rules
 
 1. Prefer capability-specific reference files before improvising parameters or output claims.
-2. Keep the distinction between skill packaging and StoryLock core authorization explicit.
+2. Keep the distinction between legacy skill packaging and StoryLock core authorization explicit.
 3. Treat `assets/migrated/` as the packaged implementation source for this bundle.
-4. Describe the current runtime honestly: the JS skill layer is runnable, while full Rust-host replacement is not yet complete.
+4. Describe the current runtime honestly: this compatibility layer is runnable, while the three-package runtime is the active implementation surface.
 
 ## Verification Path
 

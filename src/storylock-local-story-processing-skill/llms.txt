@@ -1,0 +1,9 @@
+StoryLock Local Story Processing Skill
+
+Entry:
+- SKILL.md
+
+Capabilities:
+- references/story-draft.md
+- references/story-refine.md
+- references/boundary.md

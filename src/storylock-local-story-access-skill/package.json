@@ -1,0 +1,12 @@
+{
+  "name": "storylock-local-story-access-skill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local StoryLock story access skill package",
+  "main": "index.js",
+  "scripts": {
+    "selftest": "node scripts/selftest.mjs",
+    "check:secret-store": "node scripts/check-secret-store.mjs"
+  }
+}

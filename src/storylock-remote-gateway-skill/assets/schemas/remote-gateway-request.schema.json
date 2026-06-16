@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RemoteGatewayRequest",
+  "type": "object",
+  "required": ["requestId", "capability", "scope", "payload", "nonce", "expiry"],
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability": {
+      "type": "string",
+      "enum": [
+        "requestStoryRead",
+        "requestStoryWrite",
+        "requestChallengeSign",
+        "queryStoryMetadata",
+        "requestCapabilityStatus"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expiry": {
+      "type": "number"
+    },
+    "requestedRetention": {
+      "type": "string",
+      "enum": ["none", "result_only", "audit_meta_only"],
+      "default": "result_only"
+    },
+    "policyHints": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    },
+    "chainId": {
+      "type": "number"
+    },
+    "verifyingContract": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

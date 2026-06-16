@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StoryRefineInput",
+  "type": "object",
+  "required": ["storyDraft"],
+  "properties": {
+    "storyDraft": {
+      "$ref": "#/$defs/storyDraft"
+    },
+    "goals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "hintStyle": {
+      "type": "string",
+      "minLength": 1,
+      "default": "plain"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "source": {
+      "type": "string",
+      "enum": ["approved_local_input", "manual_local_input"],
+      "default": "approved_local_input"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "storyDraft": {
+      "type": "object",
+      "required": ["content"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cues": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
