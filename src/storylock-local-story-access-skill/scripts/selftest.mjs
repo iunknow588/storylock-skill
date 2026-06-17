@@ -34,7 +34,7 @@ function cleanup(path) {
 
 async function withDb(fn) {
   const dbPath = tempDbPath();
-  const secretStore = new MemorySecretStore();
+  const secretStore = new MemorySecretStore({ developmentMode: true, suppressWarning: true });
   let context;
   try {
     context = { dbPath, secretStore, hosts: [] };
@@ -370,6 +370,12 @@ assert.throws(
   /Persistent SQLite host requires secretStore/,
 );
 pass('persistent-db-requires-secret-store');
+
+assert.throws(
+  () => new GridChallengeSkill({ dbPath: tempDbPath(), secretStore: new MemorySecretStore() }),
+  /must not use MemorySecretStore/,
+);
+pass('persistent-db-rejects-production-memory-secret-store');
 
 assert.equal(createPlatformSecretStore({ platform: 'win32' }).constructor.name, 'WindowsCredentialSecretStore');
 assert.equal(createPlatformSecretStore({ platform: 'linux' }).constructor.name, 'LinuxSecretServiceStore');

@@ -10,6 +10,7 @@
   "main": "index.js",
   "scripts": {
     "selftest": "node scripts/selftest.mjs",
-    "check:secret-store": "node scripts/check-secret-store.mjs"
+    "check:secret-store": "node scripts/check-secret-store.mjs",
+    "cleanup": "node scripts/cleanup-expired.mjs"
   }
 }

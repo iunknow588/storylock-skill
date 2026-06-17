@@ -9,6 +9,7 @@
   "description": "Remote StoryLock gateway skill package",
   "main": "index.js",
   "scripts": {
-    "selftest": "node scripts/selftest.mjs"
+    "selftest": "node scripts/selftest.mjs",
+    "selftest:e2e": "node scripts/e2e-selftest.mjs"
   }
 }

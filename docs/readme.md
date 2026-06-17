@@ -1,403 +1,209 @@
-# StoryLock Product Brief
+# StoryLock Project Brief
 
-## 1. Project Overview
+Version: 2026-06-17  
+Scope: `skill/`
 
-| Item | Details |
-|------|---------|
-| Product Name | StoryLock |
-| Applicable Scenario | Local private-key management and authorization control for Agent scenarios |
-| Positioning | A Skill solution for local private-key management and authorization control in Agent scenarios |
-| Target Users | Individual developers, small teams, Agent / Skill developers |
-| Repository Root | `skill/` |
-| Document Version | 2026-06-17 |
+## 1. Positioning
 
----
+StoryLock is a local-first authorization Skill project. It separates story-memory cues, object-strength policy, grid verification, short-lived local authorization, and remote request wrapping into three layers. A remote Agent can request local signing or Web2 password filling, but it does not directly hold long-term secrets.
 
-## 2. Summary
-
-StoryLock is a local private-key and sensitive-object authorization management tool for Agent scenarios. The local Agent manages private keys and file keys, while the remote online Agent does not directly hold user private keys. File contents are encrypted with keys, and only the local Agent with the corresponding file key and permission level can access them. StoryLock introduces associative-memory cues into authorization decisions and packages "permission-gated local sensitive-object access" and "human-understandable, recallable cues for authorization" as reusable Skill capabilities.
-
-The project is organized into three capability layers:
-
-1. Layer 1: Local story processing  
-   Handles local processing logic such as story draft generation, story refinement, and question-set strength evaluation.
-2. Layer 2: Local controlled authorization  
-   Determines the required password strength according to the target object and generates the corresponding grid verification. Whether an object requires low-, medium-, or high-strength verification is part of the object-level access policy defined and executed by this layer.
-3. Layer 3: Remote gateway and delegated authorization  
-   Wraps external calls into a unified request structure and exposes local capabilities such as signature authorization and password filling to remote Agents in a controlled way. The remote side submits structured requests; the local side completes permission checks, local authorization, signing, or password filling, and then returns minimized results. Through this layer, remote Agents can use local capabilities without directly holding user private keys or file keys.
+The current focus is a runnable, auditable, redaction-aware local authorization chain. It does not claim to be a complete multi-chain wallet, multi-platform account manager, or full business orchestration system.
 
 In one sentence:
 
-> StoryLock is an Agent security capability package in which a local Agent manages private keys and file keys, associative-memory cues participate in authorization decisions, and three coordinated Skill layers allow remote Agents to use local capabilities safely.
+> StoryLock connects local story-memory verification with remote delegated requests through a three-layer Skill structure, keeping sensitive signing and password-filling operations inside the local authorization boundary.
 
----
+## 2. Current Three-Layer Structure
 
-## 3. Code Structure
+| Layer | Package | Current Capabilities |
+| --- | --- | --- |
+| Layer 1: Story processing and strength review | `src/storylock-local-story-processing-skill` | `StoryDraftSkill`, `StoryRefineSkill`, `StrengthReviewSkill` |
+| Layer 2: Local access authorization | `src/storylock-local-story-access-skill` | `ObjectStrengthPolicySkill`, `GridChallengeSkill`, `LocalAuthorizationSkill` |
+| Layer 3: Remote gateway | `src/storylock-remote-gateway-skill` | `requestSignature`, `requestPasswordFill` |
+| Compatibility demo package | `src/storylock-skill-engine` | Local password-fill and signature-authorization examples |
 
-### 3.1 Three-Package Structure
+The current mainline remote surface focuses on two entries: `requestSignature` and `requestPasswordFill`. Local authorization is handled by Layer 2, while the remote gateway handles request wrapping, delegated execution, and redacted returns.
 
-| Package | Directory | Role |
-|---------|-----------|------|
-| `storylock-local-story-processing-skill` | `skill/src/storylock-local-story-processing-skill` | Layer 1, local story processing |
-| `storylock-local-story-access-skill` | `skill/src/storylock-local-story-access-skill` | Layer 2, local controlled authorization |
-| `storylock-remote-gateway-skill` | `skill/src/storylock-remote-gateway-skill` | Layer 3, remote request wrapping and gateway |
+## 3. Core Capabilities
 
-### 3.2 Aggregation Entry
+### 3.1 Layer 1
 
-| Module | Directory | Description |
-|--------|-----------|-------------|
-| `storylock-skill-engine` | `skill/src/storylock-skill-engine` | Unified exports, demo scripts, self-test scripts, and WASM build scripts |
-| `shared` | `skill/src/shared` | Shared encryption, SQLite, and SecretStore adapter code |
+Layer 1 handles story content and question-set quality:
 
----
+1. Generate story drafts.
+2. Refine and organize story text.
+3. Review question-set strength.
 
-## 4. Core Capabilities
+It does not issue authorization, read long-term secrets, or serve as a remote gateway.
 
-### 4.1 Layer 1: Local Story Processing
+### 3.2 Layer 2
 
-Skills:
+Layer 2 handles local authorization control:
 
-- `StoryDraftAssistSkill`
-- `StoryRefineAssistSkill`
-- `StrengthReviewSkill`
+1. Resolve target-object strength: `low`, `medium`, or `high`.
+2. Generate grid verification.
+3. Verify local answers.
+4. Issue short-lived sessions or authorizations.
+5. Maintain requestId, nonce, failure windows, and audit logs.
 
-Code:
+Current SQLite state includes:
 
-- `skill/src/storylock-local-story-processing-skill/index.js`
-- `skill/src/storylock-skill-engine/assets/migrated/skills/story-assist.js`
-- `skill/src/storylock-skill-engine/assets/migrated/skills/strength-review.js`
+1. `challenge_state`
+2. `session_store`
+3. `request_store`
+4. `nonce_store`
+5. `failure_window`
+6. `answer_digest_set`
+7. `audit_log`
 
-Capabilities:
+Answers are stored as digests, not plaintext.
 
-- Story draft generation
-- Story refinement
-- Question-set strength evaluation
+### 3.3 Layer 3
 
-### 4.2 Layer 2: Local Controlled Authorization
+Layer 3 is the unified entry point for remote Agents:
 
-Skills:
+1. `requestSignature`: wraps signature requests using a `StoryLockSignatureRequest` EIP-712 style structure.
+2. `requestPasswordFill`: wraps Web2 password-fill requests and defaults to audit metadata only.
+3. Calls optional local executors: `signatureExecutor` and `passwordFillExecutor`.
+4. Recursively redacts sensitive fields from returned results.
 
-- `ObjectStrengthPolicySkill`
-- `GridChallengeSkill`
-- `LocalAuthorizationSkill`
+Layer 3 does not store private keys, passwords, grid answers, or plaintext story content.
 
-Code:
+## 4. Security Mechanisms
 
-- `skill/src/storylock-local-story-access-skill/index.js`
-- `skill/src/storylock-local-story-access-skill/access-host.js`
+| Mechanism | Current Status |
+| --- | --- |
+| Node.js runtime | Requires Node.js 22 or above |
+| SQLite state storage | Implemented |
+| requestId/nonce replay protection | Implemented, conflicts use `SLG-013` |
+| Expiry checks | Implemented, expired requests use `SLG-011` |
+| Grid failure lockout | Implemented |
+| Expired-state cleanup | Implemented via `npm run cleanup` |
+| Answer digest storage | HMAC-SHA256 digest storage |
+| SecretStore | Development memory store and platform-store factory |
+| Remote result redaction | Recursive redaction implemented |
 
-Capabilities:
+Persistent SQLite hosts must not silently use a plain `MemorySecretStore`. Development tests may explicitly use `developmentMode=true`; production should use a platform SecretStore or equivalent secure storage.
 
-- Unified request validation
-- Object-level strength policy that determines the required password strength according to the target object
-- Grid verification generation according to the required password strength
-- `requestId` idempotency and `nonce` replay protection
-- Local verification creation and answer validation
-- Short-lived session issuance
-- Authorization result return
+## 5. Run and Verification
 
-### 4.3 Layer 3: Remote Gateway
+Run the following commands from the `skill/` directory.
 
-Interfaces:
-
-- `requestSignature`
-- `requestPasswordFill`
-
-Code:
-
-- `skill/src/storylock-remote-gateway-skill/index.js`
-
-Capabilities:
-
-- Unified request envelope structure
-- Unified capability naming and scope
-- Remote call wrapping
-- Signature authorization request wrapping
-- Web2 login-form password filling request wrapping
-- EIP-712 minimal signing request packaging
-
-Layer 3 is the unified delegated authorization entry for remote Agents to use local capabilities. It transforms remote requests into structured, verifiable, and auditable local calls, and returns minimized execution results.
-
-- Remote Agents initiate authorization requests through Layer 3 without directly touching private keys
-- The local Agent performs permission checks, local authorization, signing, or password filling through Layer 3
-- Layer 3 separates "whether a request may be made" from "how it is executed locally"
-- Returned results follow the minimization principle to avoid leaking sensitive content to the remote side
-
----
-
-## 5. Security Mechanisms
-
-### 5.1 Security Capabilities
-
-| Capability | Description |
-|------------|-------------|
-| Object-level password strength and grid verification | Determines the required password strength according to the target object and generates the corresponding grid verification |
-| Replay protection | `requestId` idempotency, `nonce` deduplication, and `expiry` validation |
-| Session model | Controls the access window through short-lived sessions |
-| Auto lock | Enters `locked` after repeated failures |
-| Auto unlock | Restores availability after the lock window expires |
-| Object encryption | AES-256-GCM |
-| Key derivation | HKDF-SHA256 |
-| Answer digest | HMAC-SHA256 digest storage |
-
-Additional notes:
-
-- Private keys and file keys are managed by the local Agent
-- Remote Agents only request capabilities and do not directly hold private keys
-- Authorization uses associative-memory cues instead of relying only on mechanical passphrases
-
-### 5.2 Capability Scope
-
-Primary capabilities include:
-
-1. A unified three-layer Skill structure
-2. Object-level password strength policy, grid verification, and short-lived sessions
-3. Replay protection, local answer validation, and authorization result return
-4. A controlled chain from remote request wrapping to local execution
-5. Local controlled execution for signature authorization and Web2 password filling requests
-
-Extension capabilities include:
-
-- Question-set models and progressive grid verification strategies
-- Finer-grained object access classification and policy engines
-- Cross-platform SecretStore adaptation
-- Local signing execution, auditing, and recovery mechanisms
-- Standardized HTTP / host integration layers
-
-This document reflects the actual code, interfaces, and scripts in the repository.
-
----
-
-## 6. Design and Implementation Mapping
-
-Based on the current code and `skill/docs/management/code_doc_consistency_review.md`, this section explains where the current design lands in the codebase and the main directions for future extension.
-
-### 6.1 Current Implementation Mapping
-
-- Three-package directory structure and responsibility layering
-- Layer 2 object-strength decision and grid verification generation flow
-- Automatic recovery from the `locked` state
-- Reference to the EIP-712 standard to define the project-level `StoryLockSignatureRequest` request structure
-- Remote gateway focused on signature authorization and password filling request wrapping
-- Error-code mapping fix from `REQUEST_EXPIRED` to `SLG-011`
-- More robust atomic update strategy for local authorization state updates
-
-### 6.2 Further Extension Directions
-
-- Continue improving the underlying mechanisms for local authorization, permission control, and delegated execution
-- Explore typical application scenarios across different application domains to validate generality and portability
-- Gradually accumulate reusable integration patterns and engineering practices based on concrete business needs
-
----
-
-## 7. Run and Verification
-
-### 7.1 Skill Engine Demo
-
-Directory:
-
-`skill/src/storylock-skill-engine`
-
-Command:
+### 5.0 One-Command Verification
 
 ```powershell
-cd skill/src/storylock-skill-engine
-npm run demo
+npm run test
+```
+
+### 5.1 Layer 1 Self-Test
+
+```powershell
+Push-Location src/storylock-local-story-processing-skill
 npm run selftest
-npm run build:wasm
-npm run selftest:wasm
+Pop-Location
 ```
 
-Coverage:
-
-- `demo`: example flow for draft generation, password filling, and signature authorization
-- `selftest`: verifies core exported capabilities can be invoked
-- `build:wasm`: verifies the Rust/WASM artifact build flow
-- `selftest:wasm`: verifies that WASM dist artifacts can be loaded
-
-### 7.2 Local Controlled Authorization Self-Test
-
-Directory:
-
-`skill/src/storylock-local-story-access-skill`
-
-Command:
+### 5.2 Layer 2 Self-Test
 
 ```powershell
-cd skill/src/storylock-local-story-access-skill
-node scripts/selftest.mjs
+Push-Location src/storylock-local-story-access-skill
+npm run selftest
+Pop-Location
 ```
 
-Coverage:
+This covers object strength, grid verification, replay protection, local authorization, lockout, cleanup, SQLite audit, and SecretStore constraints.
 
-- Object strength decision
-- Grid verification generation
-- Replay protection
-- Idempotent request handling
-- Locking and automatic unlock
-- Expired-request error code
-- Local authorization result return
-
-### 7.3 Remote Gateway Self-Test
-
-Directory:
-
-`skill/src/storylock-remote-gateway-skill`
-
-Command:
+### 5.3 Layer 3 Self-Test
 
 ```powershell
-cd skill/src/storylock-remote-gateway-skill
-node scripts/selftest.mjs
+Push-Location src/storylock-remote-gateway-skill
+npm run selftest
+Pop-Location
 ```
 
-Coverage:
+This covers `requestSignature`, `requestPasswordFill`, EIP-712 wrapping, and recursive redaction.
 
-- Remote request wrapping
-- `requestSignature`
-- `requestPasswordFill`
-- EIP-712 structure
-- Default `policyHints`
+### 5.4 Three-Layer E2E Signature Demo
 
----
+```powershell
+Push-Location src/storylock-remote-gateway-skill
+npm run selftest:e2e
+Pop-Location
+```
 
-## 8. Product Characteristics
+The script connects:
 
-### 8.1 Characteristic One: Not Only Storing Secrets, but Also Controlling Their Use
+1. Layer 3 `requestSignature`.
+2. Layer 2 object-strength policy.
+3. Layer 2 grid verification.
+4. Layer 2 local authorization.
+5. A local signature executor.
+6. Layer 3 redacted return.
+7. SQLite audit logging.
 
-Many tools mainly solve where secrets are stored. StoryLock further focuses on the boundary of secret usage:
+### 5.5 Compatibility Demo Package Self-Test
 
-- who can use them
-- when they can be used
-- how long they can be used
-- what can be returned
-- what the remote caller can receive at most
+```powershell
+Push-Location src/storylock-skill-engine
+npm run selftest
+Pop-Location
+```
 
-This makes it more than a storage tool. It is a local authorization and key-management framework for Agent scenarios.
+### 5.6 SQLite Cleanup Command
 
-### 8.1.1 Associative Memory in Authorization
+```powershell
+Push-Location src/storylock-local-story-access-skill
+npm run cleanup -- 2 --development-memory-secret-store
+Pop-Location
+```
 
-StoryLock emphasizes associative-memory cues in authorization decisions and does not reduce authorization to mechanical fixed-password input.
+## 6. Documentation Entry Points
 
-This design is closer to everyday usage patterns:
+| Document | Path |
+| --- | --- |
+| Chinese design entry | `docs/design/cn/README.md` |
+| Submission reference docs | `docs/ref/README.md` |
+| Test plan | `docs/test/StoryLock测试方案_v1.0.md` |
+| Project completeness analysis | `docs/management/StoryLock项目完善度分析_20260617.md` |
+| Development improvement plan | `docs/management/开发完善实施计划_20260617.md` |
+| Submission brief | `docs/usecase/00-参赛说明文档.md` |
 
-- People more easily recall information tied to their own experiences, stories, and cues
-- The local Agent keeps keys and enforces permission control
-- The remote Agent initiates requests without directly touching private keys
+## 7. Current Completion Status
 
-This design combines local key management with authorization decisions based on understandable cues. It is better suited for long-term use and for Agent participation without privilege overreach.
+Completed:
 
-### 8.2 Characteristic Two: Clear Three-Layer Structure with Explicit Responsibilities
+1. Three main packages and capability boundaries.
+2. Self-tests for all four packages.
+3. Three-layer E2E signature demo.
+4. SQLite audit, replay protection, failure lockout, and cleanup.
+5. SecretStore production constraints.
+6. Current design, test, and submission-reference documentation alignment.
 
-The project is not a single script. It is split into:
+Still to improve:
 
-- a local processing package
-- a local authorization package
-- a remote gateway package
+1. Grid cells are still generated from placeholder seeds; future work should connect real question sets or object policy.
+2. Active challenge/session revocation can be expanded.
+3. HTTP or host integration remains future work.
+4. Multi-chain, multi-platform, and multi-account scenarios are application exploration directions, not current implemented capabilities.
 
-The three layers have clear and coordinated responsibilities:
+## 8. Recommended External Description
 
-- Layer 1 handles local processing and memory-cue-related capabilities
-- Layer 2 handles object-strength decisions, grid verification, and local authorization
-- Layer 3 handles remote request wrapping and delegated authorization for signature authorization and password filling
+Recommended:
 
-This structure separates processing, authorization, and delegated execution, allowing the system to extend capabilities while keeping clear boundaries and supporting safer application building.
+> StoryLock is a local-first authorization Skill project. Through story processing, local access authorization, and a remote gateway, it packages grid verification, short-lived authorization, signature requests, and Web2 password filling as callable capabilities while keeping long-term secrets and authorization decisions inside the local boundary.
 
-### 8.3 Characteristic Three: Documentation, Code, Self-Tests, and Example Scripts
+Avoid:
 
-The repository includes:
+1. “It already supports a production-grade multi-chain wallet system.”
+2. “The remote gateway directly handles local plaintext sensitive content.”
+3. “The compatibility demo package is the full production security boundary.”
 
-- `SKILL.md`
-- `references/`
-- `assets/schemas/`
-- `assets/templates/`
-- `demo/selftest/build` scripts
+## 9. Summary
 
-The repository provides documentation, code, self-tests, and example scripts to support understanding, verification, and reuse.
+StoryLock currently provides a verifiable three-layer Skill baseline:
 
-### 8.4 Characteristic Four: Unified Secure Execution Architecture Built with Rust and Pharos
+1. Layer 1 handles story processing and question-set strength.
+2. Layer 2 handles local verification, authorization, and audit.
+3. Layer 3 handles remote request wrapping, delegated execution, and redacted returns.
 
-The current architecture uses Rust and Pharos as technical anchors for the lower and upper layers. The repository already includes:
-
-- the unified `storylock-skill-engine` entry
-- `dist/wasm` build artifacts
-- WASM build and artifact self-test scripts
-
-Within this architecture:
-
-- Rust / WASM is used at the lower layer to improve the security and stability of critical execution paths
-- Pharos is used at the upper layer to adapt to different chains, signing flows, and host environments
-- StoryLock forms a unified secure execution framework across local authorization, key management, and delegated execution
-
----
-
-## 9. Business and Application Scenarios
-
-### 9.1 Typical Application Scenarios
-
-| Scenario | StoryLock Role |
-|----------|----------------|
-| Strategy-exploration automated trading | Explore an application pattern in which the remote Agent initiates strategy requests while the local Agent controls account keys, signing permissions, and operation strength by tier |
-| Automated content generation and publishing | Explore an application pattern in which the remote Agent orchestrates content workflows while the local Agent controls platform credentials, material usage, and publishing permissions |
-| Multi-account operations | Explore local credential management and high-sensitivity operation authorization across multiple sites, accounts, and publishing channels |
-| Multi-object delegated execution | Explore local authorization, signing, and access control when one workflow involves multiple wallets, cloud environments, website accounts, or credential objects |
-
----
-
-## 10. Repository Contents
-
-| Type | Path | Description |
-|------|------|-------------|
-| Chinese product brief | `skill/docs/usecase/00-参赛说明文档.md` | Product description |
-| English product brief | `skill/docs/usecase/00-submission-brief-en.md` | Product description |
-| Consistency review document | `skill/docs/management/code_doc_consistency_review.md` | Code and design document comparison review |
-| Layer 1 code | `skill/src/storylock-local-story-processing-skill` | Local story processing |
-| Layer 2 code | `skill/src/storylock-local-story-access-skill` | Local controlled authorization |
-| Layer 3 code | `skill/src/storylock-remote-gateway-skill` | Remote gateway |
-| Aggregation entry | `skill/src/storylock-skill-engine` | Examples, self-tests, and WASM build |
-| Shared modules | `skill/src/shared` | Encryption, SQLite, SecretStore |
-
----
-
-## 11. Extension Directions
-
-### 11.1 Short Term
-
-- Connect the complete processing flow across the gateway layer, authorization layer, and processing layer
-- Clarify the chain among remote requests, local authorization, local processing, and result return
-- Align demos, self-tests, and documentation around the same primary flow
-
-### 11.2 Mid Term
-
-- Form more stable capability interfaces and request structures
-- Improve standardized expression of object access classification, strength policy, and permission control
-- Advance standardized adaptation for SecretStore, signing execution, and host integration interfaces
-
-### 11.3 Long Term
-
-- Explore typical application scenarios across different application domains
-- Reuse local authorization, key management, and delegated execution capabilities in concrete scenarios
-- Gradually accumulate extensible Agent security application patterns
-
----
-
-## 12. Summary
-
-StoryLock can be summarized as:
-
-1. a three-layer coordinated Skill solution;
-2. an Agent security solution in which a local Agent manages private keys and file keys, associative-memory cues participate in authorization decisions, and authorization is executed by permission level;
-3. a verifiable project with code, documentation, example scripts, and self-test scripts.
-
-The three Skill layers take on distinct responsibilities:
-
-- Layer 1 handles local processing, story organization, and memory-cue-related capabilities
-- Layer 2 determines the required password strength according to the target object, generates the corresponding grid verification under object-level policy, and returns the local authorization result
-- Layer 3 handles remote request wrapping, delegated authorization, and minimized result returns
-
-The project operates within the following boundaries:
-
-- The local Agent manages private keys and file keys
-- The remote Agent only requests capabilities and does not directly hold private keys
-- Authorization uses associative-memory cues rather than relying only on mechanical passphrases
-- Sensitive object access follows permission levels, short-lived sessions, and minimized return principles
+It is suitable for demonstrating an Agent security model where remote systems can request capabilities, local systems authorize sensitive actions, results are auditable, and long-term secrets do not leave the local boundary.

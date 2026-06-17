@@ -1,5 +1,7 @@
 # StoryLock Skill 开发分析：对照 Pharos PiggyBank 教程
 
+> 状态说明：本文是 2026-06-15 的历史分析，仅作为早期整理参考。当前主线以 `skill/src/storylock-local-story-processing-skill`、`skill/src/storylock-local-story-access-skill`、`skill/src/storylock-remote-gateway-skill` 三包为准；签名入口统一使用 `requestSignature`，不再把 `ChallengeSigningAuthorizationSkill` 或 `requestChallengeSign` 作为当前主接口。
+
 ## 核心结论
 
 **StoryLock 当前代码已实现 Skill 的核心逻辑层，但尚未完成 Pharos 标准要求的 Skill 包结构。** 主要差距在于：缺乏标准化的 `SKILL.md` 元数据、Capability Index、以及面向 AI Agent 的参考文件结构。

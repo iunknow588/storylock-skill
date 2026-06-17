@@ -5,7 +5,7 @@ import { MemorySecretStore, createPlatformSecretStore } from '../shared/secret-s
 import { loadSqliteSchema, migrateSqliteSchema } from '../shared/sqlite.js';
 
 const DEFAULT_DB_PATH = ':memory:';
-const DEFAULT_SECRET_STORE = new MemorySecretStore();
+const DEFAULT_SECRET_STORE = new MemorySecretStore({ developmentMode: true, suppressWarning: true });
 
 const REPLAY_DRIFT_MS = 30_000;
 const REPLAY_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -410,6 +410,9 @@ export function createAccessHost({ dbPath = DEFAULT_DB_PATH, secretStore, usePla
     throw new Error('Persistent SQLite host requires secretStore or usePlatformSecretStore=true');
   }
   const resolvedSecretStore = secretStore ?? (usePlatformSecretStore ? createPlatformSecretStore() : DEFAULT_SECRET_STORE);
+  if (persistent && resolvedSecretStore?.kind === 'memory' && !resolvedSecretStore.developmentMode) {
+    throw new Error('Persistent SQLite host must not use MemorySecretStore unless developmentMode=true. Use a platform SecretStore in production.');
+  }
   const store = new SqliteStore(dbPath, resolvedSecretStore, { persistent });
   store.ensureSeeded();
   store.cleanupExpired();
