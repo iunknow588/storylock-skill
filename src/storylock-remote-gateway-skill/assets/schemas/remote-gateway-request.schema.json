@@ -11,13 +11,8 @@
     "capability": {
       "type": "string",
       "enum": [
-        "requestStoryRead",
-        "requestStoryWrite",
-        "requestChallengeSign",
-        "queryStoryMetadata",
-        "requestCapabilityStatus",
-        "requestPasswordFill",
-        "requestLocalStoryAssist"
+        "requestSignature",
+        "requestPasswordFill"
       ]
     },
     "scope": {

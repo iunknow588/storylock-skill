@@ -7,14 +7,6 @@ const MAX_NONCE_LENGTH = 128;
 const MAX_ID_LENGTH = 128;
 const MAX_ANSWERS = 10;
 const MAX_ANSWER_LENGTH = 512;
-const MAX_CONTENT_JSON_BYTES = 64 * 1024;
-const HIGH_SENSITIVITY_FIELD_PATTERN = /(password|secret|token|privateKey|mnemonic|seed|phone|email|idCard|credential)/i;
-const HIGH_SENSITIVITY_VALUE_PATTERNS = [
-  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
-  /\b1[3-9]\d{9}\b/,
-  /\b\d{15}(\d{2}[0-9Xx])?\b/,
-  /\b(?:0x)?[a-f0-9]{64}\b/i,
-];
 
 function nowMs() {
   return Date.now();
@@ -53,25 +45,6 @@ function normalizeArray(value) {
   return value;
 }
 
-function normalizeContent(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('content must be an object');
-  }
-  const encoded = Buffer.byteLength(JSON.stringify(value), 'utf8');
-  if (encoded > MAX_CONTENT_JSON_BYTES) {
-    throw new Error(`content must be ${MAX_CONTENT_JSON_BYTES} bytes or less when JSON encoded`);
-  }
-  return value;
-}
-
-function normalizeRedactionLevel(input) {
-  const level = input?.redactionLevel ?? input?.policyHints?.redactionLevel ?? 'partial';
-  if (!['none', 'partial', 'full'].includes(level)) {
-    throw new Error('redactionLevel must be none, partial, or full');
-  }
-  return level;
-}
-
 function normalizeRequestEnvelope(input, fallbackRequestId) {
   const requestId = normalizeString(input?.requestId ?? fallbackRequestId, 'requestId', { maxLength: MAX_REQUEST_ID_LENGTH });
   const nonce = normalizeString(input?.nonce ?? `nonce-${Date.now().toString(16)}`, 'nonce', { maxLength: MAX_NONCE_LENGTH });
@@ -83,81 +56,6 @@ function normalizeRequestEnvelope(input, fallbackRequestId) {
     throw new Error('REQUEST_EXPIRED');
   }
   return { requestId, nonce, expiry };
-}
-
-function collectSensitiveSignals(value, path = '', signals = new Set()) {
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => collectSensitiveSignals(item, `${path}[${index}]`, signals));
-    return signals;
-  }
-  if (value && typeof value === 'object') {
-    for (const [key, nested] of Object.entries(value)) {
-      const nextPath = path ? `${path}.${key}` : key;
-      if (HIGH_SENSITIVITY_FIELD_PATTERN.test(key)) {
-        signals.add(`field:${nextPath}`);
-      }
-      collectSensitiveSignals(nested, nextPath, signals);
-    }
-    return signals;
-  }
-  if (typeof value === 'string') {
-    for (const pattern of HIGH_SENSITIVITY_VALUE_PATTERNS) {
-      if (pattern.test(value)) {
-        signals.add(path ? `value:${path}` : 'value');
-        break;
-      }
-    }
-  }
-  return signals;
-}
-
-function analyzeSensitiveContent(value) {
-  const signals = Array.from(collectSensitiveSignals(value));
-  return {
-    hasHighSensitivityFields: signals.length > 0,
-    highSensitivitySignals: signals.slice(0, 20),
-  };
-}
-
-function redactStoryObject(storyObject, redactionLevel, sensitivityReport) {
-  if (redactionLevel === 'none') {
-    return storyObject;
-  }
-  const base = {
-    storyObjectId: storyObject.storyObjectId,
-    version: storyObject.version,
-    sensitivity: storyObject.sensitivity,
-  };
-  if (redactionLevel === 'full' || sensitivityReport.hasHighSensitivityFields) {
-    return {
-      ...base,
-      title: '[redacted]',
-      contentSummary: '[redacted]',
-    };
-  }
-  return {
-    ...base,
-    title: storyObject.title,
-    contentSummary: typeof storyObject.content === 'string' ? `[redacted:${storyObject.content.length} chars]` : '[redacted]',
-  };
-}
-
-function redactWriteResult(writeResult, redactionLevel, sensitivityReport) {
-  if (redactionLevel === 'none') {
-    return writeResult;
-  }
-  const base = {
-    storyObjectId: writeResult.storyObjectId,
-    version: writeResult.version,
-    sensitivity: writeResult.sensitivity,
-  };
-  if (redactionLevel === 'full' || sensitivityReport.hasHighSensitivityFields) {
-    return base;
-  }
-  return {
-    ...base,
-    title: writeResult.title,
-  };
 }
 
 function toErrorResponse({ requestId, capability, error }) {
@@ -178,99 +76,146 @@ function toErrorResponse({ requestId, capability, error }) {
   };
 }
 
-export class StoryReadAccessSkill {
+function normalizeObjectType(value) {
+  const objectType = normalizeString(value ?? 'generic_secret', 'objectType', { maxLength: 64 });
+  if (!['generic_secret', 'credential', 'signature_key', 'file_key', 'story_object'].includes(objectType)) {
+    throw new Error('objectType must be generic_secret, credential, signature_key, file_key, or story_object');
+  }
+  return objectType;
+}
+
+function normalizeRequestedAction(value) {
+  const requestedAction = normalizeString(value ?? 'authorize', 'requestedAction', { maxLength: 64 });
+  if (!['authorize', 'password_fill', 'signature', 'local_processing'].includes(requestedAction)) {
+    throw new Error('requestedAction must be authorize, password_fill, signature, or local_processing');
+  }
+  return requestedAction;
+}
+
+function normalizeStrength(value, fieldName = 'requiredStrength') {
+  const strength = normalizeString(value, fieldName, { maxLength: 32 });
+  if (!['low', 'medium', 'high'].includes(strength)) {
+    throw new Error(`${fieldName} must be low, medium, or high`);
+  }
+  return strength;
+}
+
+function resolveStrength({ objectType, requestedAction, policyHints = {} }) {
+  if (policyHints.requiredStrength) {
+    return normalizeStrength(policyHints.requiredStrength, 'policyHints.requiredStrength');
+  }
+  if (objectType === 'signature_key' || requestedAction === 'signature') {
+    return 'high';
+  }
+  if (objectType === 'credential' || requestedAction === 'password_fill') {
+    return 'medium';
+  }
+  return 'low';
+}
+
+function gridPolicyForStrength(requiredStrength) {
+  const strength = normalizeStrength(requiredStrength);
+  const requiredCells = {
+    low: 3,
+    medium: 6,
+    high: 9,
+  }[strength];
+  return {
+    gridSize: 9,
+    requiredCells,
+  };
+}
+
+function buildGridCells({ verificationId, objectRef, requiredStrength }) {
+  const seed = `${verificationId}:${objectRef}:${requiredStrength}`;
+  return Array.from({ length: 9 }, (_, index) => ({
+    cellId: `cell-${index + 1}`,
+    promptRef: `cue-${index + 1}`,
+    position: index + 1,
+    seed: `${seed}:${index + 1}`,
+  }));
+}
+
+function normalizeAuthorizationAnswers(value) {
+  const answers = normalizeArray(value);
+  return answers.map((item, index) => {
+    if (typeof item === 'string') {
+      return { cellId: `cell-${index + 1}`, answer: item };
+    }
+    return {
+      cellId: item.cellId ? normalizeString(item.cellId, `answers[${index}].cellId`, { maxLength: 64 }) : `cell-${index + 1}`,
+      answer: normalizeString(item.answer, `answers[${index}].answer`, { maxLength: MAX_ANSWER_LENGTH }),
+    };
+  });
+}
+
+function determineAuthorizationBudgets(allowedAction) {
+  if (allowedAction === 'signature' || allowedAction === 'password_fill') {
+    return {
+      readBudget: 1,
+      writeBudget: 0,
+    };
+  }
+  return {
+    readBudget: 0,
+    writeBudget: 0,
+  };
+}
+
+export class ObjectStrengthPolicySkill {
   constructor({ host, dbPath, secretStore, usePlatformSecretStore = false } = {}) {
     this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore });
   }
 
   skillId() {
-    return 'story_read_access';
+    return 'object_strength_policy';
   }
 
   async run(input = {}) {
     const fallbackRequestId = input?.requestId ?? `req-${Date.now().toString(16)}`;
     try {
-      const { requestId, nonce, expiry } = normalizeRequestEnvelope(input, fallbackRequestId);
       const identityId = normalizeString(input.identityId, 'identityId', { maxLength: MAX_ID_LENGTH });
-      const storyObjectId = normalizeString(input.storyObjectId, 'storyObjectId', { maxLength: MAX_ID_LENGTH });
-      const answers = normalizeArray(input.answers);
-      const redactionLevel = normalizeRedactionLevel(input);
-      this.host.ensureSeeded?.();
-      const replay = this.host.ensureReplaySafe?.(requestId, nonce, expiry, {
-        capability: 'requestStoryRead',
-        identityId,
-        storyObjectId,
-        answers,
-        redactionLevel,
+      const objectRef = normalizeString(input.objectRef ?? input.credentialRef ?? input.keyId, 'objectRef', { maxLength: MAX_ID_LENGTH });
+      const objectType = normalizeObjectType(input.objectType);
+      const requestedAction = normalizeRequestedAction(input.requestedAction);
+      const requiredStrength = resolveStrength({
+        objectType,
+        requestedAction,
+        policyHints: input.policyHints ?? {},
       });
-      if (replay?.replayed) {
-        return replay.response;
-      }
-      const challenge = this.host.createChallenge(identityId, 'story_read_basic');
-      const authorization = this.host.submitChallengeAnswers(identityId, challenge.challengeId, answers);
-      if (!authorization.approved) {
-        throw Object.assign(new Error('challenge answers did not match'), {
-          code: 'SLG-003',
-          type: 'challenge_failed',
-          retryable: true,
-          retryAfter: authorization.retryAfter ?? null,
-        });
-      }
-      const session = this.host.issueSession(identityId, challenge, 'story_read_basic', [storyObjectId], {
-        readBudget: 1,
-        ttlMs: 3 * 60 * 1000,
-        sessionType: 'one_shot',
-      });
-      const { storyObject } = this.host.readStoryObjectWithBudget(identityId, session.sessionId, storyObjectId, {
-        redactionLevel,
-      });
-      const sensitivityReport = analyzeSensitiveContent(storyObject);
-      this.host.recordAudit?.('story_read_redaction_applied', {
-        identityId,
-        storyObjectId,
-        requestId,
-        result: 'success',
-        redactionLevel,
-        hasHighSensitivityFields: sensitivityReport.hasHighSensitivityFields,
-        meta: { highSensitivitySignals: sensitivityReport.highSensitivitySignals },
-      });
-      const response = {
-        requestId,
+      return {
+        requestId: fallbackRequestId,
         status: 'success',
-        capability: 'requestStoryRead',
+        capability: 'resolveObjectStrength',
         executionLocation: 'local',
         result: {
-          mode: 'story_read_access',
-          storyObjectId,
-          storyObject: redactStoryObject(storyObject, redactionLevel, sensitivityReport),
+          identityId,
+          objectRef,
+          objectType,
+          requestedAction,
+          requiredStrength,
+          gridPolicy: gridPolicyForStrength(requiredStrength),
         },
-        redactionLevel,
-        retentionGranted: 'result_only',
+        redactionLevel: 'none',
+        retentionGranted: 'audit_meta_only',
         auditMeta: {
           timestamp: new Date().toISOString(),
-          challengeId: challenge.challengeId,
-          sessionId: session.sessionId,
-          redactionLevel,
-          hasHighSensitivityFields: sensitivityReport.hasHighSensitivityFields,
-          highSensitivitySignals: sensitivityReport.highSensitivitySignals,
         },
         error: null,
       };
-      this.host.storeRequestResponse?.(requestId, response);
-      return response;
     } catch (error) {
-      return toErrorResponse({ requestId: fallbackRequestId, capability: 'requestStoryRead', error });
+      return toErrorResponse({ requestId: fallbackRequestId, capability: 'resolveObjectStrength', error });
     }
   }
 }
 
-export class StoryWriteAccessSkill {
+export class GridChallengeSkill {
   constructor({ host, dbPath, secretStore, usePlatformSecretStore = false } = {}) {
     this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore });
   }
 
   skillId() {
-    return 'story_write_access';
+    return 'grid_challenge';
   }
 
   async run(input = {}) {
@@ -278,70 +223,114 @@ export class StoryWriteAccessSkill {
     try {
       const { requestId, nonce, expiry } = normalizeRequestEnvelope(input, fallbackRequestId);
       const identityId = normalizeString(input.identityId, 'identityId', { maxLength: MAX_ID_LENGTH });
-      const storyObjectId = normalizeString(input.storyObjectId, 'storyObjectId', { maxLength: MAX_ID_LENGTH });
-      const content = normalizeContent(input.content);
-      const answers = normalizeArray(input.answers);
-      const redactionLevel = normalizeRedactionLevel(input);
+      const objectRef = normalizeString(input.objectRef ?? input.credentialRef ?? input.keyId, 'objectRef', { maxLength: MAX_ID_LENGTH });
+      const requiredStrength = normalizeStrength(input.requiredStrength ?? 'medium');
       this.host.ensureSeeded?.();
       const replay = this.host.ensureReplaySafe?.(requestId, nonce, expiry, {
-        capability: 'requestStoryWrite',
+        capability: 'createGridVerification',
         identityId,
-        storyObjectId,
-        content,
-        answers,
-        redactionLevel,
+        objectRef,
+        requiredStrength,
       });
       if (replay?.replayed) {
         return replay.response;
       }
-      const challenge = this.host.createChallenge(identityId, 'story_write_basic');
-      const authorization = this.host.submitChallengeAnswers(identityId, challenge.challengeId, answers);
-      if (!authorization.approved) {
-        throw Object.assign(new Error('challenge answers did not match'), {
-          code: 'SLG-003',
-          type: 'challenge_failed',
-          retryable: true,
-          retryAfter: authorization.retryAfter ?? null,
-        });
-      }
-      const session = this.host.issueSession(identityId, challenge, 'story_write_basic', [storyObjectId], {
-        writeBudget: 1,
-        ttlMs: 3 * 60 * 1000,
-        sessionType: 'one_shot',
-      });
-      const contentSensitivityReport = analyzeSensitiveContent(content);
-      const writeResult = this.host.writeStoryObject(identityId, session.sessionId, storyObjectId, content, {
-        redactionLevel,
-        hasHighSensitivityFields: contentSensitivityReport.hasHighSensitivityFields,
-        meta: { highSensitivitySignals: contentSensitivityReport.highSensitivitySignals },
-      });
-      const sensitivityReport = analyzeSensitiveContent(writeResult);
+      const challenge = this.host.createChallenge(identityId, `grid_${requiredStrength}`);
       const response = {
         requestId,
         status: 'success',
-        capability: 'requestStoryWrite',
+        capability: 'createGridVerification',
         executionLocation: 'local',
         result: {
-          mode: 'story_write_access',
-          storyObjectId,
-          writeResult: redactWriteResult(writeResult, redactionLevel, sensitivityReport),
+          verificationId: challenge.challengeId,
+          identityId,
+          objectRef,
+          requiredStrength,
+          grid: {
+            ...gridPolicyForStrength(requiredStrength),
+            cells: buildGridCells({
+              verificationId: challenge.challengeId,
+              objectRef,
+              requiredStrength,
+            }),
+          },
+          expiresAt: challenge.expiresAt,
         },
-        redactionLevel,
-        retentionGranted: 'result_only',
+        redactionLevel: 'none',
+        retentionGranted: 'audit_meta_only',
         auditMeta: {
           timestamp: new Date().toISOString(),
-          challengeId: challenge.challengeId,
-          sessionId: session.sessionId,
-          redactionLevel,
-          hasHighSensitivityFields: sensitivityReport.hasHighSensitivityFields,
-          highSensitivitySignals: sensitivityReport.highSensitivitySignals,
+          verificationId: challenge.challengeId,
         },
         error: null,
       };
       this.host.storeRequestResponse?.(requestId, response);
       return response;
     } catch (error) {
-      return toErrorResponse({ requestId: fallbackRequestId, capability: 'requestStoryWrite', error });
+      return toErrorResponse({ requestId: fallbackRequestId, capability: 'createGridVerification', error });
+    }
+  }
+}
+
+export class LocalAuthorizationSkill {
+  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false } = {}) {
+    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore });
+  }
+
+  skillId() {
+    return 'local_authorization';
+  }
+
+  async run(input = {}) {
+    const fallbackRequestId = input?.requestId ?? `req-${Date.now().toString(16)}`;
+    try {
+      const identityId = normalizeString(input.identityId, 'identityId', { maxLength: MAX_ID_LENGTH });
+      const verificationId = normalizeString(input.verificationId, 'verificationId', { maxLength: MAX_ID_LENGTH });
+      const objectRef = normalizeString(input.objectRef ?? input.credentialRef ?? input.keyId, 'objectRef', { maxLength: MAX_ID_LENGTH });
+      const allowedAction = normalizeRequestedAction(input.allowedAction ?? input.requestedAction ?? 'authorize');
+      const answers = normalizeAuthorizationAnswers(input.answers);
+      const authorization = this.host.submitChallengeAnswers(identityId, verificationId, answers);
+      if (!authorization.approved) {
+        throw Object.assign(new Error('local authorization answers did not match'), {
+          code: 'SLG-003',
+          type: 'authorization_failed',
+          retryable: true,
+          retryAfter: authorization.retryAfter ?? null,
+        });
+      }
+      const budgets = determineAuthorizationBudgets(allowedAction);
+      const session = this.host.issueSession(identityId, {
+        challengeId: verificationId,
+      }, allowedAction, [objectRef], {
+        readBudget: budgets.readBudget,
+        writeBudget: budgets.writeBudget,
+        ttlMs: input.ttlMs ?? 3 * 60 * 1000,
+        sessionType: 'authorization_only',
+      });
+      return {
+        requestId: fallbackRequestId,
+        status: 'success',
+        capability: 'authorizeLocalAction',
+        executionLocation: 'local',
+        result: {
+          approved: true,
+          authorizationId: session.sessionId,
+          identityId,
+          objectRef,
+          allowedAction,
+          expiresAt: session.expiresAt,
+        },
+        redactionLevel: 'none',
+        retentionGranted: 'audit_meta_only',
+        auditMeta: {
+          timestamp: new Date().toISOString(),
+          verificationId,
+          authorizationId: session.sessionId,
+        },
+        error: null,
+      };
+    } catch (error) {
+      return toErrorResponse({ requestId: fallbackRequestId, capability: 'authorizeLocalAction', error });
     }
   }
 }

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GridVerificationInput",
+  "type": "object",
+  "required": ["identityId", "requiredStrength", "requestId", "nonce", "expiry"],
+  "properties": {
+    "identityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objectRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credentialRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "keyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requiredStrength": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expiry": {
+      "type": "number"
+    }
+  },
+  "anyOf": [
+    { "required": ["objectRef"] },
+    { "required": ["credentialRef"] },
+    { "required": ["keyId"] }
+  ],
+  "additionalProperties": false
+}

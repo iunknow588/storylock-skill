@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { ValidationError } from "../runtime/errors.js";
 import { resolveSecretReference } from "../runtime/resource-catalog.js";
 import {
@@ -37,6 +38,10 @@ function ensureHost(host) {
       host?.readSecretObject,
       "host.readSecretObject",
     ).bind(host),
+    recordAudit:
+      typeof host?.recordAudit === "function"
+        ? host.recordAudit.bind(host)
+        : null,
   };
 }
 
@@ -98,6 +103,23 @@ function normalizeBinaryPayload(payload, fieldName) {
     return new Uint8Array(payload);
   }
   throw new ValidationError(`${fieldName} must be a Uint8Array, string, or byte array`);
+}
+
+function stableAuditStringify(value) {
+  if (value instanceof Uint8Array) {
+    return JSON.stringify(Array.from(value));
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map(stableAuditStringify).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableAuditStringify(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function sha256Hex(value) {
+  return createHash("sha256").update(stableAuditStringify(value)).digest("hex");
 }
 
 async function readSecretObject(host, identityId, sessionId, secretObjectId) {
@@ -392,26 +414,67 @@ export class ChallengeSigningAuthorizationSkill {
           })),
         }),
       );
+      const sessionId = resolveAuthorizationSession(authorization);
+      const signatureHash = sha256Hex(signature);
+      this.host.recordAudit?.("signature_authorized", {
+        identityId: normalizedIdentityId,
+        storyObjectId: normalizedSecretObjectId,
+        result: "success",
+        meta: {
+          authorizationId: sessionId,
+          keyId: normalizedKeyId,
+          algorithm: normalizedAlgorithm,
+          scope,
+          resource: normalizedSecretObjectId,
+          signatureHash,
+          attachmentReferences: attachmentMaterials.map((attachment) => ({
+            attachmentId: attachment.attachmentId,
+            secretReference: attachment.secretReference,
+          })),
+        },
+      });
 
       return {
         mode: "challenge_signing_authorization",
         challenge,
         authorization,
+        authorizationId: sessionId,
         keyId: normalizedKeyId,
         algorithm: normalizedAlgorithm,
         payload: normalizedPayload,
         scope,
         secretReference: normalizedSecretObjectId,
         signature,
+        signatureHash,
         attachments: attachmentMaterials.map((attachment) => ({
           attachmentId: attachment.attachmentId,
           secretReference: attachment.secretReference,
         })),
+        auditMeta: {
+          authorizationId: sessionId,
+          scope,
+          resource: normalizedSecretObjectId,
+          signatureHash,
+        },
       };
     } finally {
       zeroizeBytes(signingKeyBytes);
       attachmentMaterials.forEach((attachment) => zeroizeBytes(attachment.secretBytes));
     }
+  }
+}
+
+export class SignatureAuthorizationSkill extends ChallengeSigningAuthorizationSkill {
+  skillId() {
+    return "signature_authorization";
+  }
+
+  async run(input) {
+    const result = await super.run(input);
+    return {
+      ...result,
+      mode: "signature_authorization",
+    };
   }
 }
 

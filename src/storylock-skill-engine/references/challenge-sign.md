@@ -1,13 +1,13 @@
-# Challenge Sign
+# Signature Authorization
 
 ## Overview
 
-Use this capability to authorize access to signing material and package a challenge-signing result for a target key and payload.
+Use this capability to authorize access to signing material and package a signature result for a target key and payload.
 
 Implemented skill classes:
 
 1. `SigningAuthorizationSkill`
-2. `ChallengeSigningAuthorizationSkill`
+2. `SignatureAuthorizationSkill`
 
 Primary implementation source:
 
@@ -16,9 +16,9 @@ Primary implementation source:
 ## Command Template
 
 ```js
-import { ChallengeSigningAuthorizationSkill } from "../assets/migrated/skills/authorization-skills.js";
+import { SignatureAuthorizationSkill } from "../assets/migrated/skills/authorization-skills.js";
 
-const skill = new ChallengeSigningAuthorizationSkill({
+const skill = new SignatureAuthorizationSkill({
   host,
   signer,
 });
@@ -47,7 +47,7 @@ const result = await skill.run({
 | `resourceCatalog` | `object \| null` | no | `null` | Resource map for role-based resolution. |
 | `includeKeyMaterial` | `boolean` | no | `false` | Expands requested scope when true. |
 | `attachments` | `object[]` | no | `[]` | Optional extra secret references. |
-| `answers` | `array` | no | `[]` | Challenge answers submitted to the host. |
+| `answers` | `array` | no | `[]` | Local authorization answers submitted to the host. |
 
 Host requirements:
 
@@ -60,13 +60,10 @@ Signer requirements:
 1. a signing function
 2. or an object exposing `sign()`
 
-Input schema:
+Schema note:
 
-1. `assets/schemas/challenge-sign-input.schema.json`
-
-Output schema:
-
-1. `assets/schemas/challenge-sign-output.schema.json`
+1. The previous challenge-sign schemas have been removed from the active package surface.
+2. New gateway-facing signing requests should use `storylock-remote-gateway-skill/assets/schemas/delegated-sign-input.schema.json`.
 
 ## Output Parsing
 
@@ -76,7 +73,7 @@ The signing result is assembled by the skill implementation and includes authori
 2. `keyId`
 3. `algorithm`
 4. `scope`
-5. `challenge`
+5. authorization verification metadata
 6. `authorization`
 7. signature-related fields returned by the signer
 
@@ -88,12 +85,12 @@ The signing result is assembled by the skill implementation and includes authori
 | `VALIDATION_ERROR` | `payload` cannot be normalized | Supply a `Uint8Array`, string, or byte array. |
 | `VALIDATION_ERROR` | `signer` is missing or invalid | Inject a function or object with `sign()`. |
 | `VALIDATION_ERROR` | secret reference cannot be resolved | Provide `secretObjectId` directly or a valid `resourceCatalog` path. |
-| host-raised error | challenge, authorization, or secret reads fail | Verify challenge freshness, answers, scope, and object references. |
+| host-raised error | local authorization or secret reads fail | Verify authorization freshness, answers, scope, and object references. |
 
 ## Agent Guidelines
 
 1. Confirm the request is for signing rather than login-field retrieval.
 2. Run all write-operation pre-checks from `SKILL.md` before invoking.
-3. Resolve the signing secret source before starting the challenge flow.
+3. Resolve the signing secret source before starting the local authorization flow.
 4. Normalize `payload` deliberately and keep binary handling explicit.
 5. Preserve structured signing output and avoid collapsing it into prose.

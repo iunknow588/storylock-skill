@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "description": "Reusable StoryLock skill-layer package migrated from story-lock",
   "main": "index.js",
   "scripts": {

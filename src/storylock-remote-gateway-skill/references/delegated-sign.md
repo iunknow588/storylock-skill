@@ -1,4 +1,4 @@
-# Delegated Challenge Sign
+# Delegated Signature
 
 ## Command Template
 
@@ -7,7 +7,7 @@ import { StoryLockRemoteGateway } from "../index.js";
 
 const gateway = new StoryLockRemoteGateway({ transport });
 
-const response = await gateway.requestChallengeSign({
+const response = await gateway.requestSignature({
   requestId: "req-sign-001",
   identityId: "identity-001",
   keyId: "wallet-key",
@@ -42,14 +42,14 @@ const response = await gateway.requestChallengeSign({
 
 ## Output Parsing
 
-The remote gateway returns a structured local signing result rather than raw key material.
+The remote gateway returns a structured local signing request rather than raw key material.
 The request payload includes a minimal EIP-712 structure under `payload.eip712`.
 
 ## Error Handling
 
 | Error | When It Happens | Fix |
 | --- | --- | --- |
-| `CHALLENGE_REQUIRED` | Local signing requires challenge | Complete local challenge flow. |
+| `AUTHORIZATION_REQUIRED` | Local signing requires authorization | Complete local grid verification. |
 | `SCOPE_INSUFFICIENT` | Signing level too low | Retry with the correct access level. |
 | `NONCE_REPLAY_DETECTED` | Nonce replayed | Issue a fresh request. |
 | `algorithm must be ed25519 or secp256k1` | Unsupported algorithm | Use the approved algorithm list. |

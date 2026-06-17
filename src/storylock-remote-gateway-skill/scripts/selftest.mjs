@@ -9,7 +9,7 @@ const gateway = new StoryLockRemoteGateway({
   },
 });
 
-const sign = await gateway.requestChallengeSign({
+const sign = await gateway.requestSignature({
   requestId: 'req-sign',
   nonce: 'nonce-sign',
   expiry: Date.now() + 10_000,
@@ -19,22 +19,16 @@ const sign = await gateway.requestChallengeSign({
   payload: 'hello',
   resourceId: 'resource-1',
   primaryRole: 'private_key',
+  eip712Nonce: '1001',
 });
 
-assert.equal(sign.capability, 'requestChallengeSign');
+assert.equal(sign.capability, 'requestSignature');
+assert.equal(sign.scope, 'signature_basic');
 assert.equal(sign.payload.eip712.domain.name, 'StoryLock');
-assert.equal(sign.payload.eip712.value.payload, '0x68656c6c6f');
-
-const status = await gateway.requestCapabilityStatus({
-  requestId: 'req-status',
-  nonce: 'nonce-status',
-  expiry: Date.now() + 10_000,
-  identityId: 'id-1',
-  capability: 'requestStoryRead',
-});
-
-assert.equal(status.capability, 'requestCapabilityStatus');
-assert.equal(status.scope, 'capability_status_basic');
+assert.equal(sign.payload.eip712.types.StoryLockSignatureRequest[0].name, 'action');
+assert.equal(sign.payload.eip712.value.action, 'request_signature');
+assert.equal(sign.payload.eip712.value.resource, 'resource-1');
+assert.equal(sign.payload.eip712.value.nonce, '1001');
 
 const passwordFill = await gateway.requestPasswordFill({
   requestId: 'req-password-fill',
@@ -50,22 +44,75 @@ assert.equal(passwordFill.scope, 'password_fill_basic');
 assert.equal(passwordFill.requestedRetention, 'audit_meta_only');
 assert.equal(passwordFill.policyHints.noRemoteSecretReturn, true);
 
-const assist = await gateway.requestLocalStoryAssist({
-  requestId: 'req-assist',
-  nonce: 'nonce-assist',
-  expiry: Date.now() + 10_000,
-  identityId: 'id-1',
-  storyObjectId: 'story-001',
-  assistType: 'summarize',
-  prompt: 'Summarize locally',
+const redactingGateway = new StoryLockRemoteGateway({
+  transport(request) {
+    return {
+      requestId: request.requestId,
+      capability: request.capability,
+      result: {
+        password: 'plain-password',
+        privateKey: 'plain-private-key',
+        secretBytes: [1, 2, 3],
+        secretReference: 'wallet/main/private_key',
+        nested: {
+          answers: [{ answer: 'grid answer' }],
+        },
+      },
+    };
+  },
 });
 
-assert.equal(assist.capability, 'requestLocalStoryAssist');
-assert.equal(assist.scope, 'story_assist_basic');
-assert.equal(assist.policyHints.localProcessingOnly, true);
+const redacted = await redactingGateway.requestSignature({
+  requestId: 'req-redacted',
+  nonce: 'nonce-redacted',
+  expiry: Date.now() + 10_000,
+  identityId: 'id-1',
+  keyId: 'key-1',
+  algorithm: 'ed25519',
+  payload: 'hello',
+  eip712Nonce: '1002',
+});
+
+assert.equal(redacted.result.password, '[redacted]');
+assert.equal(redacted.result.privateKey, '[redacted]');
+assert.equal(redacted.result.secretBytes, '[redacted]');
+assert.equal(redacted.result.secretReference, 'wallet/main/private_key');
+assert.equal(redacted.result.nested.answers, '[redacted]');
+
+const localGateway = new StoryLockRemoteGateway({
+  transport(request) {
+    return request;
+  },
+  signatureExecutor(request) {
+    return {
+      requestId: request.requestId,
+      capability: request.capability,
+      result: {
+        signature: 'sig-from-local-executor',
+        signingKeyBytes: [9, 9, 9],
+        secretReference: request.payload.resourceId,
+      },
+    };
+  },
+});
+
+const localResult = await localGateway.requestSignature({
+  requestId: 'req-local-sign',
+  nonce: 'nonce-local-sign',
+  expiry: Date.now() + 10_000,
+  identityId: 'id-1',
+  keyId: 'key-1',
+  algorithm: 'ed25519',
+  payload: 'hello',
+  resourceId: 'resource-1',
+  eip712Nonce: '1003',
+});
+
+assert.equal(localResult.result.signature, 'sig-from-local-executor');
+assert.equal(localResult.result.signingKeyBytes, '[redacted]');
 
 await assert.rejects(
-  () => gateway.requestChallengeSign({
+  () => gateway.requestSignature({
     requestId: 'req-bad-alg',
     nonce: 'nonce-bad-alg',
     expiry: Date.now() + 10_000,
@@ -77,13 +124,12 @@ await assert.rejects(
   /algorithm must be ed25519 or secp256k1/,
 );
 
-await assert.rejects(
-  () => gateway.requestStoryRead({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-  }),
-  /requestId must be a non-empty string/,
-);
+await assert.rejects(() => gateway.requestSignature({
+  identityId: 'id-1',
+  keyId: 'key-1',
+  algorithm: 'ed25519',
+  payload: 'hello',
+}), /requestId must be a non-empty string/);
 
-assert.equal(calls.length, 4);
+assert.equal(calls.length, 2);
 console.log('StoryLock remote gateway selftest passed.');

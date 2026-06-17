@@ -17,6 +17,9 @@ export class MemorySecretStore {
   constructor({ developmentMode = false } = {}) {
     this.developmentMode = developmentMode;
     this.secrets = new Map();
+    if (this.developmentMode) {
+      console.warn('StoryLock MemorySecretStore is for development only and must not be used in production.');
+    }
   }
 
   getSecret(key) {

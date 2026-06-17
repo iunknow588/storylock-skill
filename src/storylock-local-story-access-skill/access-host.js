@@ -1,12 +1,9 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { deriveHkdfSha256, hmacSha256Hex, encryptAes256Gcm, decryptAes256Gcm } from '../shared/crypto.js';
+import { deriveHkdfSha256, hmacSha256Hex } from '../shared/crypto.js';
 import { MemorySecretStore, createPlatformSecretStore } from '../shared/secret-store.js';
 import { loadSqliteSchema, migrateSqliteSchema } from '../shared/sqlite.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_DB_PATH = ':memory:';
 const DEFAULT_SECRET_STORE = new MemorySecretStore();
 
@@ -15,6 +12,7 @@ const REPLAY_WINDOW_MS = 24 * 60 * 60 * 1000;
 const FAILURE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const FAILURE_LOCK_MS = 15 * 60 * 1000;
 const MAX_FAILURES_PER_WINDOW = 3;
+const DEFAULT_CLEANUP_BATCH_SIZE = 1000;
 
 function nowMs() {
   return Date.now();
@@ -64,13 +62,6 @@ function deriveWorkKey(masterSalt, purpose) {
   });
 }
 
-function deriveObjectKey(masterSalt, storyObjectId) {
-  return deriveHkdfSha256(deriveWorkKey(masterSalt, 'object-encryption'), {
-    salt: Buffer.from(`storylock:v1:object:${storyObjectId}:salt`),
-    info: Buffer.from(`storylock:v1:object:${storyObjectId}`),
-  });
-}
-
 function deriveIdentityAnswerKey(masterSalt, identityId) {
   return deriveHkdfSha256(deriveWorkKey(masterSalt, 'identity-answer-digest'), {
     salt: Buffer.from(`storylock:v1:identity:${identityId}:salt`),
@@ -106,12 +97,7 @@ class SqliteStore {
     this.ready = true;
     this.db.exec('BEGIN IMMEDIATE;');
     try {
-      const masterSalt = this.ensureMasterSalt();
-      this.db.prepare(
-        `INSERT OR IGNORE INTO protected_story_objects
-         (story_object_id, encrypted_object_json, sensitivity, version, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
-      ).run('story-001', serializeJson(encryptAes256Gcm('Protected story content', deriveObjectKey(masterSalt, 'story-001'))), 'private_story', 1, nowMs(), nowMs());
+      this.ensureMasterSalt();
       this.db.exec('COMMIT;');
     } catch (error) {
       this.db.exec('ROLLBACK;');
@@ -134,6 +120,59 @@ class SqliteStore {
 
   close() {
     this.db.close();
+  }
+
+  cleanupExpired(now = nowMs(), { batchSize = DEFAULT_CLEANUP_BATCH_SIZE } = {}) {
+    const replayCutoff = now - REPLAY_WINDOW_MS;
+    const limit = Math.max(1, Math.min(Number(batchSize) || DEFAULT_CLEANUP_BATCH_SIZE, DEFAULT_CLEANUP_BATCH_SIZE));
+    this.db.exec('BEGIN IMMEDIATE;');
+    try {
+      const requestResult = this.db.prepare(
+        `DELETE FROM request_store
+         WHERE rowid IN (
+           SELECT rowid FROM request_store
+           WHERE created_at < ? OR expiry <= ?
+           LIMIT ?
+         )`
+      ).run(replayCutoff, now - REPLAY_DRIFT_MS, limit);
+      const nonceResult = this.db.prepare(
+        `DELETE FROM nonce_store
+         WHERE rowid IN (
+           SELECT rowid FROM nonce_store
+           WHERE created_at < ? OR expiry <= ?
+           LIMIT ?
+         )`
+      ).run(replayCutoff, now - REPLAY_DRIFT_MS, limit);
+      const sessionResult = this.db.prepare(
+        `UPDATE session_store
+         SET status = ?
+         WHERE session_id IN (
+           SELECT session_id FROM session_store
+           WHERE status = ? AND expires_at <= ?
+           LIMIT ?
+         )`
+      ).run('session_expired', 'session_active', now, limit);
+      const challengeResult = this.db.prepare(
+        `UPDATE challenge_state
+         SET status = ?
+         WHERE challenge_id IN (
+           SELECT challenge_id FROM challenge_state
+           WHERE status = ? AND expires_at <= ?
+           LIMIT ?
+         )`
+      ).run('expired', 'challenge_created', now - REPLAY_DRIFT_MS, limit);
+      const result = {
+        requestRows: requestResult.changes,
+        nonceRows: nonceResult.changes,
+        sessionRows: sessionResult.changes,
+        challengeRows: challengeResult.changes,
+      };
+      this.db.exec('COMMIT;');
+      return result;
+    } catch (error) {
+      this.db.exec('ROLLBACK;');
+      throw error;
+    }
   }
 
   recordAudit(eventType, {
@@ -179,7 +218,7 @@ class SqliteStore {
       }
       if (existingRequest || existingNonce) {
         const err = new Error('requestId or nonce was already used');
-        err.code = 'SLG-008';
+        err.code = 'SLG-013';
         err.type = 'replay_detected';
         err.retryable = false;
         this.recordAudit('replay_rejected', { requestId, result: 'error' });
@@ -222,11 +261,26 @@ class SqliteStore {
 
   getFailureWindow(identityId) {
     const row = this.db.prepare('SELECT identity_id, window_start, failure_count, locked_until FROM failure_window WHERE identity_id = ?').get(identityId);
-    if (!row || row.window_start + FAILURE_WINDOW_MS <= nowMs()) {
+    const now = nowMs();
+    if (!row || row.window_start + FAILURE_WINDOW_MS <= now) {
       this.db.prepare(
         'INSERT INTO failure_window (identity_id, window_start, failure_count, locked_until) VALUES (?, ?, 0, 0) ON CONFLICT(identity_id) DO UPDATE SET window_start = excluded.window_start, failure_count = 0, locked_until = 0'
-      ).run(identityId, nowMs());
-      return { windowStart: nowMs(), failureCount: 0, lockedUntil: 0 };
+      ).run(identityId, now);
+      this.db.prepare(
+        `UPDATE challenge_state
+         SET status = ?, failure_count = 0, lock_until = 0
+         WHERE identity_id = ? AND status = ?`
+      ).run('idle', identityId, 'locked');
+      return { windowStart: now, failureCount: 0, lockedUntil: 0 };
+    }
+    if (row.locked_until > 0 && row.locked_until <= now) {
+      this.db.prepare('UPDATE failure_window SET failure_count = 0, locked_until = 0 WHERE identity_id = ?').run(identityId);
+      this.db.prepare(
+        `UPDATE challenge_state
+         SET status = ?, failure_count = 0, lock_until = 0
+         WHERE identity_id = ? AND status = ? AND lock_until <= ?`
+      ).run('idle', identityId, 'locked', now);
+      return { windowStart: row.window_start, failureCount: 0, lockedUntil: 0 };
     }
     return { windowStart: row.window_start, failureCount: row.failure_count, lockedUntil: row.locked_until };
   }
@@ -332,7 +386,7 @@ class SqliteStore {
       `INSERT INTO session_store
        (session_id, challenge_id, identity_id, scope, resource_scope_json, session_type, read_budget, write_budget, status, issued_at, expires_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(sessionId, challenge.challengeId, identityId, scope, serializeJson(resourceScope), budgets.sessionType ?? 'one_shot', budgets.readBudget ?? 1, budgets.writeBudget ?? 1, 'session_active', nowMs(), nowMs() + ttlMs);
+    ).run(sessionId, challenge.challengeId, identityId, scope, serializeJson(resourceScope), budgets.sessionType ?? 'one_shot', budgets.readBudget ?? 0, budgets.writeBudget ?? 0, 'session_active', nowMs(), nowMs() + ttlMs);
     return {
       sessionId,
       challengeId: challenge.challengeId,
@@ -340,123 +394,14 @@ class SqliteStore {
       scope,
       resourceScope,
       sessionType: budgets.sessionType ?? 'one_shot',
-      readBudget: budgets.readBudget ?? 1,
-      writeBudget: budgets.writeBudget ?? 1,
+      readBudget: budgets.readBudget ?? 0,
+      writeBudget: budgets.writeBudget ?? 0,
       issuedAt: nowMs(),
       expiresAt: nowMs() + ttlMs,
       status: 'session_active',
     };
   }
 
-  readStoryObjectWithBudget(identityId, sessionId, storyObjectId, auditContext = {}) {
-    this.db.exec('BEGIN IMMEDIATE;');
-    try {
-      const session = this.db.prepare('SELECT * FROM session_store WHERE session_id = ?').get(sessionId);
-      if (!session || session.identity_id !== identityId || session.status !== 'session_active') {
-        const err = new Error('session is invalid');
-        err.key = 'SESSION_INVALID';
-        throw err;
-      }
-      if (session.expires_at <= nowMs()) {
-        this.db.prepare('UPDATE session_store SET status = ? WHERE session_id = ?').run('session_expired', sessionId);
-        const err = new Error('session expired');
-        err.key = 'SESSION_INVALID';
-        throw err;
-      }
-      const story = this.db.prepare('SELECT * FROM protected_story_objects WHERE story_object_id = ?').get(storyObjectId);
-      if (!story) {
-        const err = new Error('story object not found');
-        err.key = 'OBJECT_NOT_FOUND';
-        throw err;
-      }
-      if (session.read_budget <= 0) {
-        this.db.prepare('UPDATE session_store SET status = ? WHERE session_id = ?').run('session_expired', sessionId);
-        const err = new Error('read budget exhausted');
-        err.key = 'BUDGET_EXHAUSTED';
-        throw err;
-      }
-      this.db.prepare('UPDATE session_store SET read_budget = read_budget - 1 WHERE session_id = ?').run(sessionId);
-      const nextStatus = session.read_budget - 1 <= 0 ? 'session_expired' : 'session_active';
-      this.db.prepare('UPDATE session_store SET status = ? WHERE session_id = ?').run(nextStatus, sessionId);
-      const decrypted = decryptAes256Gcm(parseJson(story.encrypted_object_json, {}), deriveObjectKey(this.masterSalt, storyObjectId));
-      this.recordAudit('story_read', {
-        identityId,
-        storyObjectId,
-        result: 'success',
-        redactionLevel: auditContext.redactionLevel,
-        hasHighSensitivityFields: auditContext.hasHighSensitivityFields,
-        meta: auditContext.meta,
-      });
-      this.db.exec('COMMIT;');
-      return {
-        session: { ...session, read_budget: session.read_budget - 1, status: nextStatus },
-        storyObject: {
-          storyObjectId,
-          title: 'StoryLock Story',
-          content: decrypted.toString('utf8'),
-          version: story.version,
-          sensitivity: story.sensitivity,
-        },
-      };
-    } catch (error) {
-      this.db.exec('ROLLBACK;');
-      throw error;
-    }
-  }
-
-  writeStoryObject(identityId, sessionId, storyObjectId, content, auditContext = {}) {
-    this.db.exec('BEGIN IMMEDIATE;');
-    try {
-      const session = this.db.prepare('SELECT * FROM session_store WHERE session_id = ?').get(sessionId);
-      if (!session || session.identity_id !== identityId || session.status !== 'session_active') {
-        const err = new Error('session is invalid');
-        err.key = 'SESSION_INVALID';
-        throw err;
-      }
-      if (session.expires_at <= nowMs()) {
-        this.db.prepare('UPDATE session_store SET status = ? WHERE session_id = ?').run('session_expired', sessionId);
-        const err = new Error('session expired');
-        err.key = 'SESSION_INVALID';
-        throw err;
-      }
-      if (session.write_budget <= 0) {
-        this.db.prepare('UPDATE session_store SET status = ? WHERE session_id = ?').run('session_expired', sessionId);
-        const err = new Error('write budget exhausted');
-        err.key = 'BUDGET_EXHAUSTED';
-        throw err;
-      }
-      const key = deriveObjectKey(this.masterSalt, storyObjectId);
-      const envelope = encryptAes256Gcm(content.content ?? JSON.stringify(content), key);
-      const now = nowMs();
-      const existing = this.db.prepare('SELECT version FROM protected_story_objects WHERE story_object_id = ?').get(storyObjectId);
-      if (existing) {
-        this.db.prepare('UPDATE protected_story_objects SET encrypted_object_json = ?, sensitivity = ?, version = ?, updated_at = ? WHERE story_object_id = ?')
-          .run(serializeJson(envelope), content.sensitivity ?? 'private_story', existing.version + 1, now, storyObjectId);
-      } else {
-        this.db.prepare('INSERT INTO protected_story_objects (story_object_id, encrypted_object_json, sensitivity, version, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?)')
-          .run(storyObjectId, serializeJson(envelope), content.sensitivity ?? 'private_story', now, now);
-      }
-      this.db.prepare('UPDATE session_store SET write_budget = write_budget - 1, status = ? WHERE session_id = ?').run(session.write_budget - 1 <= 0 ? 'session_expired' : 'session_active', sessionId);
-      this.recordAudit('story_write', {
-        identityId,
-        storyObjectId,
-        result: 'success',
-        redactionLevel: auditContext.redactionLevel,
-        hasHighSensitivityFields: auditContext.hasHighSensitivityFields,
-        meta: auditContext.meta,
-      });
-      this.db.exec('COMMIT;');
-      return {
-        storyObjectId,
-        ...content,
-        version: (existing?.version ?? 0) + 1,
-        sensitivity: content.sensitivity ?? 'private_story',
-      };
-    } catch (error) {
-      this.db.exec('ROLLBACK;');
-      throw error;
-    }
-  }
 }
 
 export function createAccessHost({ dbPath = DEFAULT_DB_PATH, secretStore, usePlatformSecretStore = false } = {}) {
@@ -467,5 +412,6 @@ export function createAccessHost({ dbPath = DEFAULT_DB_PATH, secretStore, usePla
   const resolvedSecretStore = secretStore ?? (usePlatformSecretStore ? createPlatformSecretStore() : DEFAULT_SECRET_STORE);
   const store = new SqliteStore(dbPath, resolvedSecretStore, { persistent });
   store.ensureSeeded();
+  store.cleanupExpired();
   return store;
 }

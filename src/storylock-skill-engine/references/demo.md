@@ -13,7 +13,7 @@ Use this page to run and explain the package-local demo path.
 
 1. story drafting
 2. password-fill authorization packaging
-3. challenge-sign authorization packaging
+3. signature authorization packaging
 4. stable package-local invocation
 
 ## Validation Commands

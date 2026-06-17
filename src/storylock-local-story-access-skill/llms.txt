@@ -1,11 +1,12 @@
-StoryLock Local Story Access Skill
+StoryLock Local Authorization Skill
 
 Entry:
 - SKILL.md
 
 Capabilities:
-- references/story-read.md
-- references/story-write.md
+- ObjectStrengthPolicySkill
+- GridChallengeSkill
+- LocalAuthorizationSkill
 - references/infrastructure.md
 - references/boundary.md
 
@@ -20,8 +21,9 @@ Infrastructure:
 - ../shared/sqlite-schema.sql
 
 Schemas:
-- assets/schemas/story-read-input.schema.json
-- assets/schemas/story-write-input.schema.json
+- assets/schemas/object-strength-policy-input.schema.json
+- assets/schemas/grid-verification-input.schema.json
+- assets/schemas/local-authorization-input.schema.json
 - assets/schemas/access-response.schema.json
 - assets/schemas/selftest-report.schema.json
 

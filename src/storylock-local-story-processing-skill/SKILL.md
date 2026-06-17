@@ -1,6 +1,6 @@
 ---
 name: storylock-local-story-processing-skill
-description: Local-only StoryLock skill package for story drafting, refinement, and private story processing.
+description: Local-only StoryLock skill package for story drafting, refinement, question-set strength review, and private story processing.
 ---
 
 # StoryLock Local Story Processing Skill
@@ -13,6 +13,7 @@ This package defines the first layer of StoryLock: pure local story processing.
 | --- | --- | --- | --- |
 | "帮我生成故事草稿" | story draft | `references/story-draft.md` | `objective`, `audience`, `tone`, `constraints`, `source` |
 | "帮我润色故事" | story refine | `references/story-refine.md` | `storyDraft`, `goals`, `hintStyle`, `source` |
+| "评估题集强度" | strength review | `references/strength-review.md` | `questions` |
 | "解释本地故事处理边界" | processing boundary | `references/boundary.md` | none |
 
 ## Working Rules

@@ -1,8 +1,7 @@
 import {
-  ChallengeSigningAuthorizationSkill,
   LocalPasswordFillSkill,
   LOGIN_BINDING_MODE,
-  StoryDraftAssistSkill,
+  SignatureAuthorizationSkill,
 } from "../index.js";
 
 function assert(condition, message) {
@@ -44,14 +43,6 @@ const host = {
 };
 
 async function main() {
-  const draftSkill = new StoryDraftAssistSkill({
-    async generator(input) {
-      return { title: input.objective, summary: input.audience, tone: input.tone };
-    },
-  });
-  const draft = await draftSkill.run({ objective: "obj" });
-  assert(draft.title === "obj", "draft title mismatch");
-
   const fillSkill = new LocalPasswordFillSkill({ host });
   const fill = await fillSkill.run({
     identityId: "id",
@@ -62,7 +53,7 @@ async function main() {
   assert(fill.mode === "local_password_fill", "fill mode mismatch");
   assert(fill.fields.length === 2, "fill fields mismatch");
 
-  const signSkill = new ChallengeSigningAuthorizationSkill({
+  const signSkill = new SignatureAuthorizationSkill({
     host,
     async signer({ algorithm, payload }) {
       return `sig:${algorithm}:${payload.length}`;
@@ -72,13 +63,17 @@ async function main() {
     identityId: "id",
     keyId: "key",
     algorithm: "ed25519",
-    challengeCode: new Uint8Array([1, 2, 3]),
+    payload: new Uint8Array([1, 2, 3]),
     resourceId: "eth-main",
     primaryRole: "private_key",
     resourceCatalog,
   });
-  assert(sign.mode === "challenge_signing_authorization", "sign mode mismatch");
+  assert(sign.mode === "signature_authorization", "sign mode mismatch");
   assert(sign.signature === "sig:ed25519:3", "signature mismatch");
+  assert(typeof sign.signatureHash === "string" && sign.signatureHash.length === 64, "signature hash mismatch");
+  assert(sign.auditMeta.authorizationId === sign.authorization.authorization.sessionId, "signature audit authorization mismatch");
+  assert(sign.auditMeta.scope === sign.scope, "signature audit scope mismatch");
+  assert(sign.auditMeta.resource === "wallet/ethereum/main/private_key", "signature audit resource mismatch");
 
   console.log("StoryLock skill-engine selftest passed.");
 }

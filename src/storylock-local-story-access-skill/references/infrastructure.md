@@ -3,9 +3,9 @@
 ## Command Template
 
 ```js
-import { StoryReadAccessSkill } from "../index.js";
+import { GridChallengeSkill } from "../index.js";
 
-const skill = new StoryReadAccessSkill({
+const skill = new GridChallengeSkill({
   dbPath: "storylock_vault.db",
   usePlatformSecretStore: true,
 });
@@ -14,7 +14,7 @@ const skill = new StoryReadAccessSkill({
 For development-only in-memory runs:
 
 ```js
-const skill = new StoryReadAccessSkill();
+const skill = new GridChallengeSkill();
 ```
 
 ## Storage Contract
@@ -31,10 +31,7 @@ Tables:
 4. `nonce_store`
 5. `failure_window`
 6. `answer_digest_set`
-7. `protected_story_objects`
-8. `audit_log`
-
-Protected story objects are stored as AES-256-GCM envelopes. The object key is derived with HKDF-SHA256 from `masterSalt` and the object id.
+7. `audit_log`
 
 ## Secret Contract
 
@@ -69,11 +66,10 @@ macOS Keychain is intentionally not implemented in the current phase.
 
 1. Challenge answers are normalized and stored only as HMAC-SHA256 digests.
 2. Replay checks persist `requestId` and `nonce` in SQLite.
-3. Session budget consumption and object read happen in a `BEGIN IMMEDIATE` SQLite transaction.
-4. Default read/write output uses `partial` redaction.
-5. `node:sqlite` is experimental in the current Node runtime; replace the adapter if a stable SQLite binding is required.
-6. Platform SecretStore adapters fail closed when their OS integration is unavailable; they do not silently downgrade to plaintext files.
-7. Persistent SQLite databases fail closed unless backed by a persistent SecretStore.
+3. Local authorization sessions are issued only after challenge verification.
+4. `node:sqlite` is experimental in the current Node runtime; replace the adapter if a stable SQLite binding is required.
+5. Platform SecretStore adapters fail closed when their OS integration is unavailable; they do not silently downgrade to plaintext files.
+6. Persistent SQLite databases fail closed unless backed by a persistent SecretStore.
 
 ## Verification
 

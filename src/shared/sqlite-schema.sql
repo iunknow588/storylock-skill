@@ -59,15 +59,6 @@ CREATE TABLE IF NOT EXISTS answer_digest_set (
   PRIMARY KEY (identity_id, answer_digest)
 );
 
-CREATE TABLE IF NOT EXISTS protected_story_objects (
-  story_object_id TEXT PRIMARY KEY,
-  encrypted_object_json TEXT NOT NULL,
-  sensitivity TEXT NOT NULL,
-  version INTEGER NOT NULL DEFAULT 1,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS audit_log (
   audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
   event_type TEXT NOT NULL,

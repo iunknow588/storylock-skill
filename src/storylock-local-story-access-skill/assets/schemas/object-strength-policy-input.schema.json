@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ObjectStrengthPolicyInput",
+  "type": "object",
+  "required": ["identityId"],
+  "properties": {
+    "identityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objectRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credentialRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "keyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objectType": {
+      "type": "string",
+      "enum": ["generic_secret", "credential", "signature_key", "file_key", "story_object"],
+      "default": "generic_secret"
+    },
+    "requestedAction": {
+      "type": "string",
+      "enum": ["authorize", "password_fill", "signature", "local_processing"],
+      "default": "authorize"
+    },
+    "policyHints": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "anyOf": [
+    { "required": ["objectRef"] },
+    { "required": ["credentialRef"] },
+    { "required": ["keyId"] }
+  ],
+  "additionalProperties": false
+}

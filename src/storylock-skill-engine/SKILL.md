@@ -1,6 +1,6 @@
 ---
 name: storylock-skill-engine
-description: StoryLock skill package for AI agents. Use when an agent needs to draft story material, review question-set strength, produce authorized login fields, or produce a challenge-signing authorization result through the migrated StoryLock skill layer.
+description: StoryLock skill package for AI agents. Use when an agent needs to draft story material, review question-set strength, produce authorized login fields, or produce a signature authorization result through the migrated StoryLock skill layer.
 ---
 
 # StoryLock Skill Engine
@@ -22,7 +22,7 @@ This compatibility package covers four agent-facing capabilities:
 1. story draft assistance
 2. question-set strength review
 3. password-fill authorization packaging
-4. challenge-sign authorization packaging
+4. signature authorization packaging
 
 This package does not redefine StoryLock core security semantics. It documents and packages the migrated JS skill layer, plus the current Rust/WASM build path. Security-sensitive access decisions must be delegated to `storylock-local-story-access-skill`.
 
@@ -33,7 +33,7 @@ This package does not redefine StoryLock core security semantics. It documents a
 | "Help me draft a story" | story draft generation | `references/story-assist.md` | `objective`, `audience`, `tone`, `constraints` |
 | "Check whether these 24 questions are strong enough" | strength review | `references/strength-review.md` | `questions` |
 | "Fill login fields for this identity and site" | password fill | `references/password-fill.md` | `identityId`, `siteId`, `bindings`, `answers` |
-| "Sign this challenge payload" | challenge sign | `references/challenge-sign.md` | `identityId`, `keyId`, `algorithm`, `payload`, `answers` |
+| "Sign this payload" | signature authorization | `references/challenge-sign.md` | `identityId`, `keyId`, `algorithm`, `payload`, `answers` |
 | "Explain boundaries and safety limits" | skill boundary | `references/boundary.md` | none |
 | "Run the package demo or self-test" | demo and verification | `references/demo.md` | none |
 | "Check current Rust/WASM packaging status" | wasm packaging status | `references/rust-wasm.md` | none |
@@ -52,8 +52,8 @@ Before any authorization-oriented write or signing flow, verify all of the follo
 Use these directories as part of the runtime contract:
 
 1. `references/` contains machine-readable operator guidance for each capability.
-2. `assets/schemas/` contains stable input and output schemas for story drafting, password fill, challenge sign, and strength review.
-3. `assets/templates/` contains reusable request templates for story drafting, password fill, and challenge sign.
+2. `assets/schemas/` contains stable input and output schemas for story drafting, password fill, and strength review.
+3. `assets/templates/` contains reusable request templates for story drafting and password fill.
 4. `agents/openai.yaml` contains agent integration metadata.
 5. `llms.txt` provides a compact package index for LLM-oriented discovery.
 

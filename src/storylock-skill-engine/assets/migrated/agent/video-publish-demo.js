@@ -1,7 +1,7 @@
 import { ValidationError } from "../runtime/errors.js";
 import {
-  ChallengeSigningAuthorizationSkill,
   LocalPasswordFillSkill,
+  SignatureAuthorizationSkill,
 } from "../skills/authorization-skills.js";
 
 function ensureNonEmptyString(value, fieldName) {
@@ -16,7 +16,7 @@ export class VideoPublishAgentDemo {
     this.loginSkill = loginSkill ?? new LocalPasswordFillSkill({ host });
     this.signingSkill =
       signingSkill ??
-      new ChallengeSigningAuthorizationSkill({
+      new SignatureAuthorizationSkill({
         host,
         signer:
           signer ??
@@ -104,7 +104,7 @@ export class VideoPublishAgentDemo {
           fieldNames: loginResult.fields.map((field) => field.fieldName),
         },
         {
-          action: "submit_local_challenge_signature",
+          action: "submit_local_signature_authorization",
           keyId: signingResult.keyId,
           algorithm: signingResult.algorithm,
           signatureKind: signingResult.signature?.kind ?? "opaque_signature",

@@ -1,7 +1,7 @@
 import {
-  ChallengeSigningAuthorizationSkill,
   LocalPasswordFillSkill,
   LOGIN_BINDING_MODE,
+  SignatureAuthorizationSkill,
   StoryDraftAssistSkill,
 } from "../../../index.js";
 
@@ -53,7 +53,7 @@ async function main() {
   });
 
   const passwordFillSkill = new LocalPasswordFillSkill({ host });
-  const challengeSigningSkill = new ChallengeSigningAuthorizationSkill({
+  const signatureSkill = new SignatureAuthorizationSkill({
     host,
     async signer({ algorithm, payload, secretReference, attachments }) {
       return {
@@ -80,11 +80,11 @@ async function main() {
     answers: [],
   });
 
-  const challengeSigning = await challengeSigningSkill.run({
+  const signatureAuthorization = await signatureSkill.run({
     identityId: "founder_signing",
     keyId: "wallet-key",
     algorithm: "ed25519",
-    challengeCode: new Uint8Array([4, 5, 6]),
+    payload: new Uint8Array([4, 5, 6]),
     resourceId: "eth-main",
     primaryRole: "private_key",
     resourceCatalog,
@@ -103,9 +103,9 @@ async function main() {
       {
         draft,
         passwordFill,
-        challengeSigning: {
-          ...challengeSigning,
-          payload: Array.from(challengeSigning.payload),
+        signatureAuthorization: {
+          ...signatureAuthorization,
+          payload: Array.from(signatureAuthorization.payload),
         },
       },
       null,

@@ -16,5 +16,5 @@ defaults:
 guidelines:
   - Read SKILL.md before selecting a capability.
   - Use the capability index to route the request to the correct reference file.
-  - Run write-operation pre-checks before password-fill or challenge-sign actions.
+  - Run write-operation pre-checks before password-fill or signature authorization actions.
   - Preserve structured outputs instead of flattening them into prose.

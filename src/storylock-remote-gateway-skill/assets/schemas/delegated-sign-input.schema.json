@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "DelegatedChallengeSignInput",
+  "title": "DelegatedSignatureInput",
   "type": "object",
   "required": ["identityId", "keyId", "algorithm", "payload", "requestId", "nonce", "expiry"],
   "properties": {
@@ -17,6 +17,14 @@
       "enum": ["ed25519", "secp256k1"]
     },
     "payload": {},
+    "action": {
+      "type": "string",
+      "default": "request_signature"
+    },
+    "scope": {
+      "type": "string",
+      "default": "signature_basic"
+    },
     "resourceId": {
       "type": ["string", "null"]
     },

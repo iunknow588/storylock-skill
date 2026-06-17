@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LocalAuthorizationInput",
+  "type": "object",
+  "required": ["identityId", "verificationId", "answers"],
+  "properties": {
+    "identityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verificationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objectRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credentialRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "keyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowedAction": {
+      "type": "string",
+      "enum": ["authorize", "password_fill", "signature", "local_processing"],
+      "default": "authorize"
+    },
+    "answers": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "required": ["answer"],
+            "properties": {
+              "cellId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "answer": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ttlMs": {
+      "type": "number",
+      "minimum": 1
+    }
+  },
+  "anyOf": [
+    { "required": ["objectRef"] },
+    { "required": ["credentialRef"] },
+    { "required": ["keyId"] }
+  ],
+  "additionalProperties": false
+}

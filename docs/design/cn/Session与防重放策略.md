@@ -1,347 +1,106 @@
 # StoryLock Session 与防重放策略
 
-| 项目 | 内容 |
-| --- | --- |
-| 文档版本 | v1.0 |
-| 日期 | 2026-06-16 |
-| 状态 | 当前阶段采用 |
-| 适用层级 | 第二层与第三层交界 |
+## 当前实现基线
 
-## 目的
+本文档以当前 `storylock-local-story-access-skill/access-host.js` 为准。
 
-本文档用于明确：
+当前第二层使用 SQLite 保存：
 
-1. 第二层签发的 session 应如何绑定
-2. 第三层请求如何避免被重放
-3. `nonce`、`expiry`、`requestId` 分别解决什么问题
-
-## 核心结论
-
-当前阶段采用最小可实现方案：
-
-1. session 只由第二层本地访问 Skill 签发
-2. session 必须绑定 challenge、scope、对象范围和过期时间
-3. 所有远程委托请求必须带 `requestId + nonce + expiry`
-4. 已使用的 `nonce` 和已完成的 `requestId` 必须本地记录，防止重复执行
-5. `expiry` 校验默认允许小范围时钟漂移容差
-
-## Session 设计目标
-
-Session 不是“方便复用的登录态”，而是：
-
-1. 本次 challenge 成功后的受限访问凭证
-2. 某个对象范围内的短时授权结果
-3. 可被主动撤销、自动过期、预算耗尽后失效的运行令牌
-
-## Session 绑定字段
-
-建议最小 session 元数据如下：
-
-```json
-{
-  "sessionId": "ses-001",
-  "challengeId": "chl-001",
-  "identityId": "identity-001",
-  "scope": "story_read_basic",
-  "resourceScope": ["story-001"],
-  "maxReads": 1,
-  "issuedAt": 1760000200,
-  "expiresAt": 1760000500,
-  "status": "active"
-}
-```
-
-## 必须绑定的约束
-
-每个 session 至少应绑定：
-
-1. `challengeId`
-2. `identityId`
-3. `scope`
-4. `resourceScope`
-5. `expiresAt`
-6. `readBudget` 或 `writeBudget`
-
-不允许签发“无限资源范围、无限时长、无限预算”的 session。
-
-## Session 类型建议
-
-| 类型 | 适用场景 | 默认预算 | 默认 TTL |
-| --- | --- | --- | --- |
-| `one_shot` | 单次读取或单次写回 | 1 次 | 1-5 分钟 |
-| `short_session` | 短时连续读取 | 3-10 次 | 5-15 分钟 |
-| `batch_session` | 批量处理 | 按策略设定 | 15-30 分钟 |
-| `privileged_session` | 高敏签名或高信任写入 | 1 次 | 1-3 分钟 |
-
-## 防重放目标
-
-需要分别防止三类重放：
-
-1. **请求重放**
-   - 相同远程请求被重复提交
-2. **签名重放**
-   - 旧的 EIP-712 请求被重复要求本地签名
-3. **会话重放**
-   - 已过期或已耗尽预算的 session 被再次使用
-
-## 字段职责划分
-
-| 字段 | 作用 | 防护对象 |
-| --- | --- | --- |
-| `requestId` | 标识一次业务请求 | 防止同一业务请求重复执行 |
-| `nonce` | 标识一次签名 / 授权序列 | 防止签名消息重放 |
-| `expiry` | 约束请求有效时间窗 | 防止旧请求长期可用 |
-| `sessionId` | 标识一次访问会话 | 防止过期会话复用 |
-
-## Nonce 策略
-
-当前阶段建议采用本地单调序列或高强度随机数二选一：
-
-### 方案 A：单调递增 nonce
-
-适合：
-
-1. 单设备
-2. 单身份
-3. 本地状态稳定可持久化
-
-要求：
-
-1. 按 `identityId + capability + resource` 维护最近 nonce
-2. 新请求 nonce 必须严格大于已接收值
-
-### 方案 B：随机 nonce
-
-适合：
-
-1. 多端并发
-2. 需要降低时序耦合
-
-要求：
-
-1. 使用加密安全随机数
-2. 在 TTL 窗口内记录已使用 nonce 集
-3. 窗口结束后可清理
-
-当前阶段推荐优先实现 **方案 B**，实现更简单，也更适合网关包装场景。
-
-## RequestId 幂等策略
-
-第二层和第三层都应支持幂等处理。
-
-规则：
-
-1. 相同 `requestId` 的请求若已成功执行，返回同一结果摘要或明确的重复请求错误
-2. 相同 `requestId` 且负载不同，直接拒绝
-3. 已失败的 `requestId` 是否允许重试，应由本地策略决定
-
-建议错误码：
-
-1. `SLG-009 DUPLICATE_REQUEST`
-2. `SLG-010 NONCE_REPLAY_DETECTED`
-3. `SLG-011 REQUEST_EXPIRED`
-4. `SLG-012 SESSION_REVOKED_OR_EXPIRED`
-
-## Session 校验顺序
-
-每次使用 session 前建议按固定顺序校验：
-
-1. session 是否存在
-2. session 状态是否为 `active`
-3. 当前时间是否早于 `expiresAt`
-4. 请求 scope 是否包含在 session scope 内
-5. 目标对象是否包含在 `resourceScope` 内
-6. 读写预算是否仍充足
-
-任一步失败都应拒绝执行。
-
-## 预算扣减原子性
-
-当前阶段要求：
-
-1. `readBudget` / `writeBudget` 的扣减必须与对象读取或写回放在同一事务内
-2. 不允许先读对象、后异步扣减预算
-3. 当预算为 `0` 时必须直接拒绝
-
-SQLite 示例：
-
-```sql
-BEGIN IMMEDIATE;
-
-UPDATE session_store
-SET read_budget = read_budget - 1
-WHERE session_id = :sessionId
-  AND status = 'active'
-  AND read_budget > 0
-  AND expires_at > :now;
-
-SELECT changes() AS affected_rows;
-
--- 若 affected_rows = 0，则回滚并拒绝
-
-SELECT encrypted_object
-FROM protected_story_objects
-WHERE story_object_id = :storyObjectId;
-
-COMMIT;
-```
-
-要求：
-
-1. 预算扣减与对象读取在同一事务中完成
-2. 若任一步失败，必须整体回滚
-3. 不允许出现 `SELECT budget -> 应用层判断 -> UPDATE budget` 的拆分竞态
-
-若 SQLite 版本支持 `RETURNING`，也可采用：
-
-```sql
-UPDATE session_store
-SET read_budget = read_budget - 1
-WHERE session_id = :sessionId
-  AND status = 'active'
-  AND read_budget > 0
-  AND expires_at > :now
-RETURNING read_budget;
-```
-
-## 绑定远程请求的最小校验链
-
-对第三层转入的请求，第二层建议按以下顺序校验：
-
-1. `requestId` 是否已处理
-2. `expiry` 是否过期
-3. `nonce` 是否重放
-4. `capability` 是否在白名单内
-5. `scope` 是否与本地策略兼容
-6. 若需要 challenge，则检查 challenge / session 是否满足
-
-## 存储建议
-
-当前阶段可采用本地轻量存储：
-
-1. `session_store`
-2. `nonce_store`
+1. `challenge_state`
+2. `session_store`
 3. `request_store`
+4. `nonce_store`
+5. `failure_window`
+6. `answer_digest_set`
+7. `audit_log`
 
-当前阶段建议明确采用：
+第二层不再保存 `protected_story_objects`，也不再提供故事对象读写方法。
 
-1. SQLite 单文件数据库
-2. 数据库名可统一为 `storylock_vault.db`
-3. 所有会话、nonce、requestId 去重信息默认写入该数据库
+## Session 目标
 
-推荐原因：
+Session 是九宫格验证通过后的短时授权结果，不是长期登录态。
 
-1. 单文件、零配置、跨平台
-2. 事务能力足够支撑当前阶段并发控制
-3. 后续可平滑迁移到嵌入式 KV 或更强存储
+每个 session 绑定：
 
-建议字段：
+1. `sessionId`
+2. `challengeId`
+3. `identityId`
+4. `scope`
+5. `resourceScope`
+6. `sessionType`
+7. `readBudget`
+8. `writeBudget`
+9. `issuedAt`
+10. `expiresAt`
+11. `status`
 
-```json
-{
-  "requestId": "req-001",
-  "nonce": "n-001",
-  "capability": "requestChallengeSign",
-  "status": "completed",
-  "createdAt": 1760000000,
-  "expiresAt": 1760000300
-}
-```
+默认预算为 `0/0`。只有明确动作需要读取本地材料时才授予预算，例如 `signature` 与 `password_fill` 当前为 `readBudget=1, writeBudget=0`。
 
-## Nonce 存储格式建议
+## 防重放字段
 
-为了同时兼容 EIP-712 与本地实现，建议：
+| 字段 | 作用 |
+| --- | --- |
+| `requestId` | 标识一次业务请求，支持幂等返回 |
+| `nonce` | 标识一次授权或签名序列，防止重放 |
+| `expiry` | 限制请求有效时间 |
+| `sessionId` | 标识一次本地授权结果 |
 
-1. 协议层 `nonce` 保持 `uint256` 语义
-2. 本地存储层允许保存为十六进制字符串
-3. 写入前统一归一化，避免同一 nonce 出现多种文本表示
+当前实现：
 
-## Nonce 清理策略
+1. 相同 `requestId` 且请求哈希一致，返回已保存响应。
+2. 相同 `requestId` 但请求不同，拒绝。
+3. 已使用 `nonce` 再次出现，拒绝。
+4. 过期请求返回 `SLG-011`。
+5. replay 冲突返回 `SLG-013`。
 
-若采用随机 nonce 方案，建议使用：
+## Challenge 状态
 
-1. 滑动时间窗口
-2. 窗口大小默认设为 `2 x maxTTL`
-3. 后台定期清理已过窗口的 nonce 记录
+当前代码实际使用的 challenge 状态包括：
 
-建议再增加上限：
+1. `challenge_created`
+2. `answers_submitted`
+3. `verified`
+4. `failed`
+5. `locked`
+6. `expired`
+7. `idle`（用于锁定解除后的状态回收）
 
-1. 窗口大小不应无限随 `maxTTL` 扩大
-2. 默认最大窗口建议不超过 `24 小时`
-3. 超过上限时应截断为上限值
+完整 8 状态模型可作为后续增强，但当前实现以可运行的 SQLite 事务状态为准。
 
-进一步建议:
+## 失败锁定
 
-1. Host 策略应给 `maxTTL` 设置硬上限,默认不超过 `2 小时`
-2. 每次写入新 nonce 时,可异步触发一次批量清理
-3. 单次清理批次建议不超过 `1000` 条
-4. `nonce_store.createdAt` 或 `expiresAt` 必须建索引
+当前策略：
 
-这样可以在不引入复杂分布式协调的前提下，控制本地存储增长。
+1. 24 小时失败窗口。
+2. 连续 3 次失败进入锁定。
+3. 锁定时间 15 分钟。
+4. 锁定到期后自动恢复。
 
-## RequestId 清理策略
+## 清理策略
 
-当前阶段建议：
+`cleanupExpired(now, { batchSize })` 会清理或标记：
 
-1. 仅保留有效时间窗内和最近一段历史窗口内的 `requestId`
-2. 已完成记录可按时间分批清理
-3. 可在 SQLite 中按 `createdAt` 或 `expiresAt` 建索引，定期删除过期记录
+1. 过期 `request_store`
+2. 过期 `nonce_store`
+3. 过期 active session
+4. 过期 challenge
 
-这样可以避免：
+默认单次批次上限为 1000，避免长时间阻塞主线程。
 
-1. 本地数据库无限增长
-2. 长期运行后幂等表变成性能瓶颈
+当前会在 `createAccessHost()` 初始化时触发一次清理。长期运行宿主后续应增加定时调用或 CLI 清理命令。
 
-## 时钟漂移容差
+## 错误码
 
-当前阶段建议：
+| 错误码 | 类型 | 场景 |
+| --- | --- | --- |
+| `SLG-011` | `request_expired` | 请求过期 |
+| `SLG-013` | `replay_detected` | requestId 或 nonce 冲突 |
+| `SLG-003` | `challenge_failed` | 答案不匹配 |
+| `SLG-004` | `challenge_locked` | 失败过多后锁定 |
+| `SLG-005` | `session_invalid` | session 不存在、过期或状态无效 |
 
-1. `expiry` 校验默认允许 `+/- 30 秒` 容差
-2. 容差只用于处理设备时钟轻微漂移
-3. 不得把容差扩大成长期有效窗口
+## 后续完善
 
-## 版本兼容窗口与 Session 关系
-
-在单故事终身制下，题集版本与对象封装层允许平滑迁移，因此 Session 也需要配合处理：
-
-1. 常规题集优化时，不强制撤销全部有效 session
-2. 若 session 绑定的是已进入 deprecated 但仍在兼容窗口内的题集版本，可继续用到 TTL 结束
-3. 根级重建时，旧 session 必须立即撤销
-4. 旧题集摘要、旧对象密文、旧 session 的兼容窗口应分别记录，不得混成一个统一超时值
-
-## 与 EIP-712 的关系
-
-在第三层签名请求中：
-
-1. `nonce` 放入 `value.nonce`
-2. `expiry` 放入 `value.expiry`
-3. `delegationContext` 记录请求来源链路
-
-但要注意：
-
-1. EIP-712 只负责请求结构表达
-2. 防重放的判定逻辑仍由本地网关执行
-
-## 当前阶段最小实现建议
-
-建议先实现：
-
-1. `requestId` 幂等
-2. `nonce` 去重
-3. `expiry` 校验
-4. `session TTL` 校验
-5. `readBudget` / `writeBudget` 校验
-
-暂不要求先实现：
-
-1. 多设备同步 nonce
-2. 分布式 session 一致性
-3. 跨主机全局幂等
-
-## 结论
-
-StoryLock 当前阶段的 session 不应被设计成宽松复用凭证，而应被设计成：
-
-1. 绑定 challenge 的短时令牌
-2. 绑定范围和预算的最小授权结果
-3. 结合 `requestId + nonce + expiry` 的防重放执行单元
+1. 补充定时清理机制。
+2. 明确多设备 nonce 策略。
+3. 如后续恢复对象读写，需要在独立持久化层实现预算扣减与对象访问的原子事务。

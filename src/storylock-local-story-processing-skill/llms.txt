@@ -6,4 +6,5 @@ Entry:
 Capabilities:
 - references/story-draft.md
 - references/story-refine.md
+- references/strength-review.md
 - references/boundary.md

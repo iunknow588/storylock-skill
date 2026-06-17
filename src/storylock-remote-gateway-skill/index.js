@@ -1,4 +1,4 @@
-﻿function ensureFunction(value, fieldName) {
+function ensureFunction(value, fieldName) {
   if (typeof value !== 'function') {
     throw new Error(`${fieldName} must be a function`);
   }
@@ -40,96 +40,97 @@ function ensureAllowedAlgorithm(value) {
   return algorithm;
 }
 
+function ensureNonceUint256(value) {
+  const nonceText = ensureString(String(value), 'nonce');
+  if (!/^\d+$/.test(nonceText)) {
+    throw new Error('nonce must be a uint256-compatible decimal string');
+  }
+  return nonceText;
+}
+
 function buildEip712Request(payload) {
+  const eip712Nonce = payload.eip712Nonce ?? payload.signingNonce ?? '0';
   return {
     domain: {
       name: 'StoryLock',
       version: '1-placeholder',
-      chainId: payload.chainId ?? 0,
+      chainId: payload.chainId ?? 1,
       verifyingContract: payload.verifyingContract ?? '0x0000000000000000000000000000000000000000',
     },
     types: {
-      ChallengeSignRequest: [
-        { name: 'identityId', type: 'string' },
-        { name: 'keyId', type: 'string' },
-        { name: 'algorithm', type: 'string' },
-        { name: 'payload', type: 'bytes' },
-        { name: 'resourceId', type: 'string' },
-        { name: 'primaryRole', type: 'string' },
+      StoryLockSignatureRequest: [
+        { name: 'action', type: 'string' },
+        { name: 'resource', type: 'string' },
+        { name: 'scope', type: 'string' },
+        { name: 'expiry', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'requestedBy', type: 'string' },
+        { name: 'delegationContext', type: 'string' },
       ],
     },
     value: {
-      identityId: ensureString(payload.identityId, 'identityId'),
-      keyId: ensureString(payload.keyId, 'keyId'),
-      algorithm: ensureAllowedAlgorithm(payload.algorithm),
-      payload: typeof payload.payload === 'string' ? `0x${Buffer.from(payload.payload, 'utf8').toString('hex')}` : payload.payload,
-      resourceId: payload.resourceId ?? '',
-      primaryRole: payload.primaryRole ?? '',
+      action: payload.action ?? 'request_signature',
+      resource: payload.resource ?? payload.resourceId ?? ensureString(payload.keyId, 'keyId'),
+      scope: payload.scope ?? 'signature_basic',
+      expiry: String(ensureExpiry(payload.expiry)),
+      nonce: ensureNonceUint256(eip712Nonce),
+      requestedBy: payload.requestedBy ?? 'remote-agent',
+      delegationContext: payload.delegationContext ?? `identity:${ensureString(payload.identityId, 'identityId')}/key:${ensureString(payload.keyId, 'keyId')}`,
     },
   };
 }
 
+function redactRemoteValue(value) {
+  if (Array.isArray(value)) {
+    return value.map(redactRemoteValue);
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const redacted = {};
+  for (const [key, nested] of Object.entries(value)) {
+    if (/^(answers|signingKey|signingKeyBytes|secretBytes|secretValue|password|privateKey|mnemonic|seed|rawSecret|keyMaterial)$/i.test(key)) {
+      redacted[key] = '[redacted]';
+      continue;
+    }
+    redacted[key] = redactRemoteValue(nested);
+  }
+  return redacted;
+}
+
 export class StoryLockRemoteGateway {
-  constructor({ transport }) {
+  constructor({ transport, signatureExecutor = null, passwordFillExecutor = null }) {
     this.transport = ensureFunction(transport, 'transport');
+    this.signatureExecutor = signatureExecutor
+      ? ensureFunction(signatureExecutor, 'signatureExecutor')
+      : null;
+    this.passwordFillExecutor = passwordFillExecutor
+      ? ensureFunction(passwordFillExecutor, 'passwordFillExecutor')
+      : null;
   }
 
   async invoke(request) {
-    return Promise.resolve(this.transport(request));
+    const response = await Promise.resolve(this.transport(request));
+    return redactRemoteValue(response);
   }
 
-  async requestStoryRead(payload) {
-    const envelope = normalizeEnvelope(payload, {
-      requestedRetention: 'result_only',
-      policyHints: { redactionPreferred: true },
-    });
-    return this.invoke({
-      requestId: envelope.requestId,
-      capability: 'requestStoryRead',
-      scope: 'story_read_basic',
-      payload: {
-        identityId: ensureString(payload.identityId, 'identityId'),
-        storyObjectId: ensureString(payload.storyObjectId, 'storyObjectId'),
-        answers: Array.isArray(payload.answers) ? payload.answers : [],
-      },
-      policyHints: envelope.policyHints,
-      requestedRetention: envelope.requestedRetention,
-      nonce: envelope.nonce,
-      expiry: ensureExpiry(envelope.expiry),
-    });
+  async executeLocal(request, executor) {
+    if (!executor) {
+      return this.invoke(request);
+    }
+    const response = await Promise.resolve(executor(request));
+    return redactRemoteValue(response);
   }
 
-  async requestStoryWrite(payload) {
+  async requestSignature(payload) {
     const envelope = normalizeEnvelope(payload, {
       requestedRetention: 'result_only',
-      policyHints: { writeReason: 'remote_write_request' },
+      policyHints: { minAccessLevel: 'high' },
     });
-    return this.invoke({
+    return this.executeLocal({
       requestId: envelope.requestId,
-      capability: 'requestStoryWrite',
-      scope: 'story_write_basic',
-      payload: {
-        identityId: ensureString(payload.identityId, 'identityId'),
-        storyObjectId: ensureString(payload.storyObjectId, 'storyObjectId'),
-        content: payload.content,
-        answers: Array.isArray(payload.answers) ? payload.answers : [],
-      },
-      policyHints: envelope.policyHints,
-      requestedRetention: envelope.requestedRetention,
-      nonce: envelope.nonce,
-      expiry: ensureExpiry(envelope.expiry),
-    });
-  }
-
-  async requestChallengeSign(payload) {
-    const envelope = normalizeEnvelope(payload, {
-      requestedRetention: 'result_only',
-      policyHints: { minAccessLevel: 'L4' },
-    });
-    return this.invoke({
-      requestId: envelope.requestId,
-      capability: 'requestChallengeSign',
-      scope: 'challenge_sign',
+      capability: 'requestSignature',
+      scope: 'signature_basic',
       payload: {
         identityId: ensureString(payload.identityId, 'identityId'),
         keyId: ensureString(payload.keyId, 'keyId'),
@@ -143,27 +144,7 @@ export class StoryLockRemoteGateway {
       requestedRetention: envelope.requestedRetention,
       nonce: envelope.nonce,
       expiry: ensureExpiry(envelope.expiry),
-    });
-  }
-
-  async requestCapabilityStatus(payload) {
-    const envelope = normalizeEnvelope(payload, {
-      requestedRetention: 'result_only',
-      policyHints: { statusOnly: true },
-    });
-    return this.invoke({
-      requestId: envelope.requestId,
-      capability: 'requestCapabilityStatus',
-      scope: 'capability_status_basic',
-      payload: {
-        identityId: ensureString(payload.identityId, 'identityId'),
-        capability: ensureString(payload.capability, 'capability'),
-      },
-      policyHints: envelope.policyHints,
-      requestedRetention: envelope.requestedRetention,
-      nonce: envelope.nonce,
-      expiry: ensureExpiry(envelope.expiry),
-    });
+    }, this.signatureExecutor);
   }
 
   async requestPasswordFill(payload) {
@@ -171,7 +152,7 @@ export class StoryLockRemoteGateway {
       requestedRetention: 'audit_meta_only',
       policyHints: { minAccessLevel: 'L4', noRemoteSecretReturn: true },
     });
-    return this.invoke({
+    return this.executeLocal({
       requestId: envelope.requestId,
       capability: 'requestPasswordFill',
       scope: 'password_fill_basic',
@@ -185,64 +166,22 @@ export class StoryLockRemoteGateway {
       requestedRetention: envelope.requestedRetention,
       nonce: envelope.nonce,
       expiry: ensureExpiry(envelope.expiry),
-    });
+    }, this.passwordFillExecutor);
   }
 
-  async requestLocalStoryAssist(payload) {
-    const envelope = normalizeEnvelope(payload, {
-      requestedRetention: 'result_only',
-      policyHints: { localProcessingOnly: true },
-    });
-    return this.invoke({
-      requestId: envelope.requestId,
-      capability: 'requestLocalStoryAssist',
-      scope: 'story_assist_basic',
-      payload: {
-        identityId: ensureString(payload.identityId, 'identityId'),
-        storyObjectId: payload.storyObjectId ? ensureString(payload.storyObjectId, 'storyObjectId') : null,
-        assistType: ensureString(payload.assistType, 'assistType'),
-        prompt: ensureString(payload.prompt, 'prompt'),
-        context: payload.context ?? {},
-      },
-      policyHints: envelope.policyHints,
-      requestedRetention: envelope.requestedRetention,
-      nonce: envelope.nonce,
-      expiry: ensureExpiry(envelope.expiry),
-    });
-  }
-
-  async queryStoryMetadata(payload) {
-    const envelope = normalizeEnvelope(payload, {
-      requestedRetention: 'result_only',
-      policyHints: { metadataOnly: true },
-    });
-    return this.invoke({
-      requestId: envelope.requestId,
-      capability: 'queryStoryMetadata',
-      scope: 'story_metadata_basic',
-      payload: {
-        identityId: ensureString(payload.identityId, 'identityId'),
-        storyObjectId: ensureString(payload.storyObjectId, 'storyObjectId'),
-      },
-      policyHints: envelope.policyHints,
-      requestedRetention: envelope.requestedRetention,
-      nonce: envelope.nonce,
-      expiry: ensureExpiry(envelope.expiry),
-    });
-  }
 }
 
-export class DelegatedChallengeSignSkill {
+export class DelegatedSignatureSkill {
   constructor({ gateway }) {
     this.gateway = gateway;
   }
 
   skillId() {
-    return 'delegated_challenge_sign';
+    return 'delegated_signature';
   }
 
   async run({ identityId, keyId, algorithm, payload, resourceId = null, primaryRole = null, requestId, nonce, expiry }) {
-    return this.gateway.requestChallengeSign({
+    return this.gateway.requestSignature({
       identityId: ensureString(identityId, 'identityId'),
       keyId: ensureString(keyId, 'keyId'),
       algorithm: ensureAllowedAlgorithm(algorithm),

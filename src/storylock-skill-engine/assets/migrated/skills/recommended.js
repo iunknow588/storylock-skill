@@ -1,4 +1,4 @@
 export {
   LocalPasswordFillSkill,
-  ChallengeSigningAuthorizationSkill,
+  SignatureAuthorizationSkill,
 } from "./authorization-skills.js";

@@ -1,740 +1,512 @@
-# StoryLock 测试方案
+# StoryLock 测试方案 v1.0
 
-**版本**: v1.0  
-**日期**: 2026-06-16  
-**适用范围**: `E:\2026OPC大赛\skill\src` 全部 Skill 包  
-**输出目录**: `E:\2026OPC大赛\skill\docs\test`
-
----
+版本：v1.0  
+日期：2026-06-17  
+适用范围：`E:\2026OPC大赛\skill\src` 当前代码基线  
+测试方案位置：`E:\2026OPC大赛\skill\docs\test\StoryLock测试方案_v1.0.md`
 
 ## 一、测试目标
 
-1. 验证三层 Skill 包（第一包/第二包/第三包）功能正确性
-2. 验证接口契约与文档定义的一致性
-3. 验证安全机制（challenge/session/防重放/脱敏）有效性
-4. 验证新旧能力体系（`storylock-skill-engine` 迁移代码）兼容性
-5. 建立可复用的自动化测试基线，支撑持续迭代
+本测试方案用于验证 StoryLock 当前三层 Skill 架构是否按设计工作：
 
----
+1. 第一层能完成故事草稿、故事润色和题集强度评估。
+2. 第二层能完成对象强度判断、九宫格验证、短时本地授权、防重放、失败锁定和 SQLite 审计。
+3. 第三层能完成远程签名请求、Web2 密码填充请求、EIP-712 结构包装、本地执行器委托和递归脱敏。
+4. 兼容演示包能保持基础可运行，不作为新的主线安全层。
+5. 文档、Schema、错误码和当前代码保持一致。
+
+本方案不再测试旧接口 `requestStoryRead`、`requestStoryWrite`、`requestChallengeSign`、`StoryReadAccessSkill`、`StoryWriteAccessSkill`。这些接口不属于当前主线。
 
 ## 二、测试范围
 
-| 测试对象 | 路径 | 优先级 |
-|---------|------|--------|
-| 第二包 — 本地故事访问 | `src/storylock-local-story-access-skill/` | P0 |
-| 第一包 — 本地故事处理 | `src/storylock-local-story-processing-skill/` | P0 |
-| 第三包 — 远程网关 | `src/storylock-remote-gateway-skill/` | P0 |
-| 旧迁移包 — Skill Engine | `src/storylock-skill-engine/` | P1 |
-| 跨包集成链路 | 第一包↔第二包↔第三包 | P0 |
-| Schema 校验 | `assets/schemas/*.json` | P1 |
+| 测试对象 | 路径 | 优先级 | 说明 |
+| --- | --- | --- | --- |
+| 第一层故事处理包 | `src/storylock-local-story-processing-skill` | P0 | 草稿、润色、强度评估 |
+| 第二层本地访问授权包 | `src/storylock-local-story-access-skill` | P0 | 对象强度、九宫格、本地授权、SQLite 状态 |
+| 第三层远程网关包 | `src/storylock-remote-gateway-skill` | P0 | `requestSignature`、`requestPasswordFill`、脱敏 |
+| 兼容演示包 | `src/storylock-skill-engine` | P1 | 本地密码填充和签名授权示例 |
+| 跨包集成链路 | 第三层 -> 第二层 -> 本地执行器 | P0 | 端到端授权执行 |
+| Schema 与文档契约 | `assets/schemas`、`docs/design/cn` | P1 | 字段、错误码、能力名一致 |
 
----
+## 三、测试环境
 
-## 三、测试策略分层
+| 项目 | 要求 |
+| --- | --- |
+| 操作系统 | Windows 10/11，兼容 Linux/macOS |
+| Node.js | 22.0.0 或以上 |
+| npm | 随 Node.js 22 安装版本即可 |
+| SQLite | 使用 Node.js `node:sqlite` |
+| 测试数据库 | 默认使用临时 SQLite 文件或 `:memory:` |
+| SecretStore | 单元和自测使用 `MemorySecretStore`，持久化测试必须显式注入 secretStore |
 
-### 3.1 单元测试（Unit Test）
+环境检查命令：
 
-**目标**: 单个 Skill/函数/模块的独立验证  
-**工具**: Node.js Test Runner (`node --test`) 或 Vitest  
-**位置**: 各包 `tests/` 目录
-
-### 3.2 集成测试（Integration Test）
-
-**目标**: 跨模块/跨包调用链路的端到端验证  
-**工具**: Node.js Test Runner + 内存/临时 SQLite 存储  
-**位置**: 根目录 `tests/integration/`
-
-### 3.3 安全专项测试（Security Test）
-
-**目标**: 验证安全机制不被绕过  
-**工具**: 自定义攻击用例 + 模糊测试  
-**位置**: 根目录 `tests/security/`
-
-### 3.4 契约一致性测试（Contract Test）
-
-**目标**: 验证代码实现与 JSON Schema、设计文档的字段/类型/约束一致  
-**工具**: Ajv（JSON Schema 校验）+ 自定义字段映射检查  
-**位置**: 根目录 `tests/contract/`
-
----
-
-## 四、测试环境
-
-### 4.1 最小环境
-
-```
-Node.js >= 18 LTS
-npm >= 9
-SQLite3（若测试持久化层）
+```powershell
+node -v
+npm -v
 ```
 
-### 4.2 测试数据隔离
+当前最小验证命令：
 
-| 环境类型 | 存储方式 | 用途 |
-|---------|---------|------|
-| 单元测试 | 内存 Mock Host | 快速、无状态、并行 |
-| 集成测试 | 临时 SQLite 文件（`test-vault-{uuid}.db`） | 验证持久化与事务 |
-| 安全测试 | 内存 + 临时 SQLite | 验证攻击场景 |
+```powershell
+Push-Location E:\2026OPC大赛\skill\src\storylock-local-story-processing-skill; npm run selftest; Pop-Location
+Push-Location E:\2026OPC大赛\skill\src\storylock-local-story-access-skill; npm run selftest; Pop-Location
+Push-Location E:\2026OPC大赛\skill\src\storylock-remote-gateway-skill; npm run selftest; Pop-Location
+Push-Location E:\2026OPC大赛\skill\src\storylock-skill-engine; npm run selftest; Pop-Location
+```
 
-### 4.3 测试数据工厂
+## 四、测试分层策略
 
-```javascript
-// tests/fixtures/factory.js
-export function makeTestIdentity(overrides = {}) {
+| 测试类型 | 目标 | 建议工具 | 优先级 |
+| --- | --- | --- | --- |
+| 冒烟测试 | 确认四个包当前自测可运行 | 现有 `npm run selftest` | P0 |
+| 单元测试 | 验证单个 Skill 或函数行为 | Node.js Test Runner | P0 |
+| 集成测试 | 验证跨包链路 | Node.js Test Runner + 临时 SQLite | P0 |
+| 安全测试 | 验证防重放、锁定、脱敏、敏感字段保护 | 自定义用例 | P0 |
+| 契约测试 | 验证 Schema、错误码、文档口径一致 | Ajv + 静态扫描 | P1 |
+| 兼容测试 | 验证 `storylock-skill-engine` 可运行 | 现有 selftest | P1 |
+
+## 五、当前自测基线
+
+当前代码已有四个自测入口：
+
+| 包 | 命令 | 当前覆盖重点 |
+| --- | --- | --- |
+| `storylock-local-story-processing-skill` | `npm run selftest` | 草稿、润色、强度评估、边界标记 |
+| `storylock-local-story-access-skill` | `npm run selftest` | 对象强度、九宫格、防重放、本地授权、失败锁定、清理、SQLite 审计 |
+| `storylock-remote-gateway-skill` | `npm run selftest` | `requestSignature`、`requestPasswordFill`、EIP-712、脱敏、本地执行器 |
+| `storylock-skill-engine` | `npm run selftest` | 本地密码填充和签名授权兼容示例 |
+
+P0 通过标准：四个 selftest 必须全部通过。
+
+## 六、第一层测试用例
+
+测试对象：
+
+1. `StoryDraftSkill`
+2. `StoryRefineSkill`
+3. `StrengthReviewSkill`
+
+### 6.1 StoryDraftSkill
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| P-DRAFT-001 | 正常生成草稿 | `objective`、`audience`、`tone`、`constraints` | 返回 `mode=story_draft`，包含 `draft` | P0 |
+| P-DRAFT-002 | 缺失 objective | 不传 `objective` | 抛出校验错误 | P0 |
+| P-DRAFT-003 | 空字符串 objective | `objective=""` | 抛出校验错误 | P0 |
+| P-DRAFT-004 | 默认 audience/tone | 只传 `objective` | 使用默认 `self`、`neutral` | P1 |
+| P-DRAFT-005 | 自定义 generator | 注入 generator | 返回自定义草稿，且结构被校验 | P1 |
+| P-DRAFT-006 | 非法 source | `source=remote_raw_secret` | 抛出 source 枚举错误 | P0 |
+| P-DRAFT-007 | 边界标记 | 有效输入 | `challengeCreated=false`、`sessionIssued=false`、`protectedObjectRead=false` | P0 |
+
+### 6.2 StoryRefineSkill
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| P-REFINE-001 | 正常润色 | `storyDraft`、`goals`、`hintStyle` | 返回 `mode=story_refine` 与 `refinedDraft` | P0 |
+| P-REFINE-002 | 缺失 storyDraft | 不传 `storyDraft` | 抛出校验错误 | P0 |
+| P-REFINE-003 | storyDraft.content 为空 | `content=""` | 抛出校验错误 | P0 |
+| P-REFINE-004 | 非法 source | `source=template_only` | 抛出 source 枚举错误 | P0 |
+| P-REFINE-005 | 自定义 refiner | 注入 refiner | 返回自定义润色结果 | P1 |
+| P-REFINE-006 | 边界标记 | 有效输入 | 不创建 challenge，不签发 session | P0 |
+
+### 6.3 StrengthReviewSkill
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| P-STRENGTH-001 | 24 题强题集 | 24 个问题，每题 9 个候选项 | `questionSetReady=true` | P0 |
+| P-STRENGTH-002 | 题数不足 | 少于 24 题 | 抛出校验错误 | P0 |
+| P-STRENGTH-003 | 候选项不是 9 个 | 单题候选项不足或重复 | 抛出校验错误 | P0 |
+| P-STRENGTH-004 | 缺少有效答案 | `validAnswers=[]` | 抛出校验错误 | P0 |
+| P-STRENGTH-005 | 弱题集建议 | 合规题不足 | 返回 `issues` 和 `recommendedActions` | P1 |
+| P-STRENGTH-006 | 边界标记 | 任意有效输入 | 不签发 session，不读保护对象 | P0 |
+
+## 七、第二层测试用例
+
+测试对象：
+
+1. `ObjectStrengthPolicySkill`
+2. `GridChallengeSkill`
+3. `LocalAuthorizationSkill`
+4. `access-host.js`
+5. `sqlite-schema.sql`
+6. `errors.js`
+
+### 7.1 ObjectStrengthPolicySkill
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| A-POLICY-001 | 签名对象默认高强度 | `objectType=signature_key` 或 `requestedAction=signature` | `requiredStrength=high`，`requiredCells=9` | P0 |
+| A-POLICY-002 | 凭据对象默认中强度 | `objectType=credential` 或 `requestedAction=password_fill` | `requiredStrength=medium`，`requiredCells=6` | P0 |
+| A-POLICY-003 | 普通对象默认低强度 | `objectType=generic_secret` | `requiredStrength=low`，`requiredCells=3` | P1 |
+| A-POLICY-004 | policyHints 覆盖强度 | `policyHints.requiredStrength=high` | 使用指定强度 | P0 |
+| A-POLICY-005 | 非法 objectType | `objectType=invalid` | 返回 `SLG-001` | P0 |
+| A-POLICY-006 | 非法 requestedAction | `requestedAction=invalid` | 返回 `SLG-001` | P0 |
+| A-POLICY-007 | 缺失 identityId | 不传 `identityId` | 返回 `SLG-001` | P0 |
+| A-POLICY-008 | 缺失 objectRef | 不传 `objectRef/credentialRef/keyId` | 返回 `SLG-001` | P0 |
+
+### 7.2 GridChallengeSkill
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| A-GRID-001 | 低强度九宫格 | `requiredStrength=low` | 9 格展示，`requiredCells=3` | P0 |
+| A-GRID-002 | 中强度九宫格 | `requiredStrength=medium` | 9 格展示，`requiredCells=6` | P0 |
+| A-GRID-003 | 高强度九宫格 | `requiredStrength=high` | 9 格展示，`requiredCells=9` | P0 |
+| A-GRID-004 | 网格不返回答案 | 已 enroll 答案 | `grid.cells` 中不包含 `answer` | P0 |
+| A-GRID-005 | requestId 幂等重放 | 完全相同请求重复提交 | 第二次返回第一次缓存响应 | P0 |
+| A-GRID-006 | requestId 冲突 | 相同 requestId，不同 nonce 或 payload | 返回 `SLG-013` | P0 |
+| A-GRID-007 | nonce 冲突 | 不同 requestId，相同 nonce | 返回 `SLG-013` | P0 |
+| A-GRID-008 | 过期请求 | `expiry` 已过 | 返回 `SLG-011` | P0 |
+| A-GRID-009 | 非法 requiredStrength | `requiredStrength=extreme` | 返回 `SLG-001` | P0 |
+| A-GRID-010 | 未注册答案摘要 | 未 `enrollAnswers` | 返回 `SLG-010` | P0 |
+| A-GRID-011 | 输入长度限制 | 超长 requestId/nonce/answer | 返回 `SLG-001` | P1 |
+
+### 7.3 LocalAuthorizationSkill
+
+| 编号 | 用例 | 前置条件 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- | --- |
+| A-AUTH-001 | 正确答案授权签名 | 已创建 challenge，已登记答案 | `allowedAction=signature`，正确答案 | `approved=true`，签发 `authorizationId` | P0 |
+| A-AUTH-002 | 正确答案授权密码填充 | 已创建 challenge，已登记答案 | `allowedAction=password_fill` | `readBudget=1`，`writeBudget=0` | P0 |
+| A-AUTH-003 | 错误答案拒绝 | 已创建 challenge | 错误答案 | 返回 `SLG-003` | P0 |
+| A-AUTH-004 | 连续失败锁定 | 同 identity 连续错 3 次 | 第 4 次创建或提交 | 返回 `SLG-004`，含 `retryAfter` | P0 |
+| A-AUTH-005 | 锁定窗口恢复 | 锁定时间已过 | 再次创建 challenge | 允许继续 | P1 |
+| A-AUTH-006 | identity 不匹配 | identityB 提交 identityA 的 challenge | 返回 `SLG-003` | P0 |
+| A-AUTH-007 | challenge 重复提交 | 同一 challenge 成功后再提交 | 返回 `SLG-003` | P0 |
+| A-AUTH-008 | challenge 过期 | 修改 expires_at 为过去 | 提交答案 | 返回 `SLG-003` | P1 |
+| A-AUTH-009 | 非法 answers | answers 非数组或超过数量 | 返回 `SLG-001` | P0 |
+
+### 7.4 SQLite 与审计
+
+| 编号 | 用例 | 验证点 | 优先级 |
+| --- | --- | --- | --- |
+| A-SQL-001 | schema 初始化 | 创建所有当前表：`challenge_state`、`session_store`、`request_store`、`nonce_store`、`failure_window`、`answer_digest_set`、`audit_log` | P0 |
+| A-SQL-002 | 不创建旧表 | 不存在 `protected_story_objects` | P0 |
+| A-SQL-003 | 答案摘要写入 | `answer_digest_set` 只保存 HMAC 摘要，不保存明文答案 | P0 |
+| A-SQL-004 | replay 注册审计 | `replay_registered` 写入 `audit_log` | P1 |
+| A-SQL-005 | challenge 失败审计 | `challenge_failed` 写入 `audit_log` | P1 |
+| A-SQL-006 | 签名授权审计 | 签名成功写入 `signature_authorized` 审计 | P0 |
+| A-SQL-007 | cleanupExpired 清理 | 过期 request/nonce 删除，过期 session/challenge 标记 | P0 |
+| A-SQL-008 | cleanup batch 限制 | batchSize 大于 1000 时仍限制到 1000 | P1 |
+| A-SQL-009 | 持久化数据库 SecretStore 要求 | 持久化 dbPath 未注入 SecretStore 时拒绝 | P0 |
+| A-SQL-010 | 旧 schema 迁移 | 旧表结构自动补齐新列，且不恢复旧故事对象表 | P1 |
+
+## 八、第三层测试用例
+
+测试对象：
+
+1. `StoryLockRemoteGateway`
+2. `DelegatedSignatureSkill`
+3. 远程请求 Schema
+
+### 8.1 requestSignature
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| G-SIGN-001 | 正常签名请求包装 | `identityId`、`keyId`、`algorithm`、`requestId`、`nonce`、`expiry` | `capability=requestSignature` | P0 |
+| G-SIGN-002 | EIP-712 类型结构 | 有效签名请求 | 包含 `StoryLockSignatureRequest` | P0 |
+| G-SIGN-003 | nonce 必须为 uint256 字符串 | `eip712Nonce=abc` | 抛出校验错误 | P0 |
+| G-SIGN-004 | 支持 ed25519 | `algorithm=ed25519` | 请求通过 | P0 |
+| G-SIGN-005 | 支持 secp256k1 | `algorithm=secp256k1` | 请求通过 | P0 |
+| G-SIGN-006 | 拒绝非法算法 | `algorithm=rsa` | 抛出校验错误 | P0 |
+| G-SIGN-007 | 过期请求拒绝 | `expiry` 小于当前时间 | 抛出 `REQUEST_EXPIRED` | P0 |
+| G-SIGN-008 | 本地执行器路径 | 注入 `signatureExecutor` | 调用执行器并返回脱敏结果 | P0 |
+| G-SIGN-009 | transport 路径 | 未注入执行器 | 调用 `transport` | P0 |
+| G-SIGN-010 | 递归脱敏 | 返回中含 `privateKey/password/answers/secretBytes` | 全部替换为 `[redacted]` | P0 |
+
+### 8.2 requestPasswordFill
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| G-PASS-001 | 正常密码填充请求 | `identityId`、`credentialRef`、`targetOrigin` | `capability=requestPasswordFill` | P0 |
+| G-PASS-002 | 默认保留策略 | 最小有效输入 | `requestedRetention=audit_meta_only` | P0 |
+| G-PASS-003 | 默认策略提示 | 最小有效输入 | `noRemoteSecretReturn=true` | P0 |
+| G-PASS-004 | 缺失 credentialRef | 不传凭据引用 | 抛出校验错误 | P0 |
+| G-PASS-005 | 缺失 targetOrigin | 不传目标站点 | 抛出校验错误 | P0 |
+| G-PASS-006 | 本地执行器路径 | 注入 `passwordFillExecutor` | 调用执行器并脱敏返回 | P0 |
+| G-PASS-007 | 明文密码脱敏 | 执行器错误返回 `password` | 返回中为 `[redacted]` | P0 |
+
+### 8.3 DelegatedSignatureSkill
+
+| 编号 | 用例 | 输入 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| G-DELEGATE-001 | 委托签名成功 | 有效参数 | 调用 gateway 的 `requestSignature` | P1 |
+| G-DELEGATE-002 | skillId | 无 | 返回 `delegated_signature` | P1 |
+| G-DELEGATE-003 | 非法 algorithm | `algorithm=rsa` | 抛出校验错误 | P1 |
+
+## 九、跨包集成测试
+
+当前建议新增端到端测试脚本，例如：
+
+`tests/integration/signature-flow.test.mjs`
+
+### 9.1 签名授权端到端
+
+| 编号 | 用例 | 流程 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| I-SIGN-001 | 远程签名到本地授权 | `requestSignature` -> 对象强度策略 -> 九宫格 -> 本地授权 -> signatureExecutor | 返回签名结果，敏感字段脱敏 | P0 |
+| I-SIGN-002 | 授权失败传播 | 错误答案 | 第三层收到结构化错误，不泄露答案细节 | P0 |
+| I-SIGN-003 | 审计落库 | 签名成功 | `audit_log` 有签名授权记录 | P0 |
+| I-SIGN-004 | replay 防护 | 重复 requestId/nonce | 返回 `SLG-013` | P0 |
+
+### 9.2 密码填充端到端
+
+| 编号 | 用例 | 流程 | 预期结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| I-PASS-001 | 远程密码填充到本地授权 | `requestPasswordFill` -> 对象强度策略 -> 九宫格 -> 本地授权 -> passwordFillExecutor | 返回填充成功元信息 | P0 |
+| I-PASS-002 | 不返回明文密码 | 执行器返回 password 字段 | 第三层脱敏为 `[redacted]` | P0 |
+| I-PASS-003 | 错误答案拒绝 | 错误答案 | 返回授权失败 | P0 |
+
+## 十、安全专项测试
+
+| 编号 | 攻击场景 | 输入 | 预期防御结果 | 优先级 |
+| --- | --- | --- | --- | --- |
+| SEC-001 | 空答案绕过 | `answers=[]` | 授权失败 | P0 |
+| SEC-002 | 随机答案猜测 | 随机字符串 | 失败计数增加 | P0 |
+| SEC-003 | 超长答案 | 单答案超过 512 字符 | 返回 `SLG-001` | P0 |
+| SEC-004 | 超多答案 | 超过 10 条答案 | 返回 `SLG-001` | P0 |
+| SEC-005 | SQL 注入字符串 | `'; DROP TABLE audit_log; --` | 不破坏 SQLite 表 | P0 |
+| SEC-006 | requestId 重放 | 相同 requestId，不同 payload | 返回 `SLG-013` | P0 |
+| SEC-007 | nonce 重放 | 不同 requestId，相同 nonce | 返回 `SLG-013` | P0 |
+| SEC-008 | 过期请求 | expiry 过期 | 返回 `SLG-011` 或 `REQUEST_EXPIRED` | P0 |
+| SEC-009 | 跨 identity 提交 | identityB 用 identityA challenge | 授权失败 | P0 |
+| SEC-010 | 连续失败暴力尝试 | 同 identity 错 3 次以上 | 锁定并返回 retryAfter | P0 |
+| SEC-011 | 远程返回敏感字段 | `privateKey/password/answers/mnemonic` | 全部脱敏 | P0 |
+| SEC-012 | 生产持久库无 SecretStore | dbPath 指向文件且不注入 SecretStore | 拒绝创建 Host | P0 |
+
+## 十一、Schema 与契约测试
+
+当前 Schema 清单：
+
+| 包 | Schema |
+| --- | --- |
+| 本地访问授权包 | `access-response.schema.json`、`grid-verification-input.schema.json`、`local-authorization-input.schema.json`、`object-strength-policy-input.schema.json`、`selftest-report.schema.json` |
+| 本地故事处理包 | `story-draft-input.schema.json`、`story-refine-input.schema.json` |
+| 远程网关包 | `delegated-sign-input.schema.json`、`remote-gateway-request.schema.json`、`remote-gateway-response.schema.json` |
+| 兼容演示包 | `password-fill-input.schema.json`、`password-fill-output.schema.json`、`story-draft-input.schema.json`、`strength-review-output.schema.json` |
+
+契约测试项：
+
+| 编号 | 用例 | 预期结果 | 优先级 |
+| --- | --- | --- | --- |
+| C-SCHEMA-001 | 所有 JSON Schema 可被 Ajv 加载 | 无语法错误 | P1 |
+| C-SCHEMA-002 | 有效 object strength 输入 | 通过校验 | P1 |
+| C-SCHEMA-003 | 有效 grid verification 输入 | 通过校验 | P1 |
+| C-SCHEMA-004 | 有效 local authorization 输入 | 通过校验 | P1 |
+| C-SCHEMA-005 | 有效 remote gateway request | 仅允许 `requestSignature`、`requestPasswordFill` | P0 |
+| C-SCHEMA-006 | access response 错误码格式 | `SLG-xxx` 格式通过 | P1 |
+| C-DOC-001 | 错误码文档一致 | 与 `errors.js` 中 `ERROR_DEFS` 一致 | P1 |
+| C-DOC-002 | 不出现旧主线接口 | 文档不得把旧接口写成当前主线 | P0 |
+| C-DOC-003 | Node 版本一致 | 文档和 package.json 均要求 Node.js 22+ | P0 |
+
+## 十二、兼容演示包测试
+
+测试对象：
+
+`src/storylock-skill-engine`
+
+| 编号 | 用例 | 预期结果 | 优先级 |
+| --- | --- | --- | --- |
+| E-COMPAT-001 | `npm run selftest` | 通过 | P1 |
+| E-COMPAT-002 | `LocalPasswordFillSkill` | 返回 `mode=local_password_fill` | P1 |
+| E-COMPAT-003 | `SignatureAuthorizationSkill` | 返回 `mode=signature_authorization` | P1 |
+| E-COMPAT-004 | 顶层导出检查 | 不把旧 challenge sign 作为主线导出 | P1 |
+| E-COMPAT-005 | WASM 自测 | 如存在构建产物，运行 `npm run selftest:wasm` | P2 |
+
+## 十三、测试数据设计
+
+### 13.1 基础身份
+
+```js
+export const testIdentity = {
+  identityId: 'id-test-001',
+};
+```
+
+### 13.2 答案登记
+
+第二层测试必须先登记答案摘要：
+
+```js
+host.enrollAnswers('id-test-001', [
+  'correct grid answer',
+  'backup answer',
+]);
+```
+
+测试中提交答案：
+
+```js
+[
+  { cellId: 'cell-1', answer: 'correct grid answer' }
+]
+```
+
+### 13.3 请求 envelope
+
+```js
+export function makeEnvelope(prefix = 'req') {
+  const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   return {
-    identityId: 'test-identity-001',
-    masterSalt: crypto.randomBytes(32), // 测试用随机盐
-    ...overrides,
-  };
-}
-
-export function makeTestChallengeAnswers(overrides = {}) {
-  return {
-    answers: [
-      { questionId: 'q-001', answer: 'test answer one' },
-      { questionId: 'q-002', answer: 'test answer two' },
-      // ... 至少6个用于 L2, 12个用于 L3, 22个用于 L4
-    ],
-    ...overrides,
-  };
-}
-
-export function makeTestStoryObject(overrides = {}) {
-  return {
-    storyObjectId: 'story-test-001',
-    title: 'Test Story',
-    content: 'This is a test story content for validation.',
-    sensitivity: 'private',
-    version: 1,
-    ...overrides,
-  };
-}
-
-export function makeTestRequestEnvelope(overrides = {}) {
-  return {
-    requestId: `req-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    nonce: `nonce-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    expiry: Date.now() + 300_000, // 5分钟后过期
-    ...overrides,
-  };
-}
-```
-
----
-
-## 五、测试用例详细设计
-
-### 5.1 第二包 — 本地故事访问 Skill（P0）
-
-#### 5.1.1 StoryReadAccessSkill
-
-| 用例编号 | 用例名称 | 前置条件 | 输入 | 预期结果 | 验证点 |
-|---------|---------|---------|------|---------|--------|
-| R001 | 正常读取成功 | identity已注册，storyObject存在，answers正确 | identityId, storyObjectId, 正确answers, 有效requestId/nonce/expiry | status=success, result.storyObject存在, redactionLevel=partial | 挑战通过、session签发、对象读取、预算扣减 |
-| R002 | 缺失identityId | - | 无identityId | 返回错误，code=SLG-012 | 参数校验 |
-| R003 | 缺失storyObjectId | - | 无storyObjectId | 返回错误，code=SLG-012 | 参数校验 |
-| R004 | 空answers数组 | - | answers=[] | 返回错误，code=SLG-003 | 挑战失败 |
-| R005 | 错误answers | - | answers=[错误答案] | 返回错误，code=SLG-003, retryable=true | 挑战验证逻辑有效 |
-| R006 | 过期expiry | - | expiry=过去时间 | 返回错误，code=SLG-011 | 时间校验 |
-| R007 | 重复requestId | 同一requestId已成功 | 相同requestId | 返回错误，code=SLG-009 | 幂等校验 |
-| R008 | 重复nonce | 同一nonce已使用 | 相同nonce | 返回错误，code=SLG-010 | 重放校验 |
-| R009 | 时钟漂移容差 | expiry=nowMs()-20秒 | 请求 | 应成功（30秒容差内） | 漂移容差 |
-| R010 | 超出时钟漂移 | expiry=nowMs()-40秒 | 请求 | 返回错误，code=SLG-011 | 漂移边界 |
-| R011 | 对象不存在 | storyObjectId未注册 | 不存在的storyObjectId | 返回错误，code=SLG-007 | 对象存在性 |
-| R012 | 脱敏partial | redactionLevel=partial | 正确请求 | result.storyObject.content为摘要，非原文 | 脱敏实现 |
-| R013 | 脱敏full | redactionLevel=full | 正确请求 | result最小化，仅metadata | 脱敏实现 |
-| R014 | 脱敏none | redactionLevel=none | 正确请求 | result.storyObject为完整对象 | 脱敏透传 |
-| R015 | 预算耗尽后重读 | 同一session已读1次 | 再次读取 | 返回错误，code=SLG-006 | 预算限制 |
-| R016 | session过期后读取 | session TTL已过 | 使用过期session | 返回错误，code=SLG-005 | 时间失效 |
-| R017 | 失败3次后锁定 | 连续3次错误答案 | 第4次提交 | 返回错误，code=SLG-004, retryAfter存在 | 锁定策略 |
-| R018 | 锁定期间提交 | 处于locked状态 | 提交答案 | 返回错误，code=SLG-004 | 锁定拒绝 |
-| R019 | 锁定窗口结束后 | lockUntil已过 | 提交答案 | 应允许新challenge | 锁定恢复 |
-| R020 | 并发重复提交 | 同一challengeId并行提交 | 两个并行请求 | 一个成功，一个返回并发错误 | 并发控制 |
-
-#### 5.1.2 StoryWriteAccessSkill
-
-| 用例编号 | 用例名称 | 前置条件 | 输入 | 预期结果 | 验证点 |
-|---------|---------|---------|------|---------|--------|
-| W001 | 正常写回成功 | identity已注册，storyObject存在，answers正确 | identityId, storyObjectId, content, 正确answers | status=success, writeResult.version递增 | 挑战通过、写权限、版本递增 |
-| W002 | 缺失content | - | 无content | 返回错误，code=SLG-012 | 参数校验 |
-| W003 | content非对象 | - | content="string" | 返回错误，code=SLG-012 | 类型校验 |
-| W004 | 写预算耗尽 | 同一session已写1次 | 再次写入 | 返回错误，code=SLG-006 | 写预算限制 |
-| W005 | 写回后读取验证 | 刚完成写回 | 用新session读取同一对象 | 读取内容应与写入一致 | 读写一致性 |
-| W006 | 脱敏写回结果 | redactionLevel=partial | 正确请求 | writeResult不含完整content | 写回脱敏 |
-
-#### 5.1.3 状态机验证
-
-| 用例编号 | 用例名称 | 操作序列 | 预期状态序列 |
-|---------|---------|---------|------------|
-| SM001 | 基本流程 | createChallenge → submitAnswers(正确) → issueSession | idle → challenge_created → verified → session_active |
-| SM002 | 失败重试 | createChallenge → submitAnswers(错误) → submitAnswers(正确) | idle → challenge_created → failed → challenge_created → verified |
-| SM003 | 失败锁定 | createChallenge → submitAnswers(错误)x3 | idle → challenge_created → failed → locked |
-| SM004 | 锁定恢复 | locked状态等待15分钟 | locked → idle |
-| SM005 | session过期 | session_active等待TTL过期 | session_active → session_expired |
-| SM006 | 主动撤销 | session_active → revokeSession | session_active → session_revoked |
-
-#### 5.1.4 失败计数策略
-
-| 用例编号 | 用例名称 | 操作 | 预期结果 |
-|---------|---------|------|---------|
-| FC001 | 同一identity不同challenge | identityA创建chl-1失败，再创建chl-2失败 | 失败计数=2（按identityId累计） |
-| FC002 | 不同identity | identityA失败，identityB失败 | 各自独立计数，不互相影响 |
-| FC003 | 24小时窗口重置 | 23小时前失败2次，现在再失败1次 | 计数=3（仍在同一窗口） |
-| FC004 | 窗口过期后 | 25小时前失败3次，现在再失败 | 计数=1（新窗口） |
-| FC005 | 成功后重置 | 失败2次 → 成功1次 → 再失败 | 计数=1（成功重置连续失败计数） |
-
----
-
-### 5.2 第一包 — 本地故事处理 Skill（P0）
-
-#### 5.2.1 StoryDraftSkill
-
-| 用例编号 | 用例名称 | 输入 | 预期结果 | 验证点 |
-|---------|---------|------|---------|--------|
-| D001 | 正常生成 | objective="test", audience="self", tone="neutral" | draft.content包含objective, draft.title存在 | 基本生成逻辑 |
-| D002 | 缺失objective | 无objective | 抛出错误 | 必填校验 |
-| D003 | 空objective | objective="" | 抛出错误 | 非空校验 |
-| D004 | 自定义generator | 传入自定义generator函数 | 应调用自定义generator | 依赖注入 |
-| D005 | 约束条件传递 | constraints=["c1", "c2"] | draft.cues包含约束 | 约束传递 |
-| D006 | source校验 | source="invalid" | 抛出错误 | 枚举校验 |
-| D007 | 默认source | 不传入source | source="approved_local_input" | 默认值 |
-| D008 | boundary标记 | 任意有效输入 | boundary.challengeCreated=false, sessionIssued=false | 边界标记 |
-| D009 | notes传递 | notes=["n1", "n2"] | 返回notes数组 | 附加字段 |
-| D010 | 异步generator | 传入异步generator | 应await并返回结果 | 异步支持 |
-
-#### 5.2.2 StoryRefineSkill
-
-| 用例编号 | 用例名称 | 输入 | 预期结果 | 验证点 |
-|---------|---------|------|---------|--------|
-| RF001 | 正常润色 | storyDraft={title, content}, goals=["g1"] | refinedDraft.content包含原内容和goals | 润色逻辑 |
-| RF002 | 缺失storyDraft | 无storyDraft | 抛出错误 | 必填校验 |
-| RF003 | 无效storyDraft | storyDraft="string" | 抛出错误 | 类型校验 |
-| RF004 | 自定义refiner | 传入自定义refiner | 应调用自定义refiner | 依赖注入 |
-| RF005 | source限制 | source="template_only" | 抛出错误（Refine不允许template_only） | 枚举限制 |
-| RF006 | boundary标记 | 任意有效输入 | boundary.protectedObjectRead=false | 边界标记 |
-
-#### 5.2.3 别名导出验证
-
-| 用例编号 | 用例名称 | 验证点 |
-|---------|---------|--------|
-| AL001 | StoryDraftAssistSkill === StoryDraftSkill | 别名一致性 |
-| AL002 | StoryRefineAssistSkill === StoryRefineSkill | 别名一致性 |
-
----
-
-### 5.3 第三包 — 远程网关 Skill（P0）
-
-#### 5.3.1 StoryLockRemoteGateway
-
-| 用例编号 | 用例名称 | 前置条件 | 输入 | 预期结果 | 验证点 |
-|---------|---------|---------|------|---------|--------|
-| G001 | requestStoryRead | transport已注入 | 有效payload | 调用transport，参数结构正确 | 请求包装 |
-| G002 | requestStoryWrite | transport已注入 | 有效payload | 调用transport，参数结构正确 | 请求包装 |
-| G003 | requestChallengeSign | transport已注入 | 有效payload | 调用transport，参数结构正确 | 请求包装 |
-| G004 | queryStoryMetadata | transport已注入 | 有效payload | 调用transport，参数结构正确 | 请求包装 |
-| G005 | 缺失transport | - | 构造时无transport | 抛出错误 | 依赖校验 |
-| G006 | transport非函数 | - | transport="string" | 抛出错误 | 类型校验 |
-| G007 | 缺失requestId | - | payload无requestId | 抛出错误 | 必填校验 |
-| G008 | 缺失nonce | - | payload无nonce | 抛出错误 | 必填校验 |
-| G009 | 过期expiry | - | expiry=过去时间 | 抛出错误，REQUEST_EXPIRED | 时间校验 |
-| G010 | 无效expiry | - | expiry="string" | 抛出错误 | 类型校验 |
-| G011 | requestStoryRead默认policyHints | - | 最小payload | policyHints包含redactionPreferred=true | 默认值 |
-| G012 | requestStoryWrite默认policyHints | - | 最小payload | policyHints包含writeReason | 默认值 |
-| G013 | requestChallengeSign默认policyHints | - | 最小payload | policyHints包含minAccessLevel=L4 | 默认值 |
-| G014 | algorithm白名单 | - | algorithm="invalid" | 抛出错误 | 算法白名单 |
-| G015 | algorithm支持ed25519 | - | algorithm="ed25519" | 成功 | 算法支持 |
-| G016 | algorithm支持secp256k1 | - | algorithm="secp256k1" | 成功 | 算法支持 |
-| G017 | invoke透传 | transport返回自定义结果 | 任意请求 | 返回transport的结果 | 透传验证 |
-
-#### 5.3.2 DelegatedChallengeSignSkill
-
-| 用例编号 | 用例名称 | 输入 | 预期结果 | 验证点 |
-|---------|---------|------|---------|--------|
-| DS001 | 正常委托签名 | 有效参数 | 调用gateway.requestChallengeSign | 委托链路 |
-| DS002 | 无效algorithm | algorithm="rsa" | 抛出错误 | 算法校验透传 |
-| DS003 | skillId | - | 返回'delegated_challenge_sign' | 标识一致性 |
-
----
-
-### 5.4 跨包集成测试（P0）
-
-#### 5.4.1 第三包→第二包读取链路
-
-| 用例编号 | 用例名称 | 操作序列 | 预期结果 |
-|---------|---------|---------|---------|
-| I001 | 完整读取链路 | Gateway.requestStoryRead → transport → StoryReadAccessSkill.run | 最终返回结构化响应，status=success |
-| I002 | 完整写回链路 | Gateway.requestStoryWrite → transport → StoryWriteAccessSkill.run | 最终返回结构化响应，status=success |
-| I003 | 完整签名链路 | Gateway.requestChallengeSign → transport → 本地签名执行 | 最终返回签名结果 |
-| I004 | 链路错误传播 | Gateway请求 → transport → 第二包抛出错误 | 错误结构完整传播到Gateway调用方 |
-| I005 | 越权调用阻断 | 第三包尝试直接调用第一包 | 应失败或不存在此路径 | 边界隔离 |
-
-#### 5.4.2 第二包→第一包处理链路
-
-| 用例编号 | 用例名称 | 操作序列 | 预期结果 |
-|---------|---------|---------|---------|
-| I006 | 读取后处理 | StoryReadAccessSkill读取 → 将结果交给StoryDraftSkill处理 | 第一包能正常处理第二包交付的内容 |
-| I007 | 处理后写回 | StoryRefineSkill处理 → 将结果交给StoryWriteAccessSkill写回 | 写回成功，版本递增 |
-
----
-
-### 5.5 旧迁移包 — Skill Engine（P1）
-
-#### 5.5.1 authorization-skills.js
-
-| 用例编号 | 用例名称 | 验证点 |
-|---------|---------|--------|
-| M001 | LoginAuthorizationSkill.run | challenge创建、答案提交、session解析、字段填充 |
-| M002 | LocalPasswordFillSkill.run | 委托LoginAuthorizationSkill、返回mode=local_password_fill |
-| M003 | SigningAuthorizationSkill.run | 签名授权上下文、密钥读取 |
-| M004 | ChallengeSigningAuthorizationSkill.run | challenge+签名完整流程、zeroize清零 |
-| M005 | zeroizeBytes有效性 | 清零后Uint8Array全为0 |
-| M006 | cloneSecretBytes | 返回独立副本，修改不影响原值 |
-
-#### 5.5.2 story-assist.js
-
-| 用例编号 | 用例名称 | 验证点 |
-|---------|---------|--------|
-| M007 | StoryDraftAssistSkill.run | 调用注入的generator |
-| M008 | StoryRefineAssistSkill.run | 调用注入的refiner |
-
-#### 5.5.3 strength-review.js
-
-| 用例编号 | 用例名称 | 验证点 |
-|---------|---------|--------|
-| M009 | StrengthReviewSkill.run | 返回profile、questionSetReady、recommendedActions |
-| M010 | 空questions | 抛出ValidationError |
-
----
-
-### 5.6 Schema 契约测试（P1）
-
-#### 5.6.1 JSON Schema 校验
-
-| 用例编号 | 用例名称 | Schema文件 | 验证点 |
-|---------|---------|-----------|--------|
-| SC001 | story-read-input有效 | story-read-input.schema.json | 有效输入通过校验 |
-| SC002 | story-read-input缺失必填 | story-read-input.schema.json | 缺失identityId应失败 |
-| SC003 | story-write-input有效 | story-write-input.schema.json | 有效输入通过校验 |
-| SC004 | story-write-input缺失content | story-write-input.schema.json | 缺失content应失败 |
-| SC005 | remote-gateway-request有效 | remote-gateway-request.schema.json | 有效请求通过校验 |
-| SC006 | remote-gateway-request无效capability | remote-gateway-request.schema.json | capability不在枚举中应失败 |
-| SC007 | remote-gateway-response有效 | remote-gateway-response.schema.json | 有效响应通过校验 |
-| SC008 | story-draft-input有效 | story-draft-input.schema.json | 有效输入通过校验 |
-| SC009 | story-refine-input有效 | story-refine-input.schema.json | 有效输入通过校验 |
-| SC010 | challenge-sign-input有效 | challenge-sign-input.schema.json | 有效输入通过校验 |
-| SC011 | password-fill-input有效 | password-fill-input.schema.json | 有效输入通过校验 |
-
-#### 5.6.2 字段映射一致性
-
-| 用例编号 | 用例名称 | 验证点 |
-|---------|---------|--------|
-| FM001 | 代码字段与Schema字段一致 | 代码中使用的字段名与Schema定义一致 |
-| FM002 | 代码字段与文档契约一致 | 代码响应字段与三包接口契约.md一致 |
-| FM003 | 错误码与文档一致 | 代码使用的SLG错误码与本地Agent网关设计.md一致 |
-
----
-
-### 5.7 安全专项测试（P0）
-
-#### 5.7.1 挑战绕过攻击
-
-| 用例编号 | 攻击场景 | 输入 | 预期防御结果 |
-|---------|---------|------|------------|
-| SEC001 | 空答案绕过 | answers=[] | 拒绝，code=SLG-003 |
-| SEC002 | 随机答案猜测 | answers=[随机字符串] | 拒绝，累计失败计数 |
-| SEC003 | 超长答案溢出 | answer=10MB字符串 | 拒绝或截断，不崩溃 |
-| SEC004 | 特殊字符注入 | answer="'; DROP TABLE--" | 拒绝，无SQL注入风险 |
-| SEC005 | 并发暴力破解 | 1000并发错误答案 | 锁定触发，后续请求拒绝 |
-| SEC006 | 跨identity攻击 | 用identityB的答案尝试identityA | 拒绝，identity隔离 |
-
-#### 5.7.2 会话劫持攻击
-
-| 用例编号 | 攻击场景 | 输入 | 预期防御结果 |
-|---------|---------|------|------------|
-| SEC007 | 伪造sessionId | 随机sessionId | 拒绝，SESSION_INVALID |
-| SEC008 | 过期session复用 | 已过期的sessionId | 拒绝，SESSION_EXPIRED |
-| SEC009 | 跨identity session | identityA的session用于identityB | 拒绝，身份隔离 |
-| SEC010 | 预算耗尽后复用 | 已耗尽预算的session | 拒绝，BUDGET_EXHAUSTED |
-
-#### 5.7.3 重放攻击
-
-| 用例编号 | 攻击场景 | 输入 | 预期防御结果 |
-|---------|---------|------|------------|
-| SEC011 | 相同requestId重放 | 完全相同的请求再发一次 | 拒绝，DUPLICATE_REQUEST |
-| SEC012 | 相同nonce重放 | 相同nonce不同requestId | 拒绝，NONCE_REPLAY_DETECTED |
-| SEC013 | 过期请求重放 | expiry已过的请求 | 拒绝，REQUEST_EXPIRED |
-| SEC014 | 未来时间请求 | expiry=未来10年 | 应拒绝或限制最大TTL |
-
-#### 5.7.4 越权访问攻击
-
-| 用例编号 | 攻击场景 | 输入 | 预期防御结果 |
-|---------|---------|------|------------|
-| SEC015 | 第三包直接访问第一包 | 尝试直接调用StoryDraftSkill | 无此路径或拒绝 |
-| SEC016 | 第二包暴露内部接口 | 尝试调用createChallenge | 不在白名单中 |
-| SEC017 | 读取非授权对象 | session绑定story-001，尝试读story-002 | 拒绝，SCOPE_INSUFFICIENT |
-| SEC018 | 写操作伪装成读 | 用read session尝试write | 拒绝，scope不匹配 |
-
-#### 5.7.5 信息泄露攻击
-
-| 用例编号 | 攻击场景 | 输入 | 预期防御结果 |
-|---------|---------|------|------------|
-| SEC019 | 错误信息泄露 | 触发各种错误 | error.message不包含challenge细节或秘密 |
-| SEC020 | 脱敏绕过 | 请求redactionLevel=none | 仅在策略允许时生效，否则强制partial |
-| SEC021 | 审计Meta泄露 | 成功请求 | auditMeta不包含敏感实现细节 |
-| SEC022 | 堆栈跟踪泄露 | 触发异常 | 生产环境不暴露内部堆栈 |
-
----
-
-## 六、测试实现规范
-
-### 6.1 目录结构
-
-```
-E:\2026OPC大赛\skill\src\
-├── storylock-local-story-access-skill/
-│   ├── tests/
-│   │   ├── unit/
-│   │   │   ├── story-read-access.test.js
-│   │   │   ├── story-write-access.test.js
-│   │   │   ├── state-machine.test.js
-│   │   │   └── failure-count.test.js
-│   │   └── fixtures/
-│   │       └── factory.js
-├── storylock-local-story-processing-skill/
-│   ├── tests/
-│   │   ├── unit/
-│   │   │   ├── story-draft.test.js
-│   │   │   └── story-refine.test.js
-│   │   └── fixtures/
-│   │       └── factory.js
-├── storylock-remote-gateway-skill/
-│   │   ├── tests/
-│   │   │   ├── unit/
-│   │   │   │   ├── gateway.test.js
-│   │   │   │   └── delegated-sign.test.js
-│   │   │   └── fixtures/
-│   │   │       └── factory.js
-├── storylock-skill-engine/
-│   ├── tests/
-│   │   ├── unit/
-│   │   │   ├── authorization-skills.test.js
-│   │   │   ├── story-assist.test.js
-│   │   │   └── strength-review.test.js
-│   │   └── fixtures/
-│   │       └── factory.js
-└── tests/
-    ├── integration/
-    │   ├── cross-package-read.test.js
-    │   ├── cross-package-write.test.js
-    │   └── cross-package-sign.test.js
-    ├── security/
-    │   ├── challenge-bypass.test.js
-    │   ├── session-hijack.test.js
-    │   ├── replay-attack.test.js
-    │   └── privilege-escalation.test.js
-    ├── contract/
-    │   ├── schema-validation.test.js
-    │   └── field-mapping.test.js
-    └── fixtures/
-        └── shared-factory.js
-```
-
-### 6.2 测试文件模板
-
-```javascript
-// tests/unit/story-read-access.test.js
-import { describe, it, beforeEach } from 'node:test';
-import assert from 'node:assert';
-import { StoryReadAccessSkill } from '../../index.js';
-import { makeTestIdentity, makeTestStoryObject, makeTestRequestEnvelope } from '../fixtures/factory.js';
-
-describe('StoryReadAccessSkill', () => {
-  let skill;
-  let mockHost;
-
-  beforeEach(() => {
-    mockHost = createMockHost(); // 内存Mock
-    skill = new StoryReadAccessSkill({ host: mockHost });
-  });
-
-  it('R001: 正常读取成功', async () => {
-    const input = {
-      ...makeTestIdentity(),
-      ...makeTestStoryObject(),
-      ...makeTestRequestEnvelope(),
-      answers: makeTestChallengeAnswers().answers,
-    };
-    const result = await skill.run(input);
-    assert.strictEqual(result.status, 'success');
-    assert.ok(result.result.storyObject);
-    assert.strictEqual(result.redactionLevel, 'partial');
-  });
-
-  it('R005: 错误答案应失败', async () => {
-    const input = {
-      ...makeTestIdentity(),
-      ...makeTestStoryObject(),
-      ...makeTestRequestEnvelope(),
-      answers: [{ questionId: 'q-001', answer: 'wrong answer' }],
-    };
-    const result = await skill.run(input);
-    assert.strictEqual(result.status, 'error');
-    assert.strictEqual(result.error.code, 'SLG-003');
-    assert.strictEqual(result.error.retryable, true);
-  });
-
-  // ... 更多用例
-});
-```
-
-### 6.3 Mock Host 规范
-
-```javascript
-// tests/fixtures/mock-host.js
-export function createMockHost(overrides = {}) {
-  const challenges = new Map();
-  const sessions = new Map();
-  const objects = new Map();
-  const requestStore = new Set();
-  const nonceStore = new Set();
-  const failureCounts = new Map(); // identityId -> { count, windowStart }
-
-  return {
-    createChallenge(identityId, scope) {
-      const challengeId = `chl-${Date.now()}`;
-      challenges.set(challengeId, {
-        challengeId, identityId, scope,
-        status: 'challenge_created',
-        failureCount: 0,
-        maxRetryCount: 3,
-        lockUntil: 0,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 5 * 60 * 1000,
-      });
-      return challenges.get(challengeId);
-    },
-
-    submitChallengeAnswers(identityId, challengeId, answers) {
-      const challenge = challenges.get(challengeId);
-      if (!challenge) throw new Error('CHALLENGE_NOT_FOUND');
-      if (challenge.identityId !== identityId) throw new Error('IDENTITY_MISMATCH');
-      if (challenge.lockUntil > Date.now()) {
-        return { approved: false, retryAfter: Math.ceil((challenge.lockUntil - Date.now()) / 1000) };
-      }
-
-      // 模拟验证：检查答案是否匹配测试预期
-      const expectedAnswers = overrides.expectedAnswers ?? [];
-      const matched = answers.filter(a => 
-        expectedAnswers.some(e => e.questionId === a.questionId && e.answer === a.answer)
-      ).length;
-      const threshold = overrides.threshold ?? 6;
-
-      if (matched >= threshold) {
-        challenge.status = 'verified';
-        challenge.failureCount = 0;
-        return { approved: true, challenge };
-      }
-
-      challenge.failureCount += 1;
-      if (challenge.failureCount >= challenge.maxRetryCount) {
-        challenge.status = 'locked';
-        challenge.lockUntil = Date.now() + 15 * 60 * 1000;
-      } else {
-        challenge.status = 'failed';
-      }
-      return { approved: false, challenge };
-    },
-
-    issueSession(identityId, challenge, scope, resourceScope, budgets) {
-      const sessionId = `ses-${Date.now()}`;
-      sessions.set(sessionId, {
-        sessionId, challengeId: challenge.challengeId, identityId,
-        scope, resourceScope,
-        readBudget: budgets.readBudget ?? 1,
-        writeBudget: budgets.writeBudget ?? 0,
-        issuedAt: Date.now(),
-        expiresAt: Date.now() + (budgets.ttlMs ?? 3 * 60 * 1000),
-        status: 'active',
-        sessionType: budgets.sessionType ?? 'one_shot',
-      });
-      return sessions.get(sessionId);
-    },
-
-    readStoryObjectWithBudget(identityId, sessionId, storyObjectId) {
-      const session = sessions.get(sessionId);
-      if (!session || session.identityId !== identityId) throw new Error('SESSION_INVALID');
-      if (session.status !== 'active') throw new Error('SESSION_INVALID');
-      if (session.expiresAt <= Date.now()) throw new Error('SESSION_EXPIRED');
-      if (session.readBudget <= 0) throw new Error('BUDGET_EXHAUSTED');
-      if (!session.resourceScope.includes(storyObjectId)) throw new Error('SCOPE_INSUFFICIENT');
-
-      session.readBudget -= 1;
-      if (session.readBudget <= 0) session.status = 'session_expired';
-
-      const obj = objects.get(storyObjectId);
-      if (!obj) throw new Error('OBJECT_NOT_FOUND');
-      return { session, storyObject: obj };
-    },
-
-    writeStoryObject(identityId, sessionId, storyObjectId, content) {
-      const session = sessions.get(sessionId);
-      if (!session || session.identityId !== identityId) throw new Error('SESSION_INVALID');
-      if (session.writeBudget <= 0) throw new Error('BUDGET_EXHAUSTED');
-
-      const existing = objects.get(storyObjectId);
-      const next = {
-        storyObjectId,
-        ...content,
-        version: (existing?.version ?? 0) + 1,
-        sensitivity: existing?.sensitivity ?? 'private',
-      };
-      objects.set(storyObjectId, next);
-      session.writeBudget -= 1;
-      return next;
-    },
-
-    ensureReplaySafe(requestId, nonce, expiry) {
-      if (requestStore.has(requestId)) throw Object.assign(new Error('DUPLICATE_REQUEST'), { code: 'SLG-009' });
-      if (nonceStore.has(nonce)) throw Object.assign(new Error('NONCE_REPLAY_DETECTED'), { code: 'SLG-010' });
-      requestStore.add(requestId);
-      nonceStore.add(nonce);
-    },
-
-    // 测试辅助方法
-    seedObject(obj) { objects.set(obj.storyObjectId, obj); },
-    getChallenge(id) { return challenges.get(id); },
-    getSession(id) { return sessions.get(id); },
-    ...overrides,
+    requestId: `${prefix}-${suffix}`,
+    nonce: `nonce-${suffix}`,
+    expiry: Date.now() + 60_000,
   };
 }
 ```
 
----
+### 13.4 临时 SQLite
 
-## 七、测试执行计划
+```js
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 
-### 7.1 执行顺序
-
-| 阶段 | 测试集 | 预计耗时 | 通过标准 |
-|------|--------|---------|---------|
-| 1 | 第二包单元测试 | 5分钟 | 全部通过 |
-| 2 | 第一包单元测试 | 3分钟 | 全部通过 |
-| 3 | 第三包单元测试 | 3分钟 | 全部通过 |
-| 4 | 集成测试 | 5分钟 | 全部通过 |
-| 5 | 安全专项测试 | 5分钟 | 全部通过（攻击均被防御） |
-| 6 | Schema契约测试 | 3分钟 | 全部通过 |
-| 7 | 旧迁移包测试 | 5分钟 | 全部通过 |
-
-### 7.2 CI/CD 集成
-
-```yaml
-# .github/workflows/test.yml（建议）
-name: Test
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18, 20, 22]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run test:unit
-      - run: npm run test:integration
-      - run: npm run test:security
-      - run: npm run test:contract
+export function tempDbPath() {
+  return join(tmpdir(), `storylock_test_${randomUUID().replaceAll('-', '')}.db`);
+}
 ```
 
-### 7.3 npm scripts 建议
+## 十四、建议测试目录
+
+当前可先保留各包 `scripts/selftest.mjs`。后续若扩展正式测试目录，建议如下：
+
+```text
+skill/
+  tests/
+    integration/
+      signature-flow.test.mjs
+      password-fill-flow.test.mjs
+    security/
+      replay.test.mjs
+      redaction.test.mjs
+      lockout.test.mjs
+    contract/
+      schemas.test.mjs
+      docs-code-consistency.test.mjs
+  src/
+    storylock-local-story-processing-skill/
+      scripts/selftest.mjs
+    storylock-local-story-access-skill/
+      scripts/selftest.mjs
+    storylock-remote-gateway-skill/
+      scripts/selftest.mjs
+    storylock-skill-engine/
+      scripts/selftest.mjs
+```
+
+## 十五、执行计划
+
+| 阶段 | 内容 | 产物 | 优先级 |
+| --- | --- | --- | --- |
+| T0 | 跑通现有四个 selftest | 当前冒烟基线 | P0 |
+| T1 | 补端到端签名链路测试 | `signature-flow.test.mjs` | P0 |
+| T2 | 补端到端密码填充链路测试 | `password-fill-flow.test.mjs` | P0 |
+| T3 | 补安全专项测试 | replay、lockout、redaction 测试 | P0 |
+| T4 | 补 Schema 契约测试 | Ajv 校验脚本 | P1 |
+| T5 | 补文档-代码一致性测试 | 静态扫描脚本 | P1 |
+| T6 | 补覆盖率统计 | 覆盖率报告 | P2 |
+
+## 十六、通过标准
+
+### 16.1 P0 通过标准
+
+1. 四个包 `npm run selftest` 全部通过。
+2. 第二层错误答案不能授权。
+3. requestId 或 nonce 冲突返回 `SLG-013`。
+4. 过期请求返回 `SLG-011` 或抛出 `REQUEST_EXPIRED`。
+5. 远程返回中敏感字段被递归脱敏。
+6. SQLite 中不保存明文答案。
+7. 签名授权审计写入 `audit_log`。
+8. 文档和 Schema 不把旧接口作为当前主线。
+
+### 16.2 P1 通过标准
+
+1. JSON Schema 全部可加载。
+2. 主请求和响应样例能通过 Schema 校验。
+3. 错误码表与 `errors.js` 一致。
+4. 兼容演示包基础能力可运行。
+
+### 16.3 P2 通过标准
+
+1. 形成覆盖率报告。
+2. 加入 CI 自动执行。
+3. 增加压力测试或长时间运行测试。
+
+## 十七、CI 建议
+
+当前仓库没有统一根 `package.json` 测试入口时，可先使用 PowerShell 脚本：
+
+```powershell
+$ErrorActionPreference = "Stop"
+
+Push-Location src/storylock-local-story-processing-skill
+npm run selftest
+Pop-Location
+
+Push-Location src/storylock-local-story-access-skill
+npm run selftest
+Pop-Location
+
+Push-Location src/storylock-remote-gateway-skill
+npm run selftest
+Pop-Location
+
+Push-Location src/storylock-skill-engine
+npm run selftest
+Pop-Location
+```
+
+后续可增加根目录脚本：
 
 ```json
 {
   "scripts": {
-    "test": "npm run test:unit && npm run test:integration && npm run test:security && npm run test:contract",
-    "test:unit": "node --test src/*/tests/unit/*.test.js",
-    "test:integration": "node --test tests/integration/*.test.js",
-    "test:security": "node --test tests/security/*.test.js",
-    "test:contract": "node --test tests/contract/*.test.js",
-    "test:coverage": "c8 node --test src/*/tests/unit/*.test.js tests/**/*.test.js"
+    "test:self": "powershell -ExecutionPolicy Bypass -File scripts/runtime/test_self.ps1",
+    "test:integration": "node --test tests/integration/*.test.mjs",
+    "test:security": "node --test tests/security/*.test.mjs",
+    "test:contract": "node --test tests/contract/*.test.mjs"
   }
 }
 ```
 
----
+## 十八、风险与应对
 
-## 八、测试通过标准
+| 风险 | 影响 | 应对 |
+| --- | --- | --- |
+| 测试方案沿用旧接口 | 测试失真 | 本方案已移除故事读写和 challenge sign 主线测试 |
+| `node:sqlite` 运行时差异 | 自测无法运行 | 固定 Node.js 22+ |
+| Mock 与真实 SQLite 行为不一致 | 集成缺陷漏测 | P0 集成测试必须使用真实临时 SQLite |
+| 端到端链路尚未完整自动化 | 参赛演示风险 | 优先补 `signature-flow` 和 `password-fill-flow` |
+| SecretStore 生产适配未完成 | 生产安全风险 | 持久化测试必须覆盖无 SecretStore 拒绝逻辑 |
 
-### 8.1 功能测试通过标准
+## 十九、附录：当前错误码测试口径
 
-1. 所有 P0 用例 100% 通过
-2. 所有 P1 用例 >= 90% 通过（允许旧迁移包存在已知限制）
-3. 无未处理的 Promise 拒绝
-4. 无内存泄漏（通过 `--detect-leaks` 或手动检查）
+| 错误码 | 类型 | 测试重点 |
+| --- | --- | --- |
+| `SLG-001` | `validation_error` | 字段缺失、类型错误、长度超限 |
+| `SLG-002` | `replay_rejected` | 保留历史兼容，不作为当前 replay 冲突主码 |
+| `SLG-003` | `challenge_failed` | 答案错误、challenge 无效 |
+| `SLG-004` | `challenge_locked` | 连续失败锁定 |
+| `SLG-005` | `session_invalid` | session 不存在、过期或状态无效 |
+| `SLG-006` | `budget_exhausted` | 预算耗尽 |
+| `SLG-007` | `object_not_found` | 对象不存在 |
+| `SLG-008` | `redaction_required` | 结果必须脱敏 |
+| `SLG-009` | `scope_insufficient` | scope 不足 |
+| `SLG-010` | `secret_unavailable` | SecretStore 或答案摘要不可用 |
+| `SLG-011` | `request_expired` | 请求过期 |
+| `SLG-012` | `internal_error` | 未分类内部错误 |
+| `SLG-013` | `replay_detected` | requestId 或 nonce 冲突 |
 
-### 8.2 安全测试通过标准
+## 二十、附录：不测试为当前能力的内容
 
-1. 所有攻击场景（SEC001-SEC022）均被正确防御
-2. 错误响应不泄露敏感信息（challenge细节、secret内容、堆栈跟踪）
-3. 失败计数正确累计，锁定策略有效触发
-4. 预算扣减原子性验证通过
+以下内容不纳入当前 v1.0 主线验收：
 
-### 8.3 契约一致性通过标准
+1. 故事对象读取。
+2. 故事对象写回。
+3. `requestChallengeSign`。
+4. 完整链上验证。
+5. EIP-1271/ERC-4337 生产级集成。
+6. 多链、多钱包、多账号应用编排。
 
-1. 所有 JSON Schema 文件可被 Ajv 正确加载
-2. 有效输入 100% 通过 Schema 校验
-3. 无效输入 100% 被 Schema 校验拒绝
-4. 代码字段名与 Schema 字段名 100% 一致
-5. 错误码与文档定义 100% 一致
+这些内容只能作为后续应用探索或扩展测试项。
 
----
-
-## 九、风险与应对
-
-| 风险 | 影响 | 应对策略 |
-|------|------|---------|
-| 测试数据工厂复杂度高 | 测试编写效率低 | 先实现核心factory，逐步扩展 |
-| Mock Host 与真实Host行为偏差 | 测试通过但生产失败 | 集成测试使用真实SQLite Host |
-| 安全测试覆盖不足 | 遗漏攻击向量 | 参考OWASP Top 10定期补充用例 |
-| 旧迁移包测试价值低 | 投入产出比差 | P1优先级，仅做基础冒烟测试 |
-| 并发测试不稳定 | 偶发失败 | 使用SQLite事务或单线程串行测试 |
-
----
-
-## 十、附录
-
-### 10.1 测试用例与评审意见映射
-
-| 评审风险 | 对应测试用例 | 验证方式 |
-|---------|------------|---------|
-| R1 答案验证恒为true | R004, R005, SEC001-SEC006 | 错误答案必须被拒绝 |
-| R2 无加密存储 | 集成测试使用真实SQLite | 验证持久化存在 |
-| R5 失败计数按challengeId | FC001-FC005 | 验证按identityId累计 |
-| R6 无并发控制 | R020 | 并行提交验证 |
-| R7 无脱敏实现 | R012-R014, SEC020 | 验证脱敏级别生效 |
-| R8 裸Error | 所有错误用例 | 验证返回SLG结构化错误 |
-| R12 无清理策略 | 长期运行测试 | 验证内存/数据库不无限增长 |
-
-### 10.2 依赖安装
-
-```bash
-# 基础测试（Node.js 18+ 内置）
-# 无需额外安装
-
-# Schema 校验
-npm install --save-dev ajv
-
-# 覆盖率（可选）
-npm install --save-dev c8
-
-# 性能测试（可选）
-npm install --save-dev autocannon
-```
-
----
-
-*测试方案制定时间: 2026-06-16 21:31 GMT+8*
-*制定人: 代码安全审计师*

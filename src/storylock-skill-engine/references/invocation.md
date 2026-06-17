@@ -26,7 +26,8 @@ The package exports these skill classes:
 4. `LoginAuthorizationSkill`
 5. `SigningAuthorizationSkill`
 6. `LocalPasswordFillSkill`
-7. `ChallengeSigningAuthorizationSkill`
+7. `SignatureAuthorizationSkill`
+8. `ChallengeSigningAuthorizationSkill` as a compatibility alias
 
 The package also exports:
 
@@ -39,7 +40,7 @@ import {
   StoryDraftAssistSkill,
   StrengthReviewSkill,
   LocalPasswordFillSkill,
-  ChallengeSigningAuthorizationSkill,
+  SignatureAuthorizationSkill,
 } from "../index.js";
 ```
 
@@ -53,7 +54,7 @@ import {
 | `LoginAuthorizationSkill` | `host` |
 | `SigningAuthorizationSkill` | `host` |
 | `LocalPasswordFillSkill` | `host` |
-| `ChallengeSigningAuthorizationSkill` | `host`, `signer` |
+| `SignatureAuthorizationSkill` | `host`, `signer` |
 
 ## Routing Guidance
 
@@ -67,7 +68,7 @@ Agents should prefer these capability pages for actual task execution:
 For product-facing guidance, prioritize:
 
 1. `LocalPasswordFillSkill`
-2. `ChallengeSigningAuthorizationSkill`
+2. `SignatureAuthorizationSkill`
 
 ## Error Handling
 

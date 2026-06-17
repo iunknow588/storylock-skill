@@ -9,7 +9,7 @@ This page defines the responsibility split for the StoryLock skill package.
 1. draft and refine story material
 2. review question-set strength
 3. package login-field authorization results
-4. package challenge-sign authorization results
+4. package signature authorization results
 5. provide stable demo and invocation surfaces
 
 ## What This Skill Does Not Do

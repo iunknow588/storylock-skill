@@ -4,7 +4,12 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { StoryReadAccessSkill, StoryWriteAccessSkill } from '../index.js';
+import {
+  GridChallengeSkill,
+  LocalAuthorizationSkill,
+  ObjectStrengthPolicySkill,
+} from '../index.js';
+import { SignatureAuthorizationSkill } from '../../storylock-skill-engine/assets/migrated/skills/authorization-skills.js';
 import { MemorySecretStore, createPlatformSecretStore } from '../../shared/secret-store.js';
 
 const report = {
@@ -32,7 +37,7 @@ async function withDb(fn) {
   const secretStore = new MemorySecretStore();
   let context;
   try {
-    context = { dbPath, secretStore };
+    context = { dbPath, secretStore, hosts: [] };
     await fn(context);
   } finally {
     context?.hosts?.forEach((host) => host.close?.());
@@ -42,68 +47,67 @@ async function withDb(fn) {
 
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
-  const read = new StoryReadAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [read.host];
-  read.host.enrollAnswers('id-1', ['correct answer']);
-  const result = await read.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-    answers: [{ answer: ' Correct   Answer ' }],
-    requestId: 'req-success',
-    nonce: 'nonce-success',
+  const policy = new ObjectStrengthPolicySkill({ dbPath, secretStore });
+  ctx.hosts = [policy.host];
+  const signaturePolicy = await policy.run({
+    identityId: 'id-policy',
+    objectRef: 'wallet-key-main',
+    objectType: 'signature_key',
+    requestedAction: 'signature',
+    requestId: 'req-policy-signature',
+  });
+  assert.equal(signaturePolicy.status, 'success');
+  assert.equal(signaturePolicy.result.requiredStrength, 'high');
+  assert.equal(signaturePolicy.result.gridPolicy.requiredCells, 9);
+  const credentialPolicy = await policy.run({
+    identityId: 'id-policy',
+    objectRef: 'cred-main',
+    objectType: 'credential',
+    requestedAction: 'password_fill',
+    requestId: 'req-policy-credential',
+  });
+  assert.equal(credentialPolicy.result.requiredStrength, 'medium');
+  assert.equal(credentialPolicy.result.gridPolicy.requiredCells, 6);
+  pass('object-strength-policy');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  grid.host.enrollAnswers('id-grid', ['correct grid answer']);
+  const result = await grid.run({
+    identityId: 'id-grid',
+    objectRef: 'wallet-key-main',
+    requiredStrength: 'high',
+    requestId: 'req-grid',
+    nonce: 'nonce-grid',
     expiry: Date.now() + 10_000,
   });
   assert.equal(result.status, 'success');
-  assert.equal(result.redactionLevel, 'partial');
-  assert.equal(result.result.storyObject.content, undefined);
-  assert.match(result.result.storyObject.contentSummary, /^\[redacted:/);
-  pass('read-success-partial-redaction');
+  assert.equal(result.result.grid.requiredCells, 9);
+  assert.equal(result.result.grid.cells.length, 9);
+  assert.equal(result.result.grid.cells[0].answer, undefined);
+  pass('grid-verification-generated');
 });
 
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
-  const read = new StoryReadAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [read.host];
-  read.host.enrollAnswers('id-1', ['correct answer']);
-  const first = await read.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-    answers: [{ answer: 'correct answer' }],
-    requestId: 'req-replay',
-    nonce: 'nonce-replay-a',
-    expiry: Date.now() + 10_000,
-  });
-  const replay = await read.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-    answers: [{ answer: 'correct answer' }],
-    requestId: 'req-replay-b',
-    nonce: 'nonce-replay-a',
-    expiry: Date.now() + 10_000,
-  });
-  assert.equal(first.status, 'success');
-  assert.equal(replay.status, 'error');
-  assert.equal(replay.error.code, 'SLG-008');
-  pass('replay-rejected');
-});
-
-await withDb(async (ctx) => {
-  const { dbPath, secretStore } = ctx;
-  const read = new StoryReadAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [read.host];
-  read.host.enrollAnswers('id-1', ['correct answer']);
-  const first = await read.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-    answers: [{ answer: 'correct answer' }],
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  grid.host.enrollAnswers('id-replay', ['correct']);
+  const first = await grid.run({
+    identityId: 'id-replay',
+    objectRef: 'wallet-key-main',
+    requiredStrength: 'medium',
     requestId: 'req-idempotent',
     nonce: 'nonce-idempotent-a',
     expiry: Date.now() + 10_000,
   });
-  const replay = await read.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-    answers: [{ answer: 'correct answer' }],
+  const replay = await grid.run({
+    identityId: 'id-replay',
+    objectRef: 'wallet-key-main',
+    requiredStrength: 'medium',
     requestId: 'req-idempotent',
     nonce: 'nonce-idempotent-b',
     expiry: Date.now() + 10_000,
@@ -115,109 +119,214 @@ await withDb(async (ctx) => {
 
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
-  const read = new StoryReadAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [read.host];
-  read.host.enrollAnswers('id-lock', ['correct']);
-  const codes = [];
-  for (let i = 0; i < 4; i += 1) {
-    const result = await read.run({
-      identityId: 'id-lock',
-      storyObjectId: 'story-001',
-      answers: [{ answer: 'wrong' }],
-      requestId: `req-lock-${i}`,
-      nonce: `nonce-lock-${i}`,
-      expiry: Date.now() + 10_000,
-    });
-    codes.push(result.error.code);
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  grid.host.enrollAnswers('id-replay-conflict', ['correct']);
+  const first = await grid.run({
+    identityId: 'id-replay-conflict',
+    objectRef: 'wallet-key-main',
+    requiredStrength: 'medium',
+    requestId: 'req-conflict-a',
+    nonce: 'nonce-conflict',
+    expiry: Date.now() + 10_000,
+  });
+  const second = await grid.run({
+    identityId: 'id-replay-conflict',
+    objectRef: 'wallet-key-main',
+    requiredStrength: 'high',
+    requestId: 'req-conflict-b',
+    nonce: 'nonce-conflict',
+    expiry: Date.now() + 10_000,
+  });
+  assert.equal(first.status, 'success');
+  assert.equal(second.status, 'error');
+  assert.equal(second.error.code, 'SLG-013');
+  pass('replay-conflict-error-code');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  const auth = new LocalAuthorizationSkill({ host: grid.host });
+  ctx.hosts = [grid.host];
+  grid.host.enrollAnswers('id-auth', ['correct grid answer']);
+  const verification = await grid.run({
+    identityId: 'id-auth',
+    objectRef: 'wallet-key-main',
+    requiredStrength: 'medium',
+    requestId: 'req-auth-grid',
+    nonce: 'nonce-auth-grid',
+    expiry: Date.now() + 10_000,
+  });
+  const result = await auth.run({
+    identityId: 'id-auth',
+    objectRef: 'wallet-key-main',
+    verificationId: verification.result.verificationId,
+    allowedAction: 'signature',
+    answers: [{ cellId: 'cell-1', answer: ' Correct Grid Answer ' }],
+    requestId: 'req-auth-submit',
+  });
+  assert.equal(result.status, 'success');
+  assert.equal(result.result.approved, true);
+  assert.equal(result.result.allowedAction, 'signature');
+  assert.match(result.result.authorizationId, /^ses-/);
+  const session = grid.host.db.prepare('SELECT read_budget, write_budget FROM session_store WHERE session_id = ?').get(result.result.authorizationId);
+  assert.equal(session.read_budget, 1);
+  assert.equal(session.write_budget, 0);
+  pass('local-authorization-approved');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  grid.host.enrollAnswers('id-lock', ['correct']);
+  for (let i = 0; i < 3; i += 1) {
+    const challenge = grid.host.createChallenge('id-lock', 'grid_medium');
+    const result = grid.host.submitChallengeAnswers('id-lock', challenge.challengeId, [{ answer: 'wrong' }]);
+    assert.equal(result.approved, false);
   }
-  assert.deepEqual(codes, ['SLG-003', 'SLG-003', 'SLG-003', 'SLG-004']);
+  assert.throws(
+    () => grid.host.createChallenge('id-lock', 'grid_medium'),
+    /challenge is locked/,
+  );
   pass('identity-failure-window-lock');
 });
 
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
-  const write = new StoryWriteAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [write.host];
-  write.host.enrollAnswers('id-1', ['correct answer']);
-  const result = await write.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-selftest-write',
-    content: { title: 'Title', content: 'Body' },
-    answers: [{ answer: 'correct answer' }],
-    requestId: 'req-write',
-    nonce: 'nonce-write',
-    expiry: Date.now() + 10_000,
-  });
-  assert.equal(result.status, 'success');
-  assert.equal(result.result.writeResult.content, undefined);
-  pass('write-success-redacted');
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  grid.host.enrollAnswers('id-unlock', ['correct']);
+  for (let i = 0; i < 3; i += 1) {
+    const challenge = grid.host.createChallenge('id-unlock', 'grid_medium');
+    grid.host.submitChallengeAnswers('id-unlock', challenge.challengeId, [{ answer: 'wrong' }]);
+  }
+  const db = new DatabaseSync(dbPath);
+  db.prepare('UPDATE failure_window SET locked_until = ? WHERE identity_id = ?').run(Date.now() - 1, 'id-unlock');
+  db.prepare('UPDATE challenge_state SET lock_until = ? WHERE identity_id = ? AND status = ?').run(Date.now() - 1, 'id-unlock', 'locked');
+  db.close();
+  const challenge = grid.host.createChallenge('id-unlock', 'grid_medium');
+  const result = grid.host.submitChallengeAnswers('id-unlock', challenge.challengeId, [{ answer: 'correct' }]);
+  assert.equal(result.approved, true);
+  pass('identity-lock-auto-unlock');
 });
 
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
-  const write = new StoryWriteAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [write.host];
-  write.host.enrollAnswers('id-1', ['correct answer']);
-  const result = await write.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-sensitive-write',
-    content: {
-      title: 'Sensitive title',
-      content: 'Body',
-      email: 'reader@example.com',
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  const db = new DatabaseSync(dbPath);
+  const now = Date.now();
+  db.prepare('INSERT INTO request_store (request_id, nonce, expiry, request_hash, created_at) VALUES (?, ?, ?, ?, ?)').run('req-old-cleanup', 'nonce-old-cleanup', now - 60_000, 'hash', now - 60_000);
+  db.prepare('INSERT INTO nonce_store (nonce, request_id, expiry, created_at) VALUES (?, ?, ?, ?)').run('nonce-old-cleanup', 'req-old-cleanup', now - 60_000, now - 60_000);
+  db.prepare(
+    `INSERT INTO challenge_state
+     (challenge_id, identity_id, scope, status, expected_answer_digests_json, failure_count, lock_until, created_at, expires_at)
+     VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?)`
+  ).run('chl-old-cleanup', 'id-cleanup', 'grid_low', 'challenge_created', '[]', now - 60_000, now - 60_000);
+  db.prepare(
+    `INSERT INTO session_store
+     (session_id, challenge_id, identity_id, scope, resource_scope_json, session_type, read_budget, write_budget, status, issued_at, expires_at)
+     VALUES (?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?)`
+  ).run('ses-old-cleanup', 'chl-old-cleanup', 'id-cleanup', 'signature', '[]', 'authorization_only', 'session_active', now - 60_000, now - 60_000);
+  db.close();
+
+  const result = grid.host.cleanupExpired(now);
+  assert.equal(result.requestRows, 1);
+  assert.equal(result.nonceRows, 1);
+  assert.equal(result.sessionRows, 1);
+  assert.equal(result.challengeRows, 1);
+  pass('expired-records-cleaned');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  const db = new DatabaseSync(dbPath);
+  const now = Date.now();
+  for (let i = 0; i < 3; i += 1) {
+    db.prepare('INSERT INTO request_store (request_id, nonce, expiry, request_hash, created_at) VALUES (?, ?, ?, ?, ?)').run(`req-batch-${i}`, `nonce-batch-${i}`, now - 60_000, 'hash', now - 60_000);
+    db.prepare('INSERT INTO nonce_store (nonce, request_id, expiry, created_at) VALUES (?, ?, ?, ?)').run(`nonce-batch-${i}`, `req-batch-${i}`, now - 60_000, now - 60_000);
+  }
+  db.close();
+  const result = grid.host.cleanupExpired(now, { batchSize: 2 });
+  assert.equal(result.requestRows, 2);
+  assert.equal(result.nonceRows, 2);
+  const verify = new DatabaseSync(dbPath);
+  assert.equal(verify.prepare('SELECT COUNT(*) AS count FROM request_store WHERE request_id LIKE ?').get('req-batch-%').count, 1);
+  assert.equal(verify.prepare('SELECT COUNT(*) AS count FROM nonce_store WHERE nonce LIKE ?').get('nonce-batch-%').count, 1);
+  verify.close();
+  pass('expired-cleanup-batch-limited');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
+  grid.host.enrollAnswers('id-sign-audit', ['correct grid answer']);
+  const challenges = new Map();
+  const host = {
+    createChallenge(identityId, scope) {
+      const challenge = grid.host.createChallenge(identityId, scope);
+      challenges.set(challenge.challengeId, challenge);
+      return challenge;
     },
-    answers: [{ answer: 'correct answer' }],
-    requestId: 'req-sensitive-write',
-    nonce: 'nonce-sensitive-write',
-    expiry: Date.now() + 10_000,
+    submitChallengeAnswers(identityId, challengeId, answers) {
+      const verification = grid.host.submitChallengeAnswers(identityId, challengeId, answers);
+      if (!verification.approved) {
+        return verification;
+      }
+      const challenge = challenges.get(challengeId) ?? verification.challenge;
+      return grid.host.issueSession(identityId, challenge, challenge.scope, ['wallet/main/private_key'], {
+        sessionType: 'authorization_only',
+        readBudget: 1,
+        writeBudget: 0,
+      });
+    },
+    recordAudit: grid.host.recordAudit.bind(grid.host),
+    readSecretObject(_identityId, _sessionId, secretObjectId) {
+      return new TextEncoder().encode(`secret:${secretObjectId}`);
+    },
+  };
+  const skill = new SignatureAuthorizationSkill({
+    host,
+    signer({ keyId, algorithm, payload, secretReference }) {
+      return {
+        keyId,
+        algorithm,
+        payload: Array.from(payload),
+        secretReference,
+        signature: 'selftest-signature',
+      };
+    },
   });
-  assert.equal(result.status, 'success');
-  assert.equal(result.auditMeta.hasHighSensitivityFields, true);
-  assert.equal(result.result.writeResult.title, undefined);
-  pass('write-high-sensitivity-redaction');
-});
-
-await withDb(async (ctx) => {
-  const { dbPath, secretStore } = ctx;
-  const read = new StoryReadAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [read.host];
-  read.host.enrollAnswers('id-1', ['correct answer']);
-  const result = await read.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-    answers: [{ answer: 'correct answer' }],
-    redactionLevel: 'full',
-    requestId: 'req-full-redaction',
-    nonce: 'nonce-full-redaction',
-    expiry: Date.now() + 10_000,
-  });
-  assert.equal(result.status, 'success');
-  assert.equal(result.result.storyObject.title, '[redacted]');
-  assert.equal(result.result.storyObject.contentSummary, '[redacted]');
-  assert.equal(result.auditMeta.redactionLevel, 'full');
-  pass('read-full-redaction');
-});
-
-await withDb(async (ctx) => {
-  const { dbPath, secretStore } = ctx;
-  const read = new StoryReadAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [read.host];
-  read.host.enrollAnswers('id-1', ['correct answer']);
-  await read.run({
-    identityId: 'id-1',
-    storyObjectId: 'story-001',
-    answers: [{ answer: 'correct answer' }],
-    requestId: 'req-audit',
-    nonce: 'nonce-audit',
-    expiry: Date.now() + 10_000,
+  const result = await skill.run({
+    identityId: 'id-sign-audit',
+    keyId: 'wallet-key-main',
+    algorithm: 'ed25519',
+    payload: 'sign me',
+    secretObjectId: 'wallet/main/private_key',
+    answers: [{ answer: 'correct grid answer' }],
   });
   const db = new DatabaseSync(dbPath);
-  const rows = db.prepare('SELECT event_type, result, redaction_level, has_high_sensitivity_fields FROM audit_log ORDER BY audit_id').all();
+  const row = db.prepare(
+    `SELECT event_type, identity_id, story_object_id, result, meta_json
+     FROM audit_log
+     WHERE event_type = ?
+     ORDER BY audit_id DESC
+     LIMIT 1`
+  ).get('signature_authorized');
   db.close();
-  assert.deepEqual(rows.map((row) => row.event_type), ['replay_registered', 'challenge_verified', 'story_read', 'story_read_redaction_applied']);
-  assert.equal(rows.at(-1).redaction_level, 'partial');
-  assert.equal(rows.at(-1).has_high_sensitivity_fields, 0);
-  pass('audit-log-written');
+  const meta = JSON.parse(row.meta_json);
+  assert.equal(row.event_type, 'signature_authorized');
+  assert.equal(row.identity_id, 'id-sign-audit');
+  assert.equal(row.story_object_id, 'wallet/main/private_key');
+  assert.equal(row.result, 'success');
+  assert.equal(meta.authorizationId, result.authorizationId);
+  assert.equal(meta.signatureHash, result.signatureHash);
+  pass('signature-audit-persisted');
 });
 
 await withDb(async (ctx) => {
@@ -242,21 +351,22 @@ await withDb(async (ctx) => {
   `);
   legacy.close();
 
-  const read = new StoryReadAccessSkill({ dbPath, secretStore });
-  ctx.hosts = [read.host];
+  const grid = new GridChallengeSkill({ dbPath, secretStore });
+  ctx.hosts = [grid.host];
   const db = new DatabaseSync(dbPath);
   const requestColumns = new Set(db.prepare('PRAGMA table_info(request_store)').all().map((row) => row.name));
   const auditColumns = new Set(db.prepare('PRAGMA table_info(audit_log)').all().map((row) => row.name));
+  const storyObjectTable = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get('protected_story_objects');
   db.close();
   assert.equal(requestColumns.has('request_hash'), true);
   assert.equal(requestColumns.has('response_json'), true);
-  assert.equal(auditColumns.has('redaction_level'), true);
   assert.equal(auditColumns.has('meta_json'), true);
+  assert.equal(storyObjectTable, undefined);
   pass('sqlite-legacy-schema-migrated');
 });
 
 assert.throws(
-  () => new StoryReadAccessSkill({ dbPath: tempDbPath() }),
+  () => new GridChallengeSkill({ dbPath: tempDbPath() }),
   /Persistent SQLite host requires secretStore/,
 );
 pass('persistent-db-requires-secret-store');

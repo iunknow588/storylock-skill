@@ -4,8 +4,7 @@ Entry:
 - SKILL.md
 
 Capabilities:
-- references/delegated-story-read.md
-- references/delegated-story-write.md
+- requestSignature
+- requestPasswordFill
 - references/delegated-sign.md
-- references/boundary.md
 - references/boundary.md
