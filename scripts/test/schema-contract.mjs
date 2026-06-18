@@ -9,10 +9,13 @@ const requiredSchemas = [
   'src/storylock-local-story-access-skill/assets/schemas/access-response.schema.json',
   'src/storylock-local-story-access-skill/assets/schemas/grid-verification-input.schema.json',
   'src/storylock-local-story-access-skill/assets/schemas/local-authorization-input.schema.json',
+  'src/storylock-local-story-access-skill/assets/schemas/local-revocation-input.schema.json',
   'src/storylock-local-story-access-skill/assets/schemas/object-strength-policy-input.schema.json',
+  'src/storylock-local-story-access-skill/assets/schemas/question-set-master.schema.json',
   'src/storylock-local-story-processing-skill/assets/schemas/story-draft-input.schema.json',
   'src/storylock-local-story-processing-skill/assets/schemas/story-refine-input.schema.json',
   'src/storylock-remote-gateway-skill/assets/schemas/delegated-sign-input.schema.json',
+  'src/storylock-remote-gateway-skill/assets/schemas/android-host-health.schema.json',
   'src/storylock-remote-gateway-skill/assets/schemas/remote-gateway-request.schema.json',
   'src/storylock-remote-gateway-skill/assets/schemas/remote-gateway-response.schema.json',
 ];
@@ -65,7 +68,7 @@ assert.deepEqual(
 
 const accessResponse = readJson(new URL('../../src/storylock-local-story-access-skill/assets/schemas/access-response.schema.json', import.meta.url));
 assert.match(
-  accessResponse.properties.error.anyOf[0].properties.code.pattern,
+  accessResponse.properties.error.oneOf[1].properties.code.pattern,
   /\^SLG-\[0-9\]\{3\}\$/,
   'access response error code must use SLG-xxx pattern',
 );

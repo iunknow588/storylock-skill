@@ -20,6 +20,7 @@ SKIP_DIRS = {
     "__pycache__",
     ".pytest_cache",
     ".ruff_cache",
+    ".vercel",
     ".vscode",
     "node_modules",
     "venv",

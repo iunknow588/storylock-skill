@@ -17,8 +17,13 @@ const response = await gateway.requestSignature({
   primaryRole: "private_key",
   nonce: "nonce-003",
   expiry: Date.now() + 60_000,
-  chainId: 0,
-  verifyingContract: "0x0000000000000000000000000000000000000000",
+  eip712Domain: {
+    name: "StoryLock",
+    version: "1-placeholder",
+    chainId: 1,
+    verifyingContract: "0x0000000000000000000000000000000000000000",
+    environment: "demo",
+  },
 });
 ```
 
@@ -37,13 +42,18 @@ const response = await gateway.requestSignature({
 | `expiry` | number | yes | none | Request expiry timestamp. |
 | `requestedRetention` | string | no | `result_only` | Retention requested from the gateway. |
 | `policyHints` | object | no | `{}` | Route and redaction hints. |
-| `chainId` | number | no | `0` | EIP-712 domain chain id placeholder. |
-| `verifyingContract` | string | no | zero address | EIP-712 domain verifying contract placeholder. |
+| `eip712Domain` | object | no | gateway default or demo placeholder domain | Optional request-level EIP-712 domain override, including `name`, `version`, `chainId`, `verifyingContract`, and `environment`. |
 
 ## Output Parsing
 
 The remote gateway returns a structured local signing request rather than raw key material.
 The request payload includes a minimal EIP-712 structure under `payload.eip712`.
+When `eip712Domain` is not supplied, the gateway uses the constructor-level `eip712Domain` default if present, otherwise a demo-oriented placeholder domain.
+Production callers should inject an explicit domain with a real `version`, `chainId`, and `verifyingContract`.
+If `environment` is `production`, the gateway rejects placeholder versions, `chainId: 0`, and the zero verifying contract address.
+
+For callers that want an explicit production preset, use `createProductionEip712Domain({ version, chainId, verifyingContract })`.
+For demo flows, use `createDemoEip712Domain()` or pass a request-level placeholder domain explicitly.
 
 ## Error Handling
 

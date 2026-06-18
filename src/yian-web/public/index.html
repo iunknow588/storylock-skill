@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="易安帮助普通用户下载易安 App、完成本地设备绑定、查看连接状态，并在本地设备上确认需要授权的请求。"
+    >
+    <title>易安 | Yian</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <div>
+          <p class="eyebrow" data-i18n="header.kicker">StoryLock 本地确认</p>
+          <h1 class="brand" data-i18n="header.brand">易安</h1>
+        </div>
+        <div class="header-controls">
+          <nav class="nav" aria-label="Primary">
+            <a href="#overview" data-i18n="nav.overview">产品说明</a>
+            <a href="#architecture" data-i18n="nav.architecture">安全方式</a>
+            <a href="#binding" data-i18n="nav.binding">下载绑定</a>
+            <a href="#apk" data-i18n="nav.apk">安装版本</a>
+            <a href="#faq" data-i18n="nav.faq">常见问题</a>
+            <a href="#runtime" data-i18n="nav.runtime">连接状态</a>
+          </nav>
+          <div class="locale-switch" aria-label="Language">
+            <button class="locale-button is-active" type="button" data-locale="zh">中</button>
+            <button class="locale-button" type="button" data-locale="en">EN</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <img class="hero-media" src="/assets/yian-network-banner.png" alt="" data-i18n-alt="hero.imageAlt">
+        <div class="hero-overlay"></div>
+        <div class="wrap hero-content">
+          <p class="eyebrow light" data-i18n="hero.kicker">StoryLock 本地安全确认</p>
+          <h2 data-i18n="hero.title">用易安把 StoryLock 绑定到你的本地设备</h2>
+          <p class="hero-copy" data-i18n="hero.copy">
+            下载易安 App，完成一次绑定。之后第三方 Agent 或云服务发起的敏感请求，会先到你的私人智能助理；StoryLock 本地核心只和私人智能助理本地通信。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="/app/download" data-i18n="hero.download">下载易安 App</a>
+            <a class="button" href="/app/bind" data-i18n="hero.bind">打开绑定入口</a>
+            <a class="button" href="#runtime" data-i18n="hero.status">查看连接状态</a>
+          </div>
+          <dl class="hero-stats">
+            <div>
+              <dt data-i18n="hero.stats.roleLabel">第一步</dt>
+              <dd data-i18n="hero.stats.roleValue">下载并安装 App</dd>
+            </div>
+            <div>
+              <dt data-i18n="hero.stats.capabilityLabel">第二步</dt>
+              <dd data-i18n="hero.stats.capabilityValue">打开绑定入口</dd>
+            </div>
+            <div>
+              <dt data-i18n="hero.stats.localLabel">使用时</dt>
+              <dd data-i18n="hero.stats.localValue">在本地设备上确认请求</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section id="overview" class="band">
+        <div class="wrap split">
+          <div class="section-head">
+            <p class="section-kicker" data-i18n="overview.kicker">产品说明</p>
+            <h3 data-i18n="overview.title">易安让重要操作回到你的本地设备上确认</h3>
+          </div>
+          <div class="copy-list">
+            <p data-i18n="overview.copy1"></p>
+            <p data-i18n="overview.copy2"></p>
+            <p data-i18n="overview.copy3"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="architecture" class="band alt">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker" data-i18n="architecture.kicker">安全方式</p>
+            <h3 data-i18n="architecture.title">每次关键请求都需要你在本地设备上看清楚再确认</h3>
+          </div>
+          <div class="columns three">
+            <article class="column">
+              <h4 data-i18n="architecture.layer1.title">先看清请求</h4>
+              <p data-i18n="architecture.layer1.copy"></p>
+              <ul>
+                <li data-i18n="architecture.layer1.item1"></li>
+                <li data-i18n="architecture.layer1.item2"></li>
+                <li data-i18n="architecture.layer1.item3"></li>
+              </ul>
+            </article>
+            <article class="column">
+              <h4 data-i18n="architecture.layer2.title">再本地确认</h4>
+              <p data-i18n="architecture.layer2.copy"></p>
+              <ul>
+                <li data-i18n="architecture.layer2.item1"></li>
+                <li data-i18n="architecture.layer2.item2"></li>
+                <li data-i18n="architecture.layer2.item3"></li>
+              </ul>
+            </article>
+            <article class="column">
+              <h4 data-i18n="architecture.layer3.title">最后回传结果</h4>
+              <p data-i18n="architecture.layer3.copy"></p>
+              <ul>
+                <li data-i18n="architecture.layer3.item1"></li>
+                <li data-i18n="architecture.layer3.item2"></li>
+                <li data-i18n="architecture.layer3.item3"></li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="binding" class="band">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker" data-i18n="binding.kicker">下载与绑定</p>
+            <h3 data-i18n="binding.title">下载后如何绑定</h3>
+          </div>
+          <div class="columns three">
+            <article class="column">
+              <h4 data-i18n="binding.step1.title">1. 下载 App</h4>
+              <p data-i18n="binding.step1.copy"></p>
+            </article>
+            <article class="column">
+              <h4 data-i18n="binding.step2.title">2. 打开绑定链接</h4>
+              <p data-i18n="binding.step2.copy"></p>
+            </article>
+            <article class="column">
+              <h4 data-i18n="binding.step3.title">3. 注册并回连</h4>
+              <p data-i18n="binding.step3.copy"></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="apk" class="band alt">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker" data-i18n="apk.kicker">APK 分发</p>
+            <h3 data-i18n="apk.title">安装说明与版本规则</h3>
+          </div>
+          <div class="columns two">
+            <article class="column">
+              <h4 data-i18n="apk.install.title">安装流程</h4>
+              <ol class="flow-list compact">
+                <li data-i18n="apk.install.step1">下载易安 App 安装包。</li>
+                <li data-i18n="apk.install.step2">在 Android 设备上安装并允许来自当前来源的安装。</li>
+                <li data-i18n="apk.install.step3">从易安打开绑定链接，按本地设备提示完成绑定。</li>
+                <li data-i18n="apk.install.step4">完成首次注册后，回到站点查看 App 在线状态。</li>
+              </ol>
+            </article>
+            <article class="column">
+              <h4 data-i18n="apk.rules.title">版本信息</h4>
+              <p data-i18n="apk.rules.copy"></p>
+              <ul>
+                <li data-i18n="apk.rules.path"></li>
+                <li data-i18n="apk.rules.name"></li>
+                <li data-i18n="apk.rules.version"></li>
+                <li data-i18n="apk.rules.policy"></li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="user-guide" class="band">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker" data-i18n="userGuide.kicker">使用说明</p>
+            <h3 data-i18n="userGuide.title">普通用户如何使用易安</h3>
+          </div>
+          <div class="columns three">
+            <article class="column">
+              <h4 data-i18n="userGuide.use.title">开始使用</h4>
+              <p data-i18n="userGuide.use.copy"></p>
+            </article>
+            <article class="column">
+              <h4 data-i18n="userGuide.approve.title">本地确认</h4>
+              <p data-i18n="userGuide.approve.copy"></p>
+            </article>
+            <article class="column">
+              <h4 data-i18n="userGuide.notice.title">注意事项</h4>
+              <p data-i18n="userGuide.notice.copy"></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="band alt">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker" data-i18n="flow.kicker">使用流程</p>
+            <h3 data-i18n="flow.title">从下载到完成一次本地确认</h3>
+          </div>
+          <ol class="flow-list">
+            <li data-i18n="flow.item1"></li>
+            <li data-i18n="flow.item2"></li>
+            <li data-i18n="flow.item3"></li>
+            <li data-i18n="flow.item4"></li>
+            <li data-i18n="flow.item5"></li>
+            <li data-i18n="flow.item6"></li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="faq" class="band">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker" data-i18n="faq.kicker">常见问题</p>
+            <h3 data-i18n="faq.title">绑定或确认遇到问题时先看这里</h3>
+          </div>
+          <div class="columns two">
+            <article class="column">
+              <h4 data-i18n="faq.offline.title">状态显示离线怎么办？</h4>
+              <p data-i18n="faq.offline.copy"></p>
+            </article>
+            <article class="column">
+              <h4 data-i18n="faq.bind.title">绑定链接可以发给别人吗？</h4>
+              <p data-i18n="faq.bind.copy"></p>
+            </article>
+            <article class="column">
+              <h4 data-i18n="faq.install.title">安装时提示风险怎么办？</h4>
+              <p data-i18n="faq.install.copy"></p>
+            </article>
+            <article class="column">
+              <h4 data-i18n="faq.changeDevice.title">更换本地设备后怎么处理？</h4>
+              <p data-i18n="faq.changeDevice.copy"></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="runtime" class="band alt">
+        <div class="wrap runtime-grid">
+          <div>
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="runtime.kicker">连接状态</p>
+              <h3 data-i18n="runtime.title">查看当前 App 版本与本地设备连接情况</h3>
+            </div>
+            <div class="action-row">
+              <button class="button primary" type="button" data-action="gateway-status" data-i18n="runtime.loadGateway">加载连接状态</button>
+              <button class="button" type="button" data-action="registrations" data-i18n="runtime.loadRegistrations">查看设备连接</button>
+            </div>
+            <dl class="status-grid">
+              <div>
+                <dt data-i18n="runtime.currentMode">连接方式</dt>
+                <dd data-field="connect-mode" data-i18n="runtime.pending">等待加载</dd>
+              </div>
+              <div>
+                <dt data-i18n="runtime.activeHosts">在线设备</dt>
+                <dd data-field="active-host-count">0</dd>
+              </div>
+              <div>
+                <dt data-i18n="runtime.downloadEntry">下载入口</dt>
+                <dd data-field="download-url">/app/download</dd>
+              </div>
+              <div>
+                <dt data-i18n="runtime.bindEntry">绑定入口</dt>
+                <dd data-field="bind-url">/app/bind</dd>
+              </div>
+              <div>
+                <dt data-i18n="runtime.apkVersion">APK 版本</dt>
+                <dd data-field="apk-version" data-i18n="runtime.pending">等待加载</dd>
+              </div>
+              <div>
+                <dt data-i18n="runtime.apkFileSize">APK 大小</dt>
+                <dd data-field="apk-file-size" data-i18n="runtime.pending">等待加载</dd>
+              </div>
+              <div>
+                <dt data-i18n="runtime.apkPackage">版本类型</dt>
+                <dd data-field="apk-package" data-i18n="runtime.pending">等待加载</dd>
+              </div>
+              <div>
+                <dt data-i18n="runtime.apkChecksum">校验值</dt>
+                <dd data-field="apk-checksum" data-i18n="runtime.pending">等待加载</dd>
+              </div>
+            </dl>
+          </div>
+          <div class="console-block">
+            <div class="console-head">
+              <h4 data-i18n="runtime.responseTitle">返回数据</h4>
+              <p class="muted" data-i18n="runtime.responseNote"></p>
+            </div>
+            <pre data-region="output"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div>
+          <strong data-i18n="footer.brand">易安 Yian</strong>
+          <p data-i18n="footer.copy"></p>
+        </div>
+        <div class="footer-links">
+          <a href="/app/download" data-i18n="footer.androidHost">易安 App</a>
+          <a href="/app/registrations" data-i18n="footer.registrations">设备连接</a>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

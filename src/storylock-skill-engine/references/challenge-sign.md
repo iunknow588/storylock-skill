@@ -45,8 +45,8 @@ const result = await skill.run({
 | `resourceId` | `string \| null` | no | `null` | Used with `primaryRole` or attachment role lookup. |
 | `primaryRole` | `string \| null` | no | `null` | Role used when `secretObjectId` is omitted. |
 | `resourceCatalog` | `object \| null` | no | `null` | Resource map for role-based resolution. |
-| `includeKeyMaterial` | `boolean` | no | `false` | Expands requested scope when true. |
-| `attachments` | `object[]` | no | `[]` | Optional extra secret references. |
+| `includeKeyMaterial` | `boolean` | no | `false` | Expands requested scope when true. The returned package only includes material presence, byte length, and digest metadata. |
+| `attachments` | `object[]` | no | `[]` | Optional extra secret references. Up to 10 items. Raw attachment material is never returned. |
 | `answers` | `array` | no | `[]` | Local authorization answers submitted to the host. |
 
 Host requirements:
@@ -77,12 +77,15 @@ The signing result is assembled by the skill implementation and includes authori
 6. `authorization`
 7. signature-related fields returned by the signer
 
+`SigningAuthorizationSkill` does not return raw `signingKeyBytes`, `secretBytes`, or `secretValue`. When material inclusion is requested, it returns only summary metadata such as `materialIncluded`, `byteLength`, and `sha256`.
+
 ## Error Handling
 
 | Error Code | Trigger | Fix |
 | --- | --- | --- |
 | `VALIDATION_ERROR` | `identityId`, `keyId`, or `algorithm` is empty | Provide valid non-empty identifiers. |
 | `VALIDATION_ERROR` | `payload` cannot be normalized | Supply a `Uint8Array`, string, or byte array. |
+| `VALIDATION_ERROR` | `attachments` is not an array or contains more than 10 items | Supply a bounded array of attachment references. |
 | `VALIDATION_ERROR` | `signer` is missing or invalid | Inject a function or object with `sign()`. |
 | `VALIDATION_ERROR` | secret reference cannot be resolved | Provide `secretObjectId` directly or a valid `resourceCatalog` path. |
 | host-raised error | local authorization or secret reads fail | Verify authorization freshness, answers, scope, and object references. |

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LocalRevocationInput",
+  "type": "object",
+  "required": ["identityId", "requestId"],
+  "properties": {
+    "identityId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verificationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authorizationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "default": "manual_revocation"
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "oneOf": [
+    { "required": ["verificationId"] },
+    { "required": ["authorizationId"] }
+  ],
+  "additionalProperties": false
+}

@@ -66,13 +66,13 @@
 
 ## 不再作为当前主线的能力
 
-1. `requestStoryRead`
-2. `requestStoryWrite`
-3. `requestChallengeSign`
-4. `requestCapabilityStatus`
-5. `requestLocalStoryAssist`
-6. `queryStoryMetadata`
-7. 第二层故事对象读写
+1. 已废弃旧接口 `requestStoryRead`
+2. 已废弃旧接口 `requestStoryWrite`
+3. 已废弃旧接口 `requestChallengeSign`
+4. 已废弃旧接口 `requestCapabilityStatus`
+5. 已废弃旧接口 `requestLocalStoryAssist`
+6. 已废弃旧接口 `queryStoryMetadata`
+7. 已废弃第二层故事对象读写
 
 ## 后续设计原则
 

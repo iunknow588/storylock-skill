@@ -24,6 +24,7 @@
 | 第一层故事处理包 | `src/storylock-local-story-processing-skill` | P0 | 草稿、润色、强度评估 |
 | 第二层本地访问授权包 | `src/storylock-local-story-access-skill` | P0 | 对象强度、九宫格、本地授权、SQLite 状态 |
 | 第三层远程网关包 | `src/storylock-remote-gateway-skill` | P0 | `requestSignature`、`requestPasswordFill`、脱敏 |
+| 易安网站与第三层部署入口 | `src/ui`、`api/storylock-gateway.mjs` | P0 | 首页、双语切换控件、状态接口、APK 下载与绑定入口 |
 | 兼容演示包 | `src/storylock-skill-engine` | P1 | 本地密码填充和签名授权示例 |
 | 跨包集成链路 | 第三层 -> 第二层 -> 本地执行器 | P0 | 端到端授权执行 |
 | Schema 与文档契约 | `assets/schemas`、`docs/design/cn` | P1 | 字段、错误码、能力名一致 |
@@ -47,6 +48,14 @@ npm -v
 ```
 
 当前最小验证命令：
+
+```powershell
+Push-Location E:\2026OPC大赛\skill
+npm run test
+Pop-Location
+```
+
+也可以分别运行：
 
 ```powershell
 Push-Location E:\2026OPC大赛\skill\src\storylock-local-story-processing-skill; npm run selftest; Pop-Location
@@ -75,9 +84,26 @@ Push-Location E:\2026OPC大赛\skill\src\storylock-skill-engine; npm run selftes
 | `storylock-local-story-processing-skill` | `npm run selftest` | 草稿、润色、强度评估、边界标记 |
 | `storylock-local-story-access-skill` | `npm run selftest` | 对象强度、九宫格、防重放、本地授权、失败锁定、清理、SQLite 审计 |
 | `storylock-remote-gateway-skill` | `npm run selftest` | `requestSignature`、`requestPasswordFill`、EIP-712、脱敏、本地执行器 |
+| `storylock-skill-ui` | `npm run selftest` | 易安首页、双语切换控件、静态资源、网关状态、APK 摘要字段 |
 | `storylock-skill-engine` | `npm run selftest` | 本地密码填充和签名授权兼容示例 |
 
 P0 通过标准：四个 selftest 必须全部通过。
+
+补充网站自检：
+
+```powershell
+Push-Location src/ui
+npm run selftest
+Pop-Location
+```
+
+该脚本启动本地易安网站并验证：
+
+1. 首页可打开。
+2. 中英文切换控件存在，前端包含中文与英文文案字典。
+3. 静态资源可读取。
+4. `GET /api/storylock-gateway` 可返回状态 JSON。
+5. APK 版本、校验值与包类型等摘要字段可从运行态状态读取。
 
 ## 六、第一层测试用例
 
@@ -288,7 +314,7 @@ P0 通过标准：四个 selftest 必须全部通过。
 
 | 编号 | 用例 | 预期结果 | 优先级 |
 | --- | --- | --- | --- |
-| C-SCHEMA-001 | 所有 JSON Schema 可被 Ajv 加载 | 无语法错误 | P1 |
+| C-SCHEMA-001 | 所有 JSON Schema 可被根目录契约脚本加载 | 无语法错误 | P1 |
 | C-SCHEMA-002 | 有效 object strength 输入 | 通过校验 | P1 |
 | C-SCHEMA-003 | 有效 grid verification 输入 | 通过校验 | P1 |
 | C-SCHEMA-004 | 有效 local authorization 输入 | 通过校验 | P1 |
@@ -401,10 +427,12 @@ skill/
 | T0 | 跑通现有四个 selftest | 当前冒烟基线 | P0 |
 | T1 | 补端到端签名链路测试 | `signature-flow.test.mjs` | P0 |
 | T2 | 补端到端密码填充链路测试 | `password-fill-flow.test.mjs` | P0 |
-| T3 | 补安全专项测试 | replay、lockout、redaction 测试 | P0 |
-| T4 | 补 Schema 契约测试 | Ajv 校验脚本 | P1 |
-| T5 | 补文档-代码一致性测试 | 静态扫描脚本 | P1 |
-| T6 | 补覆盖率统计 | 覆盖率报告 | P2 |
+| T3 | 补易安网站最小自检 | 已新增 `src/ui/scripts/selftest-site.mjs` 并接入根 `npm run selftest` | P0 |
+| T4 | 补 APK 下载与元数据自检 | 已扩展 `selftest:vercel-android` 覆盖下载、版本、大小、checksum、包类型、发布通道 | P0 |
+| T5 | 补安全专项测试 | replay、lockout、redaction 测试 | P0 |
+| T6 | 补 Schema 契约测试 | 已新增 `npm run test:contract`，后续可继续接入 Ajv | P1 |
+| T7 | 补文档-代码一致性测试 | 静态扫描脚本 | P1 |
+| T8 | 补覆盖率统计 | 覆盖率报告 | P2 |
 
 ## 十六、通过标准
 
@@ -501,12 +529,11 @@ Pop-Location
 
 以下内容不纳入当前 v1.0 主线验收：
 
-1. 故事对象读取。
-2. 故事对象写回。
-3. `requestChallengeSign`。
+1. 不测试故事对象读取。
+2. 不测试故事对象写回。
+3. 不测试已废弃旧接口 `requestChallengeSign`。
 4. 完整链上验证。
 5. EIP-1271/ERC-4337 生产级集成。
 6. 多链、多钱包、多账号应用编排。
 
 这些内容只能作为后续应用探索或扩展测试项。
-

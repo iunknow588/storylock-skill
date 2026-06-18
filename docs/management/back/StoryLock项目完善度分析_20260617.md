@@ -29,6 +29,14 @@
     {
       "type": "P1-SecretStore生产约束",
       "description": "持久化 SQLite 使用 MemorySecretStore 时，必须显式 developmentMode=true，否则拒绝创建 Host；平台 SecretStore 工厂和检查脚本保留。"
+    },
+    {
+      "type": "P1-统一测试入口",
+      "description": "已新增根目录 package.json，支持 npm run selftest 与 npm run test。"
+    },
+    {
+      "type": "P1-Schema契约检查",
+      "description": "已新增 scripts/test/schema-contract.mjs，检查 14 个 schema 的基本结构、主线 capability 枚举和 SLG 错误码格式。"
     }
   ],
   "remaining": [
@@ -54,7 +62,7 @@
     "src/storylock-remote-gateway-skill: npm run selftest passed",
     "src/storylock-remote-gateway-skill: npm run selftest:e2e passed",
     "src/storylock-skill-engine: npm run selftest passed",
-    "src/storylock-local-story-access-skill: npm run cleanup -- 2 --development-memory-secret-store passed"
+    "src/storylock-local-story-access-skill: npm run cleanup -- 2 --development-memory-secret-store passed",
+    "workspace: npm run test passed"
   ]
 }
-

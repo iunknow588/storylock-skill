@@ -214,6 +214,14 @@ This avoids:
 
 Question set answer bodies should not be mixed with challenge submitted answers.
 
+The current implementation separates them:
+
+1. `question_set_item` stores the question-set master record: `questionId`, `versionTag`, `promptRef`, display prompt, option digest, answer digest, `normalizationVersion`, `questionSetVersion`, and `active/deprecated/pending` status.
+2. `challenge_state.challenge_manifest_json` stores the challenge instance: grid cells, question references, versions, threshold, and expiry.
+3. `challenge_state.expected_answer_digests_json` stores only the per-cell digests required for verification, not answer plaintext.
+4. `GridChallengeSkill` returns cells with question references, prompt text, versions, and option digests, but never answer plaintext.
+5. `LocalAuthorizationSkill` verifies answers by `cellId -> questionId`; high strength requires 9 cells, medium requires 6 cells, and low requires 3 cells.
+
 It is recommended to split into two types of storage:
 
 1. **Question Set Master File**

@@ -15,6 +15,7 @@ Use this guide for:
 2. StoryLock skill invocation examples
 3. StoryLock migrated package demo paths
 4. current Rust / WASM packaging status
+5. Vercel gateway plus Android-host deployment guidance
 
 Do not use this guide to claim that StoryLock core security semantics were rewritten here.
 
@@ -37,6 +38,7 @@ It still does not yet have:
 | --- | --- | --- |
 | Explain StoryLock skill boundaries | boundary and responsibility split | `references/boundary.md` |
 | Show how to call StoryLock skills | package exports and invocation map | `references/invocation.md` |
+| Explain Vercel and Android host split | Android host contract | `references/android-host.md` |
 | Draft or refine a StoryLock story | story assist workflow | `references/story-assist.md` |
 | Review whether a question set is strong enough | strength review workflow | `references/strength-review.md` |
 | Produce authorized login fields | password-fill workflow | `references/password-fill.md` |
@@ -51,3 +53,4 @@ It still does not yet have:
 3. Say clearly when a capability is JS-local only versus Rust/WASM-backed.
 4. Do not describe the current package as fully Rust-complete.
 5. Use the capability-specific reference page before improvising parameter or output claims.
+6. For current deployment guidance, describe Layer 3 as a Vercel-capable remote gateway entry and Layers 1-2 as Android-local host capabilities; do not claim that a full Android app project already exists in this repo.

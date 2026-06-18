@@ -117,11 +117,10 @@
 
 以下名称可能仍出现在历史文档或迁移代码中，但不再作为当前主线接口：
 
-1. `requestStoryRead`
-2. `requestStoryWrite`
-3. `requestChallengeSign`
-4. `requestCapabilityStatus`
-5. `StoryReadAccessSkill`
-6. `StoryWriteAccessSkill`
-7. `ChallengeSigningAuthorizationSkill`
-
+1. 已废弃旧接口 `requestStoryRead`
+2. 已废弃旧接口 `requestStoryWrite`
+3. 已废弃旧接口 `requestChallengeSign`
+4. 已废弃旧接口 `requestCapabilityStatus`
+5. 已废弃旧 Skill `StoryReadAccessSkill`
+6. 已废弃旧 Skill `StoryWriteAccessSkill`
+7. 已废弃旧 Skill `ChallengeSigningAuthorizationSkill`

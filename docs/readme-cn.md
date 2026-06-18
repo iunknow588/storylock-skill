@@ -1,6 +1,6 @@
 # StoryLock 项目说明
 
-版本：2026-06-17  
+版本：2026-06-18  
 适用目录：`skill/`
 
 ## 1. 项目定位
@@ -85,6 +85,8 @@ SQLite 当前保存：
 
 持久化 SQLite 不允许默认使用普通 `MemorySecretStore`。开发测试可以显式使用 `developmentMode=true`，生产环境应使用平台 SecretStore 或等价安全存储。
 
+生产持久化主机默认不启用 legacy 答案回退。九宫格验证必须来自足量 active 题集；题集不足时返回 `SLG-010` / `question_set_unavailable`。仅开发或演示兼容场景可以显式传入 `allowLegacyFallback: true`。
+
 ## 5. 运行与验证
 
 在 `skill/` 目录下执行以下命令。
@@ -161,12 +163,13 @@ Pop-Location
 
 | 文档 | 路径 |
 | --- | --- |
+| 工作区根目录入口 | `README.md` |
 | 中文设计入口 | `docs/design/cn/README.md` |
 | 参赛参考材料 | `docs/ref/README.md` |
 | 测试方案 | `docs/test/StoryLock测试方案_v1.0.md` |
-| 项目完善度分析 | `docs/management/StoryLock项目完善度分析_20260617.md` |
-| 开发完善计划 | `docs/management/开发完善实施计划_20260617.md` |
-| 参赛说明 | `docs/usecase/00-参赛说明文档.md` |
+| 开发落地进展 | `docs/design/cn/开发落地路线与当前进展.md` |
+| 评审讲解与演示说明 | `docs/ref/06-评审讲解与演示说明.md` |
+| 参赛概览 | `docs/ref/01-参赛概览.md` |
 
 ## 7. 当前完成度
 
@@ -181,10 +184,9 @@ Pop-Location
 
 仍需完善：
 
-1. 九宫格问题来源仍是占位式 cell，后续应接入真实题集或对象策略。
-2. Challenge 主动 revoked 状态可继续增强。
-3. HTTP/宿主集成层仍是后续扩展。
-4. 多链、多平台、多账号等属于应用场景探索，不是当前已实现能力。
+1. 生产题集已有导入 dry-run 和 schema；仍需补充更完整的运营发布、迁移、回滚说明。
+2. HTTP/宿主集成层仍是后续扩展。
+3. 多链、多平台、多账号等属于应用场景探索，不是当前已实现能力。
 
 ## 8. 推荐对外表述
 

@@ -1,0 +1,85 @@
+function optionalString(value) {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function ensureUrl(value) {
+  const text = optionalString(value);
+  if (!text) {
+    return null;
+  }
+  try {
+    return new URL(text).toString();
+  } catch {
+    return text;
+  }
+}
+
+function buildConnectionOptions(env = process.env, {
+  gatewayBaseUrl = null,
+  bindingDeepLink = null,
+} = {}) {
+  const options = [];
+  const directUrl = ensureUrl(env.STORYLOCK_ANDROID_HOST_URL);
+  const relayUrl = ensureUrl(env.STORYLOCK_ANDROID_RELAY_URL)
+    ?? (gatewayBaseUrl ? new URL('/android-host/relay', gatewayBaseUrl).toString() : null);
+  const deepLink = optionalString(env.STORYLOCK_ANDROID_DEEP_LINK)
+    ?? optionalString(bindingDeepLink);
+
+  if (directUrl) {
+    options.push({
+      mode: 'direct_url',
+      label: 'Direct Android Host URL',
+      value: directUrl,
+    });
+  }
+  if (relayUrl) {
+    options.push({
+      mode: 'relay_url',
+      label: 'Relay URL',
+      value: relayUrl,
+    });
+  }
+  if (deepLink) {
+    options.push({
+      mode: 'deep_link',
+      label: 'Android Deep Link',
+      value: deepLink,
+    });
+  }
+  return options;
+}
+
+export function resolveAndroidConnectionConfig(env = process.env, {
+  gatewayBaseUrl = null,
+  bindingDeepLink = null,
+} = {}) {
+  const preferredMode = optionalString(env.STORYLOCK_ANDROID_CONNECT_MODE) ?? 'direct_url';
+  const options = buildConnectionOptions(env, {
+    gatewayBaseUrl,
+    bindingDeepLink,
+  });
+  const activeOption = options.find((option) => option.mode === preferredMode) ?? options[0] ?? null;
+  return {
+    preferredMode,
+    activeOption,
+    options,
+  };
+}
+
+export function resolveAppDistributionConfig(env = process.env) {
+  return {
+    androidAppDownloadUrl: optionalString(env.STORYLOCK_ANDROID_APP_DOWNLOAD_URL),
+    androidApkPath: optionalString(env.STORYLOCK_ANDROID_APK_PATH),
+    androidApkVersion: optionalString(env.STORYLOCK_ANDROID_APK_VERSION),
+    androidApkVersionCode: optionalString(env.STORYLOCK_ANDROID_APK_VERSION_CODE),
+    androidApkChecksum: optionalString(env.STORYLOCK_ANDROID_APK_CHECKSUM),
+    androidPackageKind: optionalString(env.STORYLOCK_ANDROID_PACKAGE_KIND),
+    androidReleaseChannel: optionalString(env.STORYLOCK_ANDROID_RELEASE_CHANNEL),
+    androidUiDownloadUrl: optionalString(env.STORYLOCK_ANDROID_UI_DOWNLOAD_URL),
+    androidInstallGuideUrl: optionalString(env.STORYLOCK_ANDROID_INSTALL_GUIDE_URL),
+  };
+}

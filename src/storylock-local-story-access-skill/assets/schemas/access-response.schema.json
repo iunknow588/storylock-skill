@@ -27,7 +27,8 @@
       "enum": [
         "resolveObjectStrength",
         "createGridVerification",
-        "authorizeLocalAction"
+        "authorizeLocalAction",
+        "revokeLocalAuthorization"
       ]
     },
     "executionLocation": {

@@ -25,6 +25,14 @@ export function migrateSqliteSchema(db) {
   addColumnIfMissing(db, 'request_store', 'response_status', 'TEXT');
   addColumnIfMissing(db, 'request_store', 'response_created_at', 'INTEGER');
 
+  addColumnIfMissing(db, 'challenge_state', 'challenge_manifest_json', "TEXT NOT NULL DEFAULT '{}'");
+  addColumnIfMissing(db, 'challenge_state', 'required_threshold', 'INTEGER NOT NULL DEFAULT 1');
+  addColumnIfMissing(db, 'challenge_state', 'normalization_version', "TEXT NOT NULL DEFAULT 'nfkc-lower-v1'");
+  addColumnIfMissing(db, 'challenge_state', 'question_set_version', "TEXT NOT NULL DEFAULT 'legacy'");
+
+  addColumnIfMissing(db, 'answer_digest_set', 'normalization_version', "TEXT NOT NULL DEFAULT 'nfkc-lower-v1'");
+  addColumnIfMissing(db, 'answer_digest_set', 'question_set_version', "TEXT NOT NULL DEFAULT 'legacy'");
+
   addColumnIfMissing(db, 'audit_log', 'redaction_level', 'TEXT');
   addColumnIfMissing(db, 'audit_log', 'has_high_sensitivity_fields', 'INTEGER NOT NULL DEFAULT 0');
   addColumnIfMissing(db, 'audit_log', 'error_code', 'TEXT');

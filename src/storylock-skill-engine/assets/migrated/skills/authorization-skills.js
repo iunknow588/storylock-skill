@@ -62,6 +62,9 @@ function determineLoginScope(bindings) {
 }
 
 function determineSigningScope({ includeKeyMaterial, secretObjectId, attachments = [] }) {
+  if (attachments.length > 10) {
+    throw new ValidationError("attachments must contain 10 items or fewer");
+  }
   const objectIds = uniqueValues([
     secretObjectId,
     ...attachments.map((attachment) => attachment.secretObjectId),
@@ -70,6 +73,13 @@ function determineSigningScope({ includeKeyMaterial, secretObjectId, attachments
     return "vault_read_batch";
   }
   return "vault_read_basic";
+}
+
+function ensureAttachmentArray(attachments) {
+  if (!Array.isArray(attachments)) {
+    throw new ValidationError("attachments must be an array");
+  }
+  return attachments;
 }
 
 function decodeSecretValue(secretBytes) {
@@ -107,7 +117,11 @@ function normalizeBinaryPayload(payload, fieldName) {
 
 function stableAuditStringify(value) {
   if (value instanceof Uint8Array) {
-    return JSON.stringify(Array.from(value));
+    return JSON.stringify({
+      binary: true,
+      byteLength: value.byteLength,
+      sha256: createHash("sha256").update(value).digest("hex"),
+    });
   }
   if (Array.isArray(value)) {
     return `[${value.map(stableAuditStringify).join(",")}]`;
@@ -124,6 +138,24 @@ function sha256Hex(value) {
 
 async function readSecretObject(host, identityId, sessionId, secretObjectId) {
   return Promise.resolve(host.readSecretObject(identityId, sessionId, secretObjectId));
+}
+
+function summarizeSecretMaterial(value, fieldName) {
+  if (value instanceof Uint8Array) {
+    return {
+      [fieldName]: {
+        materialIncluded: true,
+        byteLength: value.byteLength,
+        sha256: createHash("sha256").update(value).digest("hex"),
+      },
+    };
+  }
+  return {
+    [fieldName]: {
+      materialIncluded: false,
+      byteLength: 0,
+    },
+  };
 }
 
 function resolveAuthorizationSession(authorizationResult) {
@@ -234,6 +266,39 @@ function normalizeSigningAttachment(attachment, resourceId, resourceCatalog) {
   };
 }
 
+async function summarizeAttachmentMaterial({
+  host,
+  identityId,
+  sessionId,
+  attachment,
+}) {
+  if (!attachment.includeMaterial) {
+    return {
+      attachmentId: attachment.attachmentId,
+      secretReference: attachment.secretObjectId,
+      materialIncluded: false,
+      byteLength: 0,
+    };
+  }
+  const secretBytes = await readSecretObject(
+    host,
+    identityId,
+    sessionId,
+    attachment.secretObjectId,
+  );
+  try {
+    return {
+      attachmentId: attachment.attachmentId,
+      secretReference: attachment.secretObjectId,
+      materialIncluded: true,
+      byteLength: secretBytes.byteLength,
+      sha256: createHash("sha256").update(secretBytes).digest("hex"),
+    };
+  } finally {
+    zeroizeBytes(secretBytes);
+  }
+}
+
 export class SigningAuthorizationSkill {
   constructor({ host }) {
     this.host = ensureHost(host);
@@ -266,11 +331,9 @@ export class SigningAuthorizationSkill {
       secretObjectId,
       fieldName: "signing",
     });
-    const normalizedAttachments = Array.isArray(attachments)
-      ? attachments.map((attachment) =>
-          normalizeSigningAttachment(attachment, resourceId, resourceCatalog),
-        )
-      : [];
+    const normalizedAttachments = ensureAttachmentArray(attachments).map((attachment) =>
+      normalizeSigningAttachment(attachment, resourceId, resourceCatalog),
+    );
     const scope = determineSigningScope({
       includeKeyMaterial,
       secretObjectId: normalizedSecretObjectId,
@@ -283,12 +346,20 @@ export class SigningAuthorizationSkill {
       Array.isArray(answers) ? answers : [],
     );
     const sessionId = resolveAuthorizationSession(authorization);
-    const signingKeyBytes = await readSecretObject(
-      this.host,
-      normalizedIdentityId,
-      sessionId,
-      normalizedSecretObjectId,
-    );
+    let signingKeySummary = summarizeSecretMaterial(null, "signingKey");
+    if (includeKeyMaterial) {
+      const signingKeyBytes = await readSecretObject(
+        this.host,
+        normalizedIdentityId,
+        sessionId,
+        normalizedSecretObjectId,
+      );
+      try {
+        signingKeySummary = summarizeSecretMaterial(signingKeyBytes, "signingKey");
+      } finally {
+        zeroizeBytes(signingKeyBytes);
+      }
+    }
 
     return {
       challenge,
@@ -298,22 +369,16 @@ export class SigningAuthorizationSkill {
       payload,
       scope,
       secretReference: normalizedSecretObjectId,
-      signingKey: includeKeyMaterial ? signingKeyBytes : null,
+      ...signingKeySummary,
       attachments: await Promise.all(
-        normalizedAttachments.map(async (attachment) => ({
-          attachmentId: attachment.attachmentId,
-          secretReference: attachment.secretObjectId,
-          secretValue: attachment.includeMaterial
-            ? decodeSecretValue(
-                await readSecretObject(
-                  this.host,
-                  normalizedIdentityId,
-                  sessionId,
-                  attachment.secretObjectId,
-                ),
-              )
-            : null,
-        })),
+        normalizedAttachments.map((attachment) =>
+          summarizeAttachmentMaterial({
+            host: this.host,
+            identityId: normalizedIdentityId,
+            sessionId,
+            attachment,
+          }),
+        ),
       ),
     };
   }
@@ -352,11 +417,9 @@ export class ChallengeSigningAuthorizationSkill {
       secretObjectId,
       fieldName: "challenge signing",
     });
-    const normalizedAttachments = Array.isArray(attachments)
-      ? attachments.map((attachment) =>
-          normalizeSigningAttachment(attachment, resourceId, resourceCatalog),
-        )
-      : [];
+    const normalizedAttachments = ensureAttachmentArray(attachments).map((attachment) =>
+      normalizeSigningAttachment(attachment, resourceId, resourceCatalog),
+    );
     const scope = determineSigningScope({
       includeKeyMaterial: true,
       secretObjectId: normalizedSecretObjectId,
@@ -374,47 +437,50 @@ export class ChallengeSigningAuthorizationSkill {
       Array.isArray(answers) ? answers : [],
     );
     const sessionId = resolveAuthorizationSession(authorization);
-    const signingKeyBytes = cloneSecretBytes(
-      await readSecretObject(
+    const signingKeyBytes = await readSecretObject(
+      this.host,
+      normalizedIdentityId,
+      sessionId,
+      normalizedSecretObjectId,
+    );
+    const signingKeyBytesClone = cloneSecretBytes(signingKeyBytes, "signingKeyBytes");
+    zeroizeBytes(signingKeyBytes);
+    const attachmentMaterials = [];
+    for (let index = 0; index < normalizedAttachments.length; index += 1) {
+      const attachment = normalizedAttachments[index];
+      const secretBytes = await readSecretObject(
         this.host,
         normalizedIdentityId,
         sessionId,
-        normalizedSecretObjectId,
-      ),
-      "signingKeyBytes",
-    );
-    const attachmentMaterials = await Promise.all(
-      normalizedAttachments.map(async (attachment) => ({
-        attachmentId: attachment.attachmentId,
-        secretReference: attachment.secretObjectId,
-        secretBytes: cloneSecretBytes(
-          await readSecretObject(
-            this.host,
-            normalizedIdentityId,
-            sessionId,
-            attachment.secretObjectId,
+        attachment.secretObjectId,
+      );
+      try {
+        attachmentMaterials[index] = {
+          attachmentId: attachment.attachmentId,
+          secretReference: attachment.secretObjectId,
+          secretBytes: cloneSecretBytes(
+            secretBytes,
+            `attachment ${attachment.attachmentId}.secretBytes`,
           ),
-          `attachment ${attachment.attachmentId}.secretBytes`,
-        ),
-      })),
-    );
+        };
+      } finally {
+        zeroizeBytes(secretBytes);
+      }
+    }
 
     try {
-      const signature = await Promise.resolve(
-        this.signer({
-          keyId: normalizedKeyId,
-          algorithm: normalizedAlgorithm,
-          payload: normalizedPayload,
-          secretReference: normalizedSecretObjectId,
-          signingKeyBytes,
-          attachments: attachmentMaterials.map((attachment) => ({
-            attachmentId: attachment.attachmentId,
-            secretReference: attachment.secretReference,
-            secretBytes: attachment.secretBytes,
-          })),
-        }),
-      );
-      const sessionId = resolveAuthorizationSession(authorization);
+      const signature = await this.signer({
+        keyId: normalizedKeyId,
+        algorithm: normalizedAlgorithm,
+        payload: normalizedPayload,
+        secretReference: normalizedSecretObjectId,
+        signingKeyBytes: signingKeyBytesClone,
+        attachments: attachmentMaterials.map((attachment) => ({
+          attachmentId: attachment.attachmentId,
+          secretReference: attachment.secretReference,
+          secretBytes: attachment.secretBytes,
+        })),
+      });
       const signatureHash = sha256Hex(signature);
       this.host.recordAudit?.("signature_authorized", {
         identityId: normalizedIdentityId,
@@ -458,7 +524,7 @@ export class ChallengeSigningAuthorizationSkill {
         },
       };
     } finally {
-      zeroizeBytes(signingKeyBytes);
+      zeroizeBytes(signingKeyBytesClone);
       attachmentMaterials.forEach((attachment) => zeroizeBytes(attachment.secretBytes));
     }
   }

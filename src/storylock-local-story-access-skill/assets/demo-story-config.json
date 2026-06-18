@@ -1,0 +1,251 @@
+{
+  "identityId": "storylock-demo-user",
+  "storyId": "demo-story-001",
+  "questionSetVersion": "demo-story-v1",
+  "normalizationVersion": "nfkc-lower-v1",
+  "credentials": [
+    {
+      "credentialRef": "site/github",
+      "targetOrigin": "https://github.com",
+      "username": "alice.storylock",
+      "password": "Github-Demo-Pass-2026!"
+    },
+    {
+      "credentialRef": "site/email",
+      "targetOrigin": "https://mail.example.com",
+      "username": "alice@example.com",
+      "password": "Mail-Demo-Pass-2026!"
+    },
+    {
+      "credentialRef": "site/bank",
+      "targetOrigin": "https://bank.example.com",
+      "username": "alice-bank",
+      "password": "Bank-Demo-Pass-2026!"
+    }
+  ],
+  "signatureKeys": [
+    {
+      "keyId": "wallet/main/private_key",
+      "algorithm": "ed25519",
+      "keyMaterial": "demo-signing-key-material-change-me"
+    }
+  ],
+  "questions": [
+    {
+      "questionId": "q-01",
+      "versionTag": "v1",
+      "promptRef": "birth-city",
+      "promptText": "Where was the protagonist born?",
+      "options": ["harbor city", "north tower", "silver farm", "old market"],
+      "answer": "harbor city",
+      "status": "active"
+    },
+    {
+      "questionId": "q-02",
+      "versionTag": "v1",
+      "promptRef": "first-tool",
+      "promptText": "What tool did the protagonist receive first?",
+      "options": ["brass compass", "blue pen", "iron cup", "paper map"],
+      "answer": "brass compass",
+      "status": "active"
+    },
+    {
+      "questionId": "q-03",
+      "versionTag": "v1",
+      "promptRef": "mentor-name",
+      "promptText": "What was the mentor called?",
+      "options": ["lin", "mara", "chen", "niko"],
+      "answer": "mara",
+      "status": "active"
+    },
+    {
+      "questionId": "q-04",
+      "versionTag": "v1",
+      "promptRef": "hidden-room",
+      "promptText": "Where was the hidden room?",
+      "options": ["under the library", "beside the river", "inside the mill", "behind the clinic"],
+      "answer": "under the library",
+      "status": "active"
+    },
+    {
+      "questionId": "q-05",
+      "versionTag": "v1",
+      "promptRef": "morning-code",
+      "promptText": "What phrase opened the morning gate?",
+      "options": ["sun returns", "stone sleeps", "water rises", "paper burns"],
+      "answer": "sun returns",
+      "status": "active"
+    },
+    {
+      "questionId": "q-06",
+      "versionTag": "v1",
+      "promptRef": "favorite-color",
+      "promptText": "Which color marked the safe path?",
+      "options": ["green", "red", "black", "white"],
+      "answer": "green",
+      "status": "active"
+    },
+    {
+      "questionId": "q-07",
+      "versionTag": "v1",
+      "promptRef": "lost-object",
+      "promptText": "What object was lost in chapter two?",
+      "options": ["silver key", "glass bead", "cotton bag", "wooden bell"],
+      "answer": "silver key",
+      "status": "active"
+    },
+    {
+      "questionId": "q-08",
+      "versionTag": "v1",
+      "promptRef": "safe-number",
+      "promptText": "What number appeared on the safe door?",
+      "options": ["17", "29", "42", "63"],
+      "answer": "42",
+      "status": "active"
+    },
+    {
+      "questionId": "q-09",
+      "versionTag": "v1",
+      "promptRef": "rain-place",
+      "promptText": "Where did the rain scene happen?",
+      "options": ["east bridge", "west hall", "north field", "south stairs"],
+      "answer": "east bridge",
+      "status": "active"
+    },
+    {
+      "questionId": "q-10",
+      "versionTag": "v1",
+      "promptRef": "promise-word",
+      "promptText": "Which word completed the promise?",
+      "options": ["return", "listen", "carry", "remember"],
+      "answer": "remember",
+      "status": "active"
+    },
+    {
+      "questionId": "q-11",
+      "versionTag": "v1",
+      "promptRef": "train-time",
+      "promptText": "When did the last train leave?",
+      "options": ["19:30", "21:10", "22:45", "23:05"],
+      "answer": "22:45",
+      "status": "active"
+    },
+    {
+      "questionId": "q-12",
+      "versionTag": "v1",
+      "promptRef": "map-symbol",
+      "promptText": "What symbol marked the map?",
+      "options": ["circle", "triangle", "star", "square"],
+      "answer": "star",
+      "status": "active"
+    },
+    {
+      "questionId": "q-13",
+      "versionTag": "v1",
+      "promptRef": "door-material",
+      "promptText": "What was the old door made of?",
+      "options": ["oak", "steel", "glass", "stone"],
+      "answer": "oak",
+      "status": "active"
+    },
+    {
+      "questionId": "q-14",
+      "versionTag": "v1",
+      "promptRef": "letter-sender",
+      "promptText": "Who sent the final letter?",
+      "options": ["mara", "lin", "jonas", "vera"],
+      "answer": "jonas",
+      "status": "active"
+    },
+    {
+      "questionId": "q-15",
+      "versionTag": "v1",
+      "promptRef": "garden-tree",
+      "promptText": "Which tree stood in the garden?",
+      "options": ["plum", "willow", "pine", "cedar"],
+      "answer": "willow",
+      "status": "active"
+    },
+    {
+      "questionId": "q-16",
+      "versionTag": "v1",
+      "promptRef": "signal-sound",
+      "promptText": "What sound was used as the signal?",
+      "options": ["three knocks", "one whistle", "two bells", "soft clap"],
+      "answer": "three knocks",
+      "status": "active"
+    },
+    {
+      "questionId": "q-17",
+      "versionTag": "v1",
+      "promptRef": "market-item",
+      "promptText": "What did the protagonist buy at the market?",
+      "options": ["red scarf", "salt bread", "blue cup", "ink bottle"],
+      "answer": "salt bread",
+      "status": "active"
+    },
+    {
+      "questionId": "q-18",
+      "versionTag": "v1",
+      "promptRef": "river-name",
+      "promptText": "What was the river named?",
+      "options": ["vale", "narin", "cinder", "lume"],
+      "answer": "lume",
+      "status": "active"
+    },
+    {
+      "questionId": "q-19",
+      "versionTag": "v1",
+      "promptRef": "sealed-box",
+      "promptText": "What was inside the sealed box?",
+      "options": ["old photograph", "paper crown", "tiny mirror", "black coin"],
+      "answer": "old photograph",
+      "status": "active"
+    },
+    {
+      "questionId": "q-20",
+      "versionTag": "v1",
+      "promptRef": "chapter-six-name",
+      "promptText": "What was chapter six called?",
+      "options": ["the quiet road", "after the bell", "under ash", "green hour"],
+      "answer": "after the bell",
+      "status": "active"
+    },
+    {
+      "questionId": "q-21",
+      "versionTag": "v1",
+      "promptRef": "friend-token",
+      "promptText": "What token proved friendship?",
+      "options": ["half coin", "white ribbon", "small card", "brass ring"],
+      "answer": "brass ring",
+      "status": "active"
+    },
+    {
+      "questionId": "q-22",
+      "versionTag": "v1",
+      "promptRef": "storm-shelter",
+      "promptText": "Where did everyone shelter from the storm?",
+      "options": ["clock house", "grain shed", "stone arch", "school cellar"],
+      "answer": "school cellar",
+      "status": "active"
+    },
+    {
+      "questionId": "q-23",
+      "versionTag": "v1",
+      "promptRef": "final-choice",
+      "promptText": "What did the protagonist choose at the end?",
+      "options": ["open the gate", "burn the map", "keep the key", "cross the sea"],
+      "answer": "open the gate",
+      "status": "active"
+    },
+    {
+      "questionId": "q-24",
+      "versionTag": "v1",
+      "promptRef": "memory-line",
+      "promptText": "Which line summarized the remembered story?",
+      "options": ["we return by light", "names outlive stone", "the road stays open", "all doors listen"],
+      "answer": "the road stays open",
+      "status": "active"
+    }
+  ]
+}

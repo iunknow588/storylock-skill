@@ -22,3 +22,4 @@ This reference defines boundary rules rather than executable errors.
 2. It must enforce challenge, session, scope, replay, and budget checks.
 3. It must not expose raw challenge answers, raw secret-store material, or long-lived session internals.
 4. Third-party or remote-facing packages must call this package rather than bypass it.
+5. Production persistent hosts must use active question-set cells for grid verification; legacy answer fallback is allowed only through an explicit development/demo `allowLegacyFallback` switch.

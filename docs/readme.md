@@ -1,6 +1,6 @@
 # StoryLock Project Brief
 
-Version: 2026-06-17  
+Version: 2026-06-18  
 Scope: `skill/`
 
 ## 1. Positioning
@@ -23,6 +23,15 @@ In one sentence:
 | Compatibility demo package | `src/storylock-skill-engine` | Local password-fill and signature-authorization examples |
 
 The current mainline remote surface focuses on two entries: `requestSignature` and `requestPasswordFill`. Local authorization is handled by Layer 2, while the remote gateway handles request wrapping, delegated execution, and redacted returns.
+
+Current deployment direction:
+
+1. Layer 3 can run behind a Vercel-style HTTP entry at `api/storylock-gateway.mjs`.
+2. Layers 1 and 2 can remain on an Android local host.
+3. The repo currently verifies that split with a local Android-host mock, not a full Android app project.
+4. Layer 3 can now expose Android app distribution metadata and second-layer connection metadata so the full system can be routed and downloaded from the server side.
+5. Yian is the public website layer for this split: it presents the project, exposes APK download and first binding entries, and displays gateway / APK / host status.
+6. PHAROS is an optional anchoring and trusted collaboration layer, not the local execution layer.
 
 ## 3. Core Capabilities
 
@@ -84,6 +93,8 @@ Layer 3 does not store private keys, passwords, grid answers, or plaintext story
 | Remote result redaction | Recursive redaction implemented |
 
 Persistent SQLite hosts must not silently use a plain `MemorySecretStore`. Development tests may explicitly use `developmentMode=true`; production should use a platform SecretStore or equivalent secure storage.
+
+Production persistent hosts do not enable legacy answer fallback by default. Grid verification must use enough active question-set cells; insufficient question-set coverage returns `SLG-010` / `question_set_unavailable`. Only development or demo compatibility flows should explicitly pass `allowLegacyFallback: true`.
 
 ## 5. Run and Verification
 
@@ -149,7 +160,47 @@ npm run selftest
 Pop-Location
 ```
 
-### 5.6 SQLite Cleanup Command
+### 5.6 Vercel + Android-Host Split Self-Test
+
+```powershell
+Push-Location src/storylock-remote-gateway-skill
+npm run selftest:vercel-android
+Pop-Location
+```
+
+This starts:
+
+1. A Vercel-style Layer 3 gateway entry.
+2. An Android-host mock that simulates Layer 1 story-strength review, Layer 2 local authorization, and local executors.
+3. End-to-end request routing plus redaction verification.
+
+### 5.7 Yian Website Self-Test
+
+```powershell
+Push-Location src/ui
+npm run selftest
+Pop-Location
+```
+
+This verifies the homepage, locale controls, static assets, runtime status endpoint, and APK metadata rendering path.
+
+### 5.8 Local Vercel-Style Gateway Development
+
+```powershell
+scripts\vercel\dev_local.cmd
+```
+
+This script reads `scripts/vercel/.env` when present and uses the same entry file as the Vercel deployment target.
+
+### 5.9 Link Local Repo To Vercel Project
+
+```powershell
+scripts\vercel\link_project.cmd
+```
+
+Set `VERCEL_PROJECT_NAME` in `scripts/vercel/.env` before linking.
+
+### 5.10 SQLite Cleanup Command
 
 ```powershell
 Push-Location src/storylock-local-story-access-skill
@@ -161,12 +212,16 @@ Pop-Location
 
 | Document | Path |
 | --- | --- |
+| Workspace root entry | `README.md` |
 | Chinese design entry | `docs/design/cn/README.md` |
 | Submission reference docs | `docs/ref/README.md` |
 | Test plan | `docs/test/StoryLock测试方案_v1.0.md` |
-| Project completeness analysis | `docs/management/StoryLock项目完善度分析_20260617.md` |
-| Development improvement plan | `docs/management/开发完善实施计划_20260617.md` |
-| Submission brief | `docs/usecase/00-参赛说明文档.md` |
+| Development progress | `docs/design/cn/开发落地路线与当前进展.md` |
+| Review demo script | `docs/ref/06-评审讲解与演示说明.md` |
+| APK distribution | `docs/ref/07-APK分发与安装说明.md` |
+| Yian deployment | `docs/ref/08-易安部署与域名说明.md` |
+| Layer terminology | `docs/ref/09-三层术语与PHAROS定位.md` |
+| Submission overview | `docs/ref/01-参赛概览.md` |
 
 ## 7. Current Completion Status
 
@@ -181,10 +236,9 @@ Completed:
 
 Still to improve:
 
-1. Grid cells are still generated from placeholder seeds; future work should connect real question sets or object policy.
-2. Active challenge/session revocation can be expanded.
-3. HTTP or host integration remains future work.
-4. Multi-chain, multi-platform, and multi-account scenarios are application exploration directions, not current implemented capabilities.
+1. Production question sets now have an import dry-run path and schema; fuller release, migration, and rollback operation notes are still needed.
+2. A real Android app host and Android Keystore integration are still future work; the current repo proves the split with an Android-host mock plus Vercel-style gateway entry.
+3. Multi-chain, multi-platform, and multi-account scenarios are application exploration directions, not current implemented capabilities.
 
 ## 8. Recommended External Description
 

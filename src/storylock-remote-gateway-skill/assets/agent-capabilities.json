@@ -1,0 +1,129 @@
+{
+  "$schema": "https://storylock.local/schemas/agent-capabilities.schema.json",
+  "package": "storylock-remote-gateway-skill",
+  "version": "0.1.0",
+  "agentBoundary": {
+    "role": "remote_gateway_agent",
+    "remoteFacing": true,
+    "localAuthorizationRequired": true,
+    "directSecretAccess": false,
+    "description": "Remote Agent entry point for StoryLock delegated signature and password-fill requests."
+  },
+  "allowedCapabilities": [
+    {
+      "name": "requestSignature",
+      "layer": 3,
+      "requiredLocalStrength": "high",
+      "localChallengeCells": 9,
+      "purpose": "Request a local signature through the StoryLock authorization chain.",
+      "requiredInputs": [
+        "requestId",
+        "nonce",
+        "expiry",
+        "identityId",
+        "keyId",
+        "algorithm",
+        "payload"
+      ],
+      "allowedAlgorithms": [
+        "ed25519",
+        "secp256k1"
+      ],
+      "preflightChecks": [
+        "requestId must be present",
+        "nonce must be present",
+        "expiry must be in the future",
+        "algorithm must be ed25519 or secp256k1",
+        "production EIP-712 domain must not use placeholders, zero chainId, or zero verifyingContract"
+      ],
+      "forbiddenOutputs": [
+        "signingKey",
+        "signingKeyBytes",
+        "privateKey",
+        "mnemonic",
+        "seed",
+        "rawSecret",
+        "keyMaterial",
+        "answers"
+      ],
+      "allowedRemoteResultFields": [
+        "authorizationId",
+        "signature",
+        "signatureHash",
+        "algorithm",
+        "auditMeta",
+        "secretReference"
+      ]
+    },
+    {
+      "name": "requestPasswordFill",
+      "layer": 3,
+      "requiredLocalStrength": "medium",
+      "localChallengeCells": 6,
+      "purpose": "Request local Web2 password filling without exposing plaintext credentials to the remote side.",
+      "requiredInputs": [
+        "requestId",
+        "nonce",
+        "expiry",
+        "identityId",
+        "credentialRef",
+        "targetOrigin"
+      ],
+      "preflightChecks": [
+        "requestId must be present",
+        "nonce must be present",
+        "expiry must be in the future",
+        "targetOrigin must be present",
+        "requestedRetention should default to audit_meta_only"
+      ],
+      "forbiddenOutputs": [
+        "password",
+        "secretValue",
+        "secretBytes",
+        "rawSecret",
+        "answers"
+      ],
+      "allowedRemoteResultFields": [
+        "authorizationId",
+        "credentialRef",
+        "targetOrigin",
+        "auditMeta",
+        "filledLocally"
+      ]
+    }
+  ],
+  "forbiddenCapabilities": [
+    "requestStoryRead",
+    "requestStoryWrite",
+    "requestChallengeSign",
+    "requestCapabilityStatus",
+    "requestLocalStoryAssist",
+    "queryStoryMetadata",
+    "readSecret",
+    "readPassword",
+    "readPrivateKey",
+    "submitGridAnswersRemotely"
+  ],
+  "redactedFieldPatterns": [
+    "answers",
+    "signingKey",
+    "signingKeyBytes",
+    "secretBytes",
+    "secretValue",
+    "password",
+    "privateKey",
+    "mnemonic",
+    "seed",
+    "rawSecret",
+    "keyMaterial"
+  ],
+  "recommendedAgentFlow": [
+    "Remote Agent calls only Layer 3 allowedCapabilities.",
+    "Layer 3 validates request envelope and wraps capability-specific payload.",
+    "Layer 2 resolves object strength and creates local grid verification.",
+    "Local user answers challenge in the local boundary.",
+    "Layer 2 issues short-lived local authorization.",
+    "Local executor performs password fill or signing.",
+    "Layer 3 returns only redacted result and audit metadata."
+  ]
+}

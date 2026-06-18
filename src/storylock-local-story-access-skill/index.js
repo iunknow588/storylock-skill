@@ -126,14 +126,21 @@ function gridPolicyForStrength(requiredStrength) {
   };
 }
 
-function buildGridCells({ verificationId, objectRef, requiredStrength }) {
-  const seed = `${verificationId}:${objectRef}:${requiredStrength}`;
-  return Array.from({ length: 9 }, (_, index) => ({
-    cellId: `cell-${index + 1}`,
-    promptRef: `cue-${index + 1}`,
-    position: index + 1,
-    seed: `${seed}:${index + 1}`,
-  }));
+function buildGridCells(challenge) {
+  if (Array.isArray(challenge?.cells) && challenge.cells.length > 0) {
+    return challenge.cells.map((cell) => ({
+      cellId: cell.cellId,
+      promptRef: cell.promptRef,
+      position: cell.position,
+      questionId: cell.questionId,
+      versionTag: cell.versionTag,
+      promptText: cell.promptText ?? undefined,
+      optionDigest: cell.optionDigest ?? undefined,
+      questionSetVersion: cell.questionSetVersion,
+      normalizationVersion: cell.normalizationVersion,
+    }));
+  }
+  return [];
 }
 
 function normalizeAuthorizationAnswers(value) {
@@ -163,8 +170,8 @@ function determineAuthorizationBudgets(allowedAction) {
 }
 
 export class ObjectStrengthPolicySkill {
-  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false } = {}) {
-    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore });
+  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
+    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
   }
 
   skillId() {
@@ -210,8 +217,8 @@ export class ObjectStrengthPolicySkill {
 }
 
 export class GridChallengeSkill {
-  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false } = {}) {
-    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore });
+  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
+    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
   }
 
   skillId() {
@@ -225,17 +232,25 @@ export class GridChallengeSkill {
       const identityId = normalizeString(input.identityId, 'identityId', { maxLength: MAX_ID_LENGTH });
       const objectRef = normalizeString(input.objectRef ?? input.credentialRef ?? input.keyId, 'objectRef', { maxLength: MAX_ID_LENGTH });
       const requiredStrength = normalizeStrength(input.requiredStrength ?? 'medium');
+      const questionSetVersion = input.questionSetVersion
+        ? normalizeString(input.questionSetVersion, 'questionSetVersion', { maxLength: 128 })
+        : null;
       this.host.ensureSeeded?.();
       const replay = this.host.ensureReplaySafe?.(requestId, nonce, expiry, {
         capability: 'createGridVerification',
         identityId,
         objectRef,
         requiredStrength,
+        questionSetVersion,
       });
       if (replay?.replayed) {
         return replay.response;
       }
-      const challenge = this.host.createChallenge(identityId, `grid_${requiredStrength}`);
+      const policy = gridPolicyForStrength(requiredStrength);
+      const challenge = this.host.createChallenge(identityId, `grid_${requiredStrength}`, {
+        requiredCells: policy.requiredCells,
+        questionSetVersion,
+      });
       const response = {
         requestId,
         status: 'success',
@@ -247,12 +262,12 @@ export class GridChallengeSkill {
           objectRef,
           requiredStrength,
           grid: {
-            ...gridPolicyForStrength(requiredStrength),
-            cells: buildGridCells({
-              verificationId: challenge.challengeId,
-              objectRef,
-              requiredStrength,
-            }),
+            ...policy,
+            questionSetVersion: challenge.questionSetVersion,
+            questionSetVersions: challenge.questionSetVersions,
+            normalizationVersion: challenge.normalizationVersion,
+            normalizationVersions: challenge.normalizationVersions,
+            cells: buildGridCells(challenge),
           },
           expiresAt: challenge.expiresAt,
         },
@@ -273,8 +288,8 @@ export class GridChallengeSkill {
 }
 
 export class LocalAuthorizationSkill {
-  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false } = {}) {
-    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore });
+  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
+    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
   }
 
   skillId() {
@@ -331,6 +346,54 @@ export class LocalAuthorizationSkill {
       };
     } catch (error) {
       return toErrorResponse({ requestId: fallbackRequestId, capability: 'authorizeLocalAction', error });
+    }
+  }
+}
+
+export class LocalRevocationSkill {
+  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
+    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
+  }
+
+  skillId() {
+    return 'local_revocation';
+  }
+
+  async run(input = {}) {
+    const fallbackRequestId = input?.requestId ?? `req-${Date.now().toString(16)}`;
+    try {
+      const identityId = normalizeString(input.identityId, 'identityId', { maxLength: MAX_ID_LENGTH });
+      const reason = input.reason
+        ? normalizeString(input.reason, 'reason', { maxLength: 128 })
+        : 'manual_revocation';
+      let result;
+      if (input.authorizationId) {
+        const authorizationId = normalizeString(input.authorizationId, 'authorizationId', { maxLength: MAX_ID_LENGTH });
+        result = this.host.revokeSession(identityId, authorizationId, { reason });
+      } else {
+        const verificationId = normalizeString(input.verificationId, 'verificationId', { maxLength: MAX_ID_LENGTH });
+        result = this.host.revokeChallenge(identityId, verificationId, { reason });
+      }
+      return {
+        requestId: fallbackRequestId,
+        status: 'success',
+        capability: 'revokeLocalAuthorization',
+        executionLocation: 'local',
+        result: {
+          identityId,
+          ...result,
+        },
+        redactionLevel: 'none',
+        retentionGranted: 'audit_meta_only',
+        auditMeta: {
+          timestamp: new Date().toISOString(),
+          targetType: result.targetType,
+          reason,
+        },
+        error: null,
+      };
+    } catch (error) {
+      return toErrorResponse({ requestId: fallbackRequestId, capability: 'revokeLocalAuthorization', error });
     }
   }
 }

@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS challenge_state (
   scope TEXT NOT NULL,
   status TEXT NOT NULL,
   expected_answer_digests_json TEXT NOT NULL,
+  challenge_manifest_json TEXT NOT NULL DEFAULT '{}',
+  required_threshold INTEGER NOT NULL DEFAULT 1,
+  normalization_version TEXT NOT NULL DEFAULT 'nfkc-lower-v1',
+  question_set_version TEXT NOT NULL DEFAULT 'legacy',
   failure_count INTEGER NOT NULL DEFAULT 0,
   lock_until INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL,
@@ -55,8 +59,26 @@ CREATE TABLE IF NOT EXISTS failure_window (
 CREATE TABLE IF NOT EXISTS answer_digest_set (
   identity_id TEXT NOT NULL,
   answer_digest TEXT NOT NULL,
+  normalization_version TEXT NOT NULL DEFAULT 'nfkc-lower-v1',
+  question_set_version TEXT NOT NULL DEFAULT 'legacy',
   created_at INTEGER NOT NULL,
   PRIMARY KEY (identity_id, answer_digest)
+);
+
+CREATE TABLE IF NOT EXISTS question_set_item (
+  identity_id TEXT NOT NULL,
+  question_id TEXT NOT NULL,
+  version_tag TEXT NOT NULL,
+  prompt_ref TEXT NOT NULL,
+  prompt_text TEXT,
+  option_digest TEXT,
+  answer_digest TEXT NOT NULL,
+  normalization_version TEXT NOT NULL,
+  question_set_version TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (identity_id, question_id, version_tag)
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -77,3 +99,4 @@ CREATE INDEX IF NOT EXISTS idx_nonce_store_expiry ON nonce_store(expiry);
 CREATE INDEX IF NOT EXISTS idx_request_store_expiry ON request_store(expiry);
 CREATE INDEX IF NOT EXISTS idx_session_store_identity_status ON session_store(identity_id, status);
 CREATE INDEX IF NOT EXISTS idx_challenge_state_identity_status ON challenge_state(identity_id, status);
+CREATE INDEX IF NOT EXISTS idx_question_set_item_identity_status ON question_set_item(identity_id, status);

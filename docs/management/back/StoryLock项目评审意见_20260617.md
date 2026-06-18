@@ -24,7 +24,7 @@
 
 | 文档类别 | 覆盖度 | 状态 |
 |----------|--------|------|
-| 设计文档（design/cn/） | 15 份 | ✅ 完整 |
+| 设计文档（design/cn/） | 主线文档 + 历史归档 | ✅ 完整 |
 | 参赛参考（ref/） | 4 份 + 1 份分析 | ✅ 完整 |
 | 测试方案（test/） | 1 份详细方案 | ✅ 完整 |
 | 管理文档（management/） | 完善度分析 + 实施计划 | ✅ 完整 |
@@ -169,7 +169,7 @@ password, privateKey, mnemonic, seed, rawSecret, keyMaterial
 ### 4.2 文档质量（✅ 良好）
 
 **优点：**
-- 15 份中文设计文档覆盖完整
+- 中文设计文档主线覆盖完整，历史材料已归档
 - 有明确的术语表和快速决策指南
 - 安全规范、脱敏规范、EIP-712 定义清晰
 - 测试方案详细（20 页，含 60+ 测试用例）
@@ -202,7 +202,7 @@ password, privateKey, mnemonic, seed, rawSecret, keyMaterial
 | 单元测试 | ✅ | 部分（selftest 覆盖） |
 | 集成测试 | ✅ | 部分（e2e selftest） |
 | 安全专项测试 | ✅ | 部分（selftest 覆盖） |
-| 契约测试（Schema） | ⚠️ | 未实现独立脚本 |
+| 契约测试（Schema） | ✅ | 已新增根目录 `npm run test:contract` |
 | 文档-代码一致性测试 | ⚠️ | 未实现独立脚本 |
 | 覆盖率统计 | ⚠️ | 未实现 |
 
@@ -222,9 +222,9 @@ password, privateKey, mnemonic, seed, rawSecret, keyMaterial
 | P1-02 | `storylock-skill-engine` 含旧迁移代码 | 明确标注 `assets/migrated/` 为非主线 | 清晰度 |
 | P1-03 | 平台 SecretStore 未完整实现 | 补充 Windows/macOS/Linux 具体实现 | 生产安全 |
 | P1-04 | Challenge `revoked` 状态未实现 | 增加主动撤销能力 | 可用性 |
-| P1-05 | 独立契约测试脚本缺失 | 增加 Ajv Schema 校验脚本 | 质量保障 |
+| P1-05 | 独立契约测试脚本缺失 | 已新增轻量 Schema 契约脚本，后续可接入 Ajv 做完整校验 | 质量保障 |
 | P1-06 | 覆盖率统计缺失 | 增加 `c8` 或 Node.js 内置覆盖率 | 质量保障 |
-| P1-07 | 根目录统一测试入口缺失 | 增加根 `package.json` 测试脚本 | 易用性 |
+| P1-07 | 根目录统一测试入口缺失 | 已新增根 `package.json`，支持 `npm run selftest` 与 `npm run test` | 易用性 |
 
 ### 6.3 低优先级（P2 探索项）
 
@@ -245,7 +245,7 @@ password, privateKey, mnemonic, seed, rawSecret, keyMaterial
 1. **三层端到端签名演示**（`npm run selftest:e2e`）——最能体现项目完整性
 2. **第二层安全机制**——防重放、失败锁定、审计日志
 3. **第三层脱敏机制**——递归替换敏感字段
-4. **文档体系完整性**——15 份设计文档 + 测试方案
+4. **文档体系完整性**——主线设计文档 + 测试方案
 
 ### 7.2 推荐表述
 
@@ -267,10 +267,12 @@ password, privateKey, mnemonic, seed, rawSecret, keyMaterial
 | 功能完整性 | 8/10 | P0 完成，P1 部分完成 |
 | 安全机制 | 8/10 | 核心安全机制到位，生产 SecretStore 待完善 |
 | 代码质量 | 8/10 | 结构清晰，自测覆盖良好 |
-| 文档完整性 | 9/10 | 15 份设计文档，体系完整 |
+| 文档完整性 | 9/10 | 主线设计文档体系完整，历史分析已归档 |
 | 测试覆盖度 | 7/10 | selftest 通过，独立测试脚本待补 |
 | 可运行性 | 9/10 | 所有 selftest 一键通过 |
 | **综合** | **8.2/10** | **具备参赛条件，建议继续完善 P1 项** |
+
+补充说明：已根据本评审补充根目录统一测试入口和轻量 Schema 契约测试脚本，项目可通过 `npm run test` 执行主要自测与契约检查。
 
 ---
 

@@ -22,6 +22,25 @@ function cleanup(path) {
   }
 }
 
+function sampleQuestions(count = 9) {
+  return Array.from({ length: count }, (_, index) => ({
+    questionId: `q-${index + 1}`,
+    versionTag: 'v1',
+    promptRef: `prompt-${index + 1}`,
+    promptText: `Question ${index + 1}`,
+    options: [`answer-${index + 1}`, `alt-${index + 1}`],
+    answer: `answer-${index + 1}`,
+    status: 'active',
+  }));
+}
+
+function answersFor(count) {
+  return Array.from({ length: count }, (_, index) => ({
+    cellId: `cell-${index + 1}`,
+    answer: `answer-${index + 1}`,
+  }));
+}
+
 const dbPath = tempDbPath();
 const secretStore = new MemorySecretStore({ developmentMode: true, suppressWarning: true });
 const policy = new ObjectStrengthPolicySkill({ dbPath, secretStore });
@@ -29,7 +48,7 @@ const grid = new GridChallengeSkill({ host: policy.host });
 const auth = new LocalAuthorizationSkill({ host: policy.host });
 
 try {
-  policy.host.enrollAnswers('id-e2e', ['correct grid answer']);
+  policy.host.enrollQuestionSet('id-e2e', sampleQuestions(9));
 
   const gateway = new StoryLockRemoteGateway({
     transport(request) {
@@ -65,7 +84,7 @@ try {
         objectRef: request.payload.keyId,
         verificationId: verification.result.verificationId,
         allowedAction: 'signature',
-        answers: [{ cellId: 'cell-1', answer: 'correct grid answer' }],
+        answers: answersFor(9),
         requestId: `${request.requestId}:auth`,
       });
       assert.equal(authorization.status, 'success');

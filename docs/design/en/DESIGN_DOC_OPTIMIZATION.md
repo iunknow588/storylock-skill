@@ -66,7 +66,7 @@ The following suggestions have become invalid and are no longer used as subseque
 
 1. Add story reading and story writing as Layer 2 main interfaces.
 2. Retain `requestStoryRead` and `requestStoryWrite` in Layer 3.
-3. Use `requestChallengeSign` as the main signature interface.
+3. Do not use deprecated old interface `requestChallengeSign` as the main signature interface.
 4. Describe the remote gateway as being able to directly read local stories or secret objects.
 5. Place Pharos Skill Engine within the local security access boundary.
 

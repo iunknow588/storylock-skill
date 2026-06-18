@@ -12,6 +12,7 @@ This directory contains the English translations of StoryLock design documents, 
 | `SYSTEM_SKILL_TABLE.md` | `系统Skill表与能力边界.md` | System skill table and capability boundaries |
 | `THREE_PACKAGE_CONTRACT.md` | `三包接口契约.md` | Inter-package interface contracts |
 | `LOCAL_AGENT_GATEWAY.md` | `本地Agent网关设计.md` | Local agent gateway design |
+| `THREE_LAYER_AGENT_DESIGN.md` | `三层Agent设计方法.md` | Three-layer Agent design method |
 | `SESSION_AND_REPLAY_PROTECTION.md` | `Session与防重放策略.md` | Session and anti-replay strategy |
 | `THREE_SKILL_PACKAGES.md` | `storylock_three_skill_packages_cn.md` | Three skill package split strategy |
 | `EIP712_MINIMAL_REQUEST.md` | `EIP-712最小请求定义.md` | EIP-712 minimal request definition |
@@ -25,6 +26,18 @@ This directory contains the English translations of StoryLock design documents, 
 | `PROXY_SIGNATURE_PROTOCOL.md` | `代理签名机制协议参考.md` | Proxy signature mechanism reference |
 | `DESIGN_DOC_OPTIMIZATION.md` | `设计文档优化建议.md` | Design document optimization suggestions |
 
+## Historical And Analysis Documents
+
+The following files are retained as historical analysis or transition notes. They are not the current design baseline unless explicitly referenced by one of the documents above.
+
+| Document | Status |
+| --- | --- |
+| `storylock_object_access_policy.md` | Historical analysis; superseded by `OBJECT_ACCESS_POLICY.md` |
+| `storylock_skill_pharos_alignment_analysis.md` | Historical Pharos alignment analysis |
+| `storylock_skill_positioning_and_boundary.md` | Historical draft; superseded by `SKILL_POSITIONING_AND_BOUNDARIES.md` |
+| `storylock_skill_positioning_and_boundary_analysis.md` | Historical positioning analysis |
+| `storylock_story_skill_feasibility_analysis.md` | Historical feasibility analysis |
+
 ## Reading Order
 
 1. `README.md`
@@ -32,13 +45,14 @@ This directory contains the English translations of StoryLock design documents, 
 3. `SYSTEM_SKILL_TABLE.md`
 4. `THREE_PACKAGE_CONTRACT.md`
 5. `LOCAL_AGENT_GATEWAY.md`
-6. `SESSION_AND_REPLAY_PROTECTION.md`
-7. `SKILL_POSITIONING_AND_BOUNDARIES.md`
-8. `THREE_SKILL_PACKAGES.md`
-9. `EIP712_MINIMAL_REQUEST.md`
-10. `REDACTION_SPEC.md`
-11. `SECURITY_SPEC.md`
-12. `OBJECT_ACCESS_POLICY.md`
+6. `THREE_LAYER_AGENT_DESIGN.md`
+7. `SESSION_AND_REPLAY_PROTECTION.md`
+8. `SKILL_POSITIONING_AND_BOUNDARIES.md`
+9. `THREE_SKILL_PACKAGES.md`
+10. `EIP712_MINIMAL_REQUEST.md`
+11. `REDACTION_SPEC.md`
+12. `SECURITY_SPEC.md`
+13. `OBJECT_ACCESS_POLICY.md`
 
 ## Design Principles
 

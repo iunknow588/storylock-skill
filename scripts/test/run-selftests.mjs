@@ -4,7 +4,10 @@ const packages = [
   ['storylock-local-story-processing-skill', ['npm', ['run', 'selftest']]],
   ['storylock-local-story-access-skill', ['npm', ['run', 'selftest']]],
   ['storylock-remote-gateway-skill', ['npm', ['run', 'selftest']]],
+  ['storylock-remote-gateway-skill', ['npm', ['run', 'check:agent-capabilities']]],
   ['storylock-remote-gateway-skill', ['npm', ['run', 'selftest:e2e']]],
+  ['storylock-remote-gateway-skill', ['npm', ['run', 'selftest:vercel-android']]],
+  ['ui', ['npm', ['run', 'selftest']]],
   ['storylock-skill-engine', ['npm', ['run', 'selftest']]],
 ];
 

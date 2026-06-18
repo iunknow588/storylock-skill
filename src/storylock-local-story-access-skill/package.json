@@ -6,11 +6,13 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "description": "Local StoryLock story access skill package",
+  "description": "Local StoryLock authorization skill package",
   "main": "index.js",
   "scripts": {
+    "demo": "node scripts/run-demo.mjs",
     "selftest": "node scripts/selftest.mjs",
     "check:secret-store": "node scripts/check-secret-store.mjs",
-    "cleanup": "node scripts/cleanup-expired.mjs"
+    "cleanup": "node scripts/cleanup-expired.mjs",
+    "import:question-set": "node scripts/import-question-set.mjs"
   }
 }

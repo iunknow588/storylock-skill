@@ -91,7 +91,14 @@ Current implementation uses SQLite to save access authorization related states, 
 4. `nonce_store`
 5. `failure_window`
 6. `answer_digest_set`
-7. `audit_log`
+7. `question_set_item`
+8. `audit_log`
+
+Where:
+
+1. `question_set_item` is the long-lived question-set master record, storing question references, versions, status, and answer digests.
+2. `challenge_state.challenge_manifest_json` is the per-challenge question binding and does not contain answer plaintext.
+3. `challenge_state.required_threshold` records the pass threshold for the challenge; current low/medium/high thresholds are 3/6/9.
 
 Layer 2 no longer saves `protected_story_objects`.
 

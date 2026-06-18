@@ -1,4 +1,4 @@
-﻿StoryLock Skill Engine
+StoryLock Skill Engine
 
 Entry:
 - SKILL.md
@@ -29,4 +29,3 @@ Schemas:
 Templates:
 - assets/templates/story-template.json
 - assets/templates/password-fill-template.json
-

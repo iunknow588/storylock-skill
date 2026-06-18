@@ -115,8 +115,7 @@
 
 1. “第二包负责受保护故事对象读写”。
 2. “第三包调用第二包再调用第一包读取故事”。
-3. “签名接口叫 `requestChallengeSign`”。
+3. “签名接口叫已废弃旧接口 `requestChallengeSign`”。
 4. “当前可借鉴 `SigningAuthorizationSkill` 作为主线签名接口”。
 
 当前主线签名口径统一为 `requestSignature` 与 `SignatureAuthorizationSkill`。
-

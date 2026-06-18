@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuestionSetMaster",
+  "type": "object",
+  "required": ["identityId", "questionSetVersion", "normalizationVersion", "status", "questions"],
+  "properties": {
+    "identityId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "questionSetVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "normalizationVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "deprecated", "pending"]
+    },
+    "replacePreviousActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["questionId", "versionTag", "promptRef", "answer"],
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "versionTag": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "promptRef": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "promptText": {
+            "type": "string",
+            "minLength": 1
+          },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "optionDigest": {
+            "type": "string",
+            "minLength": 1
+          },
+          "answer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "deprecated", "pending"]
+          },
+          "questionSetVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "normalizationVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "oneOf": [
+          { "required": ["options"] },
+          { "required": ["optionDigest"] }
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

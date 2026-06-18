@@ -37,6 +37,7 @@ try {
     batchSize: Math.max(1, Math.min(Number(batchSize) || 1000, 1000)),
     result,
   }, null, 2));
+  console.log('Cleanup removes expired request_store, nonce_store, session_store, and challenge_state rows in bounded batches.');
 } finally {
   host.close?.();
 }

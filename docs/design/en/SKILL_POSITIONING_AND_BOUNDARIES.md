@@ -117,10 +117,10 @@ This document explains how Skills are layered in the current StoryLock code, wha
 
 The following names may still appear in historical documents or migration code, but are no longer current mainline interfaces:
 
-1. `requestStoryRead`
-2. `requestStoryWrite`
-3. `requestChallengeSign`
-4. `requestCapabilityStatus`
-5. `StoryReadAccessSkill`
-6. `StoryWriteAccessSkill`
-7. `ChallengeSigningAuthorizationSkill`
+1. Deprecated old interface `requestStoryRead`
+2. Deprecated old interface `requestStoryWrite`
+3. Deprecated old interface `requestChallengeSign`
+4. Deprecated old interface `requestCapabilityStatus`
+5. Deprecated old Skill `StoryReadAccessSkill`
+6. Deprecated old Skill `StoryWriteAccessSkill`
+7. Deprecated old Skill `ChallengeSigningAuthorizationSkill`

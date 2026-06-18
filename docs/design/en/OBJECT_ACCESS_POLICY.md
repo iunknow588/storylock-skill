@@ -40,15 +40,15 @@ The system can expose multiple access thresholds.
 | Level | Example Threshold | Typical Usage |
 | --- | --- | --- |
 | `L1` | Weak challenge or no challenge | Public templates, low-risk metadata |
-| `L2` | 6-of-24 | Low-risk reading or limited assessment data |
-| `L3` | 12-of-24 | Medium-sensitive secret access or short-term field reading |
+| `L2` | 6-of-24 | Low-risk access or limited assessment data |
+| `L3` | 12-of-24 | Medium-sensitive secret access or short-term field access |
 | `L4` | 22-of-24 | Signature-class or high-trust operations |
 | `L5` | Higher threshold determined by Host | Root-level objects or particularly sensitive operations |
 
 Current StoryLock constants already provide a basic mapping:
 
-1. basic read threshold: `6`
-2. batch read threshold: `12`
+1. basic access threshold: `6`
+2. batch access threshold: `12`
 3. modify threshold: `22`
 
 ## Progressive Challenge Strategy
@@ -88,8 +88,8 @@ Current implementation constants can be used as policy inputs:
 
 1. challenge TTL
 2. session TTL
-3. basic session reads
-4. batch session reads
+3. basic session access counts
+4. batch session access counts
 
 ## Remote Capability Retention Rules
 
@@ -106,7 +106,7 @@ Not allowed to retain:
 1. Raw passwords
 2. Private keys
 3. Challenge answers
-4. Long-term reusable secret-read tokens
+4. Long-term reusable secret access tokens
 5. Layer 2 internal session material
 
 ## Local Execution Mandatory Rules
@@ -115,7 +115,7 @@ If object access involves any of the following, it must be executed locally:
 
 1. challenge answers
 2. session material
-3. secret-object reads
+3. secret-object access
 4. signing-key handling
 5. root-level object reconstruction
 6. question set answer digest verification

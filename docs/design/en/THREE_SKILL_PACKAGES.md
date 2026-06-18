@@ -115,7 +115,7 @@ The following old statements are no longer suitable as current documentation sta
 
 1. "Package 2 is responsible for protected story object reading/writing."
 2. "Package 3 calls Package 2 which then calls Package 1 to read stories."
-3. "The signature interface is called `requestChallengeSign`."
+3. "The signature interface is called deprecated old interface `requestChallengeSign`."
 4. "Currently, `SigningAuthorizationSkill` can be referenced as the mainline signature interface."
 
 The current mainline signature standard is unified as `requestSignature` and `SignatureAuthorizationSkill`.

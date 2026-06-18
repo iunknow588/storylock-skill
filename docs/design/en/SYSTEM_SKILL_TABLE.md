@@ -66,13 +66,13 @@ Files under `assets/migrated/` may still retain old implementation files or old 
 
 ## Capabilities No Longer in Current Mainline
 
-1. `requestStoryRead`
-2. `requestStoryWrite`
-3. `requestChallengeSign`
-4. `requestCapabilityStatus`
-5. `requestLocalStoryAssist`
-6. `queryStoryMetadata`
-7. Layer 2 story object reading/writing
+1. Deprecated old interface `requestStoryRead`
+2. Deprecated old interface `requestStoryWrite`
+3. Deprecated old interface `requestChallengeSign`
+4. Deprecated old interface `requestCapabilityStatus`
+5. Deprecated old interface `requestLocalStoryAssist`
+6. Deprecated old interface `queryStoryMetadata`
+7. Deprecated Layer 2 story object reading/writing
 
 ## Subsequent Design Principles
 

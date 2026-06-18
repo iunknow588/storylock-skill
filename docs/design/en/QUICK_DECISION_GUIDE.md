@@ -49,7 +49,7 @@ Do not do this:
 2. Let the remote gateway hold private keys or passwords.
 3. Let the story processing layer bypass Layer 2 authorization.
 4. Write Layer 2 as a business content reading/writing layer.
-5. Name the signature interface as `requestChallengeSign` which only fits challenge scenarios.
+5. Do not name the signature interface as deprecated old interface `requestChallengeSign`, which only fits challenge scenarios.
 
 ## Current Stage Recommendations
 

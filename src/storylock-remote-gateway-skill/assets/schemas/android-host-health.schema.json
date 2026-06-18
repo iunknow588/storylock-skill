@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AndroidHostHealth",
+  "type": "object",
+  "required": ["status", "layer1", "layer2", "stats"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["ok", "error"]
+    },
+    "layer1": {
+      "type": "object",
+      "required": ["mode", "questionSetReady", "strongestBasicChallengeBits"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["local_story_processing"]
+        },
+        "questionSetReady": {
+          "type": "boolean"
+        },
+        "strongestBasicChallengeBits": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    },
+    "layer2": {
+      "type": "object",
+      "required": ["identityId", "questionSetVersion", "activeQuestionCount"],
+      "properties": {
+        "identityId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "questionSetVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "activeQuestionCount": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    },
+    "stats": {
+      "type": "object",
+      "required": ["requestCount"],
+      "properties": {
+        "requestCount": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
