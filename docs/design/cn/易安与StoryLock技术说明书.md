@@ -42,7 +42,11 @@ StoryLock 是用于 Agent 场景的本地安全组件，负责私钥、文件密
 
 因此，易安 App 是连接“易安远程访问接口”和“StoryLock 本地核心”的本地确认入口。日常使用时，用户通过易安远程访问接口完成下载和绑定；当远端发起密码填充、签名或其他交互授权请求时，用户在本地设备上查看请求状态并完成确认。
 
-![易安系统运行关系](../../../src/yian-web/public/assets/yian-network-banner.png)
+下图展示易安系统的三段运行关系：外部 Agent 或云服务通过易安远程访问接口发起受控请求；易安远程访问接口与私人智能助理双向通信；私人智能助理再通过本地受控调用与 StoryLock 本地核心协作。
+
+![易安系统运行结构示意图](https://raw.githubusercontent.com/iunknow588/storylock-skill/main/src/yian-web/public/assets/yian-network-banner.png)
+
+图中的关键边界是：易安远程访问接口没有直接访问 StoryLock 本地核心的通道，StoryLock 本地核心只把最小必要结果返回给私人智能助理。
 
 ## 4. 运行结构
 

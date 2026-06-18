@@ -42,7 +42,11 @@ From a product-positioning perspective, the Yian System has three responsibiliti
 
 The Yian App is therefore the local approval entry that connects the Yian Remote Access Interface with StoryLock Local Core. In daily use, users complete download and binding through the Yian Remote Access Interface. When the remote side initiates a password-filling, signing, or other interactive authorization request, users view request status and complete approval on their local device.
 
-![Yian System runtime relationship](../../../src/yian-web/public/assets/yian-network-banner.png)
+The following diagram shows the three runtime relationships in the Yian System: external Agents or cloud services submit controlled requests through the Yian Remote Access Interface; the Yian Remote Access Interface communicates bidirectionally with the Private Assistant; the Private Assistant then collaborates with StoryLock Local Core through controlled local calls.
+
+![Yian System runtime structure diagram](https://raw.githubusercontent.com/iunknow588/storylock-skill/main/src/yian-web/public/assets/yian-network-banner.png)
+
+The key boundary in the diagram is that the Yian Remote Access Interface has no direct channel to StoryLock Local Core. StoryLock Local Core returns only the minimum necessary result to the Private Assistant.
 
 ## 4. Runtime Structure
 
