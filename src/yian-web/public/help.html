@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="易安与 StoryLock 帮助说明：了解整体结构、下载安装、绑定、查看请求状态和本地确认方法。"
+    >
+    <title>帮助说明 | 易安 Yian</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <div>
+          <p class="eyebrow">StoryLock 本地确认</p>
+          <h1 class="brand">易安</h1>
+        </div>
+        <div class="header-controls">
+          <nav class="nav" aria-label="Primary">
+            <a href="/">返回首页</a>
+            <a href="/app/download">下载 App</a>
+            <a href="/app/bind">打开绑定入口</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="help-page">
+      <section class="band">
+        <div class="wrap help-layout">
+          <div class="section-head">
+            <p class="section-kicker">帮助说明</p>
+            <h2>易安与 StoryLock 使用说明</h2>
+          </div>
+          <div class="copy-list">
+            <p>易安用于把需要确认的重要请求交回到用户自己的本地设备上处理。用户通过易安远程访问接口下载并安装易安 App，完成一次绑定后，就可以在本地设备上查看请求来源、理解请求内容，并确认是否继续。</p>
+            <p>当前线上入口：<a href="https://yian.cdao.online">https://yian.cdao.online</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="band alt">
+        <div class="wrap help-layout">
+          <div class="section-head">
+            <p class="section-kicker">先看整体</p>
+            <h3>从软件结构层次上，整体分为三部分</h3>
+          </div>
+          <img class="help-figure" src="/assets/yian-network-banner.png" alt="易安与 StoryLock 运行关系示意图">
+          <div class="columns three">
+            <article class="column">
+              <h4>云端入口</h4>
+              <p>易安远程访问接口运行在云服务平台上，负责展示说明、提供下载、发起绑定、接收外部 Agent 或服务的请求，并展示请求状态。</p>
+            </article>
+            <article class="column">
+              <h4>本地助理</h4>
+              <p>易安 App 安装在自己的本地设备上，承载私人智能助理。它负责接收请求、解释来源和风险，并把需要确认的内容交给本地核心处理。</p>
+            </article>
+            <article class="column">
+              <h4>本地核心</h4>
+              <p>StoryLock 本地核心负责故事文件、密钥隔离和敏感确认。它只在本地设备侧工作，把最小必要结果返回给私人智能助理。</p>
+            </article>
+          </div>
+          <p class="help-note">你下载的易安 App 是连接“易安云端入口”和“StoryLock 本地核心”的本地确认入口。当远端发起密码填充、签名或其他交互授权请求时，需要在自己的本地设备上查看请求状态并完成确认。</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker">快速开始</p>
+            <h3>从安装到绑定</h3>
+          </div>
+          <ol class="flow-list">
+            <li>打开易安远程访问接口：<a href="https://yian.cdao.online">https://yian.cdao.online</a>。</li>
+            <li>点击“下载易安 App”，下载当前安装包。</li>
+            <li>安装前核对页面展示的版本号、文件大小和校验值。</li>
+            <li>在本地设备上安装易安 App。</li>
+            <li>回到易安远程访问接口，点击“打开绑定入口”。</li>
+            <li>按本地设备上的提示完成首次绑定。</li>
+            <li>回到“请求状态”区域，确认本地设备是否可以接收请求。</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="band alt">
+        <div class="wrap columns two">
+          <article class="column">
+            <h4>如何确认请求</h4>
+            <ol class="flow-list compact">
+              <li>先在本地设备上查看请求来源。</li>
+              <li>阅读私人智能助理给出的内容说明和风险提示。</li>
+              <li>确认请求与你正在进行的操作一致。</li>
+              <li>按本地设备提示完成解锁、生物识别或设备凭据确认。</li>
+              <li>结果返回给私人智能助理，再按需要同步确认状态。</li>
+            </ol>
+          </article>
+          <article class="column">
+            <h4>查看请求状态</h4>
+            <ol class="flow-list compact">
+              <li>是否有正在等待处理的请求。</li>
+              <li>请求来自哪里，需要执行什么操作。</li>
+              <li>请求处于待确认、已确认、已取消或已完成状态。</li>
+              <li>本地设备是否可以接收新的请求。</li>
+              <li>当前安装包版本、大小和校验值。</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker">注意事项</p>
+            <h3>使用前请确认</h3>
+          </div>
+          <ol class="flow-list">
+            <li>只从你确认可信的易安远程访问接口下载安装包。</li>
+            <li>不要从陌生链接、聊天转发或不明来源下载安装包。</li>
+            <li>安装前核对版本号、文件大小和 SHA-256。</li>
+            <li>绑定链接用于连接当前使用环境和一个可信的本地设备。</li>
+            <li>保持本地设备网络可用，方便私人智能助理接收请求和返回确认状态。</li>
+            <li>遇到不认识的请求，先暂时不确认，再检查来源。</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div>
+          <strong>易安 Yian</strong>
+          <p>帮助你在本地设备上确认重要请求。</p>
+        </div>
+        <div class="footer-links">
+          <a href="/">返回首页</a>
+          <a href="/app/download">下载 App</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

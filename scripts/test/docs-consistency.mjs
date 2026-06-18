@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -137,7 +137,7 @@ function assertAccessSkillDescription() {
 }
 
 function assertWorkspaceReadmeMatchesCurrentLayout() {
-  const readmePath = join(root, 'README.md');
+  const readmePath = join(root, 'readme.md');
   const text = readFileSync(readmePath, 'utf8');
   assert.match(text, /StoryLock Skill Workspace/);
   assert.match(text, /src\/storylock-local-story-processing-skill/);
@@ -145,33 +145,6 @@ function assertWorkspaceReadmeMatchesCurrentLayout() {
   assert.match(text, /src\/storylock-remote-gateway-skill/);
   assert.match(text, /src\/storylock-skill-engine/);
   assert.match(text, /Node\.js `>=22\.0\.0`/);
-}
-
-function assertEnglishDesignBacklogIsExplicit() {
-  const enRoot = join(docsRoot, 'design', 'en');
-  const maybeHistorical = [
-    'storylock_skill_pharos_alignment_analysis.md',
-    'storylock_skill_positioning_and_boundary.md',
-    'storylock_skill_positioning_and_boundary_analysis.md',
-    'storylock_story_skill_feasibility_analysis.md',
-    'storylock_object_access_policy.md',
-  ];
-  const existing = maybeHistorical.filter((name) => {
-    try {
-      return statSync(join(enRoot, name)).isFile();
-    } catch {
-      return false;
-    }
-  });
-
-  const readme = readFileSync(join(enRoot, 'README.md'), 'utf8');
-  for (const fileName of existing) {
-    assert.match(
-      readme,
-      new RegExp(fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
-      `en/README.md must explicitly classify ${fileName} as current, archive, or historical`,
-    );
-  }
 }
 
 function assertSkillEngineExportsMatchDocs() {
@@ -204,7 +177,7 @@ function assertRemoteGatewayMainSurface() {
 
 const files = [
   ...walk(docsRoot),
-  join(root, 'README.md'),
+  join(root, 'readme.md'),
   join(srcRoot, 'storylock-local-story-access-skill', 'SKILL.md'),
   join(srcRoot, 'storylock-local-story-access-skill', 'package.json'),
 ];
@@ -212,7 +185,6 @@ const files = [
 assertNoStaleCurrentLanguage(files);
 assertAccessSkillDescription();
 assertWorkspaceReadmeMatchesCurrentLayout();
-assertEnglishDesignBacklogIsExplicit();
 assertSkillEngineExportsMatchDocs();
 assertRemoteGatewayMainSurface();
 

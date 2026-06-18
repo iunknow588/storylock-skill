@@ -162,6 +162,12 @@ function publicRegistrationsUrl(gatewayBaseUrl) {
   return new URL('/app/registrations', gatewayBaseUrl).toString();
 }
 
+function bundledApkDownloadUrl(gatewayBaseUrl) {
+  return new URL('/downloads/storylock-android-host-0.1.0-1-debug.apk', gatewayBaseUrl).toString();
+}
+
+const BUNDLED_APK_FILE_NAME = 'storylock-android-host-0.1.0-1-debug.apk';
+
 function resolveApkFilePath(env = process.env, appDistribution = resolveAppDistributionConfig(env)) {
   const configured = optionalString(appDistribution.androidApkPath);
   if (configured) {
@@ -213,10 +219,15 @@ function inferReleaseChannel(packageKind, configuredChannel = null) {
   return 'unspecified';
 }
 
+function optionalPositiveInteger(value) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 async function buildAppDistributionStatus(env, gatewayBaseUrl) {
   const appDistribution = resolveAppDistributionConfig(env);
   const apkFilePath = resolveApkFilePath(env, appDistribution);
-  const artifactName = apkFilePath ? basename(apkFilePath) : null;
+  const artifactName = apkFilePath ? basename(apkFilePath) : BUNDLED_APK_FILE_NAME;
   const packageKind = inferPackageKind(artifactName, optionalString(appDistribution.androidPackageKind));
   const artifactInfo = apkFilePath
     ? await stat(apkFilePath)
@@ -227,16 +238,20 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
     androidAppDownloadUrl: appDistribution.androidAppDownloadUrl
       ?? publicDownloadUrl(gatewayBaseUrl),
     artifact: {
-      available: Boolean(apkFilePath || appDistribution.androidAppDownloadUrl),
+      available: Boolean(apkFilePath || appDistribution.androidAppDownloadUrl || artifactName),
       localFilePath: apkFilePath,
       fileName: artifactName,
-      fileSizeBytes: artifactInfo?.size ?? null,
+      fileSizeBytes: artifactInfo?.size ?? optionalPositiveInteger(appDistribution.androidApkSizeBytes),
       versionName: optionalString(appDistribution.androidApkVersion),
       versionCode: optionalString(appDistribution.androidApkVersionCode),
       checksum: optionalString(appDistribution.androidApkChecksum),
       packageKind,
       releaseChannel: inferReleaseChannel(packageKind, optionalString(appDistribution.androidReleaseChannel)),
-      downloadStrategy: apkFilePath ? 'local_apk_file' : 'external_download_url',
+      downloadStrategy: apkFilePath
+        ? 'local_apk_file'
+        : appDistribution.androidAppDownloadUrl
+          ? 'external_download_url'
+          : 'bundled_static_apk',
       installGuideUrl: appDistribution.androidInstallGuideUrl,
     },
   };
@@ -367,9 +382,13 @@ async function handleGet(req, res, url, env) {
       await serveApkFile(res, apkFilePath);
       return;
     }
+    const currentDownloadUrl = new URL(url.pathname, gatewayBaseUrl).toString();
     const configuredDownloadUrl = appDistribution.androidAppDownloadUrl;
-    if (configuredDownloadUrl && configuredDownloadUrl !== new URL(url.pathname, gatewayBaseUrl).toString()) {
-      redirect(res, 307, configuredDownloadUrl);
+    const targetDownloadUrl = configuredDownloadUrl && configuredDownloadUrl !== currentDownloadUrl
+      ? configuredDownloadUrl
+      : bundledApkDownloadUrl(gatewayBaseUrl);
+    if (targetDownloadUrl !== currentDownloadUrl) {
+      redirect(res, 307, targetDownloadUrl);
       return;
     }
     if (wantsHtml(req)) {

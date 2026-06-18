@@ -9,9 +9,29 @@ $ErrorActionPreference = "Stop"
 
 $resolvedProject = Resolve-Path -LiteralPath $ProjectDir
 $gradlew = Join-Path $resolvedProject "gradlew.bat"
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+$localGradle = Join-Path $repoRoot ".tools\gradle-8.7\bin\gradle.bat"
+$defaultSdk = "C:\Program Files (x86)\Android\android-sdk"
+
+if (-not $env:ANDROID_HOME -and (Test-Path -LiteralPath $defaultSdk)) {
+  $env:ANDROID_HOME = $defaultSdk
+}
+if (-not $env:ANDROID_SDK_ROOT -and $env:ANDROID_HOME) {
+  $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
+}
+if ($env:ANDROID_HOME) {
+  $escapedSdk = $env:ANDROID_HOME.Replace("\", "\\")
+  "sdk.dir=$escapedSdk" | Set-Content -Encoding ascii -Path (Join-Path $resolvedProject "local.properties")
+}
+if (-not $env:JAVA_HOME -and (Test-Path -LiteralPath "C:\Program Files\Android\Android Studio\jbr")) {
+  $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+}
 
 if (Test-Path -LiteralPath $gradlew) {
   $gradleCommand = $gradlew
+  $gradleArgs = @("assemble$($Variant.Substring(0, 1).ToUpper())$($Variant.Substring(1))")
+} elseif (Test-Path -LiteralPath $localGradle) {
+  $gradleCommand = $localGradle
   $gradleArgs = @("assemble$($Variant.Substring(0, 1).ToUpper())$($Variant.Substring(1))")
 } else {
   $gradle = Get-Command gradle -ErrorAction SilentlyContinue
@@ -52,6 +72,7 @@ New-Item -ItemType Directory -Force -Path $envDir | Out-Null
   "STORYLOCK_ANDROID_APK_PATH=$($apk.FullName)"
   "STORYLOCK_ANDROID_APK_VERSION=$versionName"
   "STORYLOCK_ANDROID_APK_VERSION_CODE=$versionCode"
+  "STORYLOCK_ANDROID_APK_SIZE_BYTES=$($apk.Length)"
   "STORYLOCK_ANDROID_APK_CHECKSUM=sha256:$($hash.Hash.ToLowerInvariant())"
   "STORYLOCK_ANDROID_PACKAGE_KIND=$Variant"
   "STORYLOCK_ANDROID_RELEASE_CHANNEL=$releaseChannel"

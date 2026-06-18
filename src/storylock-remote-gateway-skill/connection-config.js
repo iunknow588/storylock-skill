@@ -74,11 +74,13 @@ export function resolveAppDistributionConfig(env = process.env) {
   return {
     androidAppDownloadUrl: optionalString(env.STORYLOCK_ANDROID_APP_DOWNLOAD_URL),
     androidApkPath: optionalString(env.STORYLOCK_ANDROID_APK_PATH),
-    androidApkVersion: optionalString(env.STORYLOCK_ANDROID_APK_VERSION),
-    androidApkVersionCode: optionalString(env.STORYLOCK_ANDROID_APK_VERSION_CODE),
-    androidApkChecksum: optionalString(env.STORYLOCK_ANDROID_APK_CHECKSUM),
-    androidPackageKind: optionalString(env.STORYLOCK_ANDROID_PACKAGE_KIND),
-    androidReleaseChannel: optionalString(env.STORYLOCK_ANDROID_RELEASE_CHANNEL),
+    androidApkVersion: optionalString(env.STORYLOCK_ANDROID_APK_VERSION) ?? '0.1.0',
+    androidApkVersionCode: optionalString(env.STORYLOCK_ANDROID_APK_VERSION_CODE) ?? '1',
+    androidApkSizeBytes: optionalString(env.STORYLOCK_ANDROID_APK_SIZE_BYTES) ?? '5836748',
+    androidApkChecksum: optionalString(env.STORYLOCK_ANDROID_APK_CHECKSUM)
+      ?? 'sha256:8150d8a09dc0b7357c001bd53ebd7788a0d211102d574268a9f720d49f34bdd1',
+    androidPackageKind: optionalString(env.STORYLOCK_ANDROID_PACKAGE_KIND) ?? 'debug',
+    androidReleaseChannel: optionalString(env.STORYLOCK_ANDROID_RELEASE_CHANNEL) ?? 'internal',
     androidUiDownloadUrl: optionalString(env.STORYLOCK_ANDROID_UI_DOWNLOAD_URL),
     androidInstallGuideUrl: optionalString(env.STORYLOCK_ANDROID_INSTALL_GUIDE_URL),
   };
