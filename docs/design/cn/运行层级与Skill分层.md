@@ -16,7 +16,7 @@
 
 对应包：
 
-`src/storylock-local-story-processing-skill`
+`src/skills/local-story-processing`
 
 当前能力：
 
@@ -40,7 +40,7 @@
 
 对应包：
 
-`src/storylock-local-story-access-skill`
+`src/skills/local-story-access`
 
 当前能力：
 
@@ -67,7 +67,7 @@
 
 对应包：
 
-`src/storylock-remote-gateway-skill`
+`src/skills/remote-gateway`
 
 当前接口：
 
@@ -91,7 +91,7 @@
 
 ## 兼容演示包
 
-`src/storylock-skill-engine` 保留本地执行示例和迁移兼容代码。它可以辅助演示 `LocalPasswordFillSkill`、`SignatureAuthorizationSkill` 等能力，但不作为第四层，也不改变三层主线边界。
+`src/engine` 保留本地执行示例和迁移兼容代码。它可以辅助演示 `LocalPasswordFillSkill`、`SignatureAuthorizationSkill` 等能力，但不作为第四层，也不改变三层主线边界。
 
 ## 三层职责表
 

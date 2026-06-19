@@ -1,0 +1,19 @@
+{
+  "name": "storylock-remote-gateway-skill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "description": "Remote StoryLock gateway skill package",
+  "main": "index.js",
+  "scripts": {
+    "check:agent-capabilities": "node scripts/check-agent-capabilities.mjs",
+    "check:eip712-config": "node scripts/check-eip712-config.mjs",
+    "dev:web-api": "node scripts/run-web-api-local.mjs",
+    "selftest": "node scripts/selftest.mjs",
+    "selftest:e2e": "node scripts/e2e-selftest.mjs",
+    "selftest:web-api-android": "node scripts/selftest-web-api-android.mjs"
+  }
+}

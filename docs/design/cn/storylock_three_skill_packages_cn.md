@@ -16,7 +16,7 @@
 
 路径：
 
-`src/storylock-local-story-processing-skill`
+`src/skills/local-story-processing`
 
 当前能力：
 
@@ -40,7 +40,7 @@
 
 路径：
 
-`src/storylock-local-story-access-skill`
+`src/skills/local-story-access`
 
 当前能力：
 
@@ -66,7 +66,7 @@
 
 路径：
 
-`src/storylock-remote-gateway-skill`
+`src/skills/remote-gateway`
 
 当前接口：
 

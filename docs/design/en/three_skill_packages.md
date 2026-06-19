@@ -16,7 +16,7 @@ Additionally, `storylock-skill-engine` is a compatibility and demonstration pack
 
 Path:
 
-`src/storylock-local-story-processing-skill`
+`src/skills/local-story-processing`
 
 Current capabilities:
 
@@ -40,7 +40,7 @@ Boundaries:
 
 Path:
 
-`src/storylock-local-story-access-skill`
+`src/skills/local-story-access`
 
 Current capabilities:
 
@@ -66,7 +66,7 @@ Boundaries:
 
 Path:
 
-`src/storylock-remote-gateway-skill`
+`src/skills/remote-gateway`
 
 Current interfaces:
 

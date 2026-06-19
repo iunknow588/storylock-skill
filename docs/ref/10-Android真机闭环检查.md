@@ -8,7 +8,7 @@
 
 ## 1. 前置条件
 
-1. 本机安装 Android SDK、JDK 17 与 Gradle，或在 `android-host/` 下加入 Gradle wrapper。
+1. 本机安装 Android SDK、JDK 17 与 Gradle，或在 `src/host/android-host/` 下加入 Gradle wrapper。
 2. 易安本地或线上网关可访问。
 3. Android 设备已连接，`adb devices` 能看到目标设备。
 4. 若使用 relay 模式，设备能访问 `STORYLOCK_GATEWAY_PUBLIC_URL`。
@@ -20,15 +20,16 @@
 从 `skill/` 目录执行：
 
 ```powershell
-scripts\android\build_apk.cmd -Variant debug
+scripts\release\android\build_apk.cmd -Variant debug
 ```
 
 脚本会：
 
 1. 运行 `assembleDebug` 或 `assembleRelease`。
-2. 查找 `android-host/app/build/outputs/apk/{variant}/*.apk`。
+2. 查找 `src/host/android-host/app/build/outputs/apk/{variant}/*.apk`。
 3. 计算 SHA-256。
-4. 写出 `scripts/vercel/.env.android-apk`，供易安下载入口读取。
+4. 复制 APK 到 `release/app/android/`，作为后续安装、上传服务器和站点构建的统一来源。
+5. 写出 `scripts/vercel/.env.android-apk`，供易安下载入口读取。
 
 ## 3. 接入易安下载入口
 
@@ -55,7 +56,7 @@ scripts\android\build_apk.cmd -Variant debug
 ## 4. 安装与绑定
 
 ```powershell
-adb install -r android-host\app\build\outputs\apk\debug\app-debug.apk
+adb install -r release\app\android\storylock-android-host-0.1.0-1-debug.apk
 ```
 
 打开易安绑定入口：
@@ -109,7 +110,7 @@ Android 宿主界面应显示：
 
 ```powershell
 scripts\android\check_device_loop.cmd `
-  -ApkPath android-host\app\build\outputs\apk\debug\app-debug.apk `
+  -ApkPath release\app\android\storylock-android-host-0.1.0-1-debug.apk `
   -GatewayBaseUrl https://yian.cdao.online `
   -DeepLink "storylock-host://bind?gateway_url=...&binding_token=...&identity_id=android-demo-001&preferred_mode=relay_url"
 ```

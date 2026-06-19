@@ -1,14 +1,14 @@
 import { spawnSync } from 'node:child_process';
 
 const packages = [
-  ['storylock-local-story-processing-skill', ['npm', ['run', 'selftest']]],
-  ['storylock-local-story-access-skill', ['npm', ['run', 'selftest']]],
-  ['storylock-remote-gateway-skill', ['npm', ['run', 'selftest']]],
-  ['storylock-remote-gateway-skill', ['npm', ['run', 'check:agent-capabilities']]],
-  ['storylock-remote-gateway-skill', ['npm', ['run', 'selftest:e2e']]],
-  ['storylock-remote-gateway-skill', ['npm', ['run', 'selftest:vercel-android']]],
+  ['skills/local-story-processing', ['npm', ['run', 'selftest']]],
+  ['skills/local-story-access', ['npm', ['run', 'selftest']]],
+  ['skills/remote-gateway', ['npm', ['run', 'selftest']]],
+  ['skills/remote-gateway', ['npm', ['run', 'check:agent-capabilities']]],
+  ['skills/remote-gateway', ['npm', ['run', 'selftest:e2e']]],
+  ['skills/remote-gateway', ['npm', ['run', 'selftest:web-api-android']]],
   ['ui', ['npm', ['run', 'selftest']]],
-  ['storylock-skill-engine', ['npm', ['run', 'selftest']]],
+  ['engine', ['npm', ['run', 'selftest']]],
 ];
 
 for (const [packageName, [command, args]] of packages) {

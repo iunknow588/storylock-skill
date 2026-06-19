@@ -1,6 +1,6 @@
 # StoryLock Skill 开发分析：对照 Pharos PiggyBank 教程
 
-> 状态说明：本文是 2026-06-15 的历史分析，仅作为早期整理参考。当前主线以 `skill/src/storylock-local-story-processing-skill`、`skill/src/storylock-local-story-access-skill`、`skill/src/storylock-remote-gateway-skill` 三包为准；签名入口统一使用 `requestSignature`，不再把 `ChallengeSigningAuthorizationSkill` 或 `requestChallengeSign` 作为当前主接口。
+> 状态说明：本文是 2026-06-15 的历史分析，仅作为早期整理参考。当前主线以 `skill/src/skills/local-story-processing`、`skill/src/skills/local-story-access`、`skill/src/skills/remote-gateway` 三包为准；签名入口统一使用 `requestSignature`，不再把 `ChallengeSigningAuthorizationSkill` 或 `requestChallengeSign` 作为当前主接口。
 
 ## 核心结论
 

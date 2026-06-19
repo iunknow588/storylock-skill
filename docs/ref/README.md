@@ -30,10 +30,10 @@
 
 | 路径 | 职责 |
 | --- | --- |
-| `skill/src/storylock-local-story-processing-skill/` | 第一层：故事处理与强度评估 |
-| `skill/src/storylock-local-story-access-skill/` | 第二层：对象强度、九宫格、本地授权 |
-| `skill/src/storylock-remote-gateway-skill/` | 第三层：远程签名、密码填充、脱敏 |
-| `skill/src/storylock-skill-engine/` | 兼容演示包 |
+| `skill/src/skills/local-story-processing/` | 第一层：故事处理与强度评估 |
+| `skill/src/skills/local-story-access/` | 第二层：对象强度、九宫格、本地授权 |
+| `skill/src/skills/remote-gateway/` | 第三层：远程签名、密码填充、脱敏 |
+| `skill/src/engine/` | 兼容演示包 |
 
 ## 4. 推荐阅读顺序
 

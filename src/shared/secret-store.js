@@ -15,10 +15,13 @@ function quotePowerShell(value) {
 
 export class MemorySecretStore {
   constructor({ developmentMode = false, suppressWarning = false } = {}) {
+    if (!developmentMode) {
+      throw new Error('MemorySecretStore requires developmentMode=true and must not be used in production.');
+    }
     this.developmentMode = developmentMode;
     this.kind = 'memory';
     this.secrets = new Map();
-    if (this.developmentMode && !suppressWarning) {
+    if (!suppressWarning) {
       console.warn('StoryLock MemorySecretStore is for development only and must not be used in production.');
     }
   }

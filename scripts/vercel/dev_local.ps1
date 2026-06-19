@@ -35,8 +35,8 @@ $env:PORT = $port
 
 Push-Location $repoRoot
 try {
-  Write-Host "[INFO] Starting StoryLock Vercel-style gateway on port $port" -ForegroundColor Green
-  npm run dev:vercel-gateway --prefix src/storylock-remote-gateway-skill
+  Write-Host "[INFO] Starting StoryLock Web API gateway on port $port" -ForegroundColor Green
+  npm run dev:web-api --prefix src/skills/remote-gateway
 } finally {
   Pop-Location
 }

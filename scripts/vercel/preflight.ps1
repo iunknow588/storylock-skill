@@ -68,6 +68,36 @@ function Test-Http {
   }
 }
 
+function Test-JsonField {
+  param(
+    [string]$Url,
+    [string]$Path,
+    [switch]$Required
+  )
+  try {
+    $value = Invoke-RestMethod -Uri $Url -TimeoutSec 30 -ErrorAction Stop
+    $current = $value
+    foreach ($segment in ($Path -split "\.")) {
+      if ($null -eq $current) {
+        break
+      }
+      $current = $current.$segment
+    }
+    $ok = $null -ne $current -and -not [string]::IsNullOrWhiteSpace([string]$current)
+    [PSCustomObject]@{
+      Check = "json:$Url#$Path"
+      Status = if ($ok) { "ok" } elseif ($Required) { "missing" } else { "optional" }
+      Value = if ($ok) { [string]$current } else { "" }
+    }
+  } catch {
+    [PSCustomObject]@{
+      Check = "json:$Url#$Path"
+      Status = if ($Required) { "failed" } else { "optional" }
+      Value = $_.Exception.Message
+    }
+  }
+}
+
 Import-EnvFile -Path $exampleEnvPath
 Import-EnvFile -Path $EnvFile
 
@@ -124,12 +154,23 @@ $targetBaseUrl = if ($BaseUrl) {
 }
 
 if (-not [string]::IsNullOrWhiteSpace($targetBaseUrl)) {
+  $windowsZipUrl = "$targetBaseUrl/downloads/yian-windows-host-0.1.0-1-prototype.zip"
+  $windowsMetadataUrl = "$targetBaseUrl/downloads/yian-windows-host-0.1.0-1-prototype.json"
+  $downloadStatusUrl = "$targetBaseUrl/app/download"
   $rows += Test-Http -Url "$targetBaseUrl/" -AllowedStatus @(200)
   $rows += Test-Http -Url "$targetBaseUrl/main.js" -AllowedStatus @(200)
   $rows += Test-Http -Url "$targetBaseUrl/styles.css" -AllowedStatus @(200)
   $rows += Test-Http -Url "$targetBaseUrl/api/storylock-gateway" -AllowedStatus @(200)
   $rows += Test-Http -Url "$targetBaseUrl/android-host/bind" -AllowedStatus @(200)
   $rows += Test-Http -Url "$targetBaseUrl/download/android-host" -AllowedStatus @(200, 307, 302)
+  $rows += Test-Http -Url "$targetBaseUrl/app/download/windows" -AllowedStatus @(200, 307, 302)
+  $rows += Test-Http -Url "$targetBaseUrl/download/windows-host" -AllowedStatus @(200, 307, 302)
+  $rows += Test-Http -Url $windowsZipUrl -AllowedStatus @(200)
+  $rows += Test-Http -Url $windowsMetadataUrl -AllowedStatus @(200)
+  $rows += Test-JsonField -Url $windowsMetadataUrl -Path "checksum" -Required
+  $rows += Test-JsonField -Url $windowsMetadataUrl -Path "fileSizeBytes" -Required
+  $rows += Test-JsonField -Url $downloadStatusUrl -Path "platforms.windows.checksum" -Required
+  $rows += Test-JsonField -Url $downloadStatusUrl -Path "platforms.windows.fileSizeBytes" -Required
 }
 
 $rows | Format-Table -AutoSize

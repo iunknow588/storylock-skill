@@ -82,7 +82,7 @@ Layer 1 handles local story drafts, story refinement, and question-set strength 
 
 | Item | Details |
 | --- | --- |
-| Code Package | `src/storylock-local-story-processing-skill` |
+| Code Package | `src/skills/local-story-processing` |
 | Main Capabilities | Story draft generation, story refinement, question-set strength evaluation |
 | Typical Skills | `StoryDraftSkill`, `StoryRefineSkill`, `StrengthReviewSkill` |
 
@@ -94,7 +94,7 @@ Layer 2 determines the authorization strength required by the target object and 
 
 | Item | Details |
 | --- | --- |
-| Code Package | `src/storylock-local-story-access-skill` |
+| Code Package | `src/skills/local-story-access` |
 | Main Capabilities | Object-level strength policy, grid verification, local authorization, short-lived sessions, replay protection |
 | Typical Skills | `ObjectStrengthPolicySkill`, `GridChallengeSkill`, `LocalAuthorizationSkill` |
 
@@ -106,7 +106,7 @@ Layer 3 wraps calls from external Agents or cloud services into unified, verifia
 
 | Item | Details |
 | --- | --- |
-| Code Package | `src/storylock-remote-gateway-skill` |
+| Code Package | `src/skills/remote-gateway` |
 | Main Interfaces | `requestSignature`, `requestPasswordFill` |
 | Main Capabilities | Remote request wrapping, signature approval request wrapping, Web2 password-fill request wrapping, EIP-712 minimal signing request structure, minimized result return |
 
@@ -118,15 +118,15 @@ This layer allows remote Agents to use local capabilities while keeping actual a
 
 | Package | Directory | Responsibility |
 | --- | --- | --- |
-| `storylock-local-story-processing-skill` | `src/storylock-local-story-processing-skill` | Layer 1, local story processing |
-| `storylock-local-story-access-skill` | `src/storylock-local-story-access-skill` | Layer 2, local controlled authorization |
-| `storylock-remote-gateway-skill` | `src/storylock-remote-gateway-skill` | Layer 3, remote request wrapping and gateway |
+| `storylock-local-story-processing-skill` | `src/skills/local-story-processing` | Layer 1, local story processing |
+| `storylock-local-story-access-skill` | `src/skills/local-story-access` | Layer 2, local controlled authorization |
+| `storylock-remote-gateway-skill` | `src/skills/remote-gateway` | Layer 3, remote request wrapping and gateway |
 
 ### 6.2 Aggregation and Shared Modules
 
 | Module | Directory | Description |
 | --- | --- | --- |
-| `storylock-skill-engine` | `src/storylock-skill-engine` | Unified exports, example scripts, self-test scripts, and compatibility demo entry |
+| `storylock-skill-engine` | `src/engine` | Unified exports, example scripts, self-test scripts, and compatibility demo entry |
 | `shared` | `src/shared` | Shared encryption, SQLite, and SecretStore adapter code |
 | `yian-web` | `src/yian-web` | Static site and help entry for the Yian Remote Access Interface |
 | `android-host` | `android-host` | Android project for the Yian App / Private Assistant / StoryLock Local Core demo loop |

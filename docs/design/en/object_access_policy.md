@@ -12,7 +12,7 @@ This document defines how StoryLock should:
 It is used in conjunction with the following documents:
 
 1. `skill_positioning_and_boundaries.md`
-2. `src/storylock-skill-engine/SKILL.md`
+2. `src/engine/SKILL.md`
 
 ## Policy Goals
 

@@ -36,6 +36,8 @@ SKIP_DIRS = {
     "venv",
     ".venv",
     "runtime",
+    "target",
+    ".tools",
     "dist",
     "build",
     "coverage",

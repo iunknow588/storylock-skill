@@ -39,9 +39,9 @@
 - `LocalStoryAssistAccessSkill`：删除类定义及所有引用
 
 **影响范围**：
-- `skill/src/storylock-local-story-access-skill/index.js`：删除3个类定义
-- `skill/src/storylock-local-story-access-skill/scripts/selftest.mjs`：删除相关测试用例
-- `skill/src/storylock-skill-engine/index.js`：检查是否有导出引用
+- `skill/src/skills/local-story-access/index.js`：删除3个类定义
+- `skill/src/skills/local-story-access/scripts/selftest.mjs`：删除相关测试用例
+- `skill/src/engine/index.js`：检查是否有导出引用
 
 ---
 
@@ -69,9 +69,9 @@
 - `queryStoryMetadata`：删除方法
 
 **影响范围**：
-- `skill/src/storylock-remote-gateway-skill/index.js`：删除6个方法
-- `skill/src/storylock-remote-gateway-skill/scripts/selftest.mjs`：删除相关测试用例
-- `skill/src/storylock-skill-engine/index.js`：检查是否有导出引用
+- `skill/src/skills/remote-gateway/index.js`：删除6个方法
+- `skill/src/skills/remote-gateway/scripts/selftest.mjs`：删除相关测试用例
+- `skill/src/engine/index.js`：检查是否有导出引用
 
 ---
 
@@ -92,9 +92,9 @@
 - 删除与 `requestChallengeSign` 重复的 schema 文件
 
 **影响范围**：
-- `skill/src/storylock-local-story-access-skill/assets/schemas/`
-- `skill/src/storylock-remote-gateway-skill/assets/schemas/`
-- `skill/src/storylock-skill-engine/assets/schemas/`
+- `skill/src/skills/local-story-access/assets/schemas/`
+- `skill/src/skills/remote-gateway/assets/schemas/`
+- `skill/src/engine/assets/schemas/`
 
 ---
 
@@ -109,7 +109,7 @@
 | 无 | 导出 `video-publish-demo.js` | 文档未提及，属于演示示例 |
 
 **删除建议**：
-- 检查 `skill/src/storylock-skill-engine/index.js` 的导出列表
+- 检查 `skill/src/engine/index.js` 的导出列表
 - 移除与文档不符的导出
 
 ---
@@ -128,8 +128,8 @@
 - 删除与废弃功能相关的 references 文档
 
 **影响范围**：
-- `skill/src/storylock-local-story-access-skill/references/`
-- `skill/src/storylock-remote-gateway-skill/references/`
+- `skill/src/skills/local-story-access/references/`
+- `skill/src/skills/remote-gateway/references/`
 
 ---
 
@@ -166,7 +166,7 @@
 
 ### 步骤1：删除第二层冗余技能
 
-**文件**：`skill/src/storylock-local-story-access-skill/index.js`
+**文件**：`skill/src/skills/local-story-access/index.js`
 
 **操作**：
 1. 删除 `StoryReadAccessSkill` 类定义（约80行）
@@ -182,7 +182,7 @@
 
 ### 步骤2：删除第三层冗余接口
 
-**文件**：`skill/src/storylock-remote-gateway-skill/index.js`
+**文件**：`skill/src/skills/remote-gateway/index.js`
 
 **操作**：
 1. 删除 `requestStoryRead` 方法
@@ -202,9 +202,9 @@
 ### 步骤3：删除冗余 Schema 文件
 
 **目录**：
-- `skill/src/storylock-local-story-access-skill/assets/schemas/`
-- `skill/src/storylock-remote-gateway-skill/assets/schemas/`
-- `skill/src/storylock-skill-engine/assets/schemas/`
+- `skill/src/skills/local-story-access/assets/schemas/`
+- `skill/src/skills/remote-gateway/assets/schemas/`
+- `skill/src/engine/assets/schemas/`
 
 **操作**：
 1. 删除 `story-read-input.schema.json`
@@ -219,8 +219,8 @@
 ### 步骤4：删除冗余 References 文档
 
 **目录**：
-- `skill/src/storylock-local-story-access-skill/references/`
-- `skill/src/storylock-remote-gateway-skill/references/`
+- `skill/src/skills/local-story-access/references/`
+- `skill/src/skills/remote-gateway/references/`
 
 **操作**：
 1. 删除 `story-read.md`
@@ -232,7 +232,7 @@
 
 ### 步骤5：更新 `storylock-skill-engine` 导出
 
-**文件**：`skill/src/storylock-skill-engine/index.js`
+**文件**：`skill/src/engine/index.js`
 
 **操作**：
 1. 检查并移除与废弃功能相关的导出
@@ -243,9 +243,9 @@
 ### 步骤6：更新自测脚本
 
 **文件**：
-- `skill/src/storylock-local-story-access-skill/scripts/selftest.mjs`
-- `skill/src/storylock-remote-gateway-skill/scripts/selftest.mjs`
-- `skill/src/storylock-skill-engine/scripts/selftest.mjs`
+- `skill/src/skills/local-story-access/scripts/selftest.mjs`
+- `skill/src/skills/remote-gateway/scripts/selftest.mjs`
+- `skill/src/engine/scripts/selftest.mjs`
 
 **操作**：
 1. 删除与废弃功能相关的测试用例

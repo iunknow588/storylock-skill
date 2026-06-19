@@ -688,14 +688,14 @@ recordAudit(eventType, { identityId, storyObjectId, requestId, result }) {
 
 ### 5.1 已新增的可验收入口
 
-1. `skill/src/storylock-local-story-access-skill/scripts/selftest.mjs`
-2. `skill/src/storylock-local-story-access-skill/scripts/check-secret-store.mjs`
-3. `skill/src/storylock-remote-gateway-skill/scripts/selftest.mjs`
+1. `skill/src/skills/local-story-access/scripts/selftest.mjs`
+2. `skill/src/skills/local-story-access/scripts/check-secret-store.mjs`
+3. `skill/src/skills/remote-gateway/scripts/selftest.mjs`
 
 ### 5.2 已新增的机器可读契约
 
-1. `skill/src/storylock-local-story-access-skill/assets/schemas/access-response.schema.json`
-2. `skill/src/storylock-local-story-access-skill/assets/schemas/selftest-report.schema.json`
+1. `skill/src/skills/local-story-access/assets/schemas/access-response.schema.json`
+2. `skill/src/skills/local-story-access/assets/schemas/selftest-report.schema.json`
 
 ### 5.3 已补充的远程网关接口
 

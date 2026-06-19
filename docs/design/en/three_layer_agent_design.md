@@ -171,6 +171,6 @@ StoryLock should not copy:
 
 Currently implemented: three Skill packages, Layer 3 `requestSignature` and `requestPasswordFill`, Layer 2 object strength/grid verification/local authorization/replay protection/audit, Layer 3 recursive redaction, and the three-layer E2E selftest.
 
-Layer 3 now provides a machine-readable Agent capability manifest at `src/storylock-remote-gateway-skill/assets/agent-capabilities.json`. It is checked by `npm run check:agent-capabilities` to keep Agent-facing capabilities aligned with the current `StoryLockRemoteGateway` methods.
+Layer 3 now provides a machine-readable Agent capability manifest at `src/skills/remote-gateway/assets/agent-capabilities.json`. It is checked by `npm run check:agent-capabilities` to keep Agent-facing capabilities aligned with the current `StoryLockRemoteGateway` methods.
 
 Future extensions include an Agent-facing HTTP or MCP host, an Agent workflow for generating 24 questions automatically, and more complete production SecretStore adapters across platforms.

@@ -11,7 +11,7 @@ import {
   StoryDraftAssistSkill,
   StoryRefineAssistSkill,
   StrengthReviewSkill,
-} from '../../src/storylock-skill-engine/index.js';
+} from '../../src/engine/index.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const docsRoot = join(root, 'docs');
@@ -126,7 +126,7 @@ function assertNoStaleCurrentLanguage(files) {
 }
 
 function assertAccessSkillDescription() {
-  const skillPath = join(srcRoot, 'storylock-local-story-access-skill', 'SKILL.md');
+  const skillPath = join(srcRoot, 'skills', 'local-story-access', 'SKILL.md');
   const text = readFileSync(skillPath, 'utf8');
   const description = text.match(/^description:\s*(.+)$/mu)?.[1] ?? '';
   assert.ok(description, 'local access SKILL.md must include a description');
@@ -140,10 +140,10 @@ function assertWorkspaceReadmeMatchesCurrentLayout() {
   const readmePath = join(root, 'readme.md');
   const text = readFileSync(readmePath, 'utf8');
   assert.match(text, /StoryLock Skill Workspace/);
-  assert.match(text, /src\/storylock-local-story-processing-skill/);
-  assert.match(text, /src\/storylock-local-story-access-skill/);
-  assert.match(text, /src\/storylock-remote-gateway-skill/);
-  assert.match(text, /src\/storylock-skill-engine/);
+  assert.match(text, /src\/skills\/local-story-processing/);
+  assert.match(text, /src\/skills\/local-story-access/);
+  assert.match(text, /src\/skills\/remote-gateway/);
+  assert.match(text, /src\/engine/);
   assert.match(text, /Node\.js `>=22\.0\.0`/);
 }
 
@@ -164,7 +164,7 @@ function assertSkillEngineExportsMatchDocs() {
 }
 
 function assertRemoteGatewayMainSurface() {
-  const indexPath = join(srcRoot, 'storylock-remote-gateway-skill', 'index.js');
+  const indexPath = join(srcRoot, 'skills', 'remote-gateway', 'index.js');
   const text = readFileSync(indexPath, 'utf8');
   const methods = [...text.matchAll(/^\s+async\s+(request[A-Za-z0-9_]+)\(/gmu)].map((match) => match[1]);
   assert.deepEqual(
@@ -178,8 +178,8 @@ function assertRemoteGatewayMainSurface() {
 const files = [
   ...walk(docsRoot),
   join(root, 'readme.md'),
-  join(srcRoot, 'storylock-local-story-access-skill', 'SKILL.md'),
-  join(srcRoot, 'storylock-local-story-access-skill', 'package.json'),
+  join(srcRoot, 'skills', 'local-story-access', 'SKILL.md'),
+  join(srcRoot, 'skills', 'local-story-access', 'package.json'),
 ];
 
 assertNoStaleCurrentLanguage(files);

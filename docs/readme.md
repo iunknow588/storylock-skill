@@ -17,16 +17,16 @@ In one sentence:
 
 | Layer | Package | Current Capabilities |
 | --- | --- | --- |
-| Layer 1: Story processing and strength review | `src/storylock-local-story-processing-skill` | `StoryDraftSkill`, `StoryRefineSkill`, `StrengthReviewSkill` |
-| Layer 2: Local access authorization | `src/storylock-local-story-access-skill` | `ObjectStrengthPolicySkill`, `GridChallengeSkill`, `LocalAuthorizationSkill` |
-| Layer 3: Remote gateway | `src/storylock-remote-gateway-skill` | `requestSignature`, `requestPasswordFill` |
-| Compatibility demo package | `src/storylock-skill-engine` | Local password-fill and signature-authorization examples |
+| Layer 1: Story processing and strength review | `src/skills/local-story-processing` | `StoryDraftSkill`, `StoryRefineSkill`, `StrengthReviewSkill` |
+| Layer 2: Local access authorization | `src/skills/local-story-access` | `ObjectStrengthPolicySkill`, `GridChallengeSkill`, `LocalAuthorizationSkill` |
+| Layer 3: Remote gateway | `src/skills/remote-gateway` | `requestSignature`, `requestPasswordFill` |
+| Compatibility demo package | `src/engine` | Local password-fill and signature-authorization examples |
 
 The current mainline remote surface focuses on two entries: `requestSignature` and `requestPasswordFill`. Local authorization is handled by Layer 2, while the remote gateway handles request wrapping, delegated execution, and redacted returns.
 
 Current deployment direction:
 
-1. Layer 3 can run behind a Vercel-style HTTP entry at `api/storylock-gateway.mjs`.
+1. Layer 3 can run behind the Web API entry at `web-api/storylock-gateway.mjs`.
 2. Layers 1 and 2 can remain on an Android local host.
 3. The repo currently verifies that split with a local Android-host mock, not a full Android app project.
 4. Layer 3 can now expose Android app distribution metadata and second-layer connection metadata so the full system can be routed and downloaded from the server side.
@@ -109,7 +109,7 @@ npm run test
 ### 5.1 Layer 1 Self-Test
 
 ```powershell
-Push-Location src/storylock-local-story-processing-skill
+Push-Location src/skills/local-story-processing
 npm run selftest
 Pop-Location
 ```
@@ -117,7 +117,7 @@ Pop-Location
 ### 5.2 Layer 2 Self-Test
 
 ```powershell
-Push-Location src/storylock-local-story-access-skill
+Push-Location src/skills/local-story-access
 npm run selftest
 Pop-Location
 ```
@@ -127,7 +127,7 @@ This covers object strength, grid verification, replay protection, local authori
 ### 5.3 Layer 3 Self-Test
 
 ```powershell
-Push-Location src/storylock-remote-gateway-skill
+Push-Location src/skills/remote-gateway
 npm run selftest
 Pop-Location
 ```
@@ -137,7 +137,7 @@ This covers `requestSignature`, `requestPasswordFill`, EIP-712 wrapping, and rec
 ### 5.4 Three-Layer E2E Signature Demo
 
 ```powershell
-Push-Location src/storylock-remote-gateway-skill
+Push-Location src/skills/remote-gateway
 npm run selftest:e2e
 Pop-Location
 ```
@@ -155,7 +155,7 @@ The script connects:
 ### 5.5 Compatibility Demo Package Self-Test
 
 ```powershell
-Push-Location src/storylock-skill-engine
+Push-Location src/engine
 npm run selftest
 Pop-Location
 ```
@@ -163,8 +163,8 @@ Pop-Location
 ### 5.6 Vercel + Android-Host Split Self-Test
 
 ```powershell
-Push-Location src/storylock-remote-gateway-skill
-npm run selftest:vercel-android
+Push-Location src/skills/remote-gateway
+npm run selftest:web-api-android
 Pop-Location
 ```
 
@@ -203,7 +203,7 @@ Set `VERCEL_PROJECT_NAME` in `scripts/vercel/.env` before linking.
 ### 5.10 SQLite Cleanup Command
 
 ```powershell
-Push-Location src/storylock-local-story-access-skill
+Push-Location src/skills/local-story-access
 npm run cleanup -- 2 --development-memory-secret-store
 Pop-Location
 ```
@@ -215,13 +215,13 @@ Pop-Location
 | Workspace root entry | `README.md` |
 | Chinese design entry | `docs/design/cn/README.md` |
 | Submission reference docs | `docs/ref/README.md` |
-| Test plan | `docs/test/StoryLock测试方案_v1.0.md` |
-| Development progress | `docs/design/cn/开发落地路线与当前进展.md` |
-| Review demo script | `docs/ref/06-评审讲解与演示说明.md` |
-| APK distribution | `docs/ref/07-APK分发与安装说明.md` |
-| Yian deployment | `docs/ref/08-易安部署与域名说明.md` |
-| Layer terminology | `docs/ref/09-三层术语与PHAROS定位.md` |
-| Submission overview | `docs/ref/01-参赛概览.md` |
+| Test plan | `docs/test/StoryLock娴嬭瘯鏂规_v1.0.md` |
+| Development progress | `docs/design/cn/寮€鍙戣惤鍦拌矾绾夸笌褰撳墠杩涘睍.md` |
+| Review demo script | `docs/ref/06-璇勫璁茶В涓庢紨绀鸿鏄?md` |
+| APK distribution | `docs/ref/07-APK鍒嗗彂涓庡畨瑁呰鏄?md` |
+| Yian deployment | `docs/ref/08-鏄撳畨閮ㄧ讲涓庡煙鍚嶈鏄?md` |
+| Layer terminology | `docs/ref/09-涓夊眰鏈涓嶱HAROS瀹氫綅.md` |
+| Submission overview | `docs/ref/01-鍙傝禌姒傝.md` |
 
 ## 7. Current Completion Status
 
@@ -248,10 +248,7 @@ Recommended:
 
 Avoid:
 
-1. “It already supports a production-grade multi-chain wallet system.”
-2. “The remote gateway directly handles local plaintext sensitive content.”
-3. “The compatibility demo package is the full production security boundary.”
-
+1. 鈥淚t already supports a production-grade multi-chain wallet system.鈥?2. 鈥淭he remote gateway directly handles local plaintext sensitive content.鈥?3. 鈥淭he compatibility demo package is the full production security boundary.鈥?
 ## 9. Summary
 
 StoryLock currently provides a verifiable three-layer Skill baseline:
@@ -261,3 +258,5 @@ StoryLock currently provides a verifiable three-layer Skill baseline:
 3. Layer 3 handles remote request wrapping, delegated execution, and redacted returns.
 
 It is suitable for demonstrating an Agent security model where remote systems can request capabilities, local systems authorize sensitive actions, results are auditable, and long-term secrets do not leave the local boundary.
+
+

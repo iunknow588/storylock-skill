@@ -8,16 +8,16 @@ import {
   GridChallengeSkill,
   LocalAuthorizationSkill,
   ObjectStrengthPolicySkill,
-} from '../storylock-local-story-access-skill/index.js';
+} from '../skills/local-story-access/index.js';
 import {
   StoryLockRemoteGateway,
   createDemoEip712Domain,
-} from '../storylock-remote-gateway-skill/index.js';
-import { handleStoryLockGatewayRequest } from '../storylock-remote-gateway-skill/vercel-handler.js';
+} from '../skills/remote-gateway/index.js';
+import { handleStoryLockGatewayRequest } from '../skills/remote-gateway/web-api-handler.js';
 
 const uiRoot = dirname(fileURLToPath(import.meta.url));
 const publicRoot = resolve(uiRoot, '../yian-web/public');
-const configPath = resolve(uiRoot, '../storylock-local-story-access-skill/assets/demo-story-config.json');
+const configPath = resolve(uiRoot, '../skills/local-story-access/assets/demo-story-config.json');
 const port = Number(process.env.PORT || 4174);
 const host = String(process.env.HOST || process.env.STORYLOCK_UI_HOST || '127.0.0.1').trim();
 const gatewayBaseUrl = String(process.env.STORYLOCK_UI_GATEWAY_BASE_URL || '').trim() || null;

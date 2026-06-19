@@ -12,7 +12,7 @@ This document defines:
 
 This document is aligned to the current package:
 
-1. `src/storylock-skill-engine/`
+1. `src/engine/`
 
 ## Design Principles
 

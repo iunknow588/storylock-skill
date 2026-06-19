@@ -21,7 +21,7 @@ Do not use this guide to claim that StoryLock core security semantics were rewri
 
 ## Current package status
 
-The migrated package at `skill/src/storylock-skill-engine/` now has:
+The migrated package at `skill/src/engine/` now has:
 
 1. a locally runnable JS skill-layer
 2. local `demo` and `selftest` commands
@@ -49,7 +49,7 @@ It still does not yet have:
 
 1. Keep core authorization and skill packaging distinct.
 2. Prefer the migrated package path when the user asks for the current reusable version:
-   - `skill/src/storylock-skill-engine/`
+   - `skill/src/engine/`
 3. Say clearly when a capability is JS-local only versus Rust/WASM-backed.
 4. Do not describe the current package as fully Rust-complete.
 5. Use the capability-specific reference page before improvising parameter or output claims.

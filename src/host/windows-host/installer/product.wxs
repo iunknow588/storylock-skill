@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="Yian Windows Host"
+    Manufacturer="Yian / StoryLock"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="6F0A7D8B-7F59-4E6B-B4E8-0EAC6959B301"
+    Language="1033">
+    <SummaryInformation Description="Yian Windows Host prototype installer" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of Yian Windows Host is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="Yian Windows Host" />
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="Yian Windows Host" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="HostExecutableComponent" Guid="*">
+        <File Id="HostExecutableFile" Source="..\target\release\yian-windows-host.exe" KeyPath="yes" />
+      </Component>
+      <Component Id="ReadmeComponent" Guid="*">
+        <File Id="ReadmeFile" Source="..\README.md" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

@@ -20,7 +20,7 @@
 
 ### 已完成
 
-- [x] 已创建 `skill/src/storylock-skill-engine/`
+- [x] 已创建 `skill/src/engine/`
 - [x] 已具备 `SKILL.md + references + assets` 的基础目录结构
 - [x] 已迁移 `story-assist.js`
 - [x] 已迁移 `authorization-skills.js`
@@ -36,7 +36,7 @@
 
 ### 已知缺口
 
-- [ ] `skill/src/storylock-skill-engine/` 仍未形成完全独立的 Rust 源码包
+- [ ] `skill/src/engine/` 仍未形成完全独立的 Rust 源码包
 - [ ] JS skill-layer 与本地 WASM host 的正式接线路径仍未完成
 - [ ] `assets/` 还没有形成完整的 schema / template 资源层
 - [ ] 更完整的自动化测试仍待补齐，当前以 demo / selftest 为主

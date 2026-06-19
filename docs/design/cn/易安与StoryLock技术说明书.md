@@ -82,7 +82,7 @@ StoryLock 是用于 Agent 场景的本地安全组件，负责私钥、文件密
 
 | 项目 | 内容 |
 | --- | --- |
-| 代码包 | `src/storylock-local-story-processing-skill` |
+| 代码包 | `src/skills/local-story-processing` |
 | 主要能力 | 故事草稿生成、故事润色、题集强度评估 |
 | 典型 Skill | `StoryDraftSkill`、`StoryRefineSkill`、`StrengthReviewSkill` |
 
@@ -94,7 +94,7 @@ StoryLock 是用于 Agent 场景的本地安全组件，负责私钥、文件密
 
 | 项目 | 内容 |
 | --- | --- |
-| 代码包 | `src/storylock-local-story-access-skill` |
+| 代码包 | `src/skills/local-story-access` |
 | 主要能力 | 对象级强度策略、九宫格验证、本地授权、短时会话、防重放 |
 | 典型 Skill | `ObjectStrengthPolicySkill`、`GridChallengeSkill`、`LocalAuthorizationSkill` |
 
@@ -106,7 +106,7 @@ StoryLock 是用于 Agent 场景的本地安全组件，负责私钥、文件密
 
 | 项目 | 内容 |
 | --- | --- |
-| 代码包 | `src/storylock-remote-gateway-skill` |
+| 代码包 | `src/skills/remote-gateway` |
 | 主要接口 | `requestSignature`、`requestPasswordFill` |
 | 主要能力 | 远程请求封装、签名确认请求包装、Web2 密码填充请求包装、EIP-712 最小签名请求结构、最小结果返回 |
 
@@ -118,15 +118,15 @@ StoryLock 是用于 Agent 场景的本地安全组件，负责私钥、文件密
 
 | 包 | 目录 | 职责 |
 | --- | --- | --- |
-| `storylock-local-story-processing-skill` | `src/storylock-local-story-processing-skill` | 第一层，本地故事处理 |
-| `storylock-local-story-access-skill` | `src/storylock-local-story-access-skill` | 第二层，本地受控授权 |
-| `storylock-remote-gateway-skill` | `src/storylock-remote-gateway-skill` | 第三层，远程请求封装与网关 |
+| `storylock-local-story-processing-skill` | `src/skills/local-story-processing` | 第一层，本地故事处理 |
+| `storylock-local-story-access-skill` | `src/skills/local-story-access` | 第二层，本地受控授权 |
+| `storylock-remote-gateway-skill` | `src/skills/remote-gateway` | 第三层，远程请求封装与网关 |
 
 ### 6.2 聚合与共享模块
 
 | 模块 | 目录 | 说明 |
 | --- | --- | --- |
-| `storylock-skill-engine` | `src/storylock-skill-engine` | 统一导出、示例脚本、自测脚本和兼容演示入口 |
+| `storylock-skill-engine` | `src/engine` | 统一导出、示例脚本、自测脚本和兼容演示入口 |
 | `shared` | `src/shared` | 共享加密、SQLite 和 SecretStore 适配代码 |
 | `yian-web` | `src/yian-web` | 易安远程访问接口的静态站点与帮助入口 |
 | `android-host` | `android-host` | 易安 App / 私人智能助理 / StoryLock 本地核心演示闭环的 Android 工程 |

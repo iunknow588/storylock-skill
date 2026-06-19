@@ -8,13 +8,19 @@
 
 Android 宿主默认调试产物路径：
 
-`android-host/app/build/outputs/apk/debug/app-debug.apk`
+`src/host/android-host/app/build/outputs/apk/debug/app-debug.apk`
+
+对外分发、安装验证和上传服务器时，统一使用项目根目录下的 App 制品目录：
+
+`release/app/android/storylock-android-host-{versionName}-{versionCode}-{debug|release}.apk`
+
+`scripts/release/android/build_apk.ps1` 会在 Gradle 构建完成后，把最新 APK 复制到 `release/app/android/`，并让生成的 `STORYLOCK_ANDROID_APK_PATH` 指向该目录下的文件。
 
 线上或本地网关优先读取环境变量：
 
 `STORYLOCK_ANDROID_APK_PATH`
 
-当 `STORYLOCK_ANDROID_APK_PATH` 指向的文件存在时，`GET /download/android-host` 直接返回该 APK 文件。当未配置本地文件但配置了 `STORYLOCK_ANDROID_APP_DOWNLOAD_URL` 时，下载入口使用 307 重定向到外部分发地址。
+当 `STORYLOCK_ANDROID_APK_PATH` 指向的文件存在时，`GET /download/android-host` 直接返回该 APK 文件。当未配置本地文件但配置了 `STORYLOCK_ANDROID_APP_DOWNLOAD_URL` 时，下载入口使用 307 重定向到外部分发地址。若两者都未配置，网关会优先检查 `release/app/android/` 和 `release/web/public/downloads/` 下的 APK 兜底文件。
 
 ## 2. 命名规则
 

@@ -25,7 +25,7 @@ The recommended signature flow is:
 ## Invocation Example
 
 ```js
-import { StoryLockRemoteGateway } from "../../../src/storylock-remote-gateway-skill/index.js";
+import { StoryLockRemoteGateway } from "../../../src/skills/remote-gateway/index.js";
 
 const gateway = new StoryLockRemoteGateway({
   transport(request) {

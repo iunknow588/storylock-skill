@@ -177,6 +177,6 @@ StoryLock 不应照搬：
 
 当前已经具备三层 Skill 包、第三层 `requestSignature` 与 `requestPasswordFill`、第二层对象强度/九宫格/本地授权/防重放/审计、第三层递归脱敏和三层 e2e selftest。
 
-第三层已经提供机器可读 Agent 能力清单：`src/storylock-remote-gateway-skill/assets/agent-capabilities.json`。该清单通过 `npm run check:agent-capabilities` 校验，确保 Agent-facing capability 与 `StoryLockRemoteGateway` 当前主接口保持一致。
+第三层已经提供机器可读 Agent 能力清单：`src/skills/remote-gateway/assets/agent-capabilities.json`。该清单通过 `npm run check:agent-capabilities` 校验，确保 Agent-facing capability 与 `StoryLockRemoteGateway` 当前主接口保持一致。
 
 面向 Agent 的 HTTP 或 MCP host、自动生成 24 个问题的 Agent 工作流仍属于后续扩展。

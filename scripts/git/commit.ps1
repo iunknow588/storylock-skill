@@ -185,9 +185,9 @@ function Invoke-SelfTests {
     )
 
     $packages = @(
-        'src/storylock-local-story-access-skill',
-        'src/storylock-remote-gateway-skill',
-        'src/storylock-skill-engine'
+        'src/skills/local-story-access',
+        'src/skills/remote-gateway',
+        'src/engine'
     )
 
     foreach ($package in $packages) {

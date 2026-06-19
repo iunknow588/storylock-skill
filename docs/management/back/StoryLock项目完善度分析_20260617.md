@@ -12,7 +12,7 @@
     },
     {
       "type": "P0-端到端演示补齐",
-      "description": "已新增 src/storylock-remote-gateway-skill/scripts/e2e-selftest.mjs，串联 requestSignature、对象强度策略、九宫格验证、本地授权、本地签名执行器、脱敏返回和 SQLite 审计。"
+      "description": "已新增 src/skills/remote-gateway/scripts/e2e-selftest.mjs，串联 requestSignature、对象强度策略、九宫格验证、本地授权、本地签名执行器、脱敏返回和 SQLite 审计。"
     },
     {
       "type": "P0-文档口径清理",
@@ -24,7 +24,7 @@
     },
     {
       "type": "P1-清理任务与维护命令",
-      "description": "已新增 src/storylock-local-story-access-skill/scripts/cleanup-expired.mjs，并提供 npm run cleanup。"
+      "description": "已新增 src/skills/local-story-access/scripts/cleanup-expired.mjs，并提供 npm run cleanup。"
     },
     {
       "type": "P1-SecretStore生产约束",
@@ -57,12 +57,12 @@
     }
   ],
   "verification": [
-    "src/storylock-local-story-processing-skill: npm run selftest passed",
-    "src/storylock-local-story-access-skill: npm run selftest passed",
-    "src/storylock-remote-gateway-skill: npm run selftest passed",
-    "src/storylock-remote-gateway-skill: npm run selftest:e2e passed",
-    "src/storylock-skill-engine: npm run selftest passed",
-    "src/storylock-local-story-access-skill: npm run cleanup -- 2 --development-memory-secret-store passed",
+    "src/skills/local-story-processing: npm run selftest passed",
+    "src/skills/local-story-access: npm run selftest passed",
+    "src/skills/remote-gateway: npm run selftest passed",
+    "src/skills/remote-gateway: npm run selftest:e2e passed",
+    "src/engine: npm run selftest passed",
+    "src/skills/local-story-access: npm run cleanup -- 2 --development-memory-secret-store passed",
     "workspace: npm run test passed"
   ]
 }

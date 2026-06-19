@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "windows-local-question-bank-v1",
+  "questionSetVersion": "windows-local-v1",
+  "normalizationVersion": "upper-ascii-v1",
+  "questions": [
+    { "questionId": "story-q-01", "promptRef": "prompt-01", "versionTag": "v1", "promptText": "Recall the first local checkpoint word.", "answer": "DAWN" },
+    { "questionId": "story-q-02", "promptRef": "prompt-02", "versionTag": "v1", "promptText": "Recall the second local checkpoint word.", "answer": "RIVER" },
+    { "questionId": "story-q-03", "promptRef": "prompt-03", "versionTag": "v1", "promptText": "Recall the third local checkpoint word.", "answer": "LANTERN" },
+    { "questionId": "story-q-04", "promptRef": "prompt-04", "versionTag": "v1", "promptText": "Recall the fourth local checkpoint word.", "answer": "PINE" },
+    { "questionId": "story-q-05", "promptRef": "prompt-05", "versionTag": "v1", "promptText": "Recall the fifth local checkpoint word.", "answer": "HARBOR" },
+    { "questionId": "story-q-06", "promptRef": "prompt-06", "versionTag": "v1", "promptText": "Recall the sixth local checkpoint word.", "answer": "MIRROR" },
+    { "questionId": "story-q-07", "promptRef": "prompt-07", "versionTag": "v1", "promptText": "Recall the seventh local checkpoint word.", "answer": "SPARROW" },
+    { "questionId": "story-q-08", "promptRef": "prompt-08", "versionTag": "v1", "promptText": "Recall the eighth local checkpoint word.", "answer": "MAPLE" },
+    { "questionId": "story-q-09", "promptRef": "prompt-09", "versionTag": "v1", "promptText": "Recall the ninth local checkpoint word.", "answer": "EMBER" }
+  ]
+}

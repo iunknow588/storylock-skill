@@ -51,9 +51,9 @@ In one sentence:
 
 | Package | Directory | Role |
 |---------|-----------|------|
-| `storylock-local-story-processing-skill` | `skill/src/storylock-local-story-processing-skill` | Layer 1, local story processing |
-| `storylock-local-story-access-skill` | `skill/src/storylock-local-story-access-skill` | Layer 2, local controlled authorization |
-| `storylock-remote-gateway-skill` | `skill/src/storylock-remote-gateway-skill` | Layer 3, remote request wrapping and gateway |
+| `storylock-local-story-processing-skill` | `skill/src/skills/local-story-processing` | Layer 1, local story processing |
+| `storylock-local-story-access-skill` | `skill/src/skills/local-story-access` | Layer 2, local controlled authorization |
+| `storylock-remote-gateway-skill` | `skill/src/skills/remote-gateway` | Layer 3, remote request wrapping and gateway |
 
 
 ### 3.2 Aggregation Entry
@@ -61,7 +61,7 @@ In one sentence:
 
 | Module | Directory | Description |
 |--------|-----------|-------------|
-| `storylock-skill-engine` | `skill/src/storylock-skill-engine` | Unified exports, demo scripts, self-test scripts, and WASM build scripts |
+| `storylock-skill-engine` | `skill/src/engine` | Unified exports, demo scripts, self-test scripts, and WASM build scripts |
 | `shared` | `skill/src/shared` | Shared encryption, SQLite, and SecretStore adapter code |
 
 
@@ -85,9 +85,9 @@ Skills:
 Code:
 
 
-- `skill/src/storylock-local-story-processing-skill/index.js`
-- `skill/src/storylock-skill-engine/assets/migrated/skills/story-assist.js`
-- `skill/src/storylock-skill-engine/assets/migrated/skills/strength-review.js`
+- `skill/src/skills/local-story-processing/index.js`
+- `skill/src/engine/assets/migrated/skills/story-assist.js`
+- `skill/src/engine/assets/migrated/skills/strength-review.js`
 
 
 Capabilities:
@@ -112,8 +112,8 @@ Skills:
 Code:
 
 
-- `skill/src/storylock-local-story-access-skill/index.js`
-- `skill/src/storylock-local-story-access-skill/access-host.js`
+- `skill/src/skills/local-story-access/index.js`
+- `skill/src/skills/local-story-access/access-host.js`
 
 
 Capabilities:
@@ -141,7 +141,7 @@ Interfaces:
 Code:
 
 
-- `skill/src/storylock-remote-gateway-skill/index.js`
+- `skill/src/skills/remote-gateway/index.js`
 
 
 Capabilities:
@@ -260,14 +260,14 @@ Based on the current code and `skill/docs/management/code_doc_consistency_review
 Directory:
 
 
-`skill/src/storylock-skill-engine`
+`skill/src/engine`
 
 
 Command:
 
 
 ```powershell
-cd skill/src/storylock-skill-engine
+cd skill/src/engine
 npm run demo
 npm run selftest
 npm run build:wasm
@@ -281,11 +281,11 @@ selftest:wasm: verifies that WASM dist artifacts can be loaded
 7.2 Local Controlled Authorization Self-Test
 Directory:
 
-skill/src/storylock-local-story-access-skill
+skill/src/skills/local-story-access
 
 Command:
 
-cd skill/src/storylock-local-story-access-skill
+cd skill/src/skills/local-story-access
 node scripts/selftest.mjs
 Coverage:
 
@@ -299,11 +299,11 @@ Local authorization result return
 7.3 Remote Gateway Self-Test
 Directory:
 
-skill/src/storylock-remote-gateway-skill
+skill/src/skills/remote-gateway
 
 Command:
 
-cd skill/src/storylock-remote-gateway-skill
+cd skill/src/skills/remote-gateway
 node scripts/selftest.mjs
 Coverage:
 
@@ -379,10 +379,10 @@ Type	Path	Description
 Chinese product brief	skill/docs/usecase/00-参赛说明文档.md	Product description
 English product brief	skill/docs/usecase/00-submission-brief-en.md	Product description
 Consistency review document	skill/docs/management/code_doc_consistency_review.md	Code and design document comparison review
-Layer 1 code	skill/src/storylock-local-story-processing-skill	Local story processing
-Layer 2 code	skill/src/storylock-local-story-access-skill	Local controlled authorization
-Layer 3 code	skill/src/storylock-remote-gateway-skill	Remote gateway
-Aggregation entry	skill/src/storylock-skill-engine	Examples, self-tests, and WASM build
+Layer 1 code	skill/src/skills/local-story-processing	Local story processing
+Layer 2 code	skill/src/skills/local-story-access	Local controlled authorization
+Layer 3 code	skill/src/skills/remote-gateway	Remote gateway
+Aggregation entry	skill/src/engine	Examples, self-tests, and WASM build
 Shared modules	skill/src/shared	Encryption, SQLite, SecretStore
 11. Extension Directions
 11.1 Short Term

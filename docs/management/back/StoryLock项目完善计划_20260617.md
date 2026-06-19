@@ -58,7 +58,7 @@ StoryLock 当前已经完成三层主线的最小可运行实现：
 
 目标：
 
-1. 修正 `src/storylock-local-story-access-skill/SKILL.md` 的 description。
+1. 修正 `src/skills/local-story-access/SKILL.md` 的 description。
 2. 不再写 `read access`、`write access`、`protected story object access` 作为第二层职责。
 3. 改为 `object strength policy, grid verification, local authorization`。
 

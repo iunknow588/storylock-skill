@@ -7,7 +7,7 @@ This document defines how StoryLock should classify objects, determine access st
 It complements:
 
 1. `storylock_skill_positioning_and_boundary.md`
-2. `src/storylock-skill-engine/SKILL.md`
+2. `src/engine/SKILL.md`
 
 ## Policy Goal
 

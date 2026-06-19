@@ -17,10 +17,10 @@ StoryLock 是一个本地优先的授权访问 Skill 项目。它将故事记忆
 
 | 层级 | 代码包 | 当前能力 |
 | --- | --- | --- |
-| 第一层：故事处理与强度分析 | `src/storylock-local-story-processing-skill` | `StoryDraftSkill`、`StoryRefineSkill`、`StrengthReviewSkill` |
-| 第二层：本地访问授权 | `src/storylock-local-story-access-skill` | `ObjectStrengthPolicySkill`、`GridChallengeSkill`、`LocalAuthorizationSkill` |
-| 第三层：远程网关 | `src/storylock-remote-gateway-skill` | `requestSignature`、`requestPasswordFill` |
-| 兼容演示包 | `src/storylock-skill-engine` | 本地密码填充与签名授权示例 |
+| 第一层：故事处理与强度分析 | `src/skills/local-story-processing` | `StoryDraftSkill`、`StoryRefineSkill`、`StrengthReviewSkill` |
+| 第二层：本地访问授权 | `src/skills/local-story-access` | `ObjectStrengthPolicySkill`、`GridChallengeSkill`、`LocalAuthorizationSkill` |
+| 第三层：远程网关 | `src/skills/remote-gateway` | `requestSignature`、`requestPasswordFill` |
+| 兼容演示包 | `src/engine` | 本地密码填充与签名授权示例 |
 
 当前主线对外聚焦两个远程入口：`requestSignature` 与 `requestPasswordFill`。本地授权流程由第二层完成，远程网关只负责请求包装、委托执行和脱敏返回。
 
@@ -100,7 +100,7 @@ npm run test
 ### 5.1 第一层自测
 
 ```powershell
-Push-Location src/storylock-local-story-processing-skill
+Push-Location src/skills/local-story-processing
 npm run selftest
 Pop-Location
 ```
@@ -108,7 +108,7 @@ Pop-Location
 ### 5.2 第二层自测
 
 ```powershell
-Push-Location src/storylock-local-story-access-skill
+Push-Location src/skills/local-story-access
 npm run selftest
 Pop-Location
 ```
@@ -118,7 +118,7 @@ Pop-Location
 ### 5.3 第三层自测
 
 ```powershell
-Push-Location src/storylock-remote-gateway-skill
+Push-Location src/skills/remote-gateway
 npm run selftest
 Pop-Location
 ```
@@ -128,7 +128,7 @@ Pop-Location
 ### 5.4 三层端到端签名演示
 
 ```powershell
-Push-Location src/storylock-remote-gateway-skill
+Push-Location src/skills/remote-gateway
 npm run selftest:e2e
 Pop-Location
 ```
@@ -146,7 +146,7 @@ Pop-Location
 ### 5.5 兼容演示包自测
 
 ```powershell
-Push-Location src/storylock-skill-engine
+Push-Location src/engine
 npm run selftest
 Pop-Location
 ```
@@ -154,7 +154,7 @@ Pop-Location
 ### 5.6 SQLite 清理命令
 
 ```powershell
-Push-Location src/storylock-local-story-access-skill
+Push-Location src/skills/local-story-access
 npm run cleanup -- 2 --development-memory-secret-store
 Pop-Location
 ```

@@ -6,18 +6,18 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const requiredSchemas = [
-  'src/storylock-local-story-access-skill/assets/schemas/access-response.schema.json',
-  'src/storylock-local-story-access-skill/assets/schemas/grid-verification-input.schema.json',
-  'src/storylock-local-story-access-skill/assets/schemas/local-authorization-input.schema.json',
-  'src/storylock-local-story-access-skill/assets/schemas/local-revocation-input.schema.json',
-  'src/storylock-local-story-access-skill/assets/schemas/object-strength-policy-input.schema.json',
-  'src/storylock-local-story-access-skill/assets/schemas/question-set-master.schema.json',
-  'src/storylock-local-story-processing-skill/assets/schemas/story-draft-input.schema.json',
-  'src/storylock-local-story-processing-skill/assets/schemas/story-refine-input.schema.json',
-  'src/storylock-remote-gateway-skill/assets/schemas/delegated-sign-input.schema.json',
-  'src/storylock-remote-gateway-skill/assets/schemas/android-host-health.schema.json',
-  'src/storylock-remote-gateway-skill/assets/schemas/remote-gateway-request.schema.json',
-  'src/storylock-remote-gateway-skill/assets/schemas/remote-gateway-response.schema.json',
+  'src/skills/local-story-access/assets/schemas/access-response.schema.json',
+  'src/skills/local-story-access/assets/schemas/grid-verification-input.schema.json',
+  'src/skills/local-story-access/assets/schemas/local-authorization-input.schema.json',
+  'src/skills/local-story-access/assets/schemas/local-revocation-input.schema.json',
+  'src/skills/local-story-access/assets/schemas/object-strength-policy-input.schema.json',
+  'src/skills/local-story-access/assets/schemas/question-set-master.schema.json',
+  'src/skills/local-story-processing/assets/schemas/story-draft-input.schema.json',
+  'src/skills/local-story-processing/assets/schemas/story-refine-input.schema.json',
+  'src/skills/remote-gateway/assets/schemas/delegated-sign-input.schema.json',
+  'src/skills/remote-gateway/assets/schemas/android-host-health.schema.json',
+  'src/skills/remote-gateway/assets/schemas/remote-gateway-request.schema.json',
+  'src/skills/remote-gateway/assets/schemas/remote-gateway-response.schema.json',
 ];
 
 function walk(dir, suffix, output = []) {
@@ -52,21 +52,21 @@ for (const schemaPath of schemaPaths) {
   assert.ok(schema.title, `${displayPath} must include title`);
 }
 
-const remoteRequest = readJson(new URL('../../src/storylock-remote-gateway-skill/assets/schemas/remote-gateway-request.schema.json', import.meta.url));
+const remoteRequest = readJson(new URL('../../src/skills/remote-gateway/assets/schemas/remote-gateway-request.schema.json', import.meta.url));
 assert.deepEqual(
   remoteRequest.properties.capability.enum,
   ['requestSignature', 'requestPasswordFill'],
   'remote gateway request capabilities must match current mainline',
 );
 
-const remoteResponse = readJson(new URL('../../src/storylock-remote-gateway-skill/assets/schemas/remote-gateway-response.schema.json', import.meta.url));
+const remoteResponse = readJson(new URL('../../src/skills/remote-gateway/assets/schemas/remote-gateway-response.schema.json', import.meta.url));
 assert.deepEqual(
   remoteResponse.properties.capability.enum,
   ['requestSignature', 'requestPasswordFill'],
   'remote gateway response capabilities must match current mainline',
 );
 
-const accessResponse = readJson(new URL('../../src/storylock-local-story-access-skill/assets/schemas/access-response.schema.json', import.meta.url));
+const accessResponse = readJson(new URL('../../src/skills/local-story-access/assets/schemas/access-response.schema.json', import.meta.url));
 assert.match(
   accessResponse.properties.error.oneOf[1].properties.code.pattern,
   /\^SLG-\[0-9\]\{3\}\$/,

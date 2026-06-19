@@ -23,7 +23,7 @@ It does not:
 
 ## 3. Current migrated package boundary
 
-For `skill/src/storylock-skill-engine/`, the current boundary is:
+For `skill/src/engine/`, the current boundary is:
 
 1. JS skill-layer is locally runnable and testable
 2. Rust/WASM build and dist validation are wired in
