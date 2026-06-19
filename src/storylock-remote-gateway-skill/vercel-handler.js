@@ -154,6 +154,14 @@ function publicDownloadUrl(gatewayBaseUrl) {
   return new URL('/app/download', gatewayBaseUrl).toString();
 }
 
+function publicAndroidDownloadUrl(gatewayBaseUrl) {
+  return new URL('/app/download/android', gatewayBaseUrl).toString();
+}
+
+function publicWindowsDownloadUrl(gatewayBaseUrl) {
+  return new URL('/app/download/windows', gatewayBaseUrl).toString();
+}
+
 function publicBindingUrl(gatewayBaseUrl) {
   return new URL('/app/bind', gatewayBaseUrl).toString();
 }
@@ -166,7 +174,12 @@ function bundledApkDownloadUrl(gatewayBaseUrl) {
   return new URL('/downloads/storylock-android-host-0.1.0-1-debug.apk', gatewayBaseUrl).toString();
 }
 
+function bundledWindowsDownloadUrl(gatewayBaseUrl) {
+  return new URL('/downloads/yian-windows-host-0.1.0-1-prototype.zip', gatewayBaseUrl).toString();
+}
+
 const BUNDLED_APK_FILE_NAME = 'storylock-android-host-0.1.0-1-debug.apk';
+const DEFAULT_WINDOWS_PACKAGE_FILE_NAME = 'yian-windows-host-0.1.0-1-prototype.zip';
 
 function resolveApkFilePath(env = process.env, appDistribution = resolveAppDistributionConfig(env)) {
   const configured = optionalString(appDistribution.androidApkPath);
@@ -178,10 +191,35 @@ function resolveApkFilePath(env = process.env, appDistribution = resolveAppDistr
   return existsSync(fallback) ? fallback : null;
 }
 
+function resolveWindowsPackageFilePath(env = process.env, appDistribution = resolveAppDistributionConfig(env)) {
+  const configured = optionalString(appDistribution.windowsPackagePath);
+  if (!configured) {
+    return null;
+  }
+  const absolute = resolve(configured);
+  return existsSync(absolute) ? absolute : null;
+}
+
 async function serveApkFile(res, absolutePath) {
   const info = await stat(absolutePath);
   res.statusCode = 200;
   res.setHeader('content-type', 'application/vnd.android.package-archive');
+  res.setHeader('content-length', String(info.size));
+  res.setHeader('content-disposition', `attachment; filename="${basename(absolutePath)}"`);
+  await new Promise((resolvePromise, rejectPromise) => {
+    const stream = createReadStream(absolutePath);
+    stream.on('error', rejectPromise);
+    stream.on('end', resolvePromise);
+    stream.pipe(res);
+  });
+}
+
+async function serveBinaryFile(res, absolutePath, {
+  contentType = 'application/octet-stream',
+} = {}) {
+  const info = await stat(absolutePath);
+  res.statusCode = 200;
+  res.setHeader('content-type', contentType);
   res.setHeader('content-length', String(info.size));
   res.setHeader('content-disposition', `attachment; filename="${basename(absolutePath)}"`);
   await new Promise((resolvePromise, rejectPromise) => {
@@ -227,16 +265,24 @@ function optionalPositiveInteger(value) {
 async function buildAppDistributionStatus(env, gatewayBaseUrl) {
   const appDistribution = resolveAppDistributionConfig(env);
   const apkFilePath = resolveApkFilePath(env, appDistribution);
+  const windowsPackageFilePath = resolveWindowsPackageFilePath(env, appDistribution);
   const artifactName = apkFilePath ? basename(apkFilePath) : BUNDLED_APK_FILE_NAME;
+  const windowsArtifactName = windowsPackageFilePath ? basename(windowsPackageFilePath) : DEFAULT_WINDOWS_PACKAGE_FILE_NAME;
   const packageKind = inferPackageKind(artifactName, optionalString(appDistribution.androidPackageKind));
+  const windowsPackageKind = optionalString(appDistribution.windowsPackageKind) ?? inferPackageKind(windowsArtifactName, null);
   const artifactInfo = apkFilePath
     ? await stat(apkFilePath)
+    : null;
+  const windowsArtifactInfo = windowsPackageFilePath
+    ? await stat(windowsPackageFilePath)
     : null;
 
   return {
     ...appDistribution,
     androidAppDownloadUrl: appDistribution.androidAppDownloadUrl
-      ?? publicDownloadUrl(gatewayBaseUrl),
+      ?? publicAndroidDownloadUrl(gatewayBaseUrl),
+    windowsAppDownloadUrl: appDistribution.windowsAppDownloadUrl
+      ?? publicWindowsDownloadUrl(gatewayBaseUrl),
     artifact: {
       available: Boolean(apkFilePath || appDistribution.androidAppDownloadUrl || artifactName),
       localFilePath: apkFilePath,
@@ -254,7 +300,61 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
           : 'bundled_static_apk',
       installGuideUrl: appDistribution.androidInstallGuideUrl,
     },
+    platforms: {
+      android: {
+        platform: 'android',
+        label: 'Android',
+        downloadUrl: appDistribution.androidAppDownloadUrl ?? publicAndroidDownloadUrl(gatewayBaseUrl),
+        available: Boolean(apkFilePath || appDistribution.androidAppDownloadUrl || artifactName),
+        fileName: artifactName,
+        fileSizeBytes: artifactInfo?.size ?? optionalPositiveInteger(appDistribution.androidApkSizeBytes),
+        versionName: optionalString(appDistribution.androidApkVersion),
+        versionCode: optionalString(appDistribution.androidApkVersionCode),
+        checksum: optionalString(appDistribution.androidApkChecksum),
+        packageKind,
+        releaseChannel: inferReleaseChannel(packageKind, optionalString(appDistribution.androidReleaseChannel)),
+      },
+      windows: {
+        platform: 'windows',
+        label: 'Windows',
+        downloadUrl: appDistribution.windowsAppDownloadUrl ?? publicWindowsDownloadUrl(gatewayBaseUrl),
+        available: Boolean(windowsPackageFilePath || appDistribution.windowsAppDownloadUrl || windowsArtifactName),
+        fileName: windowsArtifactName,
+        fileSizeBytes: windowsArtifactInfo?.size ?? optionalPositiveInteger(appDistribution.windowsPackageSizeBytes),
+        versionName: optionalString(appDistribution.windowsPackageVersion),
+        versionCode: optionalString(appDistribution.windowsPackageVersionCode),
+        checksum: optionalString(appDistribution.windowsPackageChecksum),
+        packageKind: windowsPackageKind,
+        releaseChannel: optionalString(appDistribution.windowsReleaseChannel) ?? 'prototype',
+        implementation: 'rust',
+        downloadStrategy: windowsPackageFilePath
+          ? 'local_package_file'
+          : appDistribution.windowsAppDownloadUrl
+            ? 'external_download_url'
+            : 'bundled_static_package',
+        status: windowsPackageFilePath || appDistribution.windowsAppDownloadUrl || windowsArtifactName ? 'configured' : 'not_configured',
+      },
+    },
   };
+}
+
+function renderPlatformDownloadPage({ gatewayBaseUrl, appDistribution }) {
+  const android = appDistribution.platforms.android;
+  const windows = appDistribution.platforms.windows;
+  return renderSimplePage({
+    title: '选择易安本地版本',
+    lead: '请选择当前设备对应的本地宿主。Windows 电脑应下载 Windows 版本；Android 手机应下载 Android APK。',
+    actions: [
+      { href: windows.downloadUrl, label: '下载 Windows 版本' },
+      { href: android.downloadUrl, label: '下载 Android 版本' },
+      { href: new URL('/app/bind', gatewayBaseUrl).toString(), label: '安装后打开绑定入口' },
+    ],
+    notes: [
+      `Windows: ${windows.status === 'configured' ? windows.fileName : '暂未配置真实安装包'}`,
+      `Android: ${android.fileName}`,
+      '安装前请核对版本、文件大小和 SHA-256 校验值。',
+    ],
+  });
 }
 
 async function forwardToAndroid(request, {
@@ -354,9 +454,9 @@ function buildRegistrationResponse(req, env, host) {
     status: 'ok',
     registration: summarizeHost(host),
     relay: {
-      relayUrl: new URL('/android-host/relay', gatewayBaseUrl).toString(),
-      pollUrl: new URL('/android-host/relay/poll', gatewayBaseUrl).toString(),
-      respondUrl: new URL('/android-host/relay/respond', gatewayBaseUrl).toString(),
+      relayUrl: new URL('/local-host/relay', gatewayBaseUrl).toString(),
+      pollUrl: new URL('/local-host/relay/poll', gatewayBaseUrl).toString(),
+      respondUrl: new URL('/local-host/relay/respond', gatewayBaseUrl).toString(),
     },
     gateway: {
       baseUrl: gatewayBaseUrl,
@@ -376,7 +476,64 @@ async function handleGet(req, res, url, env) {
   });
   const registrySummary = registry.getStatusSummary();
 
-  if (url.pathname === '/app/download' || url.pathname === '/download/android-host') {
+  if (url.pathname === '/app/download') {
+    if (wantsHtml(req)) {
+      html(res, 200, renderPlatformDownloadPage({
+        gatewayBaseUrl,
+        appDistribution,
+      }));
+      return;
+    }
+    json(res, 200, {
+      status: 'ok',
+      message: 'choose a local host package for your platform',
+      downloadPageUrl: publicDownloadUrl(gatewayBaseUrl),
+      platforms: appDistribution.platforms,
+    });
+    return;
+  }
+
+  if (url.pathname === '/app/download/windows' || url.pathname === '/download/windows-host') {
+    const windowsPackageFilePath = resolveWindowsPackageFilePath(env, appDistribution);
+    if (windowsPackageFilePath) {
+      await serveBinaryFile(res, windowsPackageFilePath, {
+        contentType: 'application/zip',
+      });
+      return;
+    }
+    const currentDownloadUrl = new URL(url.pathname, gatewayBaseUrl).toString();
+    const configuredDownloadUrl = appDistribution.windowsAppDownloadUrl;
+    const targetDownloadUrl = configuredDownloadUrl && configuredDownloadUrl !== currentDownloadUrl
+      ? configuredDownloadUrl
+      : bundledWindowsDownloadUrl(gatewayBaseUrl);
+    if (targetDownloadUrl !== currentDownloadUrl) {
+      redirect(res, 307, targetDownloadUrl);
+      return;
+    }
+    if (wantsHtml(req)) {
+      html(res, 404, renderSimplePage({
+        title: 'Windows 版本暂未开放下载',
+        lead: '当前站点还没有配置 Windows 本地宿主安装包。Windows 版本推荐使用 Rust 实现，目标是下载后可直接运行。',
+        actions: [
+          { href: publicDownloadUrl(gatewayBaseUrl), label: '返回版本选择' },
+          { href: publicAndroidDownloadUrl(gatewayBaseUrl), label: '下载 Android 版本' },
+        ],
+        notes: [
+          '后续 Windows 包建议提供 .exe、.msi 或 .zip。',
+          '未配置真实 Windows 包前，请不要把 Android APK 当作电脑版本使用。',
+        ],
+      }));
+      return;
+    }
+    json(res, 404, {
+      status: 'error',
+      message: 'windows app download source is not configured',
+      platform: appDistribution.platforms.windows,
+    });
+    return;
+  }
+
+  if (url.pathname === '/app/download/android' || url.pathname === '/download/android-host') {
     const apkFilePath = resolveApkFilePath(env, appDistribution);
     if (apkFilePath) {
       await serveApkFile(res, apkFilePath);
@@ -412,7 +569,7 @@ async function handleGet(req, res, url, env) {
     return;
   }
 
-  if (url.pathname === '/app/bind' || url.pathname === '/android-host/bind') {
+  if (url.pathname === '/app/bind' || url.pathname === '/android-host/bind' || url.pathname === '/local-host/bind') {
     const binding = registry.issueBindingToken({
       identityId: url.searchParams.get('identityId') ?? 'android-demo-001',
       preferredMode: url.searchParams.get('preferredMode') ?? optionalString(env.STORYLOCK_ANDROID_CONNECT_MODE) ?? 'relay_url',
@@ -446,7 +603,7 @@ async function handleGet(req, res, url, env) {
     return;
   }
 
-  if (url.pathname === '/app/registrations' || url.pathname === '/android-host/registrations') {
+  if (url.pathname === '/app/registrations' || url.pathname === '/android-host/registrations' || url.pathname === '/local-host/registrations') {
     json(res, 200, {
       status: 'ok',
       hosts: registry.listHosts({
@@ -472,7 +629,9 @@ async function handleGet(req, res, url, env) {
     onlineStatus: {
       websiteEntryUrl: `${gatewayBaseUrl}/`,
       gatewayEntryUrl: new URL('/api/storylock-gateway', gatewayBaseUrl).toString(),
-      androidDownloadUrl: appDistribution.androidAppDownloadUrl,
+      downloadUrl: publicDownloadUrl(gatewayBaseUrl),
+      androidDownloadUrl: appDistribution.platforms.android.downloadUrl,
+      windowsDownloadUrl: appDistribution.platforms.windows.downloadUrl,
       bindingEntryUrl: publicBindingUrl(gatewayBaseUrl),
       activeConnectionMode: connection.activeOption?.mode ?? connection.preferredMode ?? 'unconfigured',
       activeHostCount: registrySummary.activeHostCount,
@@ -640,15 +799,15 @@ export async function handleStoryLockGatewayRequest(req, res, {
       return;
     }
 
-    if (url.pathname === '/android-host/register') {
+    if (url.pathname === '/android-host/register' || url.pathname === '/local-host/register') {
       await handleAndroidHostRegister(req, res, env);
       return;
     }
-    if (url.pathname === '/android-host/relay/poll') {
+    if (url.pathname === '/android-host/relay/poll' || url.pathname === '/local-host/relay/poll') {
       await handleRelayPoll(req, res, env);
       return;
     }
-    if (url.pathname === '/android-host/relay/respond') {
+    if (url.pathname === '/android-host/relay/respond' || url.pathname === '/local-host/relay/respond') {
       await handleRelayRespond(req, res, env);
       return;
     }

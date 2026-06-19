@@ -20,6 +20,12 @@ const server = spawn(process.execPath, ['server.mjs'], {
     STORYLOCK_ANDROID_PACKAGE_KIND: 'debug',
     STORYLOCK_ANDROID_RELEASE_CHANNEL: 'internal',
     STORYLOCK_ANDROID_APK_CHECKSUM: 'sha256:selftest',
+    STORYLOCK_WINDOWS_APP_DOWNLOAD_URL: 'https://example.test/yian-windows-host.zip',
+    STORYLOCK_WINDOWS_PACKAGE_VERSION: '0.1.0',
+    STORYLOCK_WINDOWS_PACKAGE_VERSION_CODE: '1',
+    STORYLOCK_WINDOWS_PACKAGE_KIND: 'zip',
+    STORYLOCK_WINDOWS_RELEASE_CHANNEL: 'prototype',
+    STORYLOCK_WINDOWS_PACKAGE_CHECKSUM: 'sha256:windows-selftest',
   },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -56,7 +62,8 @@ try {
   const html = await home.text();
   assert.match(html, /data-locale="zh"/);
   assert.match(html, /data-locale="en"/);
-  assert.match(html, /data-field="apk-version"/);
+  assert.match(html, /\/app\/download\/windows/);
+  assert.match(html, /\/app\/download\/android/);
   assert.match(html, /id="faq"/);
   assert.doesNotMatch(html, /audience|评审|合作方|开发者|Judges|Partners|Developers/i);
   assert.doesNotMatch(html, /Layer 3|Keystore|BiometricPrompt|requestSignature|requestPasswordFill|gateway_url|binding_token|deep link|relay_url|direct_url|envelope/i);
@@ -88,6 +95,9 @@ try {
   assert.equal(gatewayStatus.onlineStatus.activeConnectionMode, 'relay_url');
   assert.equal(gatewayStatus.appDistribution.artifact.versionName, '0.1.0');
   assert.equal(gatewayStatus.appDistribution.artifact.checksum, 'sha256:selftest');
+  assert.equal(gatewayStatus.appDistribution.platforms.android.versionName, '0.1.0');
+  assert.equal(gatewayStatus.appDistribution.platforms.windows.implementation, 'rust');
+  assert.equal(gatewayStatus.appDistribution.platforms.windows.checksum, 'sha256:windows-selftest');
 
   const appBinding = await fetch(new URL('/app/bind', baseUrl), {
     headers: {
@@ -112,4 +122,3 @@ try {
     process.stderr.write(output);
   }
 }
-

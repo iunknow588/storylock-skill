@@ -95,7 +95,7 @@ try {
   let relayWorkerRunning = true;
   const relayWorker = (async () => {
     while (relayWorkerRunning) {
-      const poll = await fetch(`${vercelBaseUrl}/android-host/relay/poll`, {
+      const poll = await fetch(`${vercelBaseUrl}/local-host/relay/poll`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json; charset=utf-8',
@@ -113,7 +113,7 @@ try {
           sharedSecret,
           poll.request,
         );
-        await fetch(`${vercelBaseUrl}/android-host/relay/respond`, {
+        await fetch(`${vercelBaseUrl}/local-host/relay/respond`, {
           method: 'POST',
           headers: {
             'content-type': 'application/json; charset=utf-8',
@@ -132,7 +132,15 @@ try {
   })();
 
   try {
-    const downloadResponse = await fetch(`${vercelBaseUrl}/app/download`);
+    const platformDownloadResponse = await fetch(`${vercelBaseUrl}/app/download`);
+    assert.equal(platformDownloadResponse.status, 200);
+    assert.match(platformDownloadResponse.headers.get('content-type') ?? '', /application\/json/);
+    const platformDownload = await platformDownloadResponse.json();
+    assert.equal(platformDownload.status, 'ok');
+    assert.equal(platformDownload.platforms.android.downloadUrl, `${vercelBaseUrl}/app/download/android`);
+    assert.equal(platformDownload.platforms.windows.implementation, 'rust');
+
+    const downloadResponse = await fetch(`${vercelBaseUrl}/app/download/android`);
     assert.equal(downloadResponse.status, 200);
     assert.equal(downloadResponse.headers.get('content-type'), 'application/vnd.android.package-archive');
     assert.equal(await downloadResponse.text(), 'fake-apk-binary-for-selftest');
@@ -150,7 +158,7 @@ try {
     assert.equal(bindingInfo.binding.identityId, 'android-demo-001');
     assert.match(bindingInfo.binding.deepLink, /storylock-host:\/\/bind/);
 
-    const registration = await fetch(`${vercelBaseUrl}/android-host/register`, {
+    const registration = await fetch(`${vercelBaseUrl}/local-host/register`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json; charset=utf-8',
@@ -184,7 +192,29 @@ try {
     assert.equal(registration.status, 'ok');
     assert.equal(registration.registration.identityId, 'android-demo-001');
     assert.equal(registration.registration.deviceId, deviceId);
-    assert.match(registration.relay.pollUrl, /\/android-host\/relay\/poll$/);
+    assert.match(registration.relay.pollUrl, /\/local-host\/relay\/poll$/);
+
+    const legacyRegistration = await fetch(`${vercelBaseUrl}/android-host/register`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        identityId: 'android-demo-001',
+        deviceId: `${deviceId}-legacy`,
+        appInstanceId: `${appInstanceId}-legacy`,
+        preferredMode: 'relay_url',
+        host: {
+          healthUrl: androidInfo.healthUrl,
+          executeUrl: androidInfo.executeUrl,
+        },
+      }),
+    }).then((response) => response.json());
+    assert.equal(legacyRegistration.status, 'ok');
+    assert.equal(legacyRegistration.registration.deviceId, `${deviceId}-legacy`);
+    assert.match(legacyRegistration.relay.pollUrl, /\/local-host\/relay\/poll$/);
+    assert.match(legacyRegistration.relay.respondUrl, /\/local-host\/relay\/respond$/);
 
     const status = await fetch(gatewayEndpoint, {
       headers: {
@@ -195,12 +225,14 @@ try {
     assert.equal(status.secondLayerConnection.activeOption.mode, 'relay_url');
     assert.equal(status.onlineStatus.websiteEntryUrl, `${vercelBaseUrl}/`);
     assert.equal(status.onlineStatus.gatewayEntryUrl, gatewayEndpoint);
-    assert.equal(status.onlineStatus.androidDownloadUrl, `${vercelBaseUrl}/app/download`);
+    assert.equal(status.onlineStatus.downloadUrl, `${vercelBaseUrl}/app/download`);
+    assert.equal(status.onlineStatus.androidDownloadUrl, `${vercelBaseUrl}/app/download/android`);
+    assert.equal(status.onlineStatus.windowsDownloadUrl, `${vercelBaseUrl}/app/download/windows`);
     assert.equal(status.onlineStatus.bindingEntryUrl, `${vercelBaseUrl}/app/bind`);
     assert.equal(status.onlineStatus.activeConnectionMode, 'relay_url');
-    assert.equal(status.onlineStatus.activeHostCount, 1);
-    assert.equal(status.hostRegistry.activeHostCount, 1);
-    assert.equal(status.appDistribution.androidAppDownloadUrl, `${vercelBaseUrl}/app/download`);
+    assert.equal(status.onlineStatus.activeHostCount, 2);
+    assert.equal(status.hostRegistry.activeHostCount, 2);
+    assert.equal(status.appDistribution.androidAppDownloadUrl, `${vercelBaseUrl}/app/download/android`);
     assert.equal(status.appDistribution.artifact.available, true);
     assert.equal(status.appDistribution.artifact.fileName, 'storylock-android-host.apk');
     assert.equal(status.appDistribution.artifact.fileSizeBytes, fakeApk.length);
@@ -210,6 +242,9 @@ try {
     assert.equal(status.appDistribution.artifact.packageKind, 'debug');
     assert.equal(status.appDistribution.artifact.releaseChannel, 'internal');
     assert.equal(status.appDistribution.artifact.downloadStrategy, 'local_apk_file');
+    assert.equal(status.appDistribution.platforms.android.downloadUrl, `${vercelBaseUrl}/app/download/android`);
+    assert.equal(status.appDistribution.platforms.windows.downloadUrl, `${vercelBaseUrl}/app/download/windows`);
+    assert.equal(status.appDistribution.platforms.windows.implementation, 'rust');
 
     const clientGateway = new StoryLockRemoteGateway({
       transport: createHttpRemoteTransport({

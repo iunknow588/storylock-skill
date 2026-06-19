@@ -83,6 +83,11 @@ $rows += Test-Env -Name "STORYLOCK_ANDROID_APP_DOWNLOAD_URL"
 $rows += Test-Env -Name "STORYLOCK_ANDROID_APK_VERSION"
 $rows += Test-Env -Name "STORYLOCK_ANDROID_APK_VERSION_CODE"
 $rows += Test-Env -Name "STORYLOCK_ANDROID_APK_CHECKSUM"
+$rows += Test-Env -Name "STORYLOCK_WINDOWS_PACKAGE_PATH"
+$rows += Test-Env -Name "STORYLOCK_WINDOWS_APP_DOWNLOAD_URL"
+$rows += Test-Env -Name "STORYLOCK_WINDOWS_PACKAGE_VERSION"
+$rows += Test-Env -Name "STORYLOCK_WINDOWS_PACKAGE_VERSION_CODE"
+$rows += Test-Env -Name "STORYLOCK_WINDOWS_PACKAGE_CHECKSUM"
 
 $apkPath = [System.Environment]::GetEnvironmentVariable("STORYLOCK_ANDROID_APK_PATH", "Process")
 $apkUrl = [System.Environment]::GetEnvironmentVariable("STORYLOCK_ANDROID_APP_DOWNLOAD_URL", "Process")
@@ -95,6 +100,16 @@ if (-not [string]::IsNullOrWhiteSpace($apkPath)) {
     Check = "file:STORYLOCK_ANDROID_APK_PATH"
     Status = if ($resolved) { "ok" } else { "missing" }
     Value = $apkPath
+  }
+}
+
+$windowsPackagePath = [System.Environment]::GetEnvironmentVariable("STORYLOCK_WINDOWS_PACKAGE_PATH", "Process")
+if (-not [string]::IsNullOrWhiteSpace($windowsPackagePath)) {
+  $resolved = Resolve-Path -LiteralPath $windowsPackagePath -ErrorAction SilentlyContinue
+  $rows += [PSCustomObject]@{
+    Check = "file:STORYLOCK_WINDOWS_PACKAGE_PATH"
+    Status = if ($resolved) { "ok" } else { "missing" }
+    Value = $windowsPackagePath
   }
 }
 

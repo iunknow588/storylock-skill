@@ -83,5 +83,13 @@ export function resolveAppDistributionConfig(env = process.env) {
     androidReleaseChannel: optionalString(env.STORYLOCK_ANDROID_RELEASE_CHANNEL) ?? 'internal',
     androidUiDownloadUrl: optionalString(env.STORYLOCK_ANDROID_UI_DOWNLOAD_URL),
     androidInstallGuideUrl: optionalString(env.STORYLOCK_ANDROID_INSTALL_GUIDE_URL),
+    windowsAppDownloadUrl: optionalString(env.STORYLOCK_WINDOWS_APP_DOWNLOAD_URL),
+    windowsPackagePath: optionalString(env.STORYLOCK_WINDOWS_PACKAGE_PATH),
+    windowsPackageVersion: optionalString(env.STORYLOCK_WINDOWS_PACKAGE_VERSION) ?? '0.1.0',
+    windowsPackageVersionCode: optionalString(env.STORYLOCK_WINDOWS_PACKAGE_VERSION_CODE) ?? '1',
+    windowsPackageSizeBytes: optionalString(env.STORYLOCK_WINDOWS_PACKAGE_SIZE_BYTES),
+    windowsPackageChecksum: optionalString(env.STORYLOCK_WINDOWS_PACKAGE_CHECKSUM),
+    windowsPackageKind: optionalString(env.STORYLOCK_WINDOWS_PACKAGE_KIND) ?? 'zip',
+    windowsReleaseChannel: optionalString(env.STORYLOCK_WINDOWS_RELEASE_CHANNEL) ?? 'prototype',
   };
 }

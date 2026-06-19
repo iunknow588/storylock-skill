@@ -8,7 +8,11 @@
       content="易安帮助普通用户下载易安 App、完成本地设备绑定、查看请求状态，并在本地设备上确认需要授权的请求。"
     >
     <title>易安 | Yian</title>
-    <link rel="stylesheet" href="/styles.css">
+    <style>
+      .page-panel { display: none; }
+      .page-panel.is-active { display: block; }
+    </style>
+    <link rel="stylesheet" href="/styles.css?v=20260619-2">
   </head>
   <body>
     <header class="site-header">
@@ -48,119 +52,139 @@
 
     <main class="page-shell">
       <section id="home" class="hero page-panel is-active" data-page-section data-page-title="nav.home">
-        <img class="hero-media" src="/assets/yian-network-banner.png" alt="" data-i18n-alt="hero.imageAlt">
-        <div class="hero-overlay"></div>
         <div class="wrap hero-content">
-          <p class="eyebrow light" data-i18n="hero.kicker">StoryLock 本地安全确认</p>
-          <h2 data-i18n="hero.title">用易安把 StoryLock 绑定到你的本地设备</h2>
-          <p class="hero-copy" data-i18n="hero.copy">
-            下载易安 App，完成一次绑定。之后第三方 Agent 或云服务发起的敏感请求，会先到你的私人智能助理；StoryLock 本地核心只和私人智能助理本地通信。
-          </p>
-          <div class="hero-actions">
-            <a class="button primary" href="/app/download" data-i18n="hero.download">下载易安 App</a>
-            <a class="button" href="/app/bind" data-i18n="hero.bind">打开绑定入口</a>
-            <a class="button" href="#runtime" data-page-link="runtime" data-i18n="hero.status">查看请求状态</a>
-          </div>
-          <dl class="hero-stats">
-            <div>
-              <dt data-i18n="hero.stats.roleLabel">第一步</dt>
-              <dd data-i18n="hero.stats.roleValue">下载并安装 App</dd>
+          <article class="topic-card hero-card">
+            <div class="hero-text">
+              <p class="eyebrow light" data-i18n="hero.kicker">StoryLock 本地安全确认</p>
+              <h2 data-i18n="hero.title">用易安把 StoryLock 绑定到你的本地设备</h2>
+              <p class="hero-copy" data-i18n="hero.copy">
+                下载易安 App，完成一次绑定。之后第三方 Agent 或云服务发起的敏感请求，会先到你的私人智能助理；StoryLock 本地核心只和私人智能助理本地通信。
+              </p>
+              <div class="hero-actions">
+                <a class="button primary" href="/app/download/windows" data-i18n="hero.downloadWindows">下载 Windows 版本</a>
+                <a class="button" href="/app/download/android" data-i18n="hero.downloadAndroid">下载 Android 版本</a>
+                <a class="button" href="/app/bind" data-i18n="hero.bind">打开绑定入口</a>
+              </div>
             </div>
-            <div>
-              <dt data-i18n="hero.stats.capabilityLabel">第二步</dt>
-              <dd data-i18n="hero.stats.capabilityValue">打开绑定入口</dd>
-            </div>
-            <div>
-              <dt data-i18n="hero.stats.localLabel">使用时</dt>
-              <dd data-i18n="hero.stats.localValue">在本地设备上确认请求</dd>
-            </div>
-          </dl>
+            <figure class="hero-diagram">
+              <img src="/assets/yian-network-banner.png?v=20260619-2" alt="" data-i18n-alt="hero.imageAlt">
+            </figure>
+            <dl class="hero-stats">
+              <div>
+                <dt data-i18n="hero.stats.roleLabel">第一步</dt>
+                <dd data-i18n="hero.stats.roleValue">下载并安装 App</dd>
+              </div>
+              <div>
+                <dt data-i18n="hero.stats.capabilityLabel">第二步</dt>
+                <dd data-i18n="hero.stats.capabilityValue">打开绑定入口</dd>
+              </div>
+              <div>
+                <dt data-i18n="hero.stats.localLabel">使用时</dt>
+                <dd data-i18n="hero.stats.localValue">在本地设备上确认请求</dd>
+              </div>
+            </dl>
+          </article>
         </div>
       </section>
 
       <section id="overview" class="band page-panel" data-page-section data-page-title="nav.overview">
-        <div class="wrap split">
-          <div class="section-head">
+        <div class="wrap">
+          <article class="topic-card">
+            <div class="section-head">
             <p class="section-kicker" data-i18n="overview.kicker">产品说明</p>
             <h3 data-i18n="overview.title">易安让重要操作回到你的本地设备上确认</h3>
-          </div>
-          <div class="copy-list">
-            <p data-i18n="overview.copy1"></p>
-            <p data-i18n="overview.copy2"></p>
-            <p data-i18n="overview.copy3"></p>
-          </div>
+            </div>
+            <div class="copy-list">
+              <p data-i18n="overview.copy1"></p>
+              <p data-i18n="overview.copy2"></p>
+              <p data-i18n="overview.copy3"></p>
+            </div>
+          </article>
         </div>
       </section>
 
       <section id="architecture" class="band alt page-panel" data-page-section data-page-title="nav.architecture">
         <div class="wrap">
-          <div class="section-head">
-            <p class="section-kicker" data-i18n="architecture.kicker">安全方式</p>
-            <h3 data-i18n="architecture.title">每次关键请求都需要你在本地设备上看清楚再确认</h3>
-          </div>
-          <div class="columns three">
-            <article class="column">
-              <h4 data-i18n="architecture.layer1.title">先看清请求</h4>
-              <p data-i18n="architecture.layer1.copy"></p>
-              <ul>
-                <li data-i18n="architecture.layer1.item1"></li>
-                <li data-i18n="architecture.layer1.item2"></li>
-                <li data-i18n="architecture.layer1.item3"></li>
-              </ul>
-            </article>
-            <article class="column">
-              <h4 data-i18n="architecture.layer2.title">再本地确认</h4>
-              <p data-i18n="architecture.layer2.copy"></p>
-              <ul>
-                <li data-i18n="architecture.layer2.item1"></li>
-                <li data-i18n="architecture.layer2.item2"></li>
-                <li data-i18n="architecture.layer2.item3"></li>
-              </ul>
-            </article>
-            <article class="column">
-              <h4 data-i18n="architecture.layer3.title">最后回传结果</h4>
-              <p data-i18n="architecture.layer3.copy"></p>
-              <ul>
-                <li data-i18n="architecture.layer3.item1"></li>
-                <li data-i18n="architecture.layer3.item2"></li>
-                <li data-i18n="architecture.layer3.item3"></li>
-              </ul>
-            </article>
-          </div>
+          <article class="topic-card">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="architecture.kicker">安全方式</p>
+              <h3 data-i18n="architecture.title">每次关键请求都需要你在本地设备上看清楚再确认</h3>
+            </div>
+            <div class="topic-steps">
+              <section class="topic-step">
+                <h4 data-i18n="architecture.layer1.title">先看清请求</h4>
+                <p data-i18n="architecture.layer1.copy"></p>
+                <ul>
+                  <li data-i18n="architecture.layer1.item1"></li>
+                  <li data-i18n="architecture.layer1.item2"></li>
+                  <li data-i18n="architecture.layer1.item3"></li>
+                </ul>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="architecture.layer2.title">再本地确认</h4>
+                <p data-i18n="architecture.layer2.copy"></p>
+                <ul>
+                  <li data-i18n="architecture.layer2.item1"></li>
+                  <li data-i18n="architecture.layer2.item2"></li>
+                  <li data-i18n="architecture.layer2.item3"></li>
+                </ul>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="architecture.layer3.title">最后回传结果</h4>
+                <p data-i18n="architecture.layer3.copy"></p>
+                <ul>
+                  <li data-i18n="architecture.layer3.item1"></li>
+                  <li data-i18n="architecture.layer3.item2"></li>
+                  <li data-i18n="architecture.layer3.item3"></li>
+                </ul>
+              </section>
+            </div>
+          </article>
         </div>
       </section>
 
       <section id="binding" class="band page-panel" data-page-section data-page-title="nav.binding">
         <div class="wrap">
-          <div class="section-head">
-            <p class="section-kicker" data-i18n="binding.kicker">下载与绑定</p>
-            <h3 data-i18n="binding.title">下载后如何绑定</h3>
-          </div>
-          <div class="columns three">
-            <article class="column">
-              <h4 data-i18n="binding.step1.title">1. 下载 App</h4>
-              <p data-i18n="binding.step1.copy"></p>
-            </article>
-            <article class="column">
-              <h4 data-i18n="binding.step2.title">2. 打开绑定链接</h4>
-              <p data-i18n="binding.step2.copy"></p>
-            </article>
-            <article class="column">
-              <h4 data-i18n="binding.step3.title">3. 注册并回连</h4>
-              <p data-i18n="binding.step3.copy"></p>
-            </article>
-          </div>
+          <article class="topic-card">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="binding.kicker">下载与绑定</p>
+              <h3 data-i18n="binding.title">下载后如何绑定</h3>
+            </div>
+            <div class="topic-steps">
+              <section class="topic-step">
+                <h4 data-i18n="binding.step1.title">1. 下载 App</h4>
+                <p data-i18n="binding.step1.copy"></p>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="binding.step2.title">2. 打开绑定链接</h4>
+                <p data-i18n="binding.step2.copy"></p>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="binding.step3.title">3. 注册并回连</h4>
+                <p data-i18n="binding.step3.copy"></p>
+              </section>
+            </div>
+          </article>
         </div>
       </section>
 
       <section id="apk" class="band alt page-panel" data-page-section data-page-title="nav.apk">
         <div class="wrap">
-          <div class="section-head">
-            <p class="section-kicker" data-i18n="apk.kicker">APK 分发</p>
-            <h3 data-i18n="apk.title">安装说明与版本规则</h3>
-          </div>
-          <div class="columns two">
-            <article class="column">
+          <article class="topic-card">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="apk.kicker">安装版本</p>
+              <h3 data-i18n="apk.title">安装说明与版本规则</h3>
+            </div>
+            <div class="topic-steps">
+              <section class="topic-step">
+              <h4 data-i18n="apk.platforms.title">选择本地版本</h4>
+              <div class="download-options">
+                <a class="button primary" href="/app/download/windows" data-i18n="apk.platforms.windows">Windows 本地电脑版本</a>
+                <a class="button" href="/app/download/android" data-i18n="apk.platforms.android">Android 手机版本</a>
+                <a class="button" href="/app/download" data-i18n="apk.platforms.all">查看全部版本</a>
+              </div>
+              </section>
+              <section class="topic-step">
               <h4 data-i18n="apk.install.title">安装流程</h4>
               <ol class="flow-list compact">
                 <li data-i18n="apk.install.step1">下载易安 App 安装包。</li>
@@ -168,8 +192,8 @@
                 <li data-i18n="apk.install.step3">从易安打开绑定链接，按本地设备提示完成绑定。</li>
                 <li data-i18n="apk.install.step4">完成首次注册后，回到站点查看 App 在线状态。</li>
               </ol>
-            </article>
-            <article class="column">
+              </section>
+              <section class="topic-step">
               <h4 data-i18n="apk.rules.title">版本信息</h4>
               <p data-i18n="apk.rules.copy"></p>
               <ul>
@@ -178,81 +202,89 @@
                 <li data-i18n="apk.rules.version"></li>
                 <li data-i18n="apk.rules.policy"></li>
               </ul>
-            </article>
-          </div>
+              </section>
+            </div>
+          </article>
         </div>
       </section>
 
       <section id="user-guide" class="band page-panel" data-page-section data-page-title="nav.userGuide">
         <div class="wrap">
-          <div class="section-head">
-            <p class="section-kicker" data-i18n="userGuide.kicker">使用说明</p>
-            <h3 data-i18n="userGuide.title">普通用户如何使用易安</h3>
-          </div>
-          <div class="columns three">
-            <article class="column">
-              <h4 data-i18n="userGuide.use.title">开始使用</h4>
-              <p data-i18n="userGuide.use.copy"></p>
-            </article>
-            <article class="column">
-              <h4 data-i18n="userGuide.approve.title">本地确认</h4>
-              <p data-i18n="userGuide.approve.copy"></p>
-            </article>
-            <article class="column">
-              <h4 data-i18n="userGuide.notice.title">注意事项</h4>
-              <p data-i18n="userGuide.notice.copy"></p>
-            </article>
-          </div>
+          <article class="topic-card">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="userGuide.kicker">使用说明</p>
+              <h3 data-i18n="userGuide.title">普通用户如何使用易安</h3>
+            </div>
+            <div class="topic-steps">
+              <section class="topic-step">
+                <h4 data-i18n="userGuide.use.title">开始使用</h4>
+                <p data-i18n="userGuide.use.copy"></p>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="userGuide.approve.title">本地确认</h4>
+                <p data-i18n="userGuide.approve.copy"></p>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="userGuide.notice.title">注意事项</h4>
+                <p data-i18n="userGuide.notice.copy"></p>
+              </section>
+            </div>
+          </article>
         </div>
       </section>
 
       <section id="flow" class="band alt page-panel" data-page-section data-page-title="nav.flow">
         <div class="wrap">
-          <div class="section-head">
-            <p class="section-kicker" data-i18n="flow.kicker">使用流程</p>
-            <h3 data-i18n="flow.title">从下载到完成一次本地确认</h3>
-          </div>
-          <ol class="flow-list">
-            <li data-i18n="flow.item1"></li>
-            <li data-i18n="flow.item2"></li>
-            <li data-i18n="flow.item3"></li>
-            <li data-i18n="flow.item4"></li>
-            <li data-i18n="flow.item5"></li>
-            <li data-i18n="flow.item6"></li>
-          </ol>
+          <article class="topic-card">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="flow.kicker">使用流程</p>
+              <h3 data-i18n="flow.title">从下载到完成一次本地确认</h3>
+            </div>
+            <ol class="flow-list">
+              <li data-i18n="flow.item1"></li>
+              <li data-i18n="flow.item2"></li>
+              <li data-i18n="flow.item3"></li>
+              <li data-i18n="flow.item4"></li>
+              <li data-i18n="flow.item5"></li>
+              <li data-i18n="flow.item6"></li>
+            </ol>
+          </article>
         </div>
       </section>
 
       <section id="faq" class="band page-panel" data-page-section data-page-title="nav.faq">
         <div class="wrap">
-          <div class="section-head">
-            <p class="section-kicker" data-i18n="faq.kicker">常见问题</p>
-            <h3 data-i18n="faq.title">绑定或确认遇到问题时先看这里</h3>
-          </div>
-          <div class="columns two">
-            <article class="column">
-              <h4 data-i18n="faq.offline.title">状态显示离线怎么办？</h4>
-              <p data-i18n="faq.offline.copy"></p>
-            </article>
-            <article class="column">
-              <h4 data-i18n="faq.bind.title">绑定链接可以发给别人吗？</h4>
-              <p data-i18n="faq.bind.copy"></p>
-            </article>
-            <article class="column">
-              <h4 data-i18n="faq.install.title">安装时提示风险怎么办？</h4>
-              <p data-i18n="faq.install.copy"></p>
-            </article>
-            <article class="column">
-              <h4 data-i18n="faq.changeDevice.title">更换本地设备后怎么处理？</h4>
-              <p data-i18n="faq.changeDevice.copy"></p>
-            </article>
-          </div>
+          <article class="topic-card">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="faq.kicker">常见问题</p>
+              <h3 data-i18n="faq.title">绑定或确认遇到问题时先看这里</h3>
+            </div>
+            <div class="topic-steps">
+              <section class="topic-step">
+                <h4 data-i18n="faq.offline.title">状态显示离线怎么办？</h4>
+                <p data-i18n="faq.offline.copy"></p>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="faq.bind.title">绑定链接可以发给别人吗？</h4>
+                <p data-i18n="faq.bind.copy"></p>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="faq.install.title">安装时提示风险怎么办？</h4>
+                <p data-i18n="faq.install.copy"></p>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="faq.changeDevice.title">更换本地设备后怎么处理？</h4>
+                <p data-i18n="faq.changeDevice.copy"></p>
+              </section>
+            </div>
+          </article>
         </div>
       </section>
 
       <section id="runtime" class="band alt page-panel" data-page-section data-page-title="nav.runtime">
-        <div class="wrap runtime-grid">
-          <div>
+        <div class="wrap">
+          <article class="topic-card runtime-grid">
+            <div>
             <div class="section-head">
               <p class="section-kicker" data-i18n="runtime.kicker">请求状态</p>
               <h3 data-i18n="runtime.title">查看当前请求、来源和本地设备情况</h3>
@@ -287,14 +319,15 @@
             </div>
             <pre data-region="output"></pre>
           </div>
+          </article>
         </div>
       </section>
     </main>
 
     <div class="page-pager" aria-label="Page navigation">
-      <button class="pager-button" type="button" data-action="prev-page" data-i18n="pager.prev">上一页</button>
+      <button class="pager-button" type="button" data-action="prev-page" data-i18n="pager.prev">前一页</button>
       <span class="pager-current" data-region="page-title">首页</span>
-      <button class="pager-button" type="button" data-action="next-page" data-i18n="pager.next">下一页</button>
+      <button class="pager-button" type="button" data-action="next-page" data-i18n="pager.next">后一页</button>
     </div>
 
     <footer class="site-footer">
@@ -311,6 +344,6 @@
       </div>
     </footer>
 
-    <script type="module" src="/main.js"></script>
+    <script type="module" src="/main.js?v=20260619-2"></script>
   </body>
 </html>
