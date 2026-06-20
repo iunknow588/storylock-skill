@@ -1,12 +1,12 @@
 package org.storylock.androidhost.host
 
-import android.util.Base64
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
+import org.storylock.androidhost.security.AndroidKeystoreSigner
+import org.storylock.androidhost.security.LocalChallengeItem
 import org.storylock.androidhost.security.LocalConfirmationRequest
+import org.storylock.androidhost.security.LocalConfirmationResult
 import org.storylock.androidhost.security.LocalUserConfirmation
 import org.storylock.androidhost.security.SecretStore
 
@@ -14,12 +14,10 @@ class StoryLockAndroidHostService(
   private val config: AndroidHostConfig,
   private val secretStore: SecretStore,
   private val localConfirmation: LocalUserConfirmation,
+  private val runtime: LocalAuthorizationRuntime,
   private val connectivityProvider: (() -> JSONObject)? = null,
 ) : AndroidHostService {
-  private val runtime = LocalAuthorizationRuntime(
-    identityId = config.identityId,
-    questionSetVersion = config.questionSetVersion,
-  )
+  private val signer = AndroidKeystoreSigner()
 
   override fun health(): JSONObject {
     val (questionSetReady, strongestBits, requestCount) = runtime.healthSnapshot()
@@ -38,6 +36,7 @@ class StoryLockAndroidHostService(
         JSONObject()
           .put("identityId", runtime.identityId())
           .put("questionSetVersion", runtime.questionSetVersion())
+          .put("normalizationVersion", runtime.normalizationVersion())
           .put("activeQuestionCount", runtime.activeQuestionCount()),
       )
       .put(
@@ -75,8 +74,20 @@ class StoryLockAndroidHostService(
       if (capability == "requestSignature") "keyId" else "credentialRef",
     )
     val requiredStrength = runtime.resolveRequiredStrength(capability)
-    val cells = runtime.createChallenge(requiredStrength)
-    val primaryCell = cells.first()
+    val challenge = try {
+      runtime.createChallenge(requiredStrength)
+    } catch (error: ChallengeLockedException) {
+      return errorResponse(
+        requestId = requestId,
+        capability = capability,
+        code = "SLG-004",
+        type = "challenge_locked",
+        message = error.message ?: "challenge is locked",
+        suggestedAction = "Wait until retryAfter before retrying the local challenge.",
+        retryAfter = error.retryAfter,
+      )
+    }
+    val cells = challenge.cells
 
     val confirmation = runBlocking {
       localConfirmation.confirm(
@@ -85,33 +96,55 @@ class StoryLockAndroidHostService(
           subtitle = capability,
           reason = "Approve local execution for $capability on Android host",
           strongConfirmationRequired = capability == "requestSignature",
-          challengePrompt = buildChallengePrompt(cells),
-          challengeAnswer = primaryCell.answer,
+          challengeItems = cells.map { cell ->
+            LocalChallengeItem(
+              cellId = cell.cellId,
+              questionId = cell.questionId,
+              promptText = cell.promptText,
+              expectedAnswer = cell.answer,
+              position = cell.position,
+            )
+          },
+          requiredChallengeAnswers = challenge.requiredThreshold,
         ),
       )
     }
 
     if (!confirmation.approved) {
-      return errorResponse(
+      return confirmationErrorResponse(
         requestId = requestId,
         capability = capability,
-        code = "SLG-003",
-        type = "authorization_failed",
-        message = confirmation.reason ?: "local confirmation denied",
-        suggestedAction = "Retry after local user confirmation.",
+        challenge = challenge,
+        confirmation = confirmation,
       )
     }
 
-    val answers = mapOf(primaryCell.cellId to primaryCell.answer) +
-      cells.drop(1).associate { cell -> cell.cellId to cell.answer }
-    if (!runtime.verifyChallengeAnswers(cells, answers)) {
+    val answers = confirmation.challengeAnswers
+    val verification = runtime.verifyChallengeAnswers(challenge, answers)
+    if (!verification.approved) {
       return errorResponse(
         requestId = requestId,
         capability = capability,
-        code = "SLG-003",
-        type = "authorization_failed",
-        message = "challenge answer verification failed",
-        suggestedAction = "Retry with valid local challenge answers.",
+        code = if (verification.lockUntil > 0L) "SLG-004" else "SLG-003",
+        type = if (verification.lockUntil > 0L) "challenge_locked" else "challenge_failed",
+        message = if (verification.lockUntil > 0L) {
+          "challenge answer verification failed and the local challenge is now locked"
+        } else {
+          "challenge answer verification failed"
+        },
+        suggestedAction = if (verification.lockUntil > 0L) {
+          "Wait until retryAfter before retrying the local challenge."
+        } else {
+          "Retry with valid local challenge answers."
+        },
+        challenge = challenge,
+        retryAfter = verification.lockUntil.takeIf { it > 0L },
+        extraErrorFields = mapOf(
+          "matchedCount" to verification.matchedCount,
+          "requiredThreshold" to verification.requiredThreshold,
+          "failureCount" to verification.failureCount,
+          "maxFailureCount" to verification.maxFailureCount,
+        ),
       )
     }
 
@@ -121,8 +154,8 @@ class StoryLockAndroidHostService(
     )
 
     return when (capability) {
-      "requestSignature" -> signatureResponse(requestId, capability, request, session, requiredStrength, cells)
-      "requestPasswordFill" -> passwordFillResponse(requestId, capability, request, session, requiredStrength, cells)
+      "requestSignature" -> signatureResponse(requestId, capability, request, session, requiredStrength, challenge)
+      "requestPasswordFill" -> passwordFillResponse(requestId, capability, request, session, requiredStrength, challenge)
       else -> errorResponse(
         requestId = requestId,
         capability = capability,
@@ -130,6 +163,7 @@ class StoryLockAndroidHostService(
         type = "validation_error",
         message = "unsupported capability",
         suggestedAction = "Use requestSignature or requestPasswordFill.",
+        challenge = challenge,
       )
     }
   }
@@ -140,12 +174,13 @@ class StoryLockAndroidHostService(
     request: JSONObject,
     session: AuthorizationSession,
     requiredStrength: String,
-    cells: List<ChallengeCell>,
+    challenge: ChallengeSession,
   ): JSONObject {
     val keyId = request.optJSONObject("payload")?.optString("keyId").orEmpty()
     val alias = "storylock-signature-$keyId"
-    val signingKey = readOrCreateSignatureKey(alias, keyId)
-    val signature = signPayload(signingKey.getString("keyMaterial"), request)
+    val signingKey = signer.getOrCreateSigningKey(alias, keyId)
+    val payload = request.optJSONObject("payload")?.toString() ?: request.toString()
+    val signature = signer.sign(alias, payload.encodeToByteArray())
     return JSONObject()
       .put("requestId", requestId)
       .put("status", "success")
@@ -156,8 +191,12 @@ class StoryLockAndroidHostService(
         JSONObject()
           .put("authorizationId", session.authorizationId)
           .put("requiredStrength", requiredStrength)
-          .put("challenge", challengeSummary(cells))
+          .put("challenge", challengeSummary(challenge))
           .put("algorithm", signingKey.getString("algorithm"))
+          .put("requestedAlgorithm", request.optJSONObject("payload")?.optString("algorithm").orEmpty())
+          .put("signatureFormat", signingKey.getString("signatureFormat"))
+          .put("curve", signingKey.getString("curve"))
+          .put("publicKeySpki", signingKey.getString("publicKeySpki"))
           .put("signature", signature)
           .put("keyId", signingKey.getString("keyId"))
           .put("privateKey", "android-keystore-local-only")
@@ -168,7 +207,8 @@ class StoryLockAndroidHostService(
       .put(
         "auditMeta",
         JSONObject()
-          .put("authorizationId", session.authorizationId),
+          .put("authorizationId", session.authorizationId)
+          .put("challengeId", challenge.challengeId),
       )
       .put("error", JSONObject.NULL)
   }
@@ -179,7 +219,7 @@ class StoryLockAndroidHostService(
     request: JSONObject,
     session: AuthorizationSession,
     requiredStrength: String,
-    cells: List<ChallengeCell>,
+    challenge: ChallengeSession,
   ): JSONObject {
     val credentialRef = request.optJSONObject("payload")?.optString("credentialRef").orEmpty()
     val alias = "storylock-credential-$credentialRef"
@@ -194,7 +234,7 @@ class StoryLockAndroidHostService(
         JSONObject()
           .put("authorizationId", session.authorizationId)
           .put("requiredStrength", requiredStrength)
-          .put("challenge", challengeSummary(cells))
+          .put("challenge", challengeSummary(challenge))
           .put("credentialRef", credential.getString("credentialRef"))
           .put("username", credential.getString("username"))
           .put("password", credential.getString("password"))
@@ -205,28 +245,10 @@ class StoryLockAndroidHostService(
       .put(
         "auditMeta",
         JSONObject()
-          .put("authorizationId", session.authorizationId),
+          .put("authorizationId", session.authorizationId)
+          .put("challengeId", challenge.challengeId),
       )
       .put("error", JSONObject.NULL)
-  }
-
-  private fun readOrCreateSignatureKey(alias: String, keyId: String): JSONObject {
-    val existing = secretStore.getSecret(alias)
-    if (existing != null) {
-      return JSONObject(existing.toString(Charsets.UTF_8))
-    }
-    val material = Base64.encodeToString(
-      "storylock-android-signing-key:$keyId:${UUID.randomUUID()}".encodeToByteArray(),
-      Base64.NO_WRAP,
-    )
-    val created = JSONObject()
-      .put("keyId", keyId)
-      .put("algorithm", "hmac-sha256-demo")
-      .put("keyMaterial", material)
-      .put("storage", "android_keystore_secret_store")
-      .put("createdAt", System.currentTimeMillis())
-    secretStore.setSecret(alias, created.toString().encodeToByteArray())
-    return created
   }
 
   private fun readOrCreateCredential(alias: String, credentialRef: String, request: JSONObject): JSONObject {
@@ -246,37 +268,52 @@ class StoryLockAndroidHostService(
     return created
   }
 
-  private fun signPayload(keyMaterial: String, request: JSONObject): String {
-    val key = Base64.decode(keyMaterial, Base64.NO_WRAP)
-    val payload = request.optJSONObject("payload")?.toString() ?: request.toString()
-    val mac = Mac.getInstance("HmacSHA256")
-    mac.init(SecretKeySpec(key, "HmacSHA256"))
-    return mac.doFinal(payload.encodeToByteArray()).joinToString(separator = "") { byte ->
-      "%02x".format(byte)
-    }
-  }
-
-  private fun challengeSummary(cells: List<ChallengeCell>): JSONObject {
+  private fun challengeSummary(challenge: ChallengeSession): JSONObject {
     return JSONObject()
-      .put("requiredCells", cells.size)
+      .put("challengeId", challenge.challengeId)
+      .put("requiredStrength", challenge.requiredStrength)
+      .put("requiredCells", challenge.requiredCells)
+      .put("requiredThreshold", challenge.requiredThreshold)
+      .put("failureCount", challenge.failureCount)
+      .put("maxFailureCount", challenge.maxFailureCount)
+      .put("lockUntil", if (challenge.lockUntil > 0L) challenge.lockUntil else JSONObject.NULL)
+      .put("questionSetVersion", challenge.questionSetVersion)
       .put(
         "cells",
-        cells.map { cell ->
+        challenge.cells.map { cell ->
           JSONObject()
             .put("cellId", cell.cellId)
+            .put("position", cell.position)
             .put("questionId", cell.questionId)
             .put("promptText", cell.promptText)
         },
       )
   }
 
-  private fun buildChallengePrompt(cells: List<ChallengeCell>): String {
-    val target = cells.first()
-    return buildString {
-      append(target.promptText)
-      append("\n")
-      append("Please answer the first challenge question to continue local authorization.")
+  private fun confirmationErrorResponse(
+    requestId: String,
+    capability: String,
+    challenge: ChallengeSession,
+    confirmation: LocalConfirmationResult,
+  ): JSONObject {
+    val (code, type, suggestedAction) = when (confirmation.failureType) {
+      "host_unavailable" -> Triple("SLG-010", "host_unavailable", "Attach a foreground activity before retrying local confirmation.")
+      "challenge_cancelled" -> Triple("SLG-003", "challenge_cancelled", "Retry and complete the local challenge.")
+      "challenge_failed" -> Triple("SLG-003", "challenge_failed", "Retry and answer every local challenge cell correctly.")
+      "biometric_unavailable" -> Triple("SLG-010", "biometric_unavailable", "Enable biometric or device credential confirmation on the Android host.")
+      "biometric_cancelled" -> Triple("SLG-003", "biometric_cancelled", "Retry and complete biometric confirmation.")
+      "biometric_failed" -> Triple("SLG-003", "biometric_failed", "Retry after successful biometric confirmation.")
+      else -> Triple("SLG-003", "authorization_failed", "Retry after local user confirmation.")
     }
+    return errorResponse(
+      requestId = requestId,
+      capability = capability,
+      code = code,
+      type = type,
+      message = confirmation.reason ?: "local confirmation denied",
+      suggestedAction = suggestedAction,
+      challenge = challenge,
+    )
   }
 
   private fun errorResponse(
@@ -286,7 +323,23 @@ class StoryLockAndroidHostService(
     type: String,
     message: String,
     suggestedAction: String,
+    challenge: ChallengeSession? = null,
+    retryAfter: Long? = null,
+    extraErrorFields: Map<String, Any?> = emptyMap(),
   ): JSONObject {
+    val errorObject = JSONObject()
+      .put("code", code)
+      .put("type", type)
+      .put("message", message)
+      .put("suggestedAction", suggestedAction)
+      .put("challenge", challenge?.let { challengeSummary(it) } ?: JSONObject.NULL)
+      .put("retryable", code == "SLG-003" || code == "SLG-004")
+    if (retryAfter != null) {
+      errorObject.put("retryAfter", retryAfter)
+    }
+    extraErrorFields.forEach { (key, value) ->
+      errorObject.put(key, value ?: JSONObject.NULL)
+    }
     return JSONObject()
       .put("requestId", requestId)
       .put("status", "error")
@@ -298,16 +351,10 @@ class StoryLockAndroidHostService(
       .put(
         "auditMeta",
         JSONObject()
+          .put("challengeId", challenge?.challengeId ?: JSONObject.NULL)
+          .put("retryAfter", retryAfter ?: JSONObject.NULL)
           .put("timestamp", System.currentTimeMillis()),
       )
-      .put(
-        "error",
-        JSONObject()
-          .put("code", code)
-          .put("type", type)
-          .put("message", message)
-          .put("suggestedAction", suggestedAction)
-          .put("retryable", code == "SLG-003"),
-      )
+      .put("error", errorObject)
   }
 }

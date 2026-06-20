@@ -7,11 +7,12 @@ Current implemented scope:
 1. Android application project skeleton
 2. local HTTP host entry at `GET /health` and `POST /execute`
 3. Android Keystore-backed `SecretStore`
-4. local challenge prompt and BiometricPrompt confirmation flow
+4. local multi-cell challenge prompt and BiometricPrompt confirmation flow
 5. host registration store with stable `deviceId` and `appInstanceId`
 6. deep-link based first-bind flow
 7. relay polling client for server-side callback execution
-8. `execute` path backed by Android Keystore-encrypted signature key and credential objects
+8. `execute` path backed by Android Keystore asymmetric signature keys and Android Keystore-encrypted credential objects
+9. asset-backed local question-set loading for Android challenge execution
 
 Current network flow:
 
@@ -23,16 +24,32 @@ Current network flow:
 
 Current non-goals:
 
-1. full production asymmetric Android signing and platform Credential Manager integration
+1. full production mobile release hardening, attestation, and platform Credential Manager integration
 2. full Layer 1 / Layer 2 runtime parity with the JS host
 3. packaged APK build verification inside this workspace session
 
 Recommended next steps:
 
-1. replace the demo HMAC signature object with production Android Keystore asymmetric signing
+1. add requested-algorithm policy mapping between Layer 3 requests and the Android Keystore signer
 2. connect Android Credential Manager or an equivalent real credential provider
 3. compile a real APK and point `STORYLOCK_ANDROID_APK_PATH` to the build artifact
 4. replace the simplified authorization runtime with the production Layer 1 and Layer 2 bindings
+5. move from asset-backed question-set loading to full second-layer persistent question-set management
+
+Current signature behavior:
+
+1. signature requests are executed by a local Android Keystore EC keypair generated per `keyId`
+2. the host returns signature result and public-key metadata, not demo HMAC key material
+3. the current prototype still does not guarantee parity with requested external algorithms such as `ed25519` or `secp256k1`
+
+Current challenge behavior:
+
+1. the Android prototype now asks for all required local challenge cells for the requested strength
+2. signature requests require nine local challenge answers plus strong biometric confirmation
+3. password-fill requests require six local challenge answers plus local confirmation
+4. repeated challenge failures now increment a local failure counter and can trigger temporary lockout
+5. failure responses now distinguish challenge cancellation, challenge mismatch, biometric unavailability, biometric cancellation, and challenge lockout
+6. challenge data now comes from a versioned local asset file instead of a hard-coded question list inside the runtime
 
 APK distribution notes:
 

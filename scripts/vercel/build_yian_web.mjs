@@ -10,7 +10,7 @@ const target = join(root, 'release', 'web', 'public');
 const appArtifactsRoot = join(root, 'release', 'app');
 const windowsEnvFile = join(root, 'scripts', 'vercel', '.env.windows-package');
 const defaultWindowsPackageName = 'yian-windows-host-0.1.0-1-prototype.zip';
-const packagePattern = /\.(apk|zip|msi|exe|appimage|deb|rpm)$/iu;
+const packagePattern = /(\.tar\.gz|\.(apk|zip|msi|exe|appimage|deb|rpm))$/iu;
 
 async function readEnvFile(path) {
   if (!existsSync(path)) {
@@ -65,7 +65,7 @@ function inferPlatform(fileName, platformDirectory = null) {
   if (normalized.includes('windows') || /\.(msi|exe)$/iu.test(normalized)) {
     return 'windows';
   }
-  if (/\.(appimage|deb|rpm)$/iu.test(normalized) || normalized.includes('linux')) {
+  if (/(\.tar\.gz|\.(appimage|deb|rpm))$/iu.test(normalized) || normalized.includes('linux')) {
     return 'linux';
   }
   return 'unknown';
@@ -84,6 +84,9 @@ function inferPackageKind(fileName) {
   }
   if (normalized.endsWith('.zip')) {
     return 'zip';
+  }
+  if (normalized.endsWith('.tar.gz')) {
+    return 'tar.gz';
   }
   if (normalized.endsWith('.deb')) {
     return 'deb';
@@ -112,8 +115,8 @@ function inferReleaseChannel(fileName, packageKind) {
 }
 
 function inferVersionMetadata(fileName) {
-  const withoutExtension = fileName.replace(/\.[^.]+$/u, '');
-  const match = withoutExtension.match(/(?:storylock-android-host|yian-windows-host)-([0-9]+(?:\.[0-9]+)*)-([0-9]+)/u);
+  const withoutExtension = fileName.replace(/\.tar\.gz$/iu, '').replace(/\.[^.]+$/u, '');
+  const match = withoutExtension.match(/(?:storylock-android-host|yian-windows-host|yian-linux-host)-([0-9]+(?:\.[0-9]+)*)-([0-9]+)/u);
   if (!match) {
     return {};
   }
@@ -124,7 +127,10 @@ function inferVersionMetadata(fileName) {
 }
 
 function metadataNameFor(fileName) {
-  return fileName.replace(/\.[^.]+$/u, '.json');
+  if (fileName.endsWith('.tar.gz')) {
+    return fileName.replace(/\.tar\.gz$/iu, '-tar-gz.json');
+  }
+  return fileName.replace(/\.([^.]+)$/u, '-$1.json');
 }
 
 async function copyPackageToDownloads(packagePath, {
@@ -183,6 +189,8 @@ async function copyAppArtifactsToDownloads(downloadsDir) {
 await rm(target, { recursive: true, force: true });
 await cp(source, target, { recursive: true });
 const downloadsDir = join(target, 'downloads');
+await rm(downloadsDir, { recursive: true, force: true });
+await mkdir(downloadsDir, { recursive: true });
 await copyAppArtifactsToDownloads(downloadsDir);
 
 const windowsEnv = await readEnvFile(windowsEnvFile);
@@ -221,7 +229,7 @@ for (const requiredFile of ['index.html', 'main.js', 'styles.css']) {
   await access(join(target, requiredFile));
 }
 if (existsSync(join(target, 'downloads', defaultWindowsPackageName))) {
-  await access(join(target, 'downloads', defaultWindowsPackageName.replace(/\.[^.]+$/u, '.json')));
+  await access(join(target, 'downloads', metadataNameFor(defaultWindowsPackageName)));
 }
 
 console.log(`Copied ${source} -> ${target}`);

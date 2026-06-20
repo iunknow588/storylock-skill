@@ -13,6 +13,8 @@
     "selftest": "node scripts/selftest.mjs",
     "check:secret-store": "node scripts/check-secret-store.mjs",
     "cleanup": "node scripts/cleanup-expired.mjs",
-    "import:question-set": "node scripts/import-question-set.mjs"
+    "import:question-set": "node scripts/import-question-set.mjs",
+    "validate:question-set": "node scripts/import-question-set.mjs --dry-run",
+    "generate:question-set-template": "node scripts/generate-question-set-template.mjs"
   }
 }

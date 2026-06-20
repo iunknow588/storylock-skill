@@ -107,7 +107,7 @@ interface SecretStore {
 }
 ```
 
-The bundled `MemorySecretStore` is a development adapter. Production hosts should replace it with Windows Credential Manager or Linux Secret Service.
+The bundled `MemorySecretStore` is a development adapter. Production hosts should replace it with a platform SecretStore such as Windows Credential Manager, Linux Secret Service, or macOS Keychain.
 
 Current platform adapters:
 
@@ -120,8 +120,10 @@ Current platform adapters:
    - Uses `secret-tool`.
    - Requires Secret Service / libsecret to be available in the user session.
    - Stores base64-encoded secret bytes with attributes `service=storylock` and `key=<key>`.
-
-macOS Keychain is intentionally not implemented in the current phase.
+3. `MacOSKeychainSecretStore`
+   - Uses the macOS `security` CLI.
+   - Requires the current user session to have access to Keychain services.
+   - Stores base64-encoded secret bytes as generic passwords under the `storylock` service.
 
 ## Security Notes
 
@@ -147,4 +149,5 @@ It prints a final JSON report matching `assets/schemas/selftest-report.schema.js
 
 1. Windows: checks for PowerShell CredentialManager cmdlets.
 2. Linux: checks for `secret-tool`.
-3. Unsupported platforms report `unsupported` with the platform name.
+3. macOS: checks that the `security` CLI can reach Keychain services.
+4. Unsupported platforms report `unsupported` with the platform name.

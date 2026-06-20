@@ -12,7 +12,9 @@ function Invoke-JsonPost {
     [string]$Uri,
     [hashtable]$Body
   )
-  Invoke-RestMethod -Method Post -Uri $Uri -ContentType "application/json" -Body ($Body | ConvertTo-Json -Depth 8)
+  $json = $Body | ConvertTo-Json -Depth 8
+  $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
+  Invoke-RestMethod -Method Post -Uri $Uri -ContentType "application/json; charset=utf-8" -Body $bytes
 }
 
 function Add-Result {
@@ -29,12 +31,39 @@ function Add-Result {
     }) | Out-Null
 }
 
+function Assert-Success {
+  param(
+    [object]$Response,
+    [string]$Name
+  )
+  if ($null -eq $Response) {
+    throw "$Name returned no response"
+  }
+  if ($Response.status -ne "success") {
+    $message = if ($Response.error -and $Response.error.message) { $Response.error.message } else { ($Response | ConvertTo-Json -Depth 8) }
+    throw "$Name failed: $message"
+  }
+}
+
+function Assert-Value {
+  param(
+    [object]$Value,
+    [string]$Name
+  )
+  if ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value)) {
+    throw "$Name was empty"
+  }
+}
+
 if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
   throw "Cargo was not found. Install Rust from https://rustup.rs/ and rerun this script."
 }
 
 $project = Resolve-Path -LiteralPath $ProjectDir
 $data = [System.IO.Path]::GetFullPath($DataDir)
+if (Test-Path -LiteralPath $data) {
+  Remove-Item -LiteralPath $data -Recurse -Force
+}
 New-Item -ItemType Directory -Force -Path $data | Out-Null
 
 $env:STORYLOCK_WINDOWS_DATA_DIR = $data
@@ -75,9 +104,14 @@ try {
     throw "Windows host did not become healthy. Stdout:`n$stdoutTail`nStderr:`n$stderrTail"
   }
 
+  Assert-Value $health.approvalMode "health.approvalMode"
+  Assert-Value $health.storage.path "health.storage.path"
   Add-Result $rows "health" "ok" ("approvalMode={0}; questionBankPath={1}" -f $health.approvalMode, $health.storage.path)
 
   $questionBankStatus = Invoke-RestMethod -Method Get -Uri "$baseUrl/question-bank/status"
+  Assert-Success $questionBankStatus "question-bank-status"
+  Assert-Value $questionBankStatus.result.questionSetVersion "question-bank-status.result.questionSetVersion"
+  Assert-Value $questionBankStatus.result.questionCount "question-bank-status.result.questionCount"
   Add-Result $rows "question-bank-status" "ok" ("questionSetVersion={0}; questionCount={1}" -f $questionBankStatus.result.questionSetVersion, $questionBankStatus.result.questionCount)
 
   $tempImport = Join-Path $data "import-question-bank.json"
@@ -116,6 +150,9 @@ try {
     requestId = "req-import-loop-001"
     sourcePath = $tempImport
   }
+  Assert-Success $importResponse "question-bank-import"
+  Assert-Value $importResponse.result.questionSetVersion "question-bank-import.result.questionSetVersion"
+  Assert-Value $importResponse.result.questionCount "question-bank-import.result.questionCount"
   Add-Result $rows "question-bank-import" "ok" ("questionSetVersion={0}; questionCount={1}" -f $importResponse.result.questionSetVersion, $importResponse.result.questionCount)
 
   $verify = Invoke-JsonPost -Uri "$baseUrl/verify" -Body @{
@@ -123,7 +160,12 @@ try {
     capability = "requestSignature"
     keyId = "wallet-loop"
   }
+  Assert-Success $verify "verify"
+  Assert-Value $verify.result.verificationId "verify.result.verificationId"
   $cells = @($verify.result.grid.cells)
+  if ($cells.Count -lt 1) {
+    throw "verify.result.grid.cells was empty"
+  }
   $answers = @()
   foreach ($cell in $cells) {
     $answer = switch ($cell.questionId) {
@@ -144,6 +186,8 @@ try {
     verificationId = $verify.result.verificationId
     answers = $answers
   }
+  Assert-Success $authorize "authorize"
+  Assert-Value $authorize.result.authorizationId "authorize.result.authorizationId"
   Add-Result $rows "authorize" "ok" ("authorizationId={0}" -f $authorize.result.authorizationId)
 
   $execute = Invoke-JsonPost -Uri "$baseUrl/execute" -Body @{
@@ -152,11 +196,19 @@ try {
     keyId = "wallet-loop"
     authorizationId = $authorize.result.authorizationId
   }
+  Assert-Success $execute "execute"
+  Assert-Value $execute.result.signature "execute.result.signature"
   Add-Result $rows "execute" "ok" ("signature={0}" -f $execute.result.signature)
 
   $revoke = Invoke-JsonPost -Uri "$baseUrl/revoke" -Body @{
     requestId = "req-revoke-loop-001"
     authorizationId = $authorize.result.authorizationId
+  }
+  Assert-Success $revoke "revoke"
+  Assert-Value $revoke.result.status "revoke.result.status"
+  Assert-Value $revoke.result.authorizationId "revoke.result.authorizationId"
+  if ($revoke.result.status -ne "revoked") {
+    throw "revoke.result.status expected revoked but got $($revoke.result.status)"
   }
   Add-Result $rows "revoke" "ok" ("status={0}; authorizationId={1}" -f $revoke.result.status, $revoke.result.authorizationId)
 

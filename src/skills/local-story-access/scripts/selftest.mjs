@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -7,6 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import {
+  createAccessHost,
   GridChallengeSkill,
   LocalAuthorizationSkill,
   LocalRevocationSkill,
@@ -290,6 +291,35 @@ await withDb(async (ctx) => {
     pass('question-set-import-command');
   } finally {
     cleanup(dbPath);
+    cleanupDir(dir);
+  }
+}
+
+{
+  const dir = mkdtempSync(join(tmpdir(), 'storylock_template_selftest_'));
+  const outputPath = join(dir, 'generated-question-set.json');
+  try {
+    const templateOutput = execFileSync(process.execPath, [
+      fileURLToPath(new URL('./generate-question-set-template.mjs', import.meta.url)),
+      '--output',
+      outputPath,
+      '--identity-id',
+      'id-template',
+      '--question-set-version',
+      'template-v1',
+    ], {
+      encoding: 'utf8',
+      windowsHide: true,
+    });
+    const templateResult = JSON.parse(templateOutput);
+    const generated = JSON.parse(readFileSync(outputPath, 'utf8'));
+    assert.equal(templateResult.status, 'success');
+    assert.equal(generated.template, true);
+    assert.equal(generated.questions.length, 24);
+    assert.equal(generated.questionSetVersion, 'template-v1');
+    assert.equal(generated.questions[0].answer, 'replace-answer-1');
+    pass('question-set-template-generator');
+  } finally {
     cleanupDir(dir);
   }
 }
@@ -657,6 +687,45 @@ assert.throws(
 );
 pass('scheduled-cleanup-validates-interval');
 
+{
+  let callback = null;
+  const host = createAccessHost({
+    developmentMode: true,
+    cleanupIntervalMs: 2500,
+    cleanupBatchSize: 5,
+    databaseFactory(path) {
+      return new DatabaseSync(path);
+    },
+    onCleanupError(error) {
+      throw error;
+    },
+  });
+  try {
+    host.cleanupController?.stop();
+  } finally {
+    host.close?.();
+  }
+
+  const wiredHost = createAccessHost({
+    developmentMode: true,
+    cleanupIntervalMs: 2500,
+    cleanupBatchSize: 5,
+    cleanupSetIntervalFn(callbackFn) {
+      callback = callbackFn;
+      return { unref() {} };
+    },
+    cleanupClearIntervalFn() {},
+  });
+  try {
+    assert.equal(typeof callback, 'function');
+    assert.equal(typeof wiredHost.cleanupController?.runNow, 'function');
+  } finally {
+    wiredHost.cleanupController?.stop();
+    wiredHost.close?.();
+  }
+  pass('create-access-host-auto-cleanup');
+}
+
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
   const grid = new GridChallengeSkill({ dbPath, secretStore });
@@ -845,7 +914,7 @@ pass('database-factory-contract-enforced');
 
 assert.throws(
   () => new GridChallengeSkill({ dbPath: tempDbPath() }),
-  /Persistent SQLite host requires secretStore/,
+  /createAccessHost requires secretStore, usePlatformSecretStore=true, or developmentMode=true/,
 );
 pass('persistent-db-requires-secret-store');
 
@@ -855,9 +924,76 @@ assert.throws(
 );
 pass('memory-secret-store-requires-development-mode');
 
+{
+  const skill = new GridChallengeSkill({ developmentMode: true });
+  try {
+    assert.equal(skill.host.secretStore.kind, 'memory');
+    assert.equal(skill.host.secretStore.developmentMode, true);
+  } finally {
+    skill.host.close?.();
+  }
+}
+pass('explicit-development-mode-allows-memory-fallback');
+
 assert.equal(createPlatformSecretStore({ platform: 'win32' }).constructor.name, 'WindowsCredentialSecretStore');
 assert.equal(createPlatformSecretStore({ platform: 'linux' }).constructor.name, 'LinuxSecretServiceStore');
+assert.equal(createPlatformSecretStore({ platform: 'darwin' }).constructor.name, 'MacOSKeychainSecretStore');
+assert.equal(
+  createPlatformSecretStore({ platform: 'darwin', allowMemoryFallback: true }).constructor.name,
+  'MacOSKeychainSecretStore',
+);
 pass('platform-secret-store-factory');
+
+{
+  const dbPath = tempDbPath();
+  let calls = 0;
+  const secretStore = {
+    kind: 'platform_stub',
+    checkAvailable() {
+      calls += 1;
+      return true;
+    },
+    getSecret() {
+      return null;
+    },
+    setSecret() {},
+    deleteSecret() {},
+  };
+  const host = createAccessHost({
+    dbPath,
+    secretStore,
+  });
+  try {
+    assert.equal(calls, 1);
+  } finally {
+    host.close?.();
+    cleanup(dbPath);
+  }
+}
+pass('platform-secret-store-startup-check');
+
+{
+  const dbPath = tempDbPath();
+  assert.throws(
+    () => createAccessHost({
+      dbPath,
+      secretStore: {
+        kind: 'platform_stub',
+        checkAvailable() {
+          throw new Error('CredentialManager PowerShell module is required');
+        },
+        getSecret() {
+          return null;
+        },
+        setSecret() {},
+        deleteSecret() {},
+      },
+    }),
+    /Platform SecretStore is unavailable: CredentialManager PowerShell module is required/,
+  );
+  cleanup(dbPath);
+}
+pass('platform-secret-store-startup-check-fails-fast');
 
 console.log('StoryLock local story access selftest passed.');
 console.log(JSON.stringify(report));

@@ -1,96 +1,163 @@
-# StoryLock Android 瀹夸富瀹炵幇瑙勮寖
+# StoryLock Android 宿主实现规范
 
-## 1. 鐩爣
+日期：2026-06-20
 
-鏈枃妗ｇ敤浜庢妸褰撳墠 `Android 瀹夸富 mock` 鏀舵暃涓哄悗缁湡瀹?Android 瀹夸富瀹炵幇鐨勬渶灏忚鑼冦€?
-褰撳墠鐩爣涓嶆槸瀹氫箟瀹屾暣 App 浜у搧锛岃€屾槸瀹氫箟鈥滅涓€灞傚拰绗簩灞傚浣曞湪 Android 渚ф壙杞斤紝骞朵笌绗笁灞備簯绔叆鍙ｅ鎺モ€濄€?
-## 2. 褰撳墠鏋舵瀯瀹氫綅
+本文档用于说明当前仓库中 Android 宿主原型的真实边界、已落地能力和仍待补齐的正式交付缺口。
 
-寤鸿閲囩敤浠ヤ笅閮ㄧ讲鍏崇郴锛?
-1. 绗笁灞?`storylock-remote-gateway-skill` 閫氳繃 Vercel 椋庢牸鍏ュ彛瀵瑰鏆撮湶銆?2. 绗竴灞?`storylock-local-story-processing-skill` 鍦?Android 鏈湴鎵ц銆?3. 绗簩灞?`storylock-local-story-access-skill` 鍦?Android 鏈湴鎵ц銆?4. Android 瀹夸富瀵圭涓夊眰鍙毚闇叉渶灏忔帴鍙ｏ細`GET /health`銆乣POST /execute`銆?
-## 3. Android 瀹夸富蹇呴』鎵胯浇鐨勮兘鍔?
-### 3.1 绗竴灞?
-鑷冲皯闇€瑕侊細
+## 1. 当前真实状态
 
-1. 棰橀泦寮哄害妫€鏌ャ€?2. 鏈湴鏁呬簨棰橀泦鍑嗗鐘舵€佹鏌ャ€?
-瀵瑰簲褰撳墠浠ｇ爜鑳藉姏锛?
-1. `StrengthReviewSkill`
+当前仓库已经包含一套可联调、可继续推进的 Android 真机宿主原型工程：
 
-### 3.2 绗簩灞?
-鑷冲皯闇€瑕侊細
+`src/host/android-host/`
 
-1. 瀵硅薄寮哄害绛栫暐鍒ゅ畾銆?2. 涔濆鏍?challenge 鍒涘缓銆?3. 鏈湴绛旀鏍￠獙銆?4. 鐭椂鎺堟潈绛惧彂銆?5. 闃查噸鏀俱€佸け璐ラ攣瀹氥€佸璁¤惤搴撱€?6. 鎾ら攢鎺ュ彛棰勭暀銆?
-瀵瑰簲褰撳墠浠ｇ爜鑳藉姏锛?
-1. `ObjectStrengthPolicySkill`
-2. `GridChallengeSkill`
-3. `LocalAuthorizationSkill`
-4. `LocalRevocationSkill`
+当前已经落地的能力包括：
 
-## 4. Android 瀹夸富鏈€灏忔帴鍙?
-### 4.1 `GET /health`
+1. 本地 HTTP 宿主入口：`GET /health`、`POST /execute`
+2. Android Keystore 保护下的本地 `SecretStore`
+3. Android Keystore 非对称签名原型路径
+4. 多格 challenge 输入与 BiometricPrompt 确认链路
+5. challenge 失败计数与临时锁定语义
+6. 基于本地资源文件加载的题集原型路径
+7. deep link 绑定、注册、relay 轮询与回传原型代码路径
 
-鐢ㄩ€旓細
+当前不能表述为：
 
-1. 缁欑涓夊眰妫€鏌?Android 瀹夸富鏄惁鍦ㄧ嚎銆?2. 杩斿洖绗竴灞傞闆嗗氨缁姸鎬併€?3. 杩斿洖绗簩灞?active question set 鐨勬瑕佺姸鎬併€?
-褰撳墠 schema锛?
-`src/skills/remote-gateway/assets/schemas/android-host-health.schema.json`
+1. Android 宿主已经是正式上架 App
+2. Android 本地签名已经完成正式多算法生产闭环
+3. Android challenge 已经与第二层正式实现完全等价
+4. Android 正式 release 构建、签名、验签与发布闭环已经完成
 
-### 4.2 `POST /execute`
+## 2. Android 宿主职责
 
-鐢ㄩ€旓細
+Android 宿主当前负责：
 
-1. 鎺ユ敹绗笁灞傛爣鍑嗚姹傘€?2. 鍦?Android 鏈湴瀹屾垚鏈湴鎺堟潈閾捐矾銆?3. 杩斿洖鏍囧噯 remote gateway response銆?
-褰撳墠杈撳叆杈撳嚭 schema锛?
-1. `src/skills/remote-gateway/assets/schemas/remote-gateway-request.schema.json`
-2. `src/skills/remote-gateway/assets/schemas/remote-gateway-response.schema.json`
+1. 持有本地题集可用状态
+2. 加载本地 challenge 题集资源
+3. 承载 challenge、BiometricPrompt、本地确认与本地执行
+4. 执行本地签名或密码填充
+5. 向第三层返回最小必要结果
 
-## 5. Android 渚ф湰鍦板畨鍏ㄨ姹?
-### 5.1 瀵嗛挜涓庨暱鏈熺瀵?
-鐪熷疄 Android 瀹夸富搴斾紭鍏堟帴鍏ワ細
+Android 宿主当前不负责：
 
-1. Android Keystore
-2. 蹇呰鏃剁粨鍚?EncryptedSharedPreferences 鎴栫瓑浠峰畨鍏ㄥ瓨鍌ㄤ繚瀛橀潪瀵嗛挜鍏冩暟鎹?
-褰撳墠蹇呴』婊¤冻锛?
-1. 涓嶆妸闀挎湡绉侀挜鏄庢枃鍐欏叆鏅€氭枃浠躲€?2. 涓嶆妸 challenge answers 鏄庢枃闀挎湡鎸佷箙鍖栥€?3. 涓嶆妸 masterSalt 鏄庢枃鏆撮湶缁欑涓夊眰鎴栬繙绔€?
-### 5.2 challenge answers
+1. 直接向远程暴露第二层内部方法
+2. 回传题集答案、私钥原文或 `SecretStore` 明文
+3. 替第三层完成最终对外脱敏
 
-鐪熷疄 Android 瀹夸富蹇呴』閬靛畧褰撳墠鎸戞垬绛旀瀛樺偍绛栫暐锛?
-1. 鍘熷绛旀鍙厑璁哥煭鏃跺瓨鍦ㄤ簬鍐呭瓨鎴栧彈鎺ц緭鍏ユ祦绋嬨€?2. 鎸佷箙灞傚彧淇濆瓨鎽樿銆乧hallenge manifest 鍜?session 鍏冩暟鎹€?3. challenge 瀹屾垚鍚庣珛鍗虫竻鐞嗚繍琛屾€佸師濮嬬瓟妗堛€?
-### 5.3 鐢熺墿璇嗗埆涓庢湰鍦扮‘璁?
-寤鸿鐪熷疄 Android 瀹夸富澧炲姞浠ヤ笅鏈湴纭鑳藉姏锛?
-1. BiometricPrompt 浜屾纭銆?2. 搴旂敤鍓嶅悗鍙板垏鎹㈡椂鑷姩澶辨晥寰呮巿鏉冪姸鎬併€?3. 楂樺己搴︾鍚嶈姹傚彲瑕佹眰鈥滈闆嗛獙璇?+ 鐢熺墿璇嗗埆鈥濆弻鏉′欢銆?
-娉ㄦ剰锛? 
-鐢熺墿璇嗗埆鏄?Android 瀹夸富鐨勬湰鍦板姞鍥烘満鍒讹紝涓嶅簲鏇夸唬棰橀泦 challenge 鐨勪富濂戠害锛岄櫎闈炴湭鏉ユ枃妗ｅ彟琛屽崌绾у畾涔夈€?
-## 6. 绗笁灞備笌 Android 瀹夸富鐨勮繛鎺ヨ姹?
-### 6.1 绗笁灞備簯绔叆鍙?
-褰撳墠绗笁灞傚叆鍙ｏ細
+## 3. 最小接口契约
 
-1. `web-api/storylock-gateway.mjs`
-2. `src/skills/remote-gateway/web-api-handler.js`
-3. `GET /download/android-host`
+当前最小宿主接口只有两个：
 
-绗笁灞傝亴璐ｏ細
+1. `GET /health`
+2. `POST /execute`
 
-1. 鎺ユ敹杩滅▼璇锋眰銆?2. 淇濇寔涓绘帴鍙?allowlist銆?3. 杞彂鏍囧噯 envelope 缁?Android 瀹夸富銆?4. 瀵硅繑鍥炵粨鏋滃仛鑴辨晱銆?5. 鍚戝鎻愪緵 Android 鏈湴瀹夸富鐨勪笅杞藉湴鍧€涓庣浜屽眰杩炴帴鍏冩暟鎹€?
-### 6.2 瀹夸富閴存潈
+### 3.1 `GET /health`
 
-褰撳墠鏈€灏忔柟妗堬細
+当前关键字段包括：
 
-1. `x-storylock-shared-secret`
+1. `status`
+2. `layer1.mode`
+3. `layer1.questionSetReady`
+4. `layer1.strongestBasicChallengeBits`
+5. `layer2.identityId`
+6. `layer2.questionSetVersion`
+7. `layer2.normalizationVersion`
+8. `layer2.activeQuestionCount`
+9. `stats.requestCount`
 
-鍚庣画鐪熷疄瀹炵幇寤鸿澧炲姞锛?
-1. 璁惧鏍囪瘑 `deviceId`
-2. App 瀹炰緥鏍囪瘑 `appInstanceId`
-3. 瀹夸富娉ㄥ唽璁板綍
-4. 鍙€夎澶囪瘉鏄庢垨绛惧悕鎸戞垬
+### 3.2 `POST /execute`
 
-## 7. 褰撳墠浠撳簱宸茬粡楠岃瘉鐨勯儴鍒?
-褰撳墠浠撳簱宸茬粡楠岃瘉锛?
-1. 绗笁灞?Vercel 椋庢牸鍏ュ彛鍙繍琛屻€?2. Android 瀹夸富 mock 鍙壙杞界涓€灞備笌绗簩灞傝兘鍔涖€?3. `selftest:web-api-android` 鑳借窇閫氱鍒扮璇锋眰閾捐矾銆?
-褰撳墠浠撳簱灏氭湭鎻愪緵锛?
-1. 瀹屾暣 Android App 宸ョ▼銆?2. Android Keystore 瀹炵幇銆?3. BiometricPrompt 闆嗘垚銆?4. 鐪熸満缃戠粶鏆撮湶鏂规銆?
-## 8. 鎺ㄨ崘瀵瑰鍙ｅ緞
+当前主线支持：
 
-寤鸿浣跨敤锛?
-> 褰撳墠浠撳簱宸茬粡楠岃瘉鈥滅涓夊眰浜戠鍏ュ彛 + Android 鏈湴瀹夸富鈥濈殑鏈€灏忛摼璺紝鍏朵腑绗笁灞傝礋璐ｈ姹傚寘瑁呬笌鑴辨晱锛岀涓€灞傚拰绗簩灞備繚鐣欏湪鏈湴瀹夸富锛涚湡瀹?Android App 涓?Android Keystore 闆嗘垚灞炰簬涓嬩竴闃舵瀹炵幇宸ヤ綔銆?
+1. `requestSignature`
+2. `requestPasswordFill`
 
+## 4. 当前 challenge 与确认模型
+
+当前 Android 原型已经不再是单题确认。
+
+当前行为：
+
+1. `requestSignature` 默认要求高强度 challenge
+2. 高强度 challenge 当前需要 9 格答案
+3. `requestPasswordFill` 默认要求中强度 challenge
+4. 中强度 challenge 当前需要 6 格答案
+5. challenge 通过后仍需继续经过 BiometricPrompt / 设备凭据确认
+6. challenge 连续失败会累计失败计数，并在达到阈值后进入临时锁定
+7. challenge 数据当前来自本地资源文件，而不是直接硬编码在运行时代码里
+
+当前失败路径已区分：
+
+1. `challenge_cancelled`
+2. `challenge_failed`
+3. `challenge_locked`
+4. `biometric_unavailable`
+5. `biometric_cancelled`
+6. `biometric_failed`
+7. `host_unavailable`
+
+## 5. 当前题集来源
+
+当前 Android 原型题集来源已经推进到：
+
+1. 本地 asset 文件 `storylock-question-set.json`
+2. 宿主启动时读取并构造 challenge 题集
+3. 题集带有 `identityId`、`questionSetVersion` 与 `normalizationVersion`
+4. 宿主启动期会对题集执行 fail-fast 检查，包括：
+   - `identityId`、`questionSetVersion`、`normalizationVersion` 不能为空
+   - active 题目 `questionId`、`promptText`、`answer` 不能为空
+   - active `questionId` 不能重复
+   - active 题目数量至少为 24
+   - 题集 `identityId` 必须与宿主 `hostConfig.identityId` 一致
+5. 仓库侧可通过以下命令做静态校验：
+
+```powershell
+node scripts/android/validate_android_question_set.mjs
+```
+
+当前仍未完成：
+
+1. 与第二层正式 SQLite 题集持久化完全打通
+2. 真机端题集导入、轮换和清理闭环
+3. 正式 Android 题集数据管理工具链
+
+## 6. 当前签名模型
+
+当前 Android 原型签名路径已经从 demo HMAC 前进到：
+
+1. 基于 Android Keystore 的本地 EC 密钥对
+2. 本地执行签名
+3. 返回签名结果和必要公钥元数据
+4. 不再返回 demo `keyMaterial`
+
+当前仍需继续补齐：
+
+1. 请求算法和本地实际算法的正式策略映射
+2. 更强的用户认证策略与签名键绑定
+3. 更正式的审计与失败处理闭环
+
+## 7. 当前可验证范围
+
+当前仓库已经可以验证：
+
+1. Web API 网关入口
+2. Android 宿主 mock 注册
+3. relay / poll / respond 闭环
+4. APK 下载元数据入口
+5. 共享密钥透传
+6. 宿主执行结果脱敏返回
+7. Android 原型工程中的本地宿主、Keystore、challenge、BiometricPrompt 与注册 / relay 代码路径
+8. Android asset 题集的仓库侧结构校验与宿主启动期 fail-fast 检查
+
+当前仓库尚未完成：
+
+1. Android 正式交付级 UI 与完整产品化处理
+2. 正式移动端 release 构建、签名、验签和发布闭环
+3. 请求算法与本地签名策略最终对齐
+4. 与第二层正式模型完全一致的题集持久化、失败窗口与撤销细节
+5. Android 正式题集导入、轮换与持久化闭环
+
+## 8. 建议演示口径
+
+建议对外表述为：
+
+> 当前仓库已经验证“云端第三层网关 + Android 本地宿主接口模型”的闭环，且仓库内已经存在 Android 真机宿主原型工程、Keystore、本地题集资源加载、challenge 与 BiometricPrompt 相关代码路径；但它仍处于可联调、可验证、未完成正式交付闭环的阶段。

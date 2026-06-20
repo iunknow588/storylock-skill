@@ -1,0 +1,9 @@
+Package: yian-linux-host
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Yian StoryLock Team <maintainers@example.invalid>
+Depends: nodejs (>= 22), libsecret-tools
+Description: Yian Linux local StoryLock host
+ Prototype Linux local host for StoryLock authorization, challenge, and local execution flows.

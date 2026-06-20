@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Yian Linux Host
+Comment=Local StoryLock host for Yian
+Exec=/opt/yian-linux-host/bin/yian-linux-host
+Terminal=false
+Categories=Utility;Security;
+StartupNotify=false

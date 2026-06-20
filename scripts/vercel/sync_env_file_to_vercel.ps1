@@ -59,6 +59,35 @@ function Read-EnvEntries {
   return $entries
 }
 
+function Get-LocalVercelProjectName {
+  param([string]$RootDir)
+  $projectJsonPath = Join-Path $RootDir ".vercel\project.json"
+  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
+    return ""
+  }
+  try {
+    $project = Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
+    return [string]$project.projectName
+  } catch {
+    throw "Unable to parse local Vercel project link: $projectJsonPath"
+  }
+}
+
+function Assert-VercelProjectLink {
+  param(
+    [string]$RootDir,
+    [string]$ExpectedProjectName
+  )
+  $localProjectName = Get-LocalVercelProjectName -RootDir $RootDir
+  if ([string]::IsNullOrWhiteSpace($localProjectName)) {
+    throw "Local Vercel project link was not found. Run scripts\vercel\link_project.cmd from the skill/ directory before syncing env."
+  }
+  if (-not [string]::IsNullOrWhiteSpace($ExpectedProjectName) -and $localProjectName -ne $ExpectedProjectName) {
+    throw "Local Vercel project link mismatch. VERCEL_PROJECT_NAME='$ExpectedProjectName' but .vercel/project.json is linked to '$localProjectName'. Re-run scripts\vercel\link_project.cmd after confirming which Vercel project owns yian.cdao.online."
+  }
+  return $localProjectName
+}
+
 function Invoke-VercelEnvWrite {
   param(
     [string]$Action,
@@ -104,6 +133,7 @@ $resolvedProjectDir = (Resolve-Path -LiteralPath $ProjectDir).Path
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 
 $projectName = [System.Environment]::GetEnvironmentVariable("VERCEL_PROJECT_NAME", "Process")
+$localVercelProjectName = Assert-VercelProjectLink -RootDir $resolvedProjectDir -ExpectedProjectName $projectName
 $scopeValue = [System.Environment]::GetEnvironmentVariable("VERCEL_SCOPE", "Process")
 $tokenValue = if ([string]::IsNullOrWhiteSpace($VercelToken)) {
   [System.Environment]::GetEnvironmentVariable("VERCEL_TOKEN", "Process")
@@ -126,6 +156,7 @@ foreach ($environment in $Environments) {
 $planPath = Join-Path $OutputDir ("vercel-env-sync-plan-{0}.json" -f (Get-Date -Format "yyyyMMdd-HHmmss"))
 [PSCustomObject]@{
   projectName = $projectName
+  localVercelProjectName = $localVercelProjectName
   projectDir = $resolvedProjectDir
   envFilePath = (Resolve-Path -LiteralPath $EnvFilePath).Path
   environments = $Environments

@@ -163,6 +163,10 @@ function publicWindowsDownloadUrl(gatewayBaseUrl) {
   return new URL('/app/download/windows', gatewayBaseUrl).toString();
 }
 
+function publicLinuxDownloadUrl(gatewayBaseUrl) {
+  return new URL('/app/download/linux', gatewayBaseUrl).toString();
+}
+
 function publicBindingUrl(gatewayBaseUrl) {
   return new URL('/app/bind', gatewayBaseUrl).toString();
 }
@@ -179,9 +183,19 @@ function bundledWindowsDownloadUrl(gatewayBaseUrl) {
   return new URL('/downloads/yian-windows-host-0.1.0-1-prototype.zip', gatewayBaseUrl).toString();
 }
 
+function bundledLinuxDownloadUrl(gatewayBaseUrl) {
+  return new URL(`/downloads/${DEFAULT_LINUX_PACKAGE_FILE_NAME}`, gatewayBaseUrl).toString();
+}
+
 const BUNDLED_APK_FILE_NAME = 'storylock-android-host-0.1.0-1-debug.apk';
 const DEFAULT_WINDOWS_PACKAGE_FILE_NAME = 'yian-windows-host-0.1.0-1-prototype.zip';
-const DEFAULT_WINDOWS_PACKAGE_METADATA_FILE_NAME = 'yian-windows-host-0.1.0-1-prototype.json';
+const DEFAULT_WINDOWS_PACKAGE_METADATA_FILE_NAME = 'yian-windows-host-0.1.0-1-prototype-zip.json';
+const DEFAULT_LINUX_PACKAGE_FILE_NAME = 'yian-linux-host-0.1.0-1-prototype.deb';
+const DEFAULT_LINUX_PACKAGE_METADATA_FILE_NAME = 'yian-linux-host-0.1.0-1-prototype-deb.json';
+const FALLBACK_LINUX_PACKAGE_FILE_NAMES = [
+  'yian-linux-host-0.1.0-1-prototype.tar.gz',
+  'yian-linux-host-0.1.0-1-prototype.zip',
+];
 
 function firstExistingPath(paths) {
   return paths.find((candidate) => existsSync(candidate)) ?? null;
@@ -240,8 +254,48 @@ function resolveWindowsPackageFilePath(env = process.env, appDistribution = reso
   );
 }
 
+function resolveLinuxPackageFilePath(env = process.env) {
+  const configured = optionalString(env.STORYLOCK_LINUX_PACKAGE_PATH);
+  if (configured) {
+    const absolute = resolve(configured);
+    return existsSync(absolute) ? absolute : null;
+  }
+  return firstExistingPath([
+    resolve(process.cwd(), 'release', 'app', 'linux', DEFAULT_LINUX_PACKAGE_FILE_NAME),
+    resolve(process.cwd(), 'release', 'web', 'public', 'downloads', DEFAULT_LINUX_PACKAGE_FILE_NAME),
+    ...FALLBACK_LINUX_PACKAGE_FILE_NAMES.flatMap((fileName) => [
+      resolve(process.cwd(), 'release', 'app', 'linux', fileName),
+      resolve(process.cwd(), 'release', 'web', 'public', 'downloads', fileName),
+    ]),
+  ]) ?? findNewestFile(
+    resolve(process.cwd(), 'release', 'app', 'linux'),
+    (fileName) => /^yian-linux-host-.+\.deb$/iu.test(fileName),
+  ) ?? findNewestFile(
+    resolve(process.cwd(), 'release', 'web', 'public', 'downloads'),
+    (fileName) => /^yian-linux-host-.+\.deb$/iu.test(fileName),
+  ) ?? findNewestFile(
+    resolve(process.cwd(), 'release', 'app', 'linux'),
+    (fileName) => /^yian-linux-host-.+(\.tar\.gz|\.(zip|deb|rpm|appimage))$/iu.test(fileName),
+  ) ?? findNewestFile(
+    resolve(process.cwd(), 'release', 'web', 'public', 'downloads'),
+    (fileName) => /^yian-linux-host-.+(\.tar\.gz|\.(zip|deb|rpm|appimage))$/iu.test(fileName),
+  );
+}
+
 async function readBundledWindowsPackageMetadata() {
   const metadataPath = resolve(process.cwd(), 'release', 'web', 'public', 'downloads', DEFAULT_WINDOWS_PACKAGE_METADATA_FILE_NAME);
+  if (!existsSync(metadataPath)) {
+    return null;
+  }
+  try {
+    return JSON.parse(await readFile(metadataPath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+async function readBundledLinuxPackageMetadata() {
+  const metadataPath = resolve(process.cwd(), 'release', 'web', 'public', 'downloads', DEFAULT_LINUX_PACKAGE_METADATA_FILE_NAME);
   if (!existsSync(metadataPath)) {
     return null;
   }
@@ -290,7 +344,7 @@ async function serveBinaryFile(res, absolutePath, {
   });
 }
 
-function inferPackageKind(fileName, configuredKind = null) {
+function inferAndroidPackageKind(fileName, configuredKind = null) {
   if (configuredKind) {
     return configuredKind;
   }
@@ -302,6 +356,35 @@ function inferPackageKind(fileName, configuredKind = null) {
     return 'debug';
   }
   return 'apk';
+}
+
+function inferHostPackageKind(fileName, configuredKind = null) {
+  if (configuredKind) {
+    return configuredKind;
+  }
+  const normalized = String(fileName ?? '').toLowerCase();
+  if (normalized.endsWith('.tar.gz')) {
+    return 'tar.gz';
+  }
+  if (normalized.endsWith('.zip')) {
+    return 'zip';
+  }
+  if (normalized.endsWith('.msi')) {
+    return 'msi';
+  }
+  if (normalized.endsWith('.exe')) {
+    return 'exe';
+  }
+  if (normalized.endsWith('.deb')) {
+    return 'deb';
+  }
+  if (normalized.endsWith('.rpm')) {
+    return 'rpm';
+  }
+  if (normalized.endsWith('.appimage')) {
+    return 'appimage';
+  }
+  return 'package';
 }
 
 function inferReleaseChannel(packageKind, configuredChannel = null) {
@@ -326,19 +409,27 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
   const appDistribution = resolveAppDistributionConfig(env);
   const apkFilePath = resolveApkFilePath(env, appDistribution);
   const windowsPackageFilePath = resolveWindowsPackageFilePath(env, appDistribution);
+  const linuxPackageFilePath = resolveLinuxPackageFilePath(env);
   const artifactName = apkFilePath ? basename(apkFilePath) : BUNDLED_APK_FILE_NAME;
   const windowsArtifactName = windowsPackageFilePath ? basename(windowsPackageFilePath) : DEFAULT_WINDOWS_PACKAGE_FILE_NAME;
-  const packageKind = inferPackageKind(artifactName, optionalString(appDistribution.androidPackageKind));
-  const windowsPackageKind = optionalString(appDistribution.windowsPackageKind) ?? inferPackageKind(windowsArtifactName, null);
+  const linuxArtifactName = linuxPackageFilePath ? basename(linuxPackageFilePath) : DEFAULT_LINUX_PACKAGE_FILE_NAME;
+  const packageKind = inferAndroidPackageKind(artifactName, optionalString(appDistribution.androidPackageKind));
+  const windowsPackageKind = inferHostPackageKind(windowsArtifactName, optionalString(appDistribution.windowsPackageKind));
+  const linuxPackageKind = inferHostPackageKind(linuxArtifactName, optionalString(env.STORYLOCK_LINUX_PACKAGE_KIND));
   const artifactInfo = apkFilePath
     ? await stat(apkFilePath)
     : null;
   const windowsArtifactInfo = windowsPackageFilePath
     ? await stat(windowsPackageFilePath)
     : null;
+  const linuxArtifactInfo = linuxPackageFilePath
+    ? await stat(linuxPackageFilePath)
+    : null;
   const bundledWindowsMetadata = await readBundledWindowsPackageMetadata();
+  const bundledLinuxMetadata = await readBundledLinuxPackageMetadata();
   const apkChecksum = apkFilePath ? await checksumForFile(apkFilePath) : null;
   const windowsPackageChecksum = windowsPackageFilePath ? await checksumForFile(windowsPackageFilePath) : null;
+  const linuxPackageChecksum = linuxPackageFilePath ? await checksumForFile(linuxPackageFilePath) : null;
 
   return {
     ...appDistribution,
@@ -405,6 +496,29 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
             : 'bundled_static_package',
         status: windowsPackageFilePath || appDistribution.windowsAppDownloadUrl || windowsArtifactName ? 'configured' : 'not_configured',
       },
+      linux: {
+        platform: 'linux',
+        label: 'Linux',
+        downloadUrl: publicLinuxDownloadUrl(gatewayBaseUrl),
+        available: Boolean(linuxPackageFilePath || linuxArtifactName),
+        fileName: linuxArtifactName,
+        fileSizeBytes: linuxArtifactInfo?.size
+          ?? optionalPositiveInteger(bundledLinuxMetadata?.fileSizeBytes),
+        versionName: optionalString(env.STORYLOCK_LINUX_PACKAGE_VERSION)
+          ?? optionalString(bundledLinuxMetadata?.versionName),
+        versionCode: optionalString(env.STORYLOCK_LINUX_PACKAGE_VERSION_CODE)
+          ?? optionalString(bundledLinuxMetadata?.versionCode),
+        checksum: optionalString(env.STORYLOCK_LINUX_PACKAGE_CHECKSUM)
+          ?? linuxPackageChecksum
+          ?? optionalString(bundledLinuxMetadata?.checksum),
+        packageKind: linuxPackageKind ?? optionalString(bundledLinuxMetadata?.packageKind),
+        releaseChannel: optionalString(env.STORYLOCK_LINUX_RELEASE_CHANNEL)
+          ?? optionalString(bundledLinuxMetadata?.releaseChannel)
+          ?? 'prototype',
+        implementation: 'node',
+        downloadStrategy: linuxPackageFilePath ? 'local_package_file' : 'bundled_static_package',
+        status: linuxPackageFilePath || linuxArtifactName ? 'configured' : 'not_configured',
+      },
     },
   };
 }
@@ -412,17 +526,20 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
 function renderPlatformDownloadPage({ gatewayBaseUrl, appDistribution }) {
   const android = appDistribution.platforms.android;
   const windows = appDistribution.platforms.windows;
+  const linux = appDistribution.platforms.linux;
   return renderSimplePage({
     title: '选择易安本地版本',
-    lead: '请选择当前设备对应的本地宿主。Windows 电脑应下载 Windows 版本；Android 手机应下载 Android APK。',
+    lead: '请选择当前设备对应的本地宿主。Windows 电脑下载 Windows 版本；Android 手机下载 Android APK；Linux 当前提供原型包。',
     actions: [
       { href: windows.downloadUrl, label: '下载 Windows 版本' },
       { href: android.downloadUrl, label: '下载 Android 版本' },
+      { href: linux.downloadUrl, label: '下载 Linux 原型包' },
       { href: new URL('/app/bind', gatewayBaseUrl).toString(), label: '安装后打开绑定入口' },
     ],
     notes: [
       `Windows: ${windows.status === 'configured' ? windows.fileName : '暂未配置真实安装包'}`,
       `Android: ${android.fileName}`,
+      `Linux: ${linux.status === 'configured' ? linux.fileName : '暂未配置 Linux 包'}`,
       '安装前请核对版本、文件大小和 SHA-256 校验值。',
     ],
   });
@@ -600,6 +717,42 @@ async function handleGet(req, res, url, env) {
       status: 'error',
       message: 'windows app download source is not configured',
       platform: appDistribution.platforms.windows,
+    });
+    return;
+  }
+
+  if (url.pathname === '/app/download/linux' || url.pathname === '/download/linux-host') {
+    const linuxPackageFilePath = resolveLinuxPackageFilePath(env);
+    if (linuxPackageFilePath) {
+      await serveBinaryFile(res, linuxPackageFilePath, {
+        contentType: 'application/octet-stream',
+      });
+      return;
+    }
+    const currentDownloadUrl = new URL(url.pathname, gatewayBaseUrl).toString();
+    const targetDownloadUrl = bundledLinuxDownloadUrl(gatewayBaseUrl);
+    if (targetDownloadUrl !== currentDownloadUrl) {
+      redirect(res, 307, targetDownloadUrl);
+      return;
+    }
+    if (wantsHtml(req)) {
+      html(res, 404, renderSimplePage({
+        title: 'Linux 原型包暂未开放下载',
+        lead: '当前站点还没有配置 Linux 本地宿主原型包。Linux 包仍处于原型和发行版验收阶段。',
+        actions: [
+          { href: publicDownloadUrl(gatewayBaseUrl), label: '返回版本选择' },
+        ],
+        notes: [
+          'Linux 当前需要 Node.js >=22。',
+          '生产模式需要 secret-tool 和 Secret Service 可用。',
+        ],
+      }));
+      return;
+    }
+    json(res, 404, {
+      status: 'error',
+      message: 'linux app download source is not configured',
+      platform: appDistribution.platforms.linux,
     });
     return;
   }
@@ -896,6 +1049,7 @@ export async function handleStoryLockGatewayRequest(req, res, {
           preferredMode: connection.activeOption?.mode ?? connection.preferredMode,
         });
       },
+      eip712Env: env,
     });
     const response = await gateway.invoke(request);
     json(res, 200, {

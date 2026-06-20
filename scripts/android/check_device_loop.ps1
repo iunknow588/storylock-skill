@@ -2,6 +2,9 @@ param(
   [string]$ApkPath = "",
   [string]$GatewayBaseUrl = "",
   [string]$DeepLink = "",
+  [string]$IdentityId = "android-demo-001",
+  [string]$PackageKind = "",
+  [string]$ReleaseChannel = "",
   [string]$ReportPath = (Join-Path ([System.IO.Path]::GetTempPath()) "android-device-loop-report.local.md")
 )
 
@@ -65,7 +68,7 @@ if ($DeepLink -and $adb) {
 
 if ($GatewayBaseUrl) {
   $base = $GatewayBaseUrl.TrimEnd("/")
-  foreach ($path in @("/", "/api/storylock-gateway", "/android-host/bind")) {
+  foreach ($path in @("/", "/api/storylock-gateway", "/app/download", "/app/download/android", "/android-host/bind")) {
     try {
       $response = Invoke-WebRequest -Uri "$base$path" -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop
       $rows += Add-Result "gateway $path" "ok" "$($response.StatusCode) $($response.Headers['Content-Type'])"
@@ -79,6 +82,26 @@ if ($GatewayBaseUrl) {
   $rows += Add-Result "gateway" "skipped" "Pass -GatewayBaseUrl to verify Yian endpoints"
 }
 
+if ($GatewayBaseUrl -and $IdentityId) {
+  $bindUrl = "{0}/app/bind?identityId={1}&preferredMode=relay_url" -f $GatewayBaseUrl.TrimEnd("/"), $IdentityId
+  try {
+    $bindingResponse = Invoke-WebRequest -Uri $bindUrl -UseBasicParsing -ErrorAction Stop
+    $rows += Add-Result "bind request" "ok" "$($bindingResponse.StatusCode) identityId=$IdentityId"
+  } catch {
+    $response = $_.Exception.Response
+    $detail = if ($response) { "$([int]$response.StatusCode) $($response.Headers['Content-Type'])" } else { $_.Exception.Message }
+    $rows += Add-Result "bind request" "failed" $detail
+  }
+}
+
+if ($PackageKind) {
+  $rows += Add-Result "package kind" "info" $PackageKind
+}
+
+if ($ReleaseChannel) {
+  $rows += Add-Result "release channel" "info" $ReleaseChannel
+}
+
 $rows | Format-Table -AutoSize
 
 $reportDir = Split-Path -Parent $ReportPath
@@ -87,6 +110,9 @@ $lines = @(
   "# Android Device Loop Check Report",
   "",
   "GeneratedAt: $(Get-Date -Format s)",
+  "IdentityId: $IdentityId",
+  "PackageKind: $PackageKind",
+  "ReleaseChannel: $ReleaseChannel",
   "",
   "| Check | Status | Detail |",
   "| --- | --- | --- |"

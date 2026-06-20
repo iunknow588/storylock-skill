@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+set -e
+
+echo "Removing Yian Linux Host package files."

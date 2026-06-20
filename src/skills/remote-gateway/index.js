@@ -138,6 +138,9 @@ export class StoryLockRemoteGateway {
     signatureExecutor = null,
     passwordFillExecutor = null,
     eip712Domain = null,
+    eip712Env = process.env,
+    eip712DomainPrefix = 'STORYLOCK_EIP712_',
+    eip712DefaultEnvironment = 'demo',
   }) {
     this.transport = ensureFunction(transport, 'transport');
     this.signatureExecutor = signatureExecutor
@@ -146,7 +149,10 @@ export class StoryLockRemoteGateway {
     this.passwordFillExecutor = passwordFillExecutor
       ? ensureFunction(passwordFillExecutor, 'passwordFillExecutor')
       : null;
-    this.eip712Domain = eip712Domain;
+    this.eip712Domain = eip712Domain ?? createEip712DomainFromEnv(eip712Env, {
+      prefix: eip712DomainPrefix,
+      defaultEnvironment: eip712DefaultEnvironment,
+    });
   }
 
   async invoke(request) {

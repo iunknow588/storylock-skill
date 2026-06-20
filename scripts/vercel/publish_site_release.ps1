@@ -10,8 +10,12 @@ param(
   [string[]]$VercelEnvTargets = @("preview", "production"),
   [switch]$Build,
   [switch]$Preflight,
+  [switch]$SiteHttpSmoke,
   [switch]$Prod,
-  [switch]$Execute
+  [switch]$Execute,
+  [string]$VercelCustomDomain = "",
+  [switch]$BindCustomDomain,
+  [int]$DeployRetries = 2
 )
 
 $ErrorActionPreference = "Stop"
@@ -49,6 +53,196 @@ function Import-EnvFile {
   }
 }
 
+function Get-LocalVercelProjectName {
+  param([string]$RootDir)
+  $projectJsonPath = Join-Path $RootDir ".vercel\project.json"
+  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
+    return ""
+  }
+  try {
+    $project = Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
+    return [string]$project.projectName
+  } catch {
+    throw "Unable to parse local Vercel project link: $projectJsonPath"
+  }
+}
+
+function Assert-VercelProjectLink {
+  param(
+    [string]$RootDir,
+    [string]$ExpectedProjectName
+  )
+  $localProjectName = Get-LocalVercelProjectName -RootDir $RootDir
+  if ([string]::IsNullOrWhiteSpace($localProjectName)) {
+    throw "Local Vercel project link was not found. Run scripts\vercel\link_project.cmd from the skill/ directory before deploying."
+  }
+  if (-not [string]::IsNullOrWhiteSpace($ExpectedProjectName) -and $localProjectName -ne $ExpectedProjectName) {
+    throw "Local Vercel project link mismatch. VERCEL_PROJECT_NAME='$ExpectedProjectName' but .vercel/project.json is linked to '$localProjectName'. Re-run scripts\vercel\link_project.cmd after confirming which Vercel project owns yian.cdao.online."
+  }
+  return $localProjectName
+}
+
+function Test-VercelCliReady {
+  param(
+    [string]$Token,
+    [string]$Scope
+  )
+  if (-not (Get-Command vercel -ErrorAction SilentlyContinue)) {
+    throw "Vercel CLI not found. Install it first or run scripts\vercel\link_project.cmd."
+  }
+
+  $whoamiArgs = @("whoami")
+  if (-not [string]::IsNullOrWhiteSpace($Token)) {
+    $whoamiArgs += @("--token", $Token)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($Scope)) {
+    $whoamiArgs += @("--scope", $Scope)
+  }
+
+  Write-Output "Checking Vercel CLI authentication and network..."
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    $output = & vercel @whoamiArgs 2>&1
+    $exitCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+  if ($exitCode -eq 0) {
+    Write-Output ($output -join [Environment]::NewLine)
+    return
+  }
+
+  $message = ($output | Out-String).Trim()
+  if ($message -match "openid-configuration|Client network socket disconnected|TLS connection|FetchError") {
+    throw "Vercel CLI cannot reach the Vercel auth/OIDC endpoint. Configure VERCEL_TOKEN, check proxy/firewall/TLS interception, or retry from a network that can access https://vercel.com/.well-known/openid-configuration. Original error: $message"
+  }
+  if ([string]::IsNullOrWhiteSpace($Token) -and $message -match "not authenticated|login|token|Unauthorized|No existing credentials") {
+    throw "Vercel CLI is not authenticated and VERCEL_TOKEN is empty. Run 'vercel login' or set VERCEL_TOKEN in scripts\vercel\.env before deploying."
+  }
+  throw "Vercel CLI authentication check failed with exit code $exitCode. $message"
+}
+
+function Invoke-VercelDeployWithRetry {
+  param(
+    [string[]]$Arguments,
+    [int]$MaxAttempts
+  )
+  $attempts = [Math]::Max(1, $MaxAttempts)
+  $lastOutput = ""
+  for ($attempt = 1; $attempt -le $attempts; $attempt += 1) {
+    Write-Output ("Running: vercel {0} (attempt {1}/{2})" -f ($Arguments -join " "), $attempt, $attempts)
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+      $output = & vercel @Arguments 2>&1
+      $exitCode = $LASTEXITCODE
+    } finally {
+      $ErrorActionPreference = $previousErrorActionPreference
+    }
+    $lastOutput = ($output | Out-String).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($lastOutput)) {
+      Write-Output $lastOutput
+    }
+    if ($exitCode -eq 0) {
+      return $lastOutput
+    }
+    if ($attempt -lt $attempts) {
+      Start-Sleep -Seconds ([Math]::Min(10, 2 * $attempt))
+    }
+  }
+
+  if ($lastOutput -match "openid-configuration|Client network socket disconnected|TLS connection|FetchError") {
+    throw "Vercel deploy could not reach Vercel auth/OIDC over TLS after $attempts attempt(s). Set VERCEL_TOKEN, verify proxy/firewall/TLS settings, or deploy from a network that can reach Vercel. Original error: $lastOutput"
+  }
+  throw "Vercel deploy failed after $attempts attempt(s). Last output: $lastOutput"
+}
+
+function Get-VercelDeploymentUrl {
+  param([string]$DeployOutput)
+  if ([string]::IsNullOrWhiteSpace($DeployOutput)) {
+    return ""
+  }
+  $matches = [regex]::Matches($DeployOutput, "https://[^\s]+\.vercel\.app")
+  if ($matches.Count -eq 0) {
+    return ""
+  }
+  return $matches[$matches.Count - 1].Value.Trim()
+}
+
+function Test-VercelDomainAccess {
+  param(
+    [string]$Domain,
+    [string]$Token,
+    [string]$Scope
+  )
+  if ([string]::IsNullOrWhiteSpace($Domain)) {
+    return
+  }
+
+  $args = @("domains", "inspect", $Domain)
+  if (-not [string]::IsNullOrWhiteSpace($Token)) {
+    $args += @("--token", $Token)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($Scope)) {
+    $args += @("--scope", $Scope)
+  }
+
+  Write-Output "Checking Vercel domain access: $Domain"
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    $output = & vercel @args 2>&1
+    $exitCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+  $message = ($output | Out-String).Trim()
+  if (-not [string]::IsNullOrWhiteSpace($message)) {
+    Write-Output $message
+  }
+  if ($exitCode -ne 0) {
+    Write-Output "Vercel domain inspect did not succeed. If yian.cdao.online still returns deployment-level 404, confirm the domain is added to the same Vercel project/account as the production deployment."
+  }
+}
+
+function Set-VercelDeploymentAlias {
+  param(
+    [string]$DeploymentUrl,
+    [string]$Domain,
+    [string]$Token,
+    [string]$Scope
+  )
+  if ([string]::IsNullOrWhiteSpace($DeploymentUrl) -or [string]::IsNullOrWhiteSpace($Domain)) {
+    return
+  }
+
+  $args = @("alias", "set", $DeploymentUrl, $Domain)
+  if (-not [string]::IsNullOrWhiteSpace($Token)) {
+    $args += @("--token", $Token)
+  }
+  if (-not [string]::IsNullOrWhiteSpace($Scope)) {
+    $args += @("--scope", $Scope)
+  }
+
+  Write-Output "Binding custom domain to this deployment: $Domain -> $DeploymentUrl"
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    $output = & vercel @args 2>&1
+    $exitCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+  $message = ($output | Out-String).Trim()
+  if (-not [string]::IsNullOrWhiteSpace($message)) {
+    Write-Output $message
+  }
+  if ($exitCode -ne 0) {
+    throw "Vercel alias binding failed for $Domain. Confirm the domain belongs to this Vercel account/project and DNS is configured for Vercel."
+  }
+}
+
 Import-EnvFile -Path $exampleEnvPath
 Import-EnvFile -Path $EnvFile
 Import-EnvFile -Path $WindowsEnvFile
@@ -73,7 +267,13 @@ try {
     if (-not (Test-Path -LiteralPath $preflightScript)) {
       throw "Preflight script not found: $preflightScript"
     }
-    & $preflightScript
+    Write-Output "Running local Vercel preflight..."
+    & $preflightScript -EnvFile $EnvFile -SkipHttp
+  }
+
+  if ($SiteHttpSmoke) {
+    Write-Output "Running local site HTTP smoke test..."
+    npm run test:site-http
   }
 
   $publicDir = Join-Path $resolvedProjectDir "release\web\public"
@@ -104,8 +304,9 @@ try {
   if ([string]::IsNullOrWhiteSpace($projectName)) {
     throw "VERCEL_PROJECT_NAME is required for Vercel target."
   }
+  $localVercelProjectName = Assert-VercelProjectLink -RootDir $resolvedProjectDir -ExpectedProjectName $projectName
 
-  $vercelArgs = @("deploy")
+  $vercelArgs = @("deploy", "--yes")
   if ($Prod) {
     $vercelArgs += "--prod"
   }
@@ -121,17 +322,28 @@ try {
   if (-not [string]::IsNullOrWhiteSpace($scopeValue)) {
     $vercelArgs += @("--scope", $scopeValue)
   }
+  $customDomainValue = if ([string]::IsNullOrWhiteSpace($VercelCustomDomain)) {
+    [System.Environment]::GetEnvironmentVariable("VERCEL_CUSTOM_DOMAIN", "Process")
+  } else {
+    $VercelCustomDomain
+  }
+  $bindCustomDomainValue = $BindCustomDomain -or ([System.Environment]::GetEnvironmentVariable("VERCEL_BIND_CUSTOM_DOMAIN", "Process") -eq "true")
 
   $planPath = Join-Path $releaseOutputDir "vercel-release-plan.json"
   [PSCustomObject]@{
     target = "vercel"
     projectDir = $resolvedProjectDir
     projectName = $projectName
+    localVercelProjectName = $localVercelProjectName
     buildRequested = [bool]$Build
     preflightRequested = [bool]$Preflight
+    siteHttpSmokeRequested = [bool]$SiteHttpSmoke
     prod = [bool]$Prod
     execute = [bool]$Execute
+    deployRetries = $DeployRetries
     command = @("vercel") + $vercelArgs
+    customDomain = $customDomainValue
+    bindCustomDomain = [bool]$bindCustomDomainValue
     windowsEnvFile = $resolvedWindowsEnvFile
     syncWindowsEnvToVercel = [bool]$SyncWindowsEnvToVercel
     vercelEnvTargets = $VercelEnvTargets
@@ -159,12 +371,29 @@ try {
     return
   }
 
-  if (-not (Get-Command vercel -ErrorAction SilentlyContinue)) {
-    throw "Vercel CLI not found. Install it first or run scripts\\vercel\\link_project.cmd."
+  Test-VercelCliReady -Token $tokenValue -Scope $scopeValue
+  Test-VercelDomainAccess -Domain $customDomainValue -Token $tokenValue -Scope $scopeValue
+  $deployOutput = Invoke-VercelDeployWithRetry -Arguments $vercelArgs -MaxAttempts $DeployRetries
+  $deploymentUrl = Get-VercelDeploymentUrl -DeployOutput $deployOutput
+  if (-not [string]::IsNullOrWhiteSpace($deploymentUrl)) {
+    Write-Output "Deployment URL: $deploymentUrl"
+  } else {
+    Write-Output "Deployment URL could not be parsed from Vercel output; custom-domain alias binding will be skipped."
   }
-
-  Write-Output ("Running: vercel {0}" -f ($vercelArgs -join " "))
-  & vercel @vercelArgs
+  if ($Prod -and $bindCustomDomainValue) {
+    Set-VercelDeploymentAlias -DeploymentUrl $deploymentUrl -Domain $customDomainValue -Token $tokenValue -Scope $scopeValue
+  } elseif ($Prod -and -not [string]::IsNullOrWhiteSpace($customDomainValue)) {
+    Write-Output "Custom domain binding was not forced. If $customDomainValue returns 404 after a successful deploy, re-run with -BindCustomDomain after confirming domain ownership."
+  }
+  if ($Preflight) {
+    $postDeployBaseUrl = [System.Environment]::GetEnvironmentVariable("STORYLOCK_GATEWAY_PUBLIC_URL", "Process")
+    if (-not [string]::IsNullOrWhiteSpace($postDeployBaseUrl)) {
+      Write-Output "Running post-deploy Vercel preflight..."
+      & $preflightScript -EnvFile $EnvFile -BaseUrl $postDeployBaseUrl
+    } else {
+      Write-Output "Skipping post-deploy HTTP preflight because STORYLOCK_GATEWAY_PUBLIC_URL is empty."
+    }
+  }
 } finally {
   Pop-Location
 }

@@ -11,7 +11,7 @@ function recommendationFor({ platform, status, reason }) {
     return 'Install libsecret secret-tool and ensure a Secret Service provider is available in the user session.';
   }
   if (platform === 'darwin') {
-    return 'macOS Keychain is not supported in this phase; use an injected SecretStore adapter or keep this host out of production.';
+    return 'Ensure the macOS security CLI can access the user Keychain in the current session, then rerun this check.';
   }
   return `Provide a custom persistent SecretStore adapter before production use.${reason ? ` Last error: ${reason}` : ''}`;
 }

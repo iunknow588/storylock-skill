@@ -87,6 +87,34 @@ assert.equal(defaultProductionSign.payload.eip712.domain.chainId, 11155111);
 assert.equal(defaultProductionSign.payload.eip712.domain.verifyingContract, '0x0000000000000000000000000000000000000456');
 assert.equal(defaultProductionSign.payload.eip712.domain.environment, 'production');
 
+const envConfiguredGateway = new StoryLockRemoteGateway({
+  transport(request) {
+    return request;
+  },
+  eip712Env: {
+    STORYLOCK_EIP712_ENVIRONMENT: 'test',
+    STORYLOCK_EIP712_NAME: 'StoryLock Test',
+    STORYLOCK_EIP712_VERSION: '1.5.0-rc1',
+    STORYLOCK_EIP712_CHAIN_ID: '31337',
+    STORYLOCK_EIP712_VERIFYING_CONTRACT: '0x0000000000000000000000000000000000000abc',
+  },
+});
+
+const envConfiguredSign = await envConfiguredGateway.requestSignature({
+  requestId: 'req-sign-env-default',
+  nonce: 'nonce-sign-env-default',
+  expiry: Date.now() + 10_000,
+  identityId: 'id-1',
+  keyId: 'key-1',
+  algorithm: 'ed25519',
+  payload: 'hello',
+});
+
+assert.equal(envConfiguredSign.payload.eip712.domain.name, 'StoryLock Test');
+assert.equal(envConfiguredSign.payload.eip712.domain.environment, 'test');
+assert.equal(envConfiguredSign.payload.eip712.domain.chainId, 31337);
+assert.equal(envConfiguredSign.payload.eip712.domain.verifyingContract, '0x0000000000000000000000000000000000000abc');
+
 await assert.rejects(
   () => gateway.requestSignature({
     requestId: 'req-prod-placeholder',

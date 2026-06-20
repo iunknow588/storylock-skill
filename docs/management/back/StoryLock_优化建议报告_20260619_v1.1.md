@@ -89,7 +89,7 @@ if (environment === 'production') {
 
 #### 债务4: 九宫格题目来源仍为占位数据（中优先级）
 
-**问题**: `docs/design/cn/开发落地路线与当前进展.md` 明确指出"真实九宫格题目选择作为后续增强"，当前使用 `demo-story-config.json` 和 `question-set-master.sample.json`。
+**问题**: 历史路线文档曾明确指出“真实九宫格题目选择作为后续增强”，当前使用 `demo-story-config.json` 和 `question-set-master.sample.json`。
 
 **风险**: 演示时可能暴露"题目是硬编码的"这一事实，影响评审印象。
 
@@ -349,4 +349,3 @@ Pop-Location
 请确认是否需要我：
 1. 直接在仓库中把 `package.json` 的 `name` 字段批量替换为简化名称（我会先在新分支执行并运行自测）；或
 2. 仅完成文档路径的替换、编码修正与脚本更新，保留 `package.json` 的原有 `name` 字段以保证包标识兼容性。
-

@@ -13,12 +13,13 @@ class AttachedActivityConfirmation : LocalUserConfirmation {
   override suspend fun confirm(request: LocalConfirmationRequest): LocalConfirmationResult {
     val current = activity ?: return LocalConfirmationResult(
       approved = false,
+      failureType = "host_unavailable",
       reason = "no activity attached for local confirmation",
     )
-    if (!request.challengePrompt.isNullOrBlank() && !request.challengeAnswer.isNullOrBlank()) {
+    if (request.challengeItems.isNotEmpty()) {
       val challengeResult = ChallengePromptLocalUserConfirmation(current).confirm(
-        prompt = request.challengePrompt,
-        expectedAnswer = request.challengeAnswer,
+        title = request.title,
+        challengeItems = request.challengeItems,
       )
       if (!challengeResult.approved) {
         return challengeResult

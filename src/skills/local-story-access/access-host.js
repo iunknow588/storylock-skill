@@ -5,7 +5,6 @@ import { MemorySecretStore, createPlatformSecretStore } from '../../shared/secre
 import { loadSqliteSchema, migrateSqliteSchema } from '../../shared/sqlite.js';
 
 const DEFAULT_DB_PATH = ':memory:';
-const DEFAULT_SECRET_STORE = new MemorySecretStore({ developmentMode: true, suppressWarning: true });
 
 const REPLAY_DRIFT_MS = 30_000;
 const REPLAY_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -141,12 +140,27 @@ function normalizeQuestionSetVersion(value, fieldName = 'questionSetVersion') {
   return version;
 }
 
+function ensureSecretStoreAvailable(secretStore) {
+  if (!secretStore || secretStore.kind === 'memory' || typeof secretStore.checkAvailable !== 'function') {
+    return;
+  }
+  try {
+    secretStore.checkAvailable();
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Platform SecretStore is unavailable: ${reason}`);
+  }
+}
+
 class SqliteStore {
-  constructor(dbPath = DEFAULT_DB_PATH, secretStore = new MemorySecretStore({ developmentMode: true, suppressWarning: true }), {
+  constructor(dbPath = DEFAULT_DB_PATH, secretStore, {
     persistent = false,
     allowLegacyFallback = false,
     databaseFactory = (path) => new DatabaseSync(path),
   } = {}) {
+    if (!secretStore) {
+      throw new Error('SqliteStore requires an explicit secretStore instance');
+    }
     this.db = databaseFactory(dbPath);
     if (!this.db || typeof this.db.exec !== 'function' || typeof this.db.prepare !== 'function' || typeof this.db.close !== 'function') {
       throw new Error('databaseFactory must return a DatabaseSync-compatible object with exec, prepare, and close methods');
@@ -758,18 +772,29 @@ export function createAccessHost({
   dbPath = DEFAULT_DB_PATH,
   secretStore,
   usePlatformSecretStore = false,
+  developmentMode = false,
   allowLegacyFallback,
   databaseFactory,
+  cleanupIntervalMs = null,
+  cleanupBatchSize = DEFAULT_CLEANUP_BATCH_SIZE,
+  cleanupOnError = null,
+  cleanupSetIntervalFn,
+  cleanupClearIntervalFn,
 } = {}) {
   const persistent = dbPath !== ':memory:';
-  if (persistent && !secretStore && !usePlatformSecretStore) {
-    throw new Error('Persistent SQLite host requires secretStore or usePlatformSecretStore=true');
+  if (!secretStore && !usePlatformSecretStore && !developmentMode) {
+    throw new Error('createAccessHost requires secretStore, usePlatformSecretStore=true, or developmentMode=true for explicit MemorySecretStore fallback.');
   }
-  const resolvedSecretStore = secretStore ?? (usePlatformSecretStore ? createPlatformSecretStore() : DEFAULT_SECRET_STORE);
+  const resolvedSecretStore = secretStore ?? (
+    usePlatformSecretStore
+      ? createPlatformSecretStore()
+      : new MemorySecretStore({ developmentMode: true })
+  );
+  ensureSecretStoreAvailable(resolvedSecretStore);
   if (persistent && resolvedSecretStore?.kind === 'memory' && !resolvedSecretStore.developmentMode) {
     throw new Error('Persistent SQLite host must not use MemorySecretStore unless developmentMode=true. Use a platform SecretStore in production.');
   }
-  const resolvedAllowLegacyFallback = allowLegacyFallback ?? !persistent;
+  const resolvedAllowLegacyFallback = allowLegacyFallback ?? (developmentMode || !persistent);
   const store = new SqliteStore(dbPath, resolvedSecretStore, {
     persistent,
     allowLegacyFallback: resolvedAllowLegacyFallback,
@@ -777,6 +802,15 @@ export function createAccessHost({
   });
   store.ensureSeeded();
   store.cleanupExpired();
+  if (cleanupIntervalMs !== null && cleanupIntervalMs !== undefined) {
+    store.cleanupController = startAccessHostCleanup(store, {
+      intervalMs: cleanupIntervalMs,
+      batchSize: cleanupBatchSize,
+      onError: cleanupOnError,
+      setIntervalFn: cleanupSetIntervalFn,
+      clearIntervalFn: cleanupClearIntervalFn,
+    });
+  }
   return store;
 }
 

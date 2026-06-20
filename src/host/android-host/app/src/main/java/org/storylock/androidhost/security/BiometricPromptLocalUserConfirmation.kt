@@ -23,6 +23,7 @@ class BiometricPromptLocalUserConfirmation(
     if (capability != BiometricManager.BIOMETRIC_SUCCESS) {
       return LocalConfirmationResult(
         approved = false,
+        failureType = "biometric_unavailable",
         reason = "biometric capability unavailable: $capability",
       )
     }
@@ -41,6 +42,11 @@ class BiometricPromptLocalUserConfirmation(
             continuation.resume(
               LocalConfirmationResult(
                 approved = false,
+                failureType = if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON || errorCode == BiometricPrompt.ERROR_USER_CANCELED || errorCode == BiometricPrompt.ERROR_CANCELED) {
+                  "biometric_cancelled"
+                } else {
+                  "biometric_failed"
+                },
                 reason = "biometric error $errorCode: $errString",
               ),
             )

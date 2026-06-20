@@ -40,8 +40,8 @@ This package defines the second layer of StoryLock: object strength policy, grid
 ## Infrastructure
 
 - `../shared/crypto.js`: AES-256-GCM, HKDF-SHA256, HMAC-SHA256 helpers.
-- `../shared/secret-store.js`: `SecretStore` compatible memory adapter, Windows Credential Manager adapter, Linux Secret Service adapter, and `masterSalt` bootstrap.
+- `../shared/secret-store.js`: `SecretStore` compatible memory adapter, Windows Credential Manager adapter, Linux Secret Service adapter, macOS Keychain adapter, and `masterSalt` bootstrap.
 - `../shared/sqlite-schema.sql`: local vault schema for verification, session, replay, answer digest, protected object, and audit tables.
 - `access-host.js`: SQLite-backed access host used by the local authorization skills.
 
-macOS Keychain is intentionally out of scope for this phase.
+macOS Keychain is available through the shared adapter, but still needs platform-level acceptance and delivery material outside this package.

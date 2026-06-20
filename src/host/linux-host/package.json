@@ -1,0 +1,12 @@
+{
+  "name": "yian-linux-host",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Linux local host prototype for Yian / StoryLock",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "selftest": "node ../../../scripts/linux/check_linux_host_loop.mjs"
+  }
+}

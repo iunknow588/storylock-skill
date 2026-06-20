@@ -36,7 +36,15 @@ async function executeAgainstAndroid(executeUrl, sharedSecret, request) {
     },
     body: JSON.stringify(request),
   });
-  return response.json();
+  return {
+    statusCode: response.status,
+    body: await response.json(),
+  };
+}
+
+async function executeAgainstAndroidBody(executeUrl, sharedSecret, request) {
+  const response = await executeAgainstAndroid(executeUrl, sharedSecret, request);
+  return response.body;
 }
 
 const sharedSecret = 'storylock-local-android-selftest';
@@ -78,6 +86,13 @@ try {
   }).then((response) => response.json());
   assert.equal(health.status, 'ok');
   assert.equal(health.layer1.questionSetReady, true);
+  const unauthorizedHealth = await fetch(androidInfo.healthUrl, {
+    headers: {
+      'x-storylock-shared-secret': 'wrong-secret',
+    },
+  });
+  assert.equal(unauthorizedHealth.status, 401);
+  assert.equal((await unauthorizedHealth.json()).message, 'unauthorized');
 
   delete process.env.STORYLOCK_ANDROID_HOST_URL;
   process.env.STORYLOCK_ANDROID_SHARED_SECRET = sharedSecret;
@@ -113,7 +128,7 @@ try {
         }).then((response) => response.json());
 
         if (poll.status === 'ok') {
-          const relayResponse = await executeAgainstAndroid(
+          const relayResponse = await executeAgainstAndroidBody(
             androidInfo.executeUrl,
             sharedSecret,
             poll.request,
@@ -137,6 +152,19 @@ try {
   })();
 
   try {
+    const idlePoll = await fetch(`${webApiBaseUrl}/local-host/relay/poll`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        deviceId: 'unregistered-device',
+        appInstanceId: 'unregistered-app',
+      }),
+    }).then((response) => response.json());
+    assert.equal(idlePoll.status, 'idle');
+
     const platformDownloadResponse = await fetch(`${webApiBaseUrl}/app/download`);
     assert.equal(platformDownloadResponse.status, 200);
     assert.match(platformDownloadResponse.headers.get('content-type') ?? '', /application\/json/);
@@ -162,6 +190,21 @@ try {
     assert.equal(bindingInfo.status, 'ok');
     assert.equal(bindingInfo.binding.identityId, 'android-demo-001');
     assert.match(bindingInfo.binding.deepLink, /storylock-host:\/\/bind/);
+
+    const invalidRegistration = await fetch(`${webApiBaseUrl}/local-host/register`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify({
+        bindingToken: 'invalid-token',
+        identityId: 'android-demo-001',
+        deviceId: 'bad-device',
+        appInstanceId: 'bad-app',
+      }),
+    });
+    assert.equal(invalidRegistration.status, 400);
+    assert.equal((await invalidRegistration.json()).message, 'binding token is invalid or expired');
 
     const registration = await fetch(`${webApiBaseUrl}/local-host/register`, {
       method: 'POST',
@@ -250,6 +293,23 @@ try {
     assert.equal(status.appDistribution.platforms.android.downloadUrl, `${webApiBaseUrl}/app/download/android`);
     assert.equal(status.appDistribution.platforms.windows.downloadUrl, `${webApiBaseUrl}/app/download/windows`);
     assert.equal(status.appDistribution.platforms.windows.implementation, 'rust');
+
+    const directUnsupported = await executeAgainstAndroid(androidInfo.executeUrl, sharedSecret, {
+      requestId: 'req-unsupported-direct',
+      capability: 'requestUnsupported',
+      payload: {},
+    });
+    assert.equal(directUnsupported.statusCode, 400);
+    assert.equal(directUnsupported.body.status, 'error');
+    assert.equal(directUnsupported.body.error.code, 'SLG-001');
+
+    const directUnauthorized = await executeAgainstAndroid(androidInfo.executeUrl, 'wrong-secret', {
+      requestId: 'req-direct-unauthorized',
+      capability: 'requestPasswordFill',
+      payload: {},
+    });
+    assert.equal(directUnauthorized.statusCode, 401);
+    assert.equal(directUnauthorized.body.message, 'unauthorized');
 
     const clientGateway = new StoryLockRemoteGateway({
       transport: createHttpRemoteTransport({

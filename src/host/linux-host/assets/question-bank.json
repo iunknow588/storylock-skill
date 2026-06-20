@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "linux-local-question-bank-v1",
+  "questionSetVersion": "linux-local-v1",
+  "normalizationVersion": "nfkc-lower-v1",
+  "identityId": "linux-demo-001",
+  "questions": [
+    { "questionId": "linux-q-01", "promptRef": "linux-prompt-01", "versionTag": "v1", "promptText": "Recall the first Linux local checkpoint word.", "answer": "dawn", "status": "active" },
+    { "questionId": "linux-q-02", "promptRef": "linux-prompt-02", "versionTag": "v1", "promptText": "Recall the second Linux local checkpoint word.", "answer": "river", "status": "active" },
+    { "questionId": "linux-q-03", "promptRef": "linux-prompt-03", "versionTag": "v1", "promptText": "Recall the third Linux local checkpoint word.", "answer": "lantern", "status": "active" },
+    { "questionId": "linux-q-04", "promptRef": "linux-prompt-04", "versionTag": "v1", "promptText": "Recall the fourth Linux local checkpoint word.", "answer": "pine", "status": "active" },
+    { "questionId": "linux-q-05", "promptRef": "linux-prompt-05", "versionTag": "v1", "promptText": "Recall the fifth Linux local checkpoint word.", "answer": "harbor", "status": "active" },
+    { "questionId": "linux-q-06", "promptRef": "linux-prompt-06", "versionTag": "v1", "promptText": "Recall the sixth Linux local checkpoint word.", "answer": "mirror", "status": "active" },
+    { "questionId": "linux-q-07", "promptRef": "linux-prompt-07", "versionTag": "v1", "promptText": "Recall the seventh Linux local checkpoint word.", "answer": "anchor", "status": "active" },
+    { "questionId": "linux-q-08", "promptRef": "linux-prompt-08", "versionTag": "v1", "promptText": "Recall the eighth Linux local checkpoint word.", "answer": "maple", "status": "active" },
+    { "questionId": "linux-q-09", "promptRef": "linux-prompt-09", "versionTag": "v1", "promptText": "Recall the ninth Linux local checkpoint word.", "answer": "ember", "status": "active" }
+  ]
+}

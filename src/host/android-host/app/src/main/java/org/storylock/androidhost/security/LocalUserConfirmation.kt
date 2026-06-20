@@ -5,13 +5,23 @@ data class LocalConfirmationRequest(
   val subtitle: String,
   val reason: String,
   val strongConfirmationRequired: Boolean,
-  val challengePrompt: String? = null,
-  val challengeAnswer: String? = null,
+  val challengeItems: List<LocalChallengeItem> = emptyList(),
+  val requiredChallengeAnswers: Int = 0,
+)
+
+data class LocalChallengeItem(
+  val cellId: String,
+  val questionId: String,
+  val promptText: String,
+  val expectedAnswer: String,
+  val position: Int,
 )
 
 data class LocalConfirmationResult(
   val approved: Boolean,
+  val failureType: String? = null,
   val reason: String? = null,
+  val challengeAnswers: Map<String, String> = emptyMap(),
 )
 
 interface LocalUserConfirmation {

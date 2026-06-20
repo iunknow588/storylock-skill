@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+set -eu
+
+APP_DIR="${YIAN_LINUX_HOST_APP_DIR:-/opt/yian-linux-host}"
+DATA_DIR="${STORYLOCK_LINUX_DATA_DIR:-$HOME/.local/share/yian/linux-host}"
+
+export STORYLOCK_LINUX_USE_PLATFORM_SECRET_STORE="${STORYLOCK_LINUX_USE_PLATFORM_SECRET_STORE:-1}"
+export STORYLOCK_LINUX_DEVELOPMENT_MODE="${STORYLOCK_LINUX_DEVELOPMENT_MODE:-0}"
+export STORYLOCK_LINUX_DATA_DIR="$DATA_DIR"
+
+exec node "$APP_DIR/src/host/linux-host/server.mjs" "$@"

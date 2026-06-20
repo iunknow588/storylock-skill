@@ -22,6 +22,7 @@ const I18N = {
     "hero.download": "下载易安 App",
     "hero.downloadWindows": "下载 Windows 版本",
     "hero.downloadAndroid": "下载 Android 版本",
+    "hero.downloadLinux": "下载 Linux 原型包",
     "hero.bind": "打开绑定入口",
     "hero.status": "查看请求状态",
     "hero.stats.roleLabel": "第一步",
@@ -65,6 +66,7 @@ const I18N = {
     "apk.platforms.title": "选择本地版本",
     "apk.platforms.windows": "Windows 本地电脑版本",
     "apk.platforms.android": "Android 手机版本",
+    "apk.platforms.linux": "Linux 原型版本",
     "apk.platforms.all": "查看全部版本",
     "apk.install.title": "安装流程",
     "apk.install.step1": "根据当前设备选择 Windows 或 Android 安装包。",
@@ -154,6 +156,7 @@ const I18N = {
     "hero.download": "Download Yian App",
     "hero.downloadWindows": "Download for Windows",
     "hero.downloadAndroid": "Download for Android",
+    "hero.downloadLinux": "Download Linux Prototype",
     "hero.bind": "Open Binding Entry",
     "hero.status": "View Request Status",
     "hero.stats.roleLabel": "Step 1",
@@ -197,6 +200,7 @@ const I18N = {
     "apk.platforms.title": "Choose Local Version",
     "apk.platforms.windows": "Windows Desktop Version",
     "apk.platforms.android": "Android Phone Version",
+    "apk.platforms.linux": "Linux Prototype",
     "apk.platforms.all": "View All Versions",
     "apk.install.title": "Install Flow",
     "apk.install.step1": "Choose the Windows or Android package for this device.",
@@ -275,8 +279,6 @@ const el = {
   activeHostCount: document.querySelector("[data-field='active-host-count']"),
   localeButtons: Array.from(document.querySelectorAll("[data-locale]")),
   metaDescription: document.querySelector("meta[name='description']"),
-  menu: document.querySelector("#site-menu"),
-  menuButton: document.querySelector("[data-action='menu-toggle']"),
   pageSections: Array.from(document.querySelectorAll("[data-page-section]")),
   pageLinks: Array.from(document.querySelectorAll("[data-page-link]")),
   pageTitle: document.querySelector("[data-region='page-title']"),
@@ -328,23 +330,6 @@ function pageIdFromHash() {
 function pageIndexById(pageId) {
   const index = el.pageSections.findIndex((section) => section.id === pageId);
   return index >= 0 ? index : 0;
-}
-
-function closeMenu() {
-  if (!el.menu || !el.menuButton) {
-    return;
-  }
-  el.menu.hidden = true;
-  el.menuButton.setAttribute("aria-expanded", "false");
-}
-
-function toggleMenu() {
-  if (!el.menu || !el.menuButton) {
-    return;
-  }
-  const nextOpen = el.menu.hidden;
-  el.menu.hidden = !nextOpen;
-  el.menuButton.setAttribute("aria-expanded", String(nextOpen));
 }
 
 function updatePagerTitle() {
@@ -499,16 +484,10 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
-  if (target.closest("[data-action='menu-toggle']")) {
-    toggleMenu();
-    return;
-  }
-
   const pageLink = target.closest("[data-page-link]");
   if (pageLink instanceof HTMLElement) {
     event.preventDefault();
     setActivePage(pageLink.dataset.pageLink ?? "home");
-    closeMenu();
     return;
   }
 
@@ -543,10 +522,6 @@ window.addEventListener("hashchange", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeMenu();
-    return;
-  }
   if (event.key === "ArrowLeft") {
     movePage(-1);
   }

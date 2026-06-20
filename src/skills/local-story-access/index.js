@@ -170,8 +170,29 @@ function determineAuthorizationBudgets(allowedAction) {
 }
 
 export class ObjectStrengthPolicySkill {
-  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
-    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
+  constructor({
+    host,
+    dbPath,
+    secretStore,
+    usePlatformSecretStore = false,
+    developmentMode = false,
+    allowLegacyFallback,
+    databaseFactory,
+    cleanupIntervalMs,
+    cleanupBatchSize,
+    cleanupOnError,
+  } = {}) {
+    this.host = host ?? createAccessHost({
+      dbPath,
+      secretStore,
+      usePlatformSecretStore,
+      developmentMode,
+      allowLegacyFallback,
+      databaseFactory,
+      cleanupIntervalMs,
+      cleanupBatchSize,
+      cleanupOnError,
+    });
   }
 
   skillId() {
@@ -217,8 +238,29 @@ export class ObjectStrengthPolicySkill {
 }
 
 export class GridChallengeSkill {
-  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
-    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
+  constructor({
+    host,
+    dbPath,
+    secretStore,
+    usePlatformSecretStore = false,
+    developmentMode = false,
+    allowLegacyFallback,
+    databaseFactory,
+    cleanupIntervalMs,
+    cleanupBatchSize,
+    cleanupOnError,
+  } = {}) {
+    this.host = host ?? createAccessHost({
+      dbPath,
+      secretStore,
+      usePlatformSecretStore,
+      developmentMode,
+      allowLegacyFallback,
+      databaseFactory,
+      cleanupIntervalMs,
+      cleanupBatchSize,
+      cleanupOnError,
+    });
   }
 
   skillId() {
@@ -288,8 +330,29 @@ export class GridChallengeSkill {
 }
 
 export class LocalAuthorizationSkill {
-  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
-    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
+  constructor({
+    host,
+    dbPath,
+    secretStore,
+    usePlatformSecretStore = false,
+    developmentMode = false,
+    allowLegacyFallback,
+    databaseFactory,
+    cleanupIntervalMs,
+    cleanupBatchSize,
+    cleanupOnError,
+  } = {}) {
+    this.host = host ?? createAccessHost({
+      dbPath,
+      secretStore,
+      usePlatformSecretStore,
+      developmentMode,
+      allowLegacyFallback,
+      databaseFactory,
+      cleanupIntervalMs,
+      cleanupBatchSize,
+      cleanupOnError,
+    });
   }
 
   skillId() {
@@ -351,8 +414,29 @@ export class LocalAuthorizationSkill {
 }
 
 export class LocalRevocationSkill {
-  constructor({ host, dbPath, secretStore, usePlatformSecretStore = false, allowLegacyFallback, databaseFactory } = {}) {
-    this.host = host ?? createAccessHost({ dbPath, secretStore, usePlatformSecretStore, allowLegacyFallback, databaseFactory });
+  constructor({
+    host,
+    dbPath,
+    secretStore,
+    usePlatformSecretStore = false,
+    developmentMode = false,
+    allowLegacyFallback,
+    databaseFactory,
+    cleanupIntervalMs,
+    cleanupBatchSize,
+    cleanupOnError,
+  } = {}) {
+    this.host = host ?? createAccessHost({
+      dbPath,
+      secretStore,
+      usePlatformSecretStore,
+      developmentMode,
+      allowLegacyFallback,
+      databaseFactory,
+      cleanupIntervalMs,
+      cleanupBatchSize,
+      cleanupOnError,
+    });
   }
 
   skillId() {

@@ -1,49 +1,34 @@
 # StoryLock Skill Demo
 
-## 1. Package-local demo
-
-Current preferred commands:
+## 1. Compatibility Package Demo
 
 ```powershell
-cd E:\2026OPC大赛\skill\src\storylock-skill-engine
+cd E:\2026OPC大赛\skill\src\engine
 npm run demo
 npm run selftest
 ```
 
-These validate the migrated package directly.
+These validate the migrated compatibility package directly.
 
-What they show:
-
-1. story draft output
-2. password-fill output
-3. challenge-signing output
-4. the package can run as a self-contained JS skill-layer bundle
-
-## 2. Rust / WASM packaging path
-
-Current commands:
+## 2. Rust / WASM Packaging Path
 
 ```powershell
-cd E:\2026OPC大赛\skill\src\storylock-skill-engine
+cd E:\2026OPC大赛\skill\src\engine
 npm run build:wasm
 npm run selftest:wasm
 ```
 
-What this proves:
+This proves:
 
-1. the migrated package can trigger the Rust/WASM build path
-2. the generated `dist/wasm` artifacts exist
-3. exported bindings are loadable
+1. the compatibility package can trigger the Rust/WASM build path
+2. `dist/wasm` artifacts are produced
+3. exported bindings can be loaded
 
-What this does not yet prove:
+## 3. Mainline Runtime Demo
 
-1. that all JS flows run through a local WASM host layer
-2. that the package is already a fully independent Rust distribution
+```powershell
+cd E:\2026OPC大赛\skill\src\skills\remote-gateway
+npm run selftest:e2e
+```
 
-## 3. Reporting guidance
-
-When summarizing results:
-
-1. say the migrated package already has a runnable JS skill-layer
-2. say Rust/WASM build and dist validation are wired in
-3. do not say the entire runtime has been fully re-hosted
+Use the `src/skills/*` runtime directories for current end-to-end demos. Use `src/engine` only for compatibility and migrated-package validation.

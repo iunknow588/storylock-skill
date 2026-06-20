@@ -409,7 +409,7 @@ fn load_or_init_question_bank(data_dir: &Path) -> Result<QuestionBankFile> {
 fn read_and_validate_question_bank(path: &Path) -> Result<QuestionBankFile> {
     let content = fs::read_to_string(path)
         .with_context(|| format!("failed to read question bank file: {}", path.display()))?;
-    let parsed: QuestionBankFile = serde_json::from_str(&content)
+    let parsed: QuestionBankFile = serde_json::from_str(content.trim_start_matches('\u{feff}'))
         .with_context(|| format!("failed to parse question bank file: {}", path.display()))?;
     validate_question_bank(&parsed)?;
     Ok(parsed)
@@ -2004,5 +2004,47 @@ mod tests {
         assert_eq!(current.question_set_version, "windows-local-v2");
         assert_eq!(current.questions.len(), 1);
         assert_eq!(current.questions[0].answer, "HORIZON");
+    }
+
+    #[test]
+    fn question_bank_import_accepts_utf8_bom() {
+        let runtime = test_runtime();
+        let import_path = runtime.config.data_dir.join("import-bank-with-bom.json");
+        let mut bytes = vec![0xef, 0xbb, 0xbf];
+        bytes.extend(
+            serde_json::to_vec_pretty(&json!({
+                "schemaVersion": "windows-local-question-bank-v1",
+                "questionSetVersion": "windows-local-bom-v1",
+                "normalizationVersion": "upper-ascii-v1",
+                "questions": [{
+                    "questionId": "story-q-bom",
+                    "promptRef": "prompt-bom",
+                    "versionTag": "v1",
+                    "promptText": "BOM encoded question.",
+                    "answer": "ANCHOR"
+                }]
+            }))
+            .expect("serialize import bank"),
+        );
+        fs::write(&import_path, bytes).expect("write bom import bank");
+
+        let response = question_bank_import(
+            &runtime,
+            &json!({
+                "requestId": "req-import-bom",
+                "sourcePath": import_path.display().to_string()
+            }),
+        );
+        assert_eq!(
+            response.get("status").and_then(Value::as_str),
+            Some("success")
+        );
+        assert_eq!(
+            response
+                .get("result")
+                .and_then(|value| value.get("questionSetVersion"))
+                .and_then(Value::as_str),
+            Some("windows-local-bom-v1")
+        );
     }
 }

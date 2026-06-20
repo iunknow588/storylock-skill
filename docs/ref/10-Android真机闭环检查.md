@@ -1,57 +1,54 @@
 # Android 真机闭环检查
 
-日期：2026-06-18
+日期：2026-06-20
 
-本文档用于执行清单中的真机闭环：
+本文档用于执行当前仓库里的 Android 真机联调闭环检查：
 
-`下载 -> 安装 -> 绑定 -> 注册 -> 回连 -> 本地授权 -> 返回结果`
+`下载 -> 安装 -> 绑定 -> 注册 -> relay -> 本地 challenge -> 本地确认 -> 返回脱敏结果`
+
+需要明确：
+
+1. 当前检查目标是验证 Android 宿主原型链路是否打通。
+2. 这不是正式 release 发布验收替代物。
+3. 如果使用的是 `debug`、`internal` 或原型包，必须在记录中明确标注。
 
 ## 1. 前置条件
 
-1. 本机安装 Android SDK、JDK 17 与 Gradle，或在 `src/host/android-host/` 下加入 Gradle wrapper。
-2. 易安本地或线上网关可访问。
-3. Android 设备已连接，`adb devices` 能看到目标设备。
-4. 若使用 relay 模式，设备能访问 `STORYLOCK_GATEWAY_PUBLIC_URL`。
+1. 本机可访问 Yian 网关。
+2. Android 设备已连接，`adb devices` 可见目标设备。
+3. 具备 Android SDK、JDK 17，以及 `gradle` 或本地 Gradle wrapper。
+4. 若使用 relay 模式，设备可访问 `STORYLOCK_GATEWAY_PUBLIC_URL`。
 
-当前仓库未提交 Gradle wrapper；如果系统没有 `gradle` 命令，需要先安装 Gradle 或在 Android Studio 中为 `android-host` 生成 wrapper。
+## 2. 构建与产物确认
 
-## 2. 构建 APK
-
-从 `skill/` 目录执行：
+在 `skill/` 目录执行：
 
 ```powershell
 scripts\release\android\build_apk.cmd -Variant debug
 ```
 
-脚本会：
+至少记录：
 
-1. 运行 `assembleDebug` 或 `assembleRelease`。
-2. 查找 `src/host/android-host/app/build/outputs/apk/{variant}/*.apk`。
-3. 计算 SHA-256。
-4. 复制 APK 到 `release/app/android/`，作为后续安装、上传服务器和站点构建的统一来源。
-5. 写出 `scripts/vercel/.env.android-apk`，供易安下载入口读取。
+1. APK 路径
+2. `versionName`
+3. `versionCode`
+4. SHA-256
+5. `packageKind`
+6. `releaseChannel`
 
-## 3. 接入易安下载入口
+## 3. 下载入口检查
 
-将脚本输出的环境变量同步到本地 `.env` 或 Vercel 项目环境变量：
+至少检查以下入口：
 
-`STORYLOCK_ANDROID_APK_PATH`
+1. `/app/download`
+2. `/app/download/android`
+3. `/android-host/bind`
 
-`STORYLOCK_ANDROID_APK_VERSION`
+期望：
 
-`STORYLOCK_ANDROID_APK_VERSION_CODE`
-
-`STORYLOCK_ANDROID_APK_CHECKSUM`
-
-`STORYLOCK_ANDROID_PACKAGE_KIND`
-
-`STORYLOCK_ANDROID_RELEASE_CHANNEL`
-
-然后访问：
-
-`/download/android-host`
-
-预期结果：返回 APK 文件，或在使用外部分发地址时返回 307 重定向。
+1. 平台下载入口可访问。
+2. Android 下载入口返回 APK 或明确跳转。
+3. 绑定入口可返回带 `binding.deepLink` 的结果。
 
 ## 4. 安装与绑定
 
@@ -59,64 +56,130 @@ scripts\release\android\build_apk.cmd -Variant debug
 adb install -r release\app\android\storylock-android-host-0.1.0-1-debug.apk
 ```
 
-打开易安绑定入口：
+打开绑定入口：
 
-`/android-host/bind?identityId=android-demo-001&preferredMode=relay_url`
+```text
+/app/bind?identityId=android-demo-001&preferredMode=relay_url
+```
 
-将返回的 `binding.deepLink` 通过浏览器或 adb 打开：
+用浏览器或 adb 打开返回的 deep link：
 
 ```powershell
 adb shell am start -a android.intent.action.VIEW -d "storylock-host://bind?gateway_url=...&binding_token=...&identity_id=android-demo-001&preferred_mode=relay_url"
 ```
 
-## 5. 状态检查
+## 5. 运行态状态检查
 
-Android 宿主界面应显示：
+Android 宿主侧建议观察：
 
-1. `not bound`
-2. `bound, not registered`
-3. `registering`
-4. `online`
-5. `offline`
+1. 是否已绑定
+2. 是否已注册
+3. relay 是否在线
+4. 最近错误是否为空
 
-注册完成后，易安网站运行态面板应显示活跃宿主数量大于 0。
+网关侧建议观察：
 
-## 6. 回连与本地授权
+1. active host 数量是否大于 0
+2. 注册 ID 是否生成
+3. relay poll / respond 是否持续成功
 
-执行远程能力请求：
+## 6. 本地 challenge 与确认检查
 
-1. `requestSignature`
-2. `requestPasswordFill`
+针对 `requestSignature`：
 
-预期流程：
+1. 是否弹出高强度多格 challenge
+2. 是否要求强生物确认
+3. challenge 连续失败后是否出现临时锁定
 
-1. 网关通过 relay 向 Android 宿主派发请求。
-2. Android 宿主弹出本地 challenge 与 BiometricPrompt / 设备凭据确认。
-3. 本地执行后返回脱敏结果。
-4. 网关返回 `executionLocation=remote_gateway`，敏感字段为 `[redacted]`。
+针对 `requestPasswordFill`：
 
-## 7. 记录结果
+1. 是否弹出中强度 challenge
+2. 是否完成本地确认
+3. 返回结果是否被第三层脱敏
 
-检查完成后记录：
+## 7. 失败场景检查
 
-1. APK 路径、版本、大小和 SHA-256。
-2. 设备型号、Android SDK 版本。
-3. 网关 URL 与连接模式。
-4. deep link 是否成功唤起。
-5. 注册 ID 与 relay poll/respond 是否成功。
-6. `requestSignature` 与 `requestPasswordFill` 返回结果。
+至少建议覆盖以下失败路径：
 
-可使用脚本生成本地记录：
+1. deep link 未唤起
+2. 宿主未注册
+3. shared secret 不匹配
+4. challenge 主动取消
+5. challenge 输入错误
+6. challenge 连续错误触发锁定
+7. BiometricPrompt 不可用
+8. BiometricPrompt 取消
+
+当前期望错误类型至少包括：
+
+1. `challenge_cancelled`
+2. `challenge_failed`
+3. `challenge_locked`
+4. `biometric_unavailable`
+5. `biometric_cancelled`
+6. `biometric_failed`
+
+## 8. 脱敏结果检查
+
+针对网关最终返回结果，至少确认：
+
+1. `executionLocation=remote_gateway`
+2. `privateKey` 被替换为 `[redacted]`
+3. `signingKeyBytes` 被替换为 `[redacted]`
+4. `password` 被替换为 `[redacted]`
+
+## 9. 推荐本地检查脚本
 
 ```powershell
-scripts\android\check_device_loop.cmd `
+scripts\android\check_device_loop.ps1 `
   -ApkPath release\app\android\storylock-android-host-0.1.0-1-debug.apk `
   -GatewayBaseUrl https://yian.cdao.online `
+  -IdentityId android-demo-001 `
+  -PackageKind debug `
+  -ReleaseChannel internal `
   -DeepLink "storylock-host://bind?gateway_url=...&binding_token=...&identity_id=android-demo-001&preferred_mode=relay_url"
 ```
 
-脚本会检查 `adb devices`、APK 是否存在、安装命令、deep link 唤起、易安关键端点，并生成：
+脚本当前会检查：
+
+1. `adb devices`
+2. APK 是否存在
+3. `adb install`
+4. deep link 唤起
+5. `/`
+6. `/api/storylock-gateway`
+7. `/app/download`
+8. `/app/download/android`
+9. `/android-host/bind`
+10. 带 `identityId` 的绑定请求
+
+默认输出：
 
 `%TEMP%/android-device-loop-report.local.md`
 
-如需保存到项目文档目录，可显式传入 `-ReportPath docs/management/android-device-loop-report.local.md`。该文件是本机检查产物，默认不提交。
+## 10. 检查记录模板
+
+每次真机检查建议至少记录：
+
+1. 设备型号
+2. Android SDK 版本
+3. APK 名称
+4. `packageKind`
+5. `releaseChannel`
+6. deep link 是否成功
+7. relay 是否成功
+8. `requestSignature` 是否成功
+9. `requestPasswordFill` 是否成功
+10. 失败路径是否按预期返回
+
+## 11. 当前阶段结论口径
+
+如果本检查通过，推荐表述为：
+
+> 当前 Android 宿主原型已经可以完成下载、安装、绑定、注册、relay、本地 challenge、本地确认和脱敏返回的真机联调闭环。
+
+不要表述为：
+
+1. Android 正式发布闭环已经完成
+2. Android 正式 App 已经上架
+3. Android 签名和 challenge 已达到完整生产交付级

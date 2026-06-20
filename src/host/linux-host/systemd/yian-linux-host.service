@@ -1,0 +1,14 @@
+[Unit]
+Description=Yian Linux Host
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/opt/yian-linux-host/bin/yian-linux-host
+Restart=on-failure
+RestartSec=5
+Environment=STORYLOCK_LINUX_USE_PLATFORM_SECRET_STORE=1
+Environment=STORYLOCK_LINUX_DEVELOPMENT_MODE=0
+
+[Install]
+WantedBy=default.target

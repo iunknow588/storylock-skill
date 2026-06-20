@@ -5,6 +5,7 @@ Normalize repository text files to UTF-8 (no BOM) and LF.
 Usage:
   python scripts/text/normalize_text_files.py --root . --fix
   python scripts/text/normalize_text_files.py --root . --dry-run
+  python scripts/text/normalize_text_files.py --root . --dry-run --fail-on-change
 
 Notes:
 - Only known text files are scanned by default.
@@ -218,6 +219,7 @@ def main():
     parser.add_argument("--root", default=str(DEFAULT_ROOT), help="Project root to scan")
     parser.add_argument("--fix", action="store_true", help="Actually write changes")
     parser.add_argument("--dry-run", action="store_true", help="Do not write, only show what would change")
+    parser.add_argument("--fail-on-change", action="store_true", help="Exit non-zero if normalization would change any file")
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
@@ -240,6 +242,8 @@ def main():
 
     if summary['errors'] > 0:
         sys.exit(3)
+    if args.fail_on_change and summary['changed'] > 0:
+        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -e
+
+chmod +x /opt/yian-linux-host/bin/yian-linux-host || true
+
+echo "Yian Linux Host installed."
+echo "Run /opt/yian-linux-host/bin/yian-linux-host or enable the user service from the packaged systemd unit."
