@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -98,6 +99,16 @@ struct StoredVerificationRecord {
     status: String,
 }
 
+#[derive(Clone, Debug)]
+struct AuthorizationChannelPolicy {
+    channel: &'static str,
+    required_strength: &'static str,
+    allowed_action: &'static str,
+    grid_size: u32,
+    required_cells: u32,
+    remote_allowed: bool,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct VerificationCell {
     cell_id: String,
@@ -151,6 +162,22 @@ struct RuntimeUiState {
     last_relay_poll_at: Option<String>,
     last_execution: Option<Value>,
     last_confirmation: Option<Value>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct LocalAuditEvent {
+    timestamp: String,
+    event_type: String,
+    request_id: String,
+    capability: String,
+    identity_id: String,
+    device_id: String,
+    object_ref: Option<String>,
+    result: String,
+    error_code: Option<String>,
+    error_type: Option<String>,
+    redaction_level: String,
+    meta: Value,
 }
 
 impl WindowsHostConfig {
@@ -302,12 +329,12 @@ impl WindowsHostRuntime {
         self.ui_state
             .lock()
             .map(|state| state.clone())
-        .unwrap_or_else(|_| RuntimeUiState {
-            started_at: now_timestamp(),
-            relay_status: "local_only".to_string(),
-            last_relay_error: Some("ui state lock was poisoned".to_string()),
-            last_relay_poll_at: None,
-            last_execution: None,
+            .unwrap_or_else(|_| RuntimeUiState {
+                started_at: now_timestamp(),
+                relay_status: "local_only".to_string(),
+                last_relay_error: Some("ui state lock was poisoned".to_string()),
+                last_relay_poll_at: None,
+                last_execution: None,
                 last_confirmation: None,
             })
     }
@@ -323,6 +350,7 @@ impl SecretStore {
         fs::create_dir_all(root.join("keys"))?;
         fs::create_dir_all(root.join("credentials"))?;
         fs::create_dir_all(root.join("authorizations"))?;
+        fs::create_dir_all(root.join("audit"))?;
         Ok(Self { root })
     }
 
@@ -349,6 +377,10 @@ impl SecretStore {
             "verification-{}.json",
             sanitize_ref(verification_id)
         ))
+    }
+
+    fn audit_log_path(&self) -> PathBuf {
+        self.root.join("audit").join("local-audit.jsonl")
     }
 
     fn get_or_create_signature_key(&self, key_id: &str) -> Result<String> {
@@ -433,6 +465,16 @@ impl SecretStore {
         authorization_id: &str,
     ) -> Result<StoredAuthorizationRecord> {
         self.read_secret_json(&self.authorization_path(authorization_id))
+    }
+
+    fn append_audit_event(&self, event: &LocalAuditEvent) -> Result<()> {
+        let mut file = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(self.audit_log_path())?;
+        let line = serde_json::to_string(event)?;
+        writeln!(file, "{line}")?;
+        Ok(())
     }
 }
 
@@ -634,6 +676,34 @@ fn error_response(
     })
 }
 
+fn record_local_audit(
+    runtime: &WindowsHostRuntime,
+    event_type: &str,
+    request_id: &str,
+    capability: &str,
+    object_ref: Option<&str>,
+    result: &str,
+    error_code: Option<&str>,
+    error_type: Option<&str>,
+    meta: Value,
+) {
+    let event = LocalAuditEvent {
+        timestamp: now_timestamp(),
+        event_type: event_type.to_string(),
+        request_id: request_id.to_string(),
+        capability: capability.to_string(),
+        identity_id: runtime.config.identity_id.clone(),
+        device_id: runtime.config.device_id.clone(),
+        object_ref: object_ref.map(ToOwned::to_owned),
+        result: result.to_string(),
+        error_code: error_code.map(ToOwned::to_owned),
+        error_type: error_type.map(ToOwned::to_owned),
+        redaction_level: "audit_meta_only".to_string(),
+        meta,
+    };
+    let _ = runtime.secret_store.append_audit_event(&event);
+}
+
 fn summarize_execution_for_ui(response: &Value) -> Value {
     let result = response.get("result").unwrap_or(&Value::Null);
     let audit = response.get("auditMeta").unwrap_or(&Value::Null);
@@ -734,6 +804,16 @@ fn confirmation_summary_for(
     status: &str,
 ) -> Value {
     let expires_at = expires_at_after(300);
+    let policy = channel_policy_for_request(capability, request).unwrap_or_else(|_| {
+        AuthorizationChannelPolicy {
+            channel: "single_read",
+            required_strength: required_strength_for(capability),
+            allowed_action: allowed_action_for(capability),
+            grid_size: 9,
+            required_cells: 6,
+            remote_allowed: true,
+        }
+    });
     json!({
         "requestId": request_id_from(request),
         "status": status,
@@ -741,8 +821,9 @@ fn confirmation_summary_for(
         "objectRef": object_ref,
         "requester": requester_from(request),
         "origin": origin_from(request),
-        "requiredStrength": required_strength_for(capability),
-        "allowedAction": allowed_action_for(capability),
+        "requiredStrength": policy.required_strength,
+        "allowedAction": policy.allowed_action,
+        "authorizationChannel": policy.channel,
         "expiry": expires_at,
         "risk": risk_description_for(capability),
         "approvalMode": config.approval_mode,
@@ -759,12 +840,23 @@ fn request_summary(request: &Value, capability: &str, object_ref: &str) -> Strin
         .and_then(Value::as_str)
         .unwrap_or("unknown requester");
     let origin = origin_from(request);
-    let required_strength = required_strength_for(capability);
-    let allowed_action = allowed_action_for(capability);
+    let policy = channel_policy_for_request(capability, request).unwrap_or_else(|_| {
+        AuthorizationChannelPolicy {
+            channel: "single_read",
+            required_strength: required_strength_for(capability),
+            allowed_action: allowed_action_for(capability),
+            grid_size: 9,
+            required_cells: 6,
+            remote_allowed: true,
+        }
+    });
+    let required_strength = policy.required_strength;
+    let allowed_action = policy.allowed_action;
     let expiry = expires_at_after(300);
     let risk = risk_description_for(capability);
     format!(
-        "Approve local execution?\n\nCapability: {capability}\nObject: {object_ref}\nRequester: {requester}\nOrigin: {origin}\nRequired strength: {required_strength}\nAllowed action: {allowed_action}\nExpires at: {expiry}\n\nRisk:\n{risk}\n\nChoose Yes to allow this request on the Windows host."
+        "Approve local execution?\n\nCapability: {capability}\nObject: {object_ref}\nRequester: {requester}\nOrigin: {origin}\nRequired strength: {required_strength}\nAllowed action: {allowed_action}\nAuthorization channel: {}\nExpires at: {expiry}\n\nRisk:\n{risk}\n\nChoose Yes to allow this request on the Windows host.",
+        policy.channel
     )
 }
 
@@ -876,6 +968,84 @@ fn allowed_action_for(capability: &str) -> &'static str {
     }
 }
 
+fn authorization_channel_for_request(capability: &str, request: &Value) -> String {
+    request
+        .get("authorizationChannel")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(ToOwned::to_owned)
+        .unwrap_or_else(|| {
+            if request
+                .get("requestedAction")
+                .and_then(Value::as_str)
+                .is_some_and(|action| action == "story_edit")
+            {
+                "story_edit".to_string()
+            } else if request
+                .get("requestedAction")
+                .and_then(Value::as_str)
+                .is_some_and(|action| action == "batch_read")
+            {
+                "batch_read".to_string()
+            } else {
+                match capability {
+                    "requestSignature" | "requestPasswordFill" => "single_read".to_string(),
+                    _ => "single_read".to_string(),
+                }
+            }
+        })
+}
+
+fn channel_policy_for_request(
+    capability: &str,
+    request: &Value,
+) -> Result<AuthorizationChannelPolicy> {
+    let channel = authorization_channel_for_request(capability, request);
+    let policy = match channel.as_str() {
+        "single_read" => AuthorizationChannelPolicy {
+            channel: "single_read",
+            required_strength: "medium",
+            allowed_action: allowed_action_for(capability),
+            grid_size: 9,
+            required_cells: 6,
+            remote_allowed: true,
+        },
+        "batch_read" => AuthorizationChannelPolicy {
+            channel: "batch_read",
+            required_strength: "high",
+            allowed_action: "batch_read",
+            grid_size: 12,
+            required_cells: 12,
+            remote_allowed: true,
+        },
+        "story_edit" => AuthorizationChannelPolicy {
+            channel: "story_edit",
+            required_strength: "story_edit",
+            allowed_action: "story_edit",
+            grid_size: 24,
+            required_cells: 22,
+            remote_allowed: false,
+        },
+        _ => {
+            return Err(anyhow!(
+                "authorizationChannel must be single_read, batch_read, or story_edit"
+            ))
+        }
+    };
+    if request
+        .get("remoteRequest")
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+        && !policy.remote_allowed
+    {
+        return Err(anyhow!(
+            "story_edit is local-only and cannot be triggered by the remote gateway"
+        ));
+    }
+    Ok(policy)
+}
+
 fn expires_at_after(seconds: u64) -> String {
     (SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -964,20 +1134,12 @@ fn local_core_call_envelope(
     })
 }
 
-fn grid_policy_for(required_strength: &str) -> (u32, u32) {
-    match required_strength {
-        "high" => (9, 3),
-        "medium" => (6, 2),
-        _ => (3, 1),
-    }
-}
-
 fn build_verification_cells(
     question_bank: &QuestionBankFile,
     required_strength: &str,
     object_ref: &str,
+    required_cells: u32,
 ) -> Vec<VerificationCell> {
-    let (_, required_cells) = grid_policy_for(required_strength);
     let question_set_version = &question_bank.question_set_version;
     let normalization_version = &question_bank.normalization_version;
     let bank = &question_bank.questions;
@@ -1005,21 +1167,28 @@ fn build_verification_cells(
         .collect()
 }
 
-fn verification_record_from_request(
+fn verification_record_from_policy(
     config: &WindowsHostConfig,
     question_bank: &QuestionBankFile,
     capability: &str,
     object_ref: &str,
-) -> StoredVerificationRecord {
-    let required_strength = required_strength_for(capability).to_string();
-    let (grid_size, required_cells) = grid_policy_for(&required_strength);
-    let cells = build_verification_cells(question_bank, &required_strength, object_ref);
-    StoredVerificationRecord {
+    request: &Value,
+) -> Result<StoredVerificationRecord> {
+    let policy = channel_policy_for_request(capability, request)?;
+    let required_strength = policy.required_strength.to_string();
+    let (grid_size, required_cells) = (policy.grid_size, policy.required_cells);
+    let cells = build_verification_cells(
+        question_bank,
+        &required_strength,
+        object_ref,
+        required_cells,
+    );
+    Ok(StoredVerificationRecord {
         verification_id: format!("ver-{}", Uuid::new_v4()),
         identity_id: config.identity_id.clone(),
         object_ref: object_ref.to_string(),
         capability: capability.to_string(),
-        allowed_action: allowed_action_for(capability).to_string(),
+        allowed_action: policy.allowed_action.to_string(),
         required_strength: required_strength.clone(),
         grid_size,
         required_cells,
@@ -1027,7 +1196,7 @@ fn verification_record_from_request(
         created_at: now_timestamp(),
         expires_at: expires_at_after(180),
         status: "pending".to_string(),
-    }
+    })
 }
 
 fn create_grid_verification(runtime: &WindowsHostRuntime, request: &Value) -> Value {
@@ -1057,8 +1226,40 @@ fn create_grid_verification(runtime: &WindowsHostRuntime, request: &Value) -> Va
             "Validate or re-import the local question bank, then retry the verification request.",
         ),
     };
-    let verification =
-        verification_record_from_request(config, &question_bank, &capability, object_ref);
+    let verification = match verification_record_from_policy(
+        config,
+        &question_bank,
+        &capability,
+        object_ref,
+        request,
+    ) {
+        Ok(record) => record,
+        Err(error) => {
+            record_local_audit(
+                runtime,
+                "policy_denied",
+                &request_id,
+                "createGridVerification",
+                Some(object_ref),
+                "denied",
+                Some("SLG-002"),
+                Some("policy_denied"),
+                json!({
+                    "reason": error.to_string(),
+                    "authorizationChannel": authorization_channel_for_request(&capability, request)
+                }),
+            );
+            return error_response(
+                config,
+                &request_id,
+                "createGridVerification",
+                "SLG-002",
+                "policy_denied",
+                &error.to_string(),
+                "Use a supported local authorization channel. Remote requests cannot trigger story_edit.",
+            );
+        }
+    };
     if let Err(error) = runtime
         .secret_store
         .write_verification_record(&verification)
@@ -1467,6 +1668,20 @@ fn authorize_local_action(runtime: &WindowsHostRuntime, request: &Value) -> Valu
         }
     };
     if !is_unexpired(&verification.expires_at) {
+        record_local_audit(
+            runtime,
+            "challenge_failed",
+            &request_id,
+            "authorizeLocalAction",
+            Some(&verification.object_ref),
+            "failed",
+            Some("SLG-003"),
+            Some("authorization_failed"),
+            json!({
+                "reason": "verification_expired",
+                "verificationId": verification.verification_id
+            }),
+        );
         return error_response(
             config,
             &request_id,
@@ -1500,6 +1715,22 @@ fn authorize_local_action(runtime: &WindowsHostRuntime, request: &Value) -> Valu
         })
         .count() as u32;
     if matched_cells < verification.required_cells {
+        record_local_audit(
+            runtime,
+            "challenge_failed",
+            &request_id,
+            "authorizeLocalAction",
+            Some(&verification.object_ref),
+            "failed",
+            Some("SLG-003"),
+            Some("authorization_failed"),
+            json!({
+                "reason": "answer_mismatch",
+                "verificationId": verification.verification_id,
+                "matchedCells": matched_cells,
+                "requiredCells": verification.required_cells
+            }),
+        );
         return error_response(
             config,
             &request_id,
@@ -1537,6 +1768,22 @@ fn authorize_local_action(runtime: &WindowsHostRuntime, request: &Value) -> Valu
             "Check the Windows host data directory and DPAPI availability, then retry the request.",
         );
     }
+    record_local_audit(
+        runtime,
+        "authorization_approved",
+        &request_id,
+        "authorizeLocalAction",
+        Some(&authorization.object_ref),
+        "success",
+        None,
+        None,
+        json!({
+            "verificationId": authorization.verification_id,
+            "authorizationId": authorization.authorization_id,
+            "allowedAction": authorization.allowed_action,
+            "requiredStrength": authorization.required_strength
+        }),
+    );
     json!({
         "requestId": request_id,
         "status": "success",
@@ -1587,6 +1834,20 @@ fn revoke_local_authorization(runtime: &WindowsHostRuntime, request: &Value) -> 
     {
         Ok(record) => record,
         Err(error) => {
+            record_local_audit(
+                runtime,
+                "session_revoke_rejected",
+                &request_id,
+                "revokeLocalAuthorization",
+                None,
+                "error",
+                Some("SLG-003"),
+                Some("authorization_failed"),
+                json!({
+                    "authorizationId": authorization_id,
+                    "reason": format!("authorization record was not found: {error}")
+                }),
+            );
             return error_response(
                 config,
                 &request_id,
@@ -1595,7 +1856,7 @@ fn revoke_local_authorization(runtime: &WindowsHostRuntime, request: &Value) -> 
                 "authorization_failed",
                 &format!("authorization record was not found: {error}"),
                 "Create a new authorization session if the old one is no longer available.",
-            )
+            );
         }
     };
     record.status = "revoked".to_string();
@@ -1611,6 +1872,21 @@ fn revoke_local_authorization(runtime: &WindowsHostRuntime, request: &Value) -> 
             "Check the Windows host data directory and DPAPI availability, then retry the request.",
         );
     }
+    record_local_audit(
+        runtime,
+        "session_revoked",
+        &request_id,
+        "revokeLocalAuthorization",
+        Some(&record.object_ref),
+        "success",
+        None,
+        None,
+        json!({
+            "authorizationId": record.authorization_id,
+            "verificationId": record.verification_id,
+            "allowedAction": record.allowed_action
+        }),
+    );
     json!({
         "requestId": request_id,
         "status": "success",
@@ -1648,7 +1924,44 @@ fn execute_with_local_core(
         .unwrap_or("")
         .to_string();
 
-    if capability == "requestSignature" {
+    if authorization.allowed_action == "story_edit" {
+        Ok(json!({
+            "approved": true,
+            "coreCallId": core_call_id,
+            "coreBoundary": "storylock_local_core",
+            "verificationId": authorization.verification_id,
+            "authorizationId": authorization.authorization_id,
+            "objectRef": object_ref,
+            "storyEditAuthorized": true,
+            "editableScope": "local_storylock_core_only",
+            "requiredStrength": authorization.required_strength,
+            "allowedAction": authorization.allowed_action,
+            "expiresAt": authorization.expires_at,
+            "hiddenFromResult": ["storyRawText", "canonicalAnswer", "acceptedAnswers", "password", "privateKey", "signingKeyBytes"],
+            "localCore": core_call
+        }))
+    } else if authorization.allowed_action == "batch_read" {
+        Ok(json!({
+            "approved": true,
+            "coreCallId": core_call_id,
+            "coreBoundary": "storylock_local_core",
+            "verificationId": authorization.verification_id,
+            "authorizationId": authorization.authorization_id,
+            "objectRef": object_ref,
+            "batchReadAuthorized": true,
+            "readScope": "permission_summary_only",
+            "requiredStrength": authorization.required_strength,
+            "allowedAction": authorization.allowed_action,
+            "expiresAt": authorization.expires_at,
+            "items": [{
+                "objectRef": object_ref,
+                "status": "authorized",
+                "redaction": "secret_values_hidden"
+            }],
+            "hiddenFromResult": ["storyRawText", "canonicalAnswer", "acceptedAnswers", "password", "privateKey", "signingKeyBytes"],
+            "localCore": core_call
+        }))
+    } else if capability == "requestSignature" {
         let key_material = runtime
             .secret_store
             .get_or_create_signature_key(object_ref)?;
@@ -1721,9 +2034,30 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
         .map(str::trim)
         .filter(|value| !value.is_empty())
     {
-        match runtime.secret_store.read_authorization_record(authorization_id) {
+        match runtime
+            .secret_store
+            .read_authorization_record(authorization_id)
+        {
             Ok(record) => {
-                if let Err(error) = validate_authorization_for_core(&record, &capability, &object_ref) {
+                if let Err(error) =
+                    validate_authorization_for_core(&record, &capability, &object_ref)
+                {
+                    record_local_audit(
+                        runtime,
+                        "execution_rejected",
+                        &request_id,
+                        &capability,
+                        Some(&object_ref),
+                        "error",
+                        Some("SLG-003"),
+                        Some("authorization_failed"),
+                        json!({
+                            "reason": error.to_string(),
+                            "authorizationId": authorization_id,
+                            "authorizationStatus": record.status,
+                            "allowedAction": record.allowed_action
+                        }),
+                    );
                     return error_response(
                         config,
                         &request_id,
@@ -1737,6 +2071,20 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                 record
             }
             Err(error) => {
+                record_local_audit(
+                    runtime,
+                    "execution_rejected",
+                    &request_id,
+                    &capability,
+                    Some(&object_ref),
+                    "error",
+                    Some("SLG-003"),
+                    Some("authorization_failed"),
+                    json!({
+                        "reason": format!("authorizationId could not be resolved: {error}"),
+                        "authorizationId": authorization_id
+                    }),
+                );
                 return error_response(
                     config,
                     &request_id,
@@ -1745,11 +2093,53 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                     "authorization_failed",
                     &format!("authorizationId could not be resolved: {error}"),
                     "Create a fresh verification and authorization session, then retry the execute call.",
-                )
+                );
             }
         }
     } else {
+        let policy = match channel_policy_for_request(&capability, &request) {
+            Ok(policy) => policy,
+            Err(error) => {
+                record_local_audit(
+                    runtime,
+                    "policy_denied",
+                    &request_id,
+                    &capability,
+                    Some(&object_ref),
+                    "denied",
+                    Some("SLG-002"),
+                    Some("policy_denied"),
+                    json!({
+                        "reason": error.to_string(),
+                        "authorizationChannel": authorization_channel_for_request(&capability, &request)
+                    }),
+                );
+                return error_response(
+                    config,
+                    &request_id,
+                    &capability,
+                    "SLG-002",
+                    "policy_denied",
+                    &error.to_string(),
+                    "Use a supported local authorization channel. Remote requests cannot trigger story_edit.",
+                );
+            }
+        };
         if !is_confirmation_approved(runtime, &request, &object_ref) {
+            record_local_audit(
+                runtime,
+                "authorization_denied",
+                &request_id,
+                &capability,
+                Some(&object_ref),
+                "denied",
+                Some("SLG-003"),
+                Some("authorization_failed"),
+                json!({
+                    "reason": "local_confirmation_denied",
+                    "approvalMode": config.approval_mode
+                }),
+            );
             return error_response(
                 config,
                 &request_id,
@@ -1767,8 +2157,8 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
             capability: capability.clone(),
             object_ref: object_ref.clone(),
             identity_id: config.identity_id.clone(),
-            allowed_action: allowed_action_for(&capability).to_string(),
-            required_strength: required_strength_for(&capability).to_string(),
+            allowed_action: policy.allowed_action.to_string(),
+            required_strength: policy.required_strength.to_string(),
             confirmation_method: "windows_dialog".to_string(),
             created_at: now_timestamp(),
             expires_at: expires_at_after(300),
@@ -1807,7 +2197,25 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
     );
 
     match execution {
-        Ok(result) => json!({
+        Ok(result) => {
+            record_local_audit(
+                runtime,
+                "execution_completed",
+                &request_id,
+                &capability,
+                Some(&object_ref),
+                "success",
+                None,
+                None,
+                json!({
+                    "verificationId": verification_id,
+                    "authorizationId": authorization_id,
+                    "allowedAction": allowed_action,
+                    "requiredStrength": required_strength,
+                    "confirmationMethod": confirmation_method
+                }),
+            );
+            json!({
             "requestId": request_id,
             "status": "success",
             "capability": capability,
@@ -1831,7 +2239,8 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                 "confirmationMethod": confirmation_method
             },
             "error": Value::Null
-        }),
+            })
+        }
         Err(error) => {
             let error_type = if error.to_string().contains("authorization") {
                 "authorization_failed"
@@ -1843,6 +2252,22 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
             } else {
                 "SLG-005"
             };
+            record_local_audit(
+                runtime,
+                "execution_rejected",
+                &request_id,
+                &capability,
+                Some(&object_ref),
+                "error",
+                Some(code),
+                Some(error_type),
+                json!({
+                    "reason": error.to_string(),
+                    "verificationId": verification_id,
+                    "authorizationId": authorization_id,
+                    "allowedAction": allowed_action
+                }),
+            );
             error_response(
                 config,
                 &request_id,
@@ -2359,6 +2784,46 @@ mod tests {
         WindowsHostRuntime::new(test_config()).expect("test runtime")
     }
 
+    fn authorize_all_cells(runtime: &WindowsHostRuntime, verification_id: &str) -> String {
+        let authorization = authorize_local_action(
+            runtime,
+            &json!({
+                "requestId": format!("req-auth-{}", Uuid::new_v4()),
+                "verificationId": verification_id,
+                "answers": runtime.secret_store
+                    .read_verification_record(verification_id)
+                    .expect("stored verification")
+                    .cells
+                    .iter()
+                    .map(|cell| json!({
+                        "cellId": cell.cell_id,
+                        "answer": cell.expected_answer.to_ascii_lowercase()
+                    }))
+                    .collect::<Vec<_>>()
+            }),
+        );
+        assert_eq!(
+            authorization.get("status").and_then(Value::as_str),
+            Some("success")
+        );
+        authorization
+            .get("result")
+            .and_then(|value| value.get("authorizationId"))
+            .and_then(Value::as_str)
+            .expect("authorization id")
+            .to_string()
+    }
+
+    fn local_audit_events(runtime: &WindowsHostRuntime) -> Vec<Value> {
+        let path = runtime.secret_store.audit_log_path();
+        let content = fs::read_to_string(path).expect("audit jsonl");
+        content
+            .lines()
+            .filter(|line| !line.trim().is_empty())
+            .map(|line| serde_json::from_str(line).expect("audit line json"))
+            .collect()
+    }
+
     #[test]
     fn rejects_unsupported_capability() {
         let runtime = test_runtime();
@@ -2485,29 +2950,7 @@ mod tests {
             .and_then(Value::as_str)
             .expect("verification id");
 
-        let authorization = authorize_local_action(
-            &runtime,
-            &json!({
-                "requestId": "req-auth-1",
-                "verificationId": verification_id,
-                "answers": build_verification_cells(&runtime.current_question_bank().expect("question bank"), "high", "wallet-flow")
-                    .iter()
-                    .map(|cell| json!({
-                        "cellId": cell.cell_id,
-                        "answer": cell.expected_answer.to_ascii_lowercase()
-                    }))
-                    .collect::<Vec<_>>()
-            }),
-        );
-        assert_eq!(
-            authorization.get("status").and_then(Value::as_str),
-            Some("success")
-        );
-        let authorization_id = authorization
-            .get("result")
-            .and_then(|value| value.get("authorizationId"))
-            .and_then(Value::as_str)
-            .expect("authorization id");
+        let authorization_id = authorize_all_cells(&runtime, verification_id);
 
         let execution = execute_request(
             &runtime,
@@ -2527,7 +2970,7 @@ mod tests {
                 .get("result")
                 .and_then(|value| value.get("authorizationId"))
                 .and_then(Value::as_str),
-            Some(authorization_id)
+            Some(authorization_id.as_str())
         );
         assert_eq!(
             execution
@@ -2590,6 +3033,29 @@ mod tests {
                 .and_then(|value| value.get("type"))
                 .and_then(Value::as_str),
             Some("authorization_failed")
+        );
+        let events = local_audit_events(&runtime);
+        let rejected = events
+            .iter()
+            .rev()
+            .find(|event| {
+                event.get("event_type").and_then(Value::as_str) == Some("execution_rejected")
+            })
+            .expect("execution rejection audit");
+        assert_eq!(
+            rejected.get("request_id").and_then(Value::as_str),
+            Some("req-revoked-exec")
+        );
+        assert_eq!(
+            rejected.get("error_code").and_then(Value::as_str),
+            Some("SLG-003")
+        );
+        assert_eq!(
+            rejected
+                .get("meta")
+                .and_then(|meta| meta.get("authorizationStatus"))
+                .and_then(Value::as_str),
+            Some("revoked")
         );
     }
 
@@ -2683,5 +3149,243 @@ mod tests {
                 .and_then(Value::as_str),
             Some("windows-local-bom-v1")
         );
+    }
+
+    #[test]
+    fn authorization_channels_map_to_windows_grid_policy() {
+        let runtime = test_runtime();
+        let single = create_grid_verification(
+            &runtime,
+            &json!({
+                "requestId": "req-channel-single",
+                "capability": "requestPasswordFill",
+                "credentialRef": "mailbox-single",
+                "authorizationChannel": "single_read"
+            }),
+        );
+        assert_eq!(
+            single
+                .get("result")
+                .and_then(|value| value.get("requiredStrength"))
+                .and_then(Value::as_str),
+            Some("medium")
+        );
+        assert_eq!(
+            single
+                .get("result")
+                .and_then(|value| value.get("grid"))
+                .and_then(|value| value.get("requiredCells"))
+                .and_then(Value::as_u64),
+            Some(6)
+        );
+
+        let batch = create_grid_verification(
+            &runtime,
+            &json!({
+                "requestId": "req-channel-batch",
+                "capability": "requestPasswordFill",
+                "credentialRef": "mailbox-batch",
+                "authorizationChannel": "batch_read"
+            }),
+        );
+        assert_eq!(
+            batch
+                .get("result")
+                .and_then(|value| value.get("requiredStrength"))
+                .and_then(Value::as_str),
+            Some("high")
+        );
+        assert_eq!(
+            batch
+                .get("result")
+                .and_then(|value| value.get("grid"))
+                .and_then(|value| value.get("requiredCells"))
+                .and_then(Value::as_u64),
+            Some(12)
+        );
+
+        let story_edit = create_grid_verification(
+            &runtime,
+            &json!({
+                "requestId": "req-channel-story-edit",
+                "capability": "requestPasswordFill",
+                "credentialRef": "story-local",
+                "authorizationChannel": "story_edit"
+            }),
+        );
+        assert_eq!(
+            story_edit
+                .get("result")
+                .and_then(|value| value.get("requiredStrength"))
+                .and_then(Value::as_str),
+            Some("story_edit")
+        );
+        assert_eq!(
+            story_edit
+                .get("result")
+                .and_then(|value| value.get("grid"))
+                .and_then(|value| value.get("requiredCells"))
+                .and_then(Value::as_u64),
+            Some(22)
+        );
+
+        let denied_remote = create_grid_verification(
+            &runtime,
+            &json!({
+                "requestId": "req-channel-remote-story-edit",
+                "capability": "requestPasswordFill",
+                "credentialRef": "story-local",
+                "authorizationChannel": "story_edit",
+                "remoteRequest": true
+            }),
+        );
+        assert_eq!(
+            denied_remote.get("status").and_then(Value::as_str),
+            Some("error")
+        );
+        assert_eq!(
+            denied_remote
+                .get("error")
+                .and_then(|value| value.get("type"))
+                .and_then(Value::as_str),
+            Some("policy_denied")
+        );
+        let events = local_audit_events(&runtime);
+        let policy_denied = events
+            .iter()
+            .rev()
+            .find(|event| {
+                event.get("event_type").and_then(Value::as_str) == Some("policy_denied")
+                    && event.get("request_id").and_then(Value::as_str)
+                        == Some("req-channel-remote-story-edit")
+            })
+            .expect("remote story_edit policy audit");
+        assert_eq!(
+            policy_denied.get("result").and_then(Value::as_str),
+            Some("denied")
+        );
+        assert_eq!(
+            policy_denied.get("error_type").and_then(Value::as_str),
+            Some("policy_denied")
+        );
+        assert_eq!(
+            policy_denied
+                .get("meta")
+                .and_then(|meta| meta.get("authorizationChannel"))
+                .and_then(Value::as_str),
+            Some("story_edit")
+        );
+    }
+
+    #[test]
+    fn batch_read_channel_executes_with_redacted_summary_result() {
+        let runtime = test_runtime();
+        let verification = create_grid_verification(
+            &runtime,
+            &json!({
+                "requestId": "req-batch-flow-verify",
+                "capability": "requestPasswordFill",
+                "credentialRef": "batch-resource",
+                "authorizationChannel": "batch_read"
+            }),
+        );
+        assert_eq!(
+            verification.get("status").and_then(Value::as_str),
+            Some("success")
+        );
+        let verification_id = verification
+            .get("result")
+            .and_then(|value| value.get("verificationId"))
+            .and_then(Value::as_str)
+            .expect("verification id");
+        let authorization_id = authorize_all_cells(&runtime, verification_id);
+        let execution = execute_request(
+            &runtime,
+            json!({
+                "requestId": "req-batch-flow-exec",
+                "capability": "requestPasswordFill",
+                "credentialRef": "batch-resource",
+                "authorizationChannel": "batch_read",
+                "authorizationId": authorization_id
+            }),
+        );
+        assert_eq!(
+            execution.get("status").and_then(Value::as_str),
+            Some("success")
+        );
+        assert_eq!(
+            execution
+                .get("result")
+                .and_then(|value| value.get("allowedAction"))
+                .and_then(Value::as_str),
+            Some("batch_read")
+        );
+        assert_eq!(
+            execution
+                .get("result")
+                .and_then(|value| value.get("batchReadAuthorized"))
+                .and_then(Value::as_bool),
+            Some(true)
+        );
+        assert!(execution
+            .get("result")
+            .and_then(|value| value.get("password"))
+            .is_none());
+    }
+
+    #[test]
+    fn story_edit_channel_executes_only_as_local_core_authorization() {
+        let runtime = test_runtime();
+        let verification = create_grid_verification(
+            &runtime,
+            &json!({
+                "requestId": "req-story-edit-verify",
+                "capability": "requestPasswordFill",
+                "credentialRef": "story-local",
+                "authorizationChannel": "story_edit"
+            }),
+        );
+        assert_eq!(
+            verification.get("status").and_then(Value::as_str),
+            Some("success")
+        );
+        let verification_id = verification
+            .get("result")
+            .and_then(|value| value.get("verificationId"))
+            .and_then(Value::as_str)
+            .expect("verification id");
+        let authorization_id = authorize_all_cells(&runtime, verification_id);
+        let execution = execute_request(
+            &runtime,
+            json!({
+                "requestId": "req-story-edit-exec",
+                "capability": "requestPasswordFill",
+                "credentialRef": "story-local",
+                "authorizationChannel": "story_edit",
+                "authorizationId": authorization_id
+            }),
+        );
+        assert_eq!(
+            execution.get("status").and_then(Value::as_str),
+            Some("success")
+        );
+        assert_eq!(
+            execution
+                .get("result")
+                .and_then(|value| value.get("allowedAction"))
+                .and_then(Value::as_str),
+            Some("story_edit")
+        );
+        assert_eq!(
+            execution
+                .get("result")
+                .and_then(|value| value.get("storyEditAuthorized"))
+                .and_then(Value::as_bool),
+            Some(true)
+        );
+        assert!(execution
+            .get("result")
+            .and_then(|value| value.get("storyRawText"))
+            .is_none());
     }
 }

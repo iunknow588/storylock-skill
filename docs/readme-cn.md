@@ -1,6 +1,6 @@
 # StoryLock 项目说明
 
-版本：2026-06-20  
+版本：2026-06-21  
 适用目录：`skill/`
 
 ## 1. 项目定位
@@ -34,20 +34,31 @@ StoryLock 是一个本地优先的授权访问 Skill 项目。它把故事处理
 8. Windows 宿主原型工程已经存在，具备本地执行与 relay 原型链路。
 9. Linux 平台 SecretStore 适配、启动期可用性检查脚本、最小本地宿主原型、WSL 打包入口、`.deb` / `tar.gz` 原型包与桌面集成预留材料已经存在。
 10. macOS 平台 Keychain SecretStore 适配与启动期可用性检查路径已经存在。
+11. StoryLock Core 正式数据包的第一版共享加载、校验和检查入口已经存在，覆盖 `package-manifest.json`、`resource-catalog.json`、`templates/*`、`author-draft.json` 和权限摘要。
 
 仍属于后续增强：
 
-1. Android 宿主从当前原型工程推进到正式交付级 App。
-2. Android 本地签名从当前 demo 实现推进到生产级 Keystore 签名闭环。
-3. Android 高强度 challenge、BiometricPrompt 与本地确认 UI 进一步对齐第二层正式模型。
-4. 更完整的 Android / Windows / Linux 多平台宿主正式发布链路。
-5. Linux 真实桌面安装、Secret Service 真环境验收、正式签名包与发布闭环。
-6. macOS 独立宿主交付材料与平台验收闭环。
+1. StoryLock Core 数据包从第一版校验入口推进到 Windows / Android / Linux 统一正式加载器。
+2. StoryLock Core 子应用接入真实本地持久化、导入、导出和校验反馈。
+3. Android 宿主从当前原型工程推进到正式交付级 App。
+4. Android 本地签名从当前 demo 实现推进到生产级 Keystore 签名闭环。
+5. Android 高强度 challenge、BiometricPrompt 与本地确认 UI 进一步对齐第二层正式模型。
+6. 更完整的 Android / Windows / Linux 多平台宿主正式发布链路。
+7. Linux 真实桌面安装、Secret Service 真环境验收、正式签名包与发布闭环。
+8. macOS 独立宿主交付材料与平台验收闭环。
 
 ## 4. 常用验证命令
 
 ```powershell
 npm run test
+```
+
+```powershell
+npm run test:storylock-package
+```
+
+```powershell
+npm run validate:storylock-package -- scripts\test\fixtures\storylock-package\valid
 ```
 
 ```powershell
@@ -70,11 +81,14 @@ node scripts/android/validate_android_question_set.mjs
 | 中文设计入口 | `docs/design/cn/README.md` |
 | 参赛与评审资料 | `docs/ref/README.md` |
 | 测试方案 | `docs/test/StoryLock测试方案_v1.0.md` |
+| StoryLock 数据包与校验 CLI | `docs/design/cn/StoryLock数据包与校验CLI说明_20260621.md` |
 | Android 宿主说明 | `docs/ref/05-Android宿主实现规范.md` |
 | 评审讲解与演示说明 | `docs/ref/06-评审讲解与演示说明.md` |
 | Linux 平台密钥存储与检查说明 | `docs/ref/11-Linux平台密钥存储与检查说明.md` |
-| 后续开发计划 | `docs/management/StoryLock后续开发计划_20260620.md` |
-| 后续开发实施清单 | `docs/management/StoryLock后续开发实施清单_20260620.md` |
+| Windows Host 菜单配置说明 | `docs/design/cn/YianWindowsHost菜单配置说明_20260621.md` |
+| 当前设计对齐后续开发计划 | `docs/management/StoryLock设计对齐后续开发计划_20260621.md` |
+| 当前设计对齐实施清单 | `docs/management/StoryLock设计对齐后续开发实施清单_20260621.md` |
+| 文档对齐后续开发计划 | `docs/management/StoryLock文档对齐后续开发计划_20260621.md` |
 
 ## 6. 对外表述建议
 
@@ -88,7 +102,7 @@ node scripts/android/validate_android_question_set.mjs
 2. 当前仓库已经有 Linux 平台 SecretStore 适配、最小宿主原型、WSL 打包与 `.deb` / `tar.gz` 原型包，但还没有完成正式 Linux 签名发布与真实桌面验收。
 3. 当前仓库已经有 macOS 平台 Keychain SecretStore 适配，但还没有单独的 macOS 宿主交付材料。
 4. 当前主线已经验证三层闭环和平台宿主原型联调。
-5. 当前仍未完成正式移动端发布与生产级本地签名交付闭环。
+5. 当前已经补入 StoryLock package 第一版校验入口，但仍未完成完整产品级导入导出、宿主持久化和真机验收。
 
 避免使用：
 

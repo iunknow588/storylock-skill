@@ -13,6 +13,7 @@ Current implemented scope:
 7. relay polling client for server-side callback execution
 8. `execute` path backed by Android Keystore asymmetric signature keys and Android Keystore-encrypted credential objects
 9. asset-backed local question-set loading for Android challenge execution
+10. shared StoryLock schema and permission summary alignment guarded by `scripts/test/android-readiness.mjs`
 
 Current network flow:
 
@@ -27,6 +28,14 @@ Current non-goals:
 1. full production mobile release hardening, attestation, and platform Credential Manager integration
 2. full Layer 1 / Layer 2 runtime parity with the JS host
 3. packaged APK build verification inside this workspace session
+4. editing StoryLock Core configuration from the Android Host UI or relay entry point
+
+Permission summary boundary:
+
+1. Android Host must not edit StoryLock Core configuration.
+2. Android Host may expose only redacted permission summary metadata derived from the shared StoryLock package model.
+3. Android permission summary semantics must stay aligned with `src/shared/storylock-package/permission-summary.js`.
+4. Android responses must not expose story raw text, answers, passwords, private keys, or `signingKeyBytes`.
 
 Recommended next steps:
 

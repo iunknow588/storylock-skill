@@ -50,6 +50,7 @@ function importedQuestionBank() {
 }
 
 const dataDir = await mkdtemp(join(tmpdir(), 'storylock-linux-host-loop-'));
+const storyLockPackageDir = join(process.cwd(), 'scripts', 'test', 'fixtures', 'storylock-package', 'valid');
 let server;
 let runtime;
 
@@ -59,6 +60,7 @@ try {
     port: 0,
     developmentMode: true,
     resetDataDir: true,
+    storyLockPackageDir,
   });
   server = await startLinuxHostServer(runtime);
   const address = server.address();
@@ -67,6 +69,21 @@ try {
   const health = await getJson(`${baseUrl}/health`);
   assert.equal(health.implementation, 'node-linux-prototype');
   assert.equal(health.questionBank.questionSetVersion, 'linux-local-v1');
+  assert.equal(health.storyLockPackage.configured, true);
+  assert.equal(health.storyLockPackage.valid, true);
+  assert.equal(health.storyLockPackage.permissionObjects, 4);
+
+  const permissionSummary = await getJson(`${baseUrl}/permission-summary`);
+  assertSuccess(permissionSummary, 'permission-summary');
+  assert.equal(permissionSummary.result.permissionObjects, 4);
+  assert.equal(permissionSummary.result.permissionSummary.items.length, 4);
+  assert.equal(
+    permissionSummary.result.permissionSummary.items.find((item) => item.objectKind === 'password').action,
+    'password_fill',
+  );
+  assert.equal(JSON.stringify(permissionSummary).includes('canonicalAnswer'), false);
+  assert.equal(JSON.stringify(permissionSummary).includes('signingKeyBytes'), false);
+  assert.equal(JSON.stringify(permissionSummary).includes('privateKey'), false);
 
   const statusBefore = await getJson(`${baseUrl}/question-bank/status`);
   assertSuccess(statusBefore, 'question-bank-status');
@@ -129,6 +146,7 @@ try {
     baseUrl,
     checks: [
       'health',
+      'permission-summary',
       'question-bank-status',
       'question-bank-import',
       'verify',

@@ -13,7 +13,7 @@ const skippedDirectories = new Set([
 ]);
 
 const skippedRelativePrefixes = [
-  'docs/management/back/',
+  'docs/management/BACK/',
   'src/storylock-local-story-access-skill/',
   'src/storylock-local-story-processing-skill/',
   'src/storylock-remote-gateway-skill/',

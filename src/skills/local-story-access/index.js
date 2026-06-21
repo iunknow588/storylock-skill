@@ -1,4 +1,10 @@
 import { createAccessHost, startAccessHostCleanup } from './access-host.js';
+import {
+  AUTHORIZATION_CHANNELS,
+  assertRemoteChannelAllowed,
+  channelPolicyFor,
+  resolveAuthorizationChannel,
+} from './authorization-channel.js';
 import { buildErrorPayload } from './errors.js';
 
 const REPLAY_DRIFT_MS = 30_000;
@@ -76,6 +82,29 @@ function toErrorResponse({ requestId, capability, error }) {
   };
 }
 
+function recordSkillAudit(host, eventType, {
+  identityId = null,
+  storyObjectId = null,
+  requestId = null,
+  result = null,
+  errorCode = null,
+  redactionLevel = 'audit_meta_only',
+  meta = null,
+} = {}) {
+  if (!host || typeof host.recordAudit !== 'function') {
+    return;
+  }
+  host.recordAudit(eventType, {
+    identityId,
+    storyObjectId,
+    requestId,
+    result,
+    errorCode,
+    redactionLevel,
+    meta,
+  });
+}
+
 function normalizeObjectType(value) {
   const objectType = normalizeString(value ?? 'generic_secret', 'objectType', { maxLength: 64 });
   if (!['generic_secret', 'credential', 'signature_key', 'file_key', 'story_object'].includes(objectType)) {
@@ -86,16 +115,16 @@ function normalizeObjectType(value) {
 
 function normalizeRequestedAction(value) {
   const requestedAction = normalizeString(value ?? 'authorize', 'requestedAction', { maxLength: 64 });
-  if (!['authorize', 'password_fill', 'signature', 'local_processing'].includes(requestedAction)) {
-    throw new Error('requestedAction must be authorize, password_fill, signature, or local_processing');
+  if (!['authorize', 'password_fill', 'signature', 'local_processing', 'batch_read', 'story_edit'].includes(requestedAction)) {
+    throw new Error('requestedAction must be authorize, password_fill, signature, local_processing, batch_read, or story_edit');
   }
   return requestedAction;
 }
 
 function normalizeStrength(value, fieldName = 'requiredStrength') {
   const strength = normalizeString(value, fieldName, { maxLength: 32 });
-  if (!['low', 'medium', 'high'].includes(strength)) {
-    throw new Error(`${fieldName} must be low, medium, or high`);
+  if (!['low', 'medium', 'high', 'story_edit'].includes(strength)) {
+    throw new Error(`${fieldName} must be low, medium, high, or story_edit`);
   }
   return strength;
 }
@@ -119,9 +148,10 @@ function gridPolicyForStrength(requiredStrength) {
     low: 3,
     medium: 6,
     high: 9,
+    story_edit: 22,
   }[strength];
   return {
-    gridSize: 9,
+    gridSize: strength === 'story_edit' ? 24 : 9,
     requiredCells,
   };
 }
@@ -211,6 +241,35 @@ export class ObjectStrengthPolicySkill {
         requestedAction,
         policyHints: input.policyHints ?? {},
       });
+      const authorizationChannel = resolveAuthorizationChannel({
+        objectType,
+        requestedAction,
+        policyHints: input.policyHints ?? {},
+      });
+      if (input.remoteRequest === true) {
+        try {
+          assertRemoteChannelAllowed(authorizationChannel);
+        } catch (error) {
+          error.code = 'SLG-001';
+          error.type = 'policy_denied';
+          error.retryable = false;
+          recordSkillAudit(this.host, 'policy_denied', {
+            identityId,
+            storyObjectId: objectRef,
+            requestId: fallbackRequestId,
+            result: 'denied',
+            errorCode: error.code,
+            meta: {
+              capability: 'resolveObjectStrength',
+              authorizationChannel,
+              requestedAction,
+              remoteRequest: true,
+            },
+          });
+          throw error;
+        }
+      }
+      const channelPolicy = channelPolicyFor(authorizationChannel);
       return {
         requestId: fallbackRequestId,
         status: 'success',
@@ -222,6 +281,8 @@ export class ObjectStrengthPolicySkill {
           objectType,
           requestedAction,
           requiredStrength,
+          authorizationChannel,
+          channelPolicy,
           gridPolicy: gridPolicyForStrength(requiredStrength),
         },
         redactionLevel: 'none',
@@ -367,7 +428,11 @@ export class LocalAuthorizationSkill {
       const objectRef = normalizeString(input.objectRef ?? input.credentialRef ?? input.keyId, 'objectRef', { maxLength: MAX_ID_LENGTH });
       const allowedAction = normalizeRequestedAction(input.allowedAction ?? input.requestedAction ?? 'authorize');
       const answers = normalizeAuthorizationAnswers(input.answers);
-      const authorization = this.host.submitChallengeAnswers(identityId, verificationId, answers);
+      const authorization = this.host.submitChallengeAnswers(identityId, verificationId, answers, {
+        requestId: fallbackRequestId,
+        storyObjectId: objectRef,
+        allowedAction,
+      });
       if (!authorization.approved) {
         throw Object.assign(new Error('local authorization answers did not match'), {
           code: 'SLG-003',
@@ -482,4 +547,11 @@ export class LocalRevocationSkill {
   }
 }
 
-export { createAccessHost, startAccessHostCleanup };
+export {
+  AUTHORIZATION_CHANNELS,
+  assertRemoteChannelAllowed,
+  channelPolicyFor,
+  createAccessHost,
+  resolveAuthorizationChannel,
+  startAccessHostCleanup,
+};

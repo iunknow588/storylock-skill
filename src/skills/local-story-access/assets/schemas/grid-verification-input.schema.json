@@ -22,7 +22,7 @@
     },
     "requiredStrength": {
       "type": "string",
-      "enum": ["low", "medium", "high"]
+      "enum": ["low", "medium", "high", "story_edit"]
     },
     "requestId": {
       "type": "string",

@@ -32,6 +32,9 @@ const requiredFiles = [
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostRegistrationManager.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/LocalAuthorizationRuntime.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/StoryLockAndroidHostService.kt',
+  'src/shared/assets/schemas/storylock-resource-catalog.schema.json',
+  'src/shared/assets/schemas/storylock-permission-summary.schema.json',
+  'src/shared/storylock-package/permission-summary.js',
   'scripts/release/android/build_apk.ps1',
   'scripts/release/android/build_apk.cmd',
   'scripts/android/validate_android_question_set.mjs',
@@ -108,6 +111,21 @@ for (const token of [
 assert.doesNotMatch(hostService, /\.put\("password"\s*,\s*credential/u, 'Android password-fill response must not return raw password');
 assert.doesNotMatch(hostService, /\.put\("privateKey"/u, 'Android signature response must not expose privateKey fields');
 assert.doesNotMatch(hostService, /\.put\("signingKeyBytes"/u, 'Android signature response must not expose signingKeyBytes fields');
+
+const sharedPermissionSummary = read('src/shared/storylock-package/permission-summary.js');
+for (const token of [
+  'createPermissionSummary',
+  'permissionAction',
+  'permissionChallengePolicy',
+  'permissionRequiredGridCount',
+  'signingKeyBytes',
+]) {
+  assert.ok(sharedPermissionSummary.includes(token), `Shared permission summary must include ${token}`);
+}
+
+const androidReadme = read('src/host/android-host/README.md');
+assert.match(androidReadme, /permission summary/u, 'Android README must mention permission summary alignment');
+assert.match(androidReadme, /must not edit StoryLock Core configuration/u, 'Android README must preserve Core configuration boundary');
 
 const gatewayClient = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostGatewayClient.kt');
 for (const token of [

@@ -25,7 +25,19 @@ The source tree uses the simplified directories above. Older package names remai
 3. Layer 3 automatically resolves `demo`, `test`, or `production` EIP-712 domain configuration from environment variables when a domain is not passed directly.
 4. Production persistent hosts do not enable legacy answer fallback by default.
 
-## 4. Question Set Workflow
+## 4. StoryLock Package Workflow
+
+The implementation workspace now includes the first shared StoryLock package validation entry. It covers `package-manifest.json`, `resource-catalog.json`, `templates/*`, `author-draft.json`, and derived permission summaries.
+
+```powershell
+npm run test:storylock-package
+npm run validate:storylock-package -- scripts\test\fixtures\storylock-package\valid
+npm run inspect:storylock-package -- scripts\test\fixtures\storylock-package\valid
+```
+
+The host UI must continue to read only derived permission summaries. Story text, challenge answers, passwords, private keys, and `signingKeyBytes` stay inside the local core boundary.
+
+## 5. Question Set Workflow
 
 Layer 2 provides a template, validation, and import path:
 
@@ -39,7 +51,7 @@ Pop-Location
 
 Use `--dry-run` validation before importing any persistent question set.
 
-## 5. Verification
+## 6. Verification
 
 Full workspace:
 
@@ -53,10 +65,12 @@ Path consistency:
 node scripts/verify/path-consistency.mjs
 ```
 
-## 6. Documentation Entry Points
+## 7. Documentation Entry Points
 
 1. Workspace root: `README.md`
 2. Chinese design entry: `docs/design/cn/README.md`
-3. Submission references: `docs/ref/README.md`
-4. Management and review notes: `docs/management/`
-5. Local-story-access assets and scripts: `src/skills/local-story-access/`
+3. StoryLock package and validation CLI: `docs/design/cn/StoryLock数据包与校验CLI说明_20260621.md`
+4. Submission references: `docs/ref/README.md`
+5. Windows Host menu configuration: `docs/design/cn/YianWindowsHost菜单配置说明_20260621.md`
+6. Current work configuration and task plans: `docs/management/`
+7. Local-story-access assets and scripts: `src/skills/local-story-access/`

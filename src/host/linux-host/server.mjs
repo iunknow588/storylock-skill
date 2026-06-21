@@ -12,6 +12,10 @@ import {
   LocalRevocationSkill,
 } from '../../skills/local-story-access/index.js';
 import { MemorySecretStore } from '../../shared/secret-store.js';
+import {
+  inspectStoryLockPackage,
+  loadStoryLockPackage,
+} from '../../shared/storylock-package/index.js';
 
 const hostRoot = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(hostRoot, '../../..');
@@ -108,6 +112,7 @@ export async function createLinuxHostRuntime({
   developmentMode = envFlag('STORYLOCK_LINUX_DEVELOPMENT_MODE', true),
   resetDataDir = false,
   questionBankPath = defaultAssetPath,
+  storyLockPackageDir = envString('STORYLOCK_LINUX_STORYLOCK_PACKAGE_DIR', ''),
 } = {}) {
   const absoluteDataDir = resolve(dataDir);
   if (resetDataDir && existsSync(absoluteDataDir)) {
@@ -130,6 +135,29 @@ export async function createLinuxHostRuntime({
     questionSetVersion: bank.questionSetVersion,
     normalizationVersion: bank.normalizationVersion,
   });
+  const resolvedStoryLockPackageDir = storyLockPackageDir ? resolve(storyLockPackageDir) : null;
+  const storyLockPackage = resolvedStoryLockPackageDir
+    ? inspectStoryLockPackage(await loadStoryLockPackage(resolvedStoryLockPackageDir))
+    : {
+        valid: false,
+        errors: [],
+        warnings: [],
+        infos: [{
+          code: 'SLP-LINUX-001',
+          level: 'info',
+          path: '$',
+          message: 'Linux host StoryLock package directory is not configured.',
+          suggestion: 'Set STORYLOCK_LINUX_STORYLOCK_PACKAGE_DIR to a local StoryLock package directory.',
+        }],
+        summary: {
+          packageId: null,
+          resources: 0,
+          permissionObjects: 0,
+          storyNodes: 0,
+          templates: 0,
+          permissionSummary: { items: [] },
+        },
+      };
   return {
     product: 'Yian Linux Host',
     implementation: 'node-linux-prototype',
@@ -140,6 +168,8 @@ export async function createLinuxHostRuntime({
     dbPath,
     questionBankPath,
     questionBank: bank,
+    storyLockPackageDir: resolvedStoryLockPackageDir,
+    storyLockPackage,
     host,
     grid: new GridChallengeSkill({ host }),
     auth: new LocalAuthorizationSkill({ host }),
@@ -209,6 +239,37 @@ async function handleLinuxHostRequest(runtime, req, res) {
         questionSetVersion: runtime.questionBank.questionSetVersion,
         questionCount: activeQuestionCount(runtime),
       },
+      storyLockPackage: {
+        path: runtime.storyLockPackageDir,
+        configured: Boolean(runtime.storyLockPackageDir),
+        valid: runtime.storyLockPackage.valid,
+        packageId: runtime.storyLockPackage.summary.packageId,
+        permissionObjects: runtime.storyLockPackage.summary.permissionObjects,
+      },
+    });
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/permission-summary') {
+    jsonResponse(res, 200, {
+      requestId: `req-${randomUUID()}`,
+      status: runtime.storyLockPackageDir ? 'success' : 'not_configured',
+      capability: 'permissionSummary',
+      executionLocation: 'local',
+      result: {
+        packageDir: runtime.storyLockPackageDir,
+        packageId: runtime.storyLockPackage.summary.packageId,
+        valid: runtime.storyLockPackage.valid,
+        resources: runtime.storyLockPackage.summary.resources,
+        permissionObjects: runtime.storyLockPackage.summary.permissionObjects,
+        permissionSummary: runtime.storyLockPackage.summary.permissionSummary,
+        errors: runtime.storyLockPackage.errors,
+        warnings: runtime.storyLockPackage.warnings,
+        infos: runtime.storyLockPackage.infos,
+      },
+      redactionLevel: 'audit_meta_only',
+      retentionGranted: 'audit_meta_only',
+      error: null,
     });
     return;
   }

@@ -1,0 +1,16 @@
+{
+  "version": "1",
+  "resources": [
+    {
+      "resourceId": "broken-main",
+      "resourceKind": "website",
+      "providerId": "broken",
+      "bindings": [
+        {
+          "role": "password",
+          "objectId": "password-only-two-segments"
+        }
+      ]
+    }
+  ]
+}

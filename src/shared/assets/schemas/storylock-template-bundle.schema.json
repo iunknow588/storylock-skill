@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StoryLockTemplateBundle",
+  "type": "object",
+  "required": ["templateType", "items"],
+  "properties": {
+    "version": { "type": "string" },
+    "templateType": {
+      "type": "string",
+      "enum": ["login-sites", "signing-actions", "agent-tasks"]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["templateId", "resourceId", "bindings"],
+        "properties": {
+          "templateId": { "type": "string", "minLength": 1 },
+          "displayName": { "type": "string" },
+          "resourceId": { "type": "string", "minLength": 1 },
+          "bindings": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["role"],
+              "properties": {
+                "fieldName": { "type": "string" },
+                "role": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

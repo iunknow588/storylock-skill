@@ -1,0 +1,15 @@
+{
+  "version": "1",
+  "templateType": "login-sites",
+  "items": [
+    {
+      "templateId": "github-login",
+      "displayName": "GitHub login",
+      "resourceId": "github-main",
+      "bindings": [
+        { "fieldName": "username", "role": "username" },
+        { "fieldName": "password", "role": "password" }
+      ]
+    }
+  ]
+}

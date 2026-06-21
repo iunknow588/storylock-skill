@@ -1,0 +1,15 @@
+{
+  "version": "1",
+  "templateType": "signing-actions",
+  "items": [
+    {
+      "templateId": "evm-personal-sign",
+      "displayName": "EVM personal sign",
+      "resourceId": "wallet-main",
+      "bindings": [
+        { "fieldName": "address", "role": "address" },
+        { "fieldName": "signingKey", "role": "signing_key" }
+      ]
+    }
+  ]
+}

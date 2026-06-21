@@ -87,6 +87,8 @@ await withDb(async (ctx) => {
   assert.equal(signaturePolicy.status, 'success');
   assert.equal(signaturePolicy.result.requiredStrength, 'high');
   assert.equal(signaturePolicy.result.gridPolicy.requiredCells, 9);
+  assert.equal(signaturePolicy.result.authorizationChannel, 'single_read');
+  assert.equal(signaturePolicy.result.channelPolicy.storyNodeThreshold, 6);
   const credentialPolicy = await policy.run({
     identityId: 'id-policy',
     objectRef: 'cred-main',
@@ -96,6 +98,50 @@ await withDb(async (ctx) => {
   });
   assert.equal(credentialPolicy.result.requiredStrength, 'medium');
   assert.equal(credentialPolicy.result.gridPolicy.requiredCells, 6);
+  assert.equal(credentialPolicy.result.authorizationChannel, 'single_read');
+  const batchPolicy = await policy.run({
+    identityId: 'id-policy',
+    objectRef: 'resource-batch',
+    objectType: 'generic_secret',
+    requestedAction: 'batch_read',
+    requestId: 'req-policy-batch',
+  });
+  assert.equal(batchPolicy.result.authorizationChannel, 'batch_read');
+  assert.equal(batchPolicy.result.channelPolicy.storyNodeThreshold, 12);
+  assert.equal(batchPolicy.result.channelPolicy.gridPolicy.requiredCells, 12);
+  const storyEditPolicy = await policy.run({
+    identityId: 'id-policy',
+    objectRef: 'story-local',
+    objectType: 'story_object',
+    requestedAction: 'story_edit',
+    requestId: 'req-policy-story-edit',
+  });
+  assert.equal(storyEditPolicy.result.authorizationChannel, 'story_edit');
+  assert.equal(storyEditPolicy.result.channelPolicy.storyNodeThreshold, 22);
+  assert.equal(storyEditPolicy.result.channelPolicy.remoteAllowed, false);
+  const remoteStoryEditPolicy = await policy.run({
+    identityId: 'id-policy',
+    objectRef: 'story-local',
+    objectType: 'story_object',
+    requestedAction: 'story_edit',
+    requestId: 'req-policy-remote-story-edit',
+    remoteRequest: true,
+  });
+  assert.equal(remoteStoryEditPolicy.status, 'error');
+  assert.equal(remoteStoryEditPolicy.error.type, 'policy_denied');
+  const policyAudit = policy.host.db.prepare(
+    `SELECT event_type, identity_id, story_object_id, request_id, result, error_code, meta_json
+     FROM audit_log
+     WHERE event_type = ?
+     ORDER BY audit_id DESC
+     LIMIT 1`
+  ).get('policy_denied');
+  assert.equal(policyAudit.identity_id, 'id-policy');
+  assert.equal(policyAudit.story_object_id, 'story-local');
+  assert.equal(policyAudit.request_id, 'req-policy-remote-story-edit');
+  assert.equal(policyAudit.result, 'denied');
+  assert.equal(policyAudit.error_code, 'SLG-001');
+  assert.equal(JSON.parse(policyAudit.meta_json).authorizationChannel, 'story_edit');
   pass('object-strength-policy');
 });
 
@@ -455,6 +501,19 @@ await withDb(async (ctx) => {
   assert.equal(audit.identity_id, 'id-revoke-challenge');
   assert.equal(audit.result, 'success');
   assert.equal(JSON.parse(audit.meta_json).reason, 'selftest');
+
+  const failedAudit = grid.host.db.prepare(
+    `SELECT event_type, identity_id, request_id, result, error_code, meta_json
+     FROM audit_log
+     WHERE event_type = ?
+     ORDER BY audit_id DESC
+     LIMIT 1`
+  ).get('challenge_failed');
+  assert.equal(failedAudit.identity_id, 'id-revoke-challenge');
+  assert.equal(failedAudit.request_id, 'req-revoke-challenge-submit');
+  assert.equal(failedAudit.result, 'failed');
+  assert.equal(failedAudit.error_code, 'SLG-003');
+  assert.equal(JSON.parse(failedAudit.meta_json).reason, 'challenge_not_active');
   pass('challenge-revocation');
 });
 
@@ -502,6 +561,26 @@ await withDb(async (ctx) => {
   assert.equal(audit.identity_id, 'id-revoke-session');
   assert.equal(audit.result, 'success');
   assert.equal(JSON.parse(audit.meta_json).reason, 'selftest');
+
+  const rejected = await revoke.run({
+    identityId: 'id-revoke-session',
+    authorizationId: authorization.result.authorizationId,
+    reason: 'selftest-repeat',
+    requestId: 'req-revoke-session-repeat',
+  });
+  assert.equal(rejected.status, 'error');
+  assert.equal(rejected.error.code, 'SLG-005');
+  const rejectedAudit = grid.host.db.prepare(
+    `SELECT event_type, identity_id, result, error_code, meta_json
+     FROM audit_log
+     WHERE event_type = ?
+     ORDER BY audit_id DESC
+     LIMIT 1`
+  ).get('session_revoke_rejected');
+  assert.equal(rejectedAudit.identity_id, 'id-revoke-session');
+  assert.equal(rejectedAudit.result, 'error');
+  assert.equal(rejectedAudit.error_code, 'SLG-005');
+  assert.equal(JSON.parse(rejectedAudit.meta_json).currentStatus, 'session_revoked');
   pass('session-revocation');
 });
 
@@ -533,6 +612,23 @@ await withDb(async (ctx) => {
   });
   assert.equal(result.status, 'error');
   assert.equal(result.error.code, 'SLG-003');
+  const audit = grid.host.db.prepare(
+    `SELECT event_type, identity_id, story_object_id, request_id, result, error_code, meta_json
+     FROM audit_log
+     WHERE event_type = ?
+     ORDER BY audit_id DESC
+     LIMIT 1`
+  ).get('challenge_failed');
+  assert.equal(audit.identity_id, 'id-auth-wrong');
+  assert.equal(audit.story_object_id, 'wallet-key-main');
+  assert.equal(audit.request_id, 'req-auth-wrong-submit');
+  assert.equal(audit.result, 'failed');
+  assert.equal(audit.error_code, 'SLG-003');
+  const auditMeta = JSON.parse(audit.meta_json);
+  assert.equal(auditMeta.reason, 'answer_mismatch');
+  assert.equal(auditMeta.requiredThreshold, 6);
+  assert.equal(audit.meta_json.includes('answer-1'), false);
+  assert.equal(audit.meta_json.includes('answer-2'), false);
   pass('local-authorization-rejects-wrong-cell-binding');
 });
 

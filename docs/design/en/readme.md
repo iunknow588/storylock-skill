@@ -92,4 +92,4 @@ First export or back up the local files from the old device, then upload or move
 
 ## Maintenance Note
 
-Historical English design analysis files have been archived under `docs/management/back`. The current `docs/design/en` directory keeps the active English user guide and design documents.
+Temporary management notes are not part of the formal documentation entry. The current `docs/design/en` directory keeps the active English user guide and design documents.

@@ -77,7 +77,7 @@ function walk(dir, output = []) {
       if (entry.name === 'node_modules' || entry.name === '.git') {
         continue;
       }
-      if (relative(root, fullPath).replaceAll('\\', '/') === 'docs/management/back') {
+      if (relative(root, fullPath).replaceAll('\\', '/') === 'docs/management/BACK') {
         continue;
       }
       walk(fullPath, output);

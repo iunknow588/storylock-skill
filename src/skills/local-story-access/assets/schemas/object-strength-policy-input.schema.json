@@ -27,11 +27,25 @@
     },
     "requestedAction": {
       "type": "string",
-      "enum": ["authorize", "password_fill", "signature", "local_processing"],
+      "enum": ["authorize", "password_fill", "signature", "local_processing", "batch_read", "story_edit"],
       "default": "authorize"
+    },
+    "remoteRequest": {
+      "type": "boolean",
+      "default": false
     },
     "policyHints": {
       "type": "object",
+      "properties": {
+        "requiredStrength": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "story_edit"]
+        },
+        "authorizationChannel": {
+          "type": "string",
+          "enum": ["single_read", "batch_read", "story_edit"]
+        }
+      },
       "additionalProperties": true,
       "default": {}
     },

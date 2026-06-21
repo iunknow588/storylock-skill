@@ -1,0 +1,14 @@
+{
+  "packageId": "demo-storylock-package",
+  "version": "0.1.0",
+  "createdAt": "2026-06-21T00:00:00Z",
+  "description": "Valid StoryLock package fixture.",
+  "files": [
+    "package-manifest.json",
+    "resource-catalog.json",
+    "author-draft.json",
+    "templates/login-sites.json",
+    "templates/signing-actions.json",
+    "templates/agent-tasks.json"
+  ]
+}

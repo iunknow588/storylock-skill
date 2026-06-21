@@ -12,13 +12,16 @@ Current implemented scope:
 6. `POST /authorize`.
 7. `POST /execute`.
 8. `POST /revoke`.
-9. StoryLock Layer 2 challenge/session logic reused from `src/skills/local-story-access`.
+9. `GET /permission-summary`.
+10. StoryLock Layer 2 challenge/session logic reused from `src/skills/local-story-access`.
+11. Optional StoryLock package loading through `src/shared/storylock-package`.
 
 Current security boundary:
 
 1. Development checks use `MemorySecretStore` so the loop can run on CI and Windows workstations.
 2. Linux production mode should run with `STORYLOCK_LINUX_USE_PLATFORM_SECRET_STORE=1`, which uses `secret-tool` / Secret Service through `createPlatformSecretStore({ platform: "linux" })`.
-3. The current Linux host is a prototype and does not yet include tray UI, desktop autostart, system package scripts, object-storage upload, or signed Linux packages.
+3. `GET /permission-summary` returns only package metadata and redacted permission summary. It must not return story raw text, answers, passwords, private keys, or `signingKeyBytes`.
+4. The current Linux host is a prototype and does not yet include tray UI, desktop autostart, system package scripts, object-storage upload, or signed Linux packages.
 
 Local check:
 
@@ -39,3 +42,4 @@ Useful environment variables:
 3. `STORYLOCK_LINUX_IDENTITY_ID`
 4. `STORYLOCK_LINUX_USE_PLATFORM_SECRET_STORE`
 5. `STORYLOCK_LINUX_DEVELOPMENT_MODE`
+6. `STORYLOCK_LINUX_STORYLOCK_PACKAGE_DIR`

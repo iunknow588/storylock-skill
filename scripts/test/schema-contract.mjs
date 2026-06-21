@@ -18,6 +18,12 @@ const requiredSchemas = [
   'src/skills/remote-gateway/assets/schemas/android-host-health.schema.json',
   'src/skills/remote-gateway/assets/schemas/remote-gateway-request.schema.json',
   'src/skills/remote-gateway/assets/schemas/remote-gateway-response.schema.json',
+  'src/shared/assets/schemas/storylock-package-manifest.schema.json',
+  'src/shared/assets/schemas/storylock-resource-catalog.schema.json',
+  'src/shared/assets/schemas/storylock-template-bundle.schema.json',
+  'src/shared/assets/schemas/storylock-author-draft.schema.json',
+  'src/shared/assets/schemas/storylock-node.schema.json',
+  'src/shared/assets/schemas/storylock-permission-summary.schema.json',
 ];
 
 function walk(dir, suffix, output = []) {

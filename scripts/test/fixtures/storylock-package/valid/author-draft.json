@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "storyTitle": "Demo StoryLock Memory",
+  "summary": "A local-only author draft used for package validation.",
+  "memoryAnchors": ["home", "school", "journey"],
+  "elementGroups": ["time", "place", "person", "theme", "conflict", "plot", "choice", "ending"],
+  "nodes": [
+    { "nodeId": "node-01", "title": "Node 01", "elementId": "time", "question": "Question 01?" },
+    { "nodeId": "node-02", "title": "Node 02", "elementId": "place", "question": "Question 02?" },
+    { "nodeId": "node-03", "title": "Node 03", "elementId": "person", "question": "Question 03?" },
+    { "nodeId": "node-04", "title": "Node 04", "elementId": "theme", "question": "Question 04?" },
+    { "nodeId": "node-05", "title": "Node 05", "elementId": "conflict", "question": "Question 05?" },
+    { "nodeId": "node-06", "title": "Node 06", "elementId": "plot", "question": "Question 06?" },
+    { "nodeId": "node-07", "title": "Node 07", "elementId": "choice", "question": "Question 07?" },
+    { "nodeId": "node-08", "title": "Node 08", "elementId": "ending", "question": "Question 08?" },
+    { "nodeId": "node-09", "title": "Node 09", "elementId": "time", "question": "Question 09?" },
+    { "nodeId": "node-10", "title": "Node 10", "elementId": "place", "question": "Question 10?" },
+    { "nodeId": "node-11", "title": "Node 11", "elementId": "person", "question": "Question 11?" },
+    { "nodeId": "node-12", "title": "Node 12", "elementId": "theme", "question": "Question 12?" },
+    { "nodeId": "node-13", "title": "Node 13", "elementId": "conflict", "question": "Question 13?" },
+    { "nodeId": "node-14", "title": "Node 14", "elementId": "plot", "question": "Question 14?" },
+    { "nodeId": "node-15", "title": "Node 15", "elementId": "choice", "question": "Question 15?" },
+    { "nodeId": "node-16", "title": "Node 16", "elementId": "ending", "question": "Question 16?" },
+    { "nodeId": "node-17", "title": "Node 17", "elementId": "time", "question": "Question 17?" },
+    { "nodeId": "node-18", "title": "Node 18", "elementId": "place", "question": "Question 18?" },
+    { "nodeId": "node-19", "title": "Node 19", "elementId": "person", "question": "Question 19?" },
+    { "nodeId": "node-20", "title": "Node 20", "elementId": "theme", "question": "Question 20?" },
+    { "nodeId": "node-21", "title": "Node 21", "elementId": "conflict", "question": "Question 21?" },
+    { "nodeId": "node-22", "title": "Node 22", "elementId": "plot", "question": "Question 22?" },
+    { "nodeId": "node-23", "title": "Node 23", "elementId": "choice", "question": "Question 23?" },
+    { "nodeId": "node-24", "title": "Node 24", "elementId": "ending", "question": "Question 24?" }
+  ]
+}

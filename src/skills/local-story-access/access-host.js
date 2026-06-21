@@ -601,30 +601,53 @@ class SqliteStore {
     };
   }
 
-  submitChallengeAnswers(identityId, challengeId, answers) {
+  submitChallengeAnswers(identityId, challengeId, answers, {
+    requestId = null,
+    storyObjectId = null,
+    allowedAction = null,
+  } = {}) {
+    const auditFailure = (result, errorCode = 'SLG-003', meta = {}) => {
+      this.recordAudit('challenge_failed', {
+        identityId,
+        storyObjectId,
+        requestId,
+        result,
+        errorCode,
+        meta: {
+          challengeId,
+          allowedAction,
+          ...meta,
+        },
+      });
+    };
     const challenge = this.db.prepare('SELECT * FROM challenge_state WHERE challenge_id = ?').get(challengeId);
     if (!challenge) {
+      auditFailure('failed', 'SLG-003', { reason: 'challenge_not_found' });
       const err = new Error('challenge verification failed');
       err.key = 'CHALLENGE_FAILED';
       throw err;
     }
     if (challenge.identity_id !== identityId) {
+      auditFailure('failed', 'SLG-003', { reason: 'identity_mismatch' });
       const err = new Error('challenge verification failed');
       err.key = 'CHALLENGE_FAILED';
       throw err;
     }
     if (challenge.status !== 'challenge_created') {
+      auditFailure('failed', 'SLG-003', { reason: 'challenge_not_active', status: challenge.status });
       const err = new Error('challenge verification failed');
       err.key = 'CHALLENGE_FAILED';
       throw err;
     }
     if (challenge.expires_at + REPLAY_DRIFT_MS <= nowMs()) {
+      auditFailure('failed', 'SLG-003', { reason: 'challenge_expired' });
       const err = new Error('challenge verification failed');
       err.key = 'CHALLENGE_FAILED';
       throw err;
     }
     const window = this.getFailureWindow(identityId);
     if (window.lockedUntil > nowMs()) {
+      auditFailure('locked', 'SLG-004', { reason: 'identity_locked', retryAfter: window.lockedUntil });
       const err = new Error('challenge is locked');
       err.key = 'CHALLENGE_LOCKED';
       err.retryAfter = window.lockedUntil;
@@ -634,6 +657,7 @@ class SqliteStore {
       'UPDATE challenge_state SET status = ? WHERE challenge_id = ? AND status = ?'
     ).run('answers_submitted', challengeId, 'challenge_created');
     if (stateUpdate.changes !== 1) {
+      auditFailure('failed', 'SLG-003', { reason: 'challenge_state_race' });
       const err = new Error('challenge verification failed');
       err.key = 'CHALLENGE_FAILED';
       throw err;
@@ -670,7 +694,12 @@ class SqliteStore {
       this.db.prepare(
         'UPDATE challenge_state SET status = ?, failure_count = ?, lock_until = ? WHERE challenge_id = ?'
       ).run(lockedUntil ? 'locked' : 'failed', nextCount, lockedUntil, challengeId);
-      this.recordAudit('challenge_failed', { identityId, result: lockedUntil ? 'locked' : 'failed' });
+      auditFailure(lockedUntil ? 'locked' : 'failed', lockedUntil ? 'SLG-004' : 'SLG-003', {
+        reason: 'answer_mismatch',
+        matchedCount,
+        requiredThreshold: challenge.required_threshold,
+        retryAfter: lockedUntil || null,
+      });
       return { approved: false, matchedCount, challenge: { ...challenge, status: lockedUntil ? 'locked' : 'failed', failure_count: nextCount, lock_until: lockedUntil }, retryAfter: lockedUntil || null };
     }
     this.db.prepare('UPDATE failure_window SET failure_count = 0, locked_until = 0 WHERE identity_id = ?').run(identityId);
@@ -705,6 +734,16 @@ class SqliteStore {
   revokeChallenge(identityId, challengeId, { reason = 'manual_revocation' } = {}) {
     const row = this.db.prepare('SELECT challenge_id, identity_id, status FROM challenge_state WHERE challenge_id = ?').get(challengeId);
     if (!row || row.identity_id !== identityId || row.status !== 'challenge_created') {
+      this.recordAudit('challenge_revoke_rejected', {
+        identityId,
+        result: 'error',
+        errorCode: 'SLG-003',
+        meta: {
+          challengeId,
+          reason,
+          currentStatus: row?.status ?? null,
+        },
+      });
       const err = new Error('challenge cannot be revoked');
       err.key = 'CHALLENGE_FAILED';
       throw err;
@@ -713,6 +752,16 @@ class SqliteStore {
       'UPDATE challenge_state SET status = ? WHERE challenge_id = ? AND status = ?'
     ).run('revoked', challengeId, 'challenge_created');
     if (result.changes !== 1) {
+      this.recordAudit('challenge_revoke_rejected', {
+        identityId,
+        result: 'error',
+        errorCode: 'SLG-003',
+        meta: {
+          challengeId,
+          reason,
+          currentStatus: 'update_race',
+        },
+      });
       const err = new Error('challenge cannot be revoked');
       err.key = 'CHALLENGE_FAILED';
       throw err;
@@ -737,6 +786,16 @@ class SqliteStore {
   revokeSession(identityId, sessionId, { reason = 'manual_revocation' } = {}) {
     const row = this.db.prepare('SELECT session_id, identity_id, status FROM session_store WHERE session_id = ?').get(sessionId);
     if (!row || row.identity_id !== identityId || row.status !== 'session_active') {
+      this.recordAudit('session_revoke_rejected', {
+        identityId,
+        result: 'error',
+        errorCode: 'SLG-005',
+        meta: {
+          sessionId,
+          reason,
+          currentStatus: row?.status ?? null,
+        },
+      });
       const err = new Error('session cannot be revoked');
       err.key = 'SESSION_INVALID';
       throw err;
@@ -745,6 +804,16 @@ class SqliteStore {
       'UPDATE session_store SET status = ? WHERE session_id = ? AND status = ?'
     ).run('session_revoked', sessionId, 'session_active');
     if (result.changes !== 1) {
+      this.recordAudit('session_revoke_rejected', {
+        identityId,
+        result: 'error',
+        errorCode: 'SLG-005',
+        meta: {
+          sessionId,
+          reason,
+          currentStatus: 'update_race',
+        },
+      });
       const err = new Error('session cannot be revoked');
       err.key = 'SESSION_INVALID';
       throw err;

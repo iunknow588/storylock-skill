@@ -1,0 +1,14 @@
+{
+  "version": "1",
+  "templateType": "agent-tasks",
+  "items": [
+    {
+      "templateId": "github-status-check",
+      "displayName": "GitHub status check",
+      "resourceId": "github-main",
+      "bindings": [
+        { "fieldName": "username", "role": "username" }
+      ]
+    }
+  ]
+}
