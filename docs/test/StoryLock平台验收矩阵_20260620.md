@@ -19,10 +19,14 @@
 | 编号 | 范围 | 检查项 | 命令 | 通过标准 |
 | --- | --- | --- | --- | --- |
 | AUTO-01 | 主线 selftest | 三层主线、Android Web API mock、UI/engine 自测 | `npm run selftest` | 所有 selftest 通过 |
+| AUTO-11 | Android 代码准备度 | Android 项目结构、Manifest、Keystore、Biometric、relay、题集和 APK 构建脚本 | `npm run test:android-readiness` | 不连接真机，仅验证 Android 代码与资源准备项 |
+| AUTO-12 | 三端真测前准备度 | Android / Windows / Linux 非真机检查、包内容、桌面集成、发布元数据和交付入口 | `npm run test:platform-readiness` | 全部通过后进入真机、真实桌面和真实 Linux 环境验收 |
 | AUTO-02 | 文档一致性 | 当前文档不重新引入旧接口和旧路径 | `npm run test:docs` | 输出 `status=passed` |
 | AUTO-03 | 路径一致性 | 仓库文本不引用旧 skill 包路径 | `npm run test:paths` | 输出 `status=passed` |
 | AUTO-04 | 发布元数据 | downloads JSON 与 Android/Windows/Linux 产物大小、SHA-256 一致 | `npm run test:release` | 覆盖 `android`、`windows` 和 `linux` |
 | AUTO-05 | 交付矩阵入口 | 本矩阵、真机文档、平台脚本和发布脚本存在 | `npm run test:delivery` | 输出 `status=passed` |
+| AUTO-09 | Windows 包内容 | Windows prototype zip 内必须包含 exe、README 和启动脚本 | `npm run test:windows-package` | 输出 `status=passed` |
+| AUTO-10 | Windows 托盘验收准备 | 托盘人工验收脚本、记录模板和 `ui-tray` 编译入口 | `npm run test:windows-tray-readiness` | 不启动桌面托盘，仅验证准备项与 feature 编译 |
 | AUTO-08 | Linux 本地宿主闭环 | Linux 原型 host 的 health、题库、授权与执行路径 | `npm run test:linux-host` | 输出 `status=passed` |
 | AUTO-06 | 文本编码 | 文档与脚本编码无异常 | `npm run test:text` | 编码检查通过 |
 | AUTO-07 | 契约 Schema | 当前 JSON Schema 可解析且主接口枚举一致 | `npm run test:contract` | Schema 检查通过 |
@@ -53,6 +57,8 @@
 | WIN-06 | 发布准备 | 自动/本地 | `scripts\release\windows\publish_windows_release.cmd` | 生成发布摘要、上传清单和可复制产物目录 |
 | WIN-07 | 下载入口 | 人工/接口 | `/app/download/windows` | 返回 Windows 包或明确跳转 |
 | WIN-08 | 元数据对齐 | 自动 | `npm run build` 后执行 `npm run test:release` | Windows JSON 与 zip/msi/exe 一致 |
+| WIN-09 | prototype 包内容 | 自动 | `npm run test:windows-package` | zip 内包含 `yian-windows-host.exe`、`README.md`、`start-yian-windows-host.cmd` |
+| WIN-10 | 托盘桌面体验 | 人工/桌面 | `scripts\windows\start_windows_host_tray_manual_check.cmd`，记录到 `docs\test\Windows托盘人工验收记录_20260620.md` | 托盘图标可见，菜单可打开管理页、查看健康、复制脱敏诊断并退出释放端口 |
 
 ## 5. Linux 本地宿主验收矩阵
 

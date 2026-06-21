@@ -1,3 +1,5 @@
+#![cfg_attr(all(windows, feature = "ui-tray"), windows_subsystem = "windows")]
+
 use anyhow::{anyhow, Context, Result};
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use reqwest::blocking::Client;
@@ -18,6 +20,11 @@ use windows_sys::Win32::Security::Cryptography::{
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{MessageBoxW, IDYES, MB_ICONQUESTION, MB_YESNO};
 
+#[cfg(feature = "ui-slint")]
+mod slint_ui;
+#[cfg(feature = "ui-tray")]
+mod tray_ui;
+
 #[derive(Clone, Debug, Serialize)]
 struct WindowsHostConfig {
     product: String,
@@ -36,6 +43,7 @@ struct WindowsHostConfig {
     relay_poll_path: String,
     relay_respond_path: String,
     approval_mode: String,
+    remote_enabled: bool,
     data_dir: PathBuf,
 }
 
@@ -135,6 +143,16 @@ struct ProtectedEnvelope {
     cipher_text: String,
 }
 
+#[derive(Clone, Debug, Serialize)]
+struct RuntimeUiState {
+    started_at: String,
+    relay_status: String,
+    last_relay_error: Option<String>,
+    last_relay_poll_at: Option<String>,
+    last_execution: Option<Value>,
+    last_confirmation: Option<Value>,
+}
+
 impl WindowsHostConfig {
     fn from_env() -> Self {
         let gateway_base_url = env_or("STORYLOCK_GATEWAY_URL", "https://yian.cdao.online");
@@ -152,6 +170,7 @@ impl WindowsHostConfig {
             .parse::<u16>()
             .unwrap_or(4510);
         let approval_mode = env_or("STORYLOCK_WINDOWS_APPROVAL_MODE", "windows_dialog");
+        let remote_enabled = truthy_env("STORYLOCK_WINDOWS_REMOTE_ENABLED", false);
         let data_dir = resolve_data_dir();
 
         Self {
@@ -171,6 +190,7 @@ impl WindowsHostConfig {
             relay_poll_path: "/local-host/relay/poll".to_string(),
             relay_respond_path: "/local-host/relay/respond".to_string(),
             approval_mode,
+            remote_enabled,
             data_dir,
         }
     }
@@ -191,7 +211,12 @@ impl WindowsHostConfig {
             "preferredMode": self.preferred_mode,
             "hostPort": self.host_port,
             "serverRunning": true,
-            "capabilities": ["health", "verify", "authorize", "revoke", "execute", "relay_poll"],
+            "remoteEnabled": self.remote_enabled,
+            "capabilities": if self.remote_enabled {
+                json!(["health", "verify", "authorize", "revoke", "execute", "relay_poll"])
+            } else {
+                json!(["health", "verify", "authorize", "revoke", "execute"])
+            },
             "status": "local_core_prototype",
             "core": {
                 "name": "StoryLock Local Core",
@@ -215,6 +240,7 @@ struct WindowsHostRuntime {
     config: WindowsHostConfig,
     secret_store: SecretStore,
     question_bank: Arc<Mutex<QuestionBankFile>>,
+    ui_state: Arc<Mutex<RuntimeUiState>>,
 }
 
 impl WindowsHostRuntime {
@@ -225,6 +251,14 @@ impl WindowsHostRuntime {
             config,
             secret_store,
             question_bank: Arc::new(Mutex::new(question_bank)),
+            ui_state: Arc::new(Mutex::new(RuntimeUiState {
+                started_at: now_timestamp(),
+                relay_status: "starting".to_string(),
+                last_relay_error: None,
+                last_relay_poll_at: None,
+                last_execution: None,
+                last_confirmation: None,
+            })),
         })
     }
 
@@ -242,6 +276,40 @@ impl WindowsHostRuntime {
             .map_err(|_| anyhow!("question bank lock was poisoned"))?;
         *bank = next;
         Ok(())
+    }
+
+    fn set_relay_status(&self, status: &str, error: Option<String>) {
+        if let Ok(mut state) = self.ui_state.lock() {
+            state.relay_status = status.to_string();
+            state.last_relay_error = error;
+            state.last_relay_poll_at = Some(now_timestamp());
+        }
+    }
+
+    fn record_execution_summary(&self, response: &Value) {
+        if let Ok(mut state) = self.ui_state.lock() {
+            state.last_execution = Some(summarize_execution_for_ui(response));
+        }
+    }
+
+    fn record_confirmation_summary(&self, summary: Value) {
+        if let Ok(mut state) = self.ui_state.lock() {
+            state.last_confirmation = Some(summary);
+        }
+    }
+
+    fn ui_state_snapshot(&self) -> RuntimeUiState {
+        self.ui_state
+            .lock()
+            .map(|state| state.clone())
+        .unwrap_or_else(|_| RuntimeUiState {
+            started_at: now_timestamp(),
+            relay_status: "local_only".to_string(),
+            last_relay_error: Some("ui state lock was poisoned".to_string()),
+            last_relay_poll_at: None,
+            last_execution: None,
+                last_confirmation: None,
+            })
     }
 }
 
@@ -376,6 +444,16 @@ fn env_or(name: &str, fallback: &str) -> String {
         .unwrap_or_else(|| fallback.to_string())
 }
 
+fn truthy_env(name: &str, fallback: bool) -> bool {
+    match std::env::var(name) {
+        Ok(value) => matches!(
+            value.trim().to_ascii_lowercase().as_str(),
+            "1" | "true" | "yes" | "on"
+        ),
+        Err(_) => fallback,
+    }
+}
+
 fn resolve_data_dir() -> PathBuf {
     if let Ok(configured) = std::env::var("STORYLOCK_WINDOWS_DATA_DIR") {
         let trimmed = configured.trim();
@@ -490,6 +568,11 @@ fn content_type_json() -> Header {
     .expect("static header is valid")
 }
 
+fn content_type_html() -> Header {
+    Header::from_bytes(&b"content-type"[..], &b"text/html; charset=utf-8"[..])
+        .expect("static header is valid")
+}
+
 fn request_id_from(request: &Value) -> String {
     request
         .get("requestId")
@@ -551,6 +634,38 @@ fn error_response(
     })
 }
 
+fn summarize_execution_for_ui(response: &Value) -> Value {
+    let result = response.get("result").unwrap_or(&Value::Null);
+    let audit = response.get("auditMeta").unwrap_or(&Value::Null);
+    json!({
+        "requestId": response.get("requestId").and_then(Value::as_str).unwrap_or(""),
+        "status": response.get("status").and_then(Value::as_str).unwrap_or("unknown"),
+        "capability": response.get("capability").and_then(Value::as_str).unwrap_or("unknown"),
+        "objectRef": audit.get("objectRef").and_then(Value::as_str)
+            .or_else(|| result.get("keyId").and_then(Value::as_str))
+            .or_else(|| result.get("credentialRef").and_then(Value::as_str))
+            .unwrap_or(""),
+        "verificationId": audit.get("verificationId").and_then(Value::as_str)
+            .or_else(|| result.get("verificationId").and_then(Value::as_str))
+            .unwrap_or(""),
+        "authorizationId": audit.get("authorizationId").and_then(Value::as_str)
+            .or_else(|| result.get("authorizationId").and_then(Value::as_str))
+            .unwrap_or(""),
+        "requiredStrength": audit.get("requiredStrength").and_then(Value::as_str)
+            .or_else(|| result.get("requiredStrength").and_then(Value::as_str))
+            .unwrap_or(""),
+        "allowedAction": audit.get("allowedAction").and_then(Value::as_str)
+            .or_else(|| result.get("allowedAction").and_then(Value::as_str))
+            .unwrap_or(""),
+        "redactionLevel": response.get("redactionLevel").and_then(Value::as_str).unwrap_or("full"),
+        "timestamp": audit.get("timestamp").and_then(Value::as_str).unwrap_or(""),
+        "errorType": response.get("error")
+            .and_then(|error| error.get("type"))
+            .and_then(Value::as_str)
+            .unwrap_or("")
+    })
+}
+
 fn signature_of_request(key_material: &str, request: &Value) -> Result<String> {
     let canonical = serde_json::to_vec(request)?;
     let mut hasher = Sha256::new();
@@ -582,25 +697,166 @@ fn show_windows_confirmation_dialog(title: &str, body: &str) -> bool {
     response == IDYES
 }
 
+fn requester_from(request: &Value) -> String {
+    request
+        .get("requester")
+        .or_else(|| request.get("origin"))
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("unknown requester")
+        .to_string()
+}
+
+fn origin_from(request: &Value) -> String {
+    request
+        .get("origin")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("unknown origin")
+        .to_string()
+}
+
+fn risk_description_for(capability: &str) -> &'static str {
+    if capability == "requestSignature" {
+        "High sensitivity: approval signs with a local DPAPI-protected key. Verify the requester and object before approving."
+    } else {
+        "Medium-high sensitivity: approval allows local credential fill. Verify the target origin before approving."
+    }
+}
+
+fn confirmation_summary_for(
+    config: &WindowsHostConfig,
+    request: &Value,
+    capability: &str,
+    object_ref: &str,
+    status: &str,
+) -> Value {
+    let expires_at = expires_at_after(300);
+    json!({
+        "requestId": request_id_from(request),
+        "status": status,
+        "capability": capability,
+        "objectRef": object_ref,
+        "requester": requester_from(request),
+        "origin": origin_from(request),
+        "requiredStrength": required_strength_for(capability),
+        "allowedAction": allowed_action_for(capability),
+        "expiry": expires_at,
+        "risk": risk_description_for(capability),
+        "approvalMode": config.approval_mode,
+        "redactionLevel": "audit_meta_only",
+        "hiddenFromUi": ["answers", "password", "privateKey", "signingKeyBytes", "storyRawText"],
+        "timestamp": now_timestamp()
+    })
+}
+
 fn request_summary(request: &Value, capability: &str, object_ref: &str) -> String {
     let requester = request
-        .get("origin")
-        .or_else(|| request.get("requester"))
+        .get("requester")
+        .or_else(|| request.get("origin"))
         .and_then(Value::as_str)
         .unwrap_or("unknown requester");
+    let origin = origin_from(request);
+    let required_strength = required_strength_for(capability);
+    let allowed_action = allowed_action_for(capability);
+    let expiry = expires_at_after(300);
+    let risk = risk_description_for(capability);
     format!(
-        "Approve local execution?\n\nCapability: {capability}\nObject: {object_ref}\nRequester: {requester}\n\nChoose Yes to allow this request on the Windows host."
+        "Approve local execution?\n\nCapability: {capability}\nObject: {object_ref}\nRequester: {requester}\nOrigin: {origin}\nRequired strength: {required_strength}\nAllowed action: {allowed_action}\nExpires at: {expiry}\n\nRisk:\n{risk}\n\nChoose Yes to allow this request on the Windows host."
     )
 }
 
-fn is_confirmation_approved(config: &WindowsHostConfig, request: &Value, object_ref: &str) -> bool {
-    match config.approval_mode.as_str() {
-        "auto_approve" => true,
-        "auto_deny" => false,
-        _ => show_windows_confirmation_dialog(
-            "Yian Windows Host Confirmation",
-            &request_summary(request, &capability_from(request), object_ref),
+#[cfg(feature = "ui-slint")]
+fn show_slint_confirmation_dialog(summary: &Value) -> bool {
+    match slint_ui::confirm_request(summary) {
+        Ok(approved) => approved,
+        Err(error) => {
+            eprintln!("Slint confirmation failed; falling back to Windows dialog: {error}");
+            show_windows_confirmation_dialog(
+                "Yian Windows Host Confirmation",
+                &format!(
+                    "Approve local execution?\n\n{}\n\nChoose Yes to allow this request on the Windows host.",
+                    serde_json::to_string_pretty(summary)
+                        .unwrap_or_else(|_| "request details unavailable".to_string())
+                ),
+            )
+        }
+    }
+}
+
+#[cfg(not(feature = "ui-slint"))]
+fn show_slint_confirmation_dialog(summary: &Value) -> bool {
+    eprintln!(
+        "STORYLOCK_WINDOWS_APPROVAL_MODE=slint_dialog requires the ui-slint feature; falling back to Windows dialog."
+    );
+    show_windows_confirmation_dialog(
+        "Yian Windows Host Confirmation",
+        &format!(
+            "Approve local execution?\n\n{}\n\nChoose Yes to allow this request on the Windows host.",
+            serde_json::to_string_pretty(summary)
+                .unwrap_or_else(|_| "request details unavailable".to_string())
         ),
+    )
+}
+
+fn is_confirmation_approved(
+    runtime: &WindowsHostRuntime,
+    request: &Value,
+    object_ref: &str,
+) -> bool {
+    let config = &runtime.config;
+    let capability = capability_from(request);
+    let pending_summary =
+        confirmation_summary_for(config, request, &capability, object_ref, "pending");
+    runtime.record_confirmation_summary(pending_summary.clone());
+    match config.approval_mode.as_str() {
+        "auto_approve" => {
+            runtime.record_confirmation_summary(confirmation_summary_for(
+                config,
+                request,
+                &capability,
+                object_ref,
+                "approved",
+            ));
+            true
+        }
+        "auto_deny" => {
+            runtime.record_confirmation_summary(confirmation_summary_for(
+                config,
+                request,
+                &capability,
+                object_ref,
+                "denied",
+            ));
+            false
+        }
+        "slint_dialog" => {
+            let approved = show_slint_confirmation_dialog(&pending_summary);
+            runtime.record_confirmation_summary(confirmation_summary_for(
+                config,
+                request,
+                &capability,
+                object_ref,
+                if approved { "approved" } else { "denied" },
+            ));
+            approved
+        }
+        _ => {
+            let approved = show_windows_confirmation_dialog(
+                "Yian Windows Host Confirmation",
+                &request_summary(request, &capability, object_ref),
+            );
+            runtime.record_confirmation_summary(confirmation_summary_for(
+                config,
+                request,
+                &capability,
+                object_ref,
+                if approved { "approved" } else { "denied" },
+            ));
+            approved
+        }
     }
 }
 
@@ -896,6 +1152,234 @@ fn question_bank_status(runtime: &WindowsHostRuntime, request: &Value) -> Value 
             "Check local Windows host storage and retry the question bank status request.",
         ),
     }
+}
+
+fn ui_status(runtime: &WindowsHostRuntime) -> Value {
+    let health = runtime.config.health_json();
+    let question_bank = question_bank_status(
+        runtime,
+        &json!({
+            "requestId": format!("req-{}", Uuid::new_v4())
+        }),
+    );
+    let state = runtime.ui_state_snapshot();
+    json!({
+        "status": "success",
+        "capability": "windowsHostUiStatus",
+        "executionLocation": "local",
+        "result": {
+            "host": health,
+            "relay": {
+                "status": state.relay_status,
+                "lastPollAt": state.last_relay_poll_at,
+                "lastError": state.last_relay_error
+            },
+            "remote": {
+                "enabled": runtime.config.remote_enabled,
+                "mode": if runtime.config.remote_enabled { "relay_url" } else { "local_only" },
+                "gatewayUrl": if runtime.config.remote_enabled {
+                    Value::String(runtime.config.gateway_base_url.clone())
+                } else {
+                    Value::Null
+                }
+            },
+            "questionBank": question_bank.get("result").cloned().unwrap_or(Value::Null),
+            "lastConfirmation": state.last_confirmation,
+            "lastExecution": state.last_execution,
+            "ui": {
+                "startedAt": state.started_at,
+                "managementUrl": format!("http://127.0.0.1:{}/ui", runtime.config.host_port),
+                "statusUrl": format!("http://127.0.0.1:{}/ui/status", runtime.config.host_port)
+            },
+            "boundaries": {
+                "remoteCapabilities": ["requestSignature", "requestPasswordFill"],
+                "hiddenFromUi": ["answers", "password", "privateKey", "signingKeyBytes", "storyRawText"],
+                "localCoreCallChain": ["verify", "authorize", "execute", "revoke"]
+            }
+        },
+        "redactionLevel": "audit_meta_only",
+        "retentionGranted": "audit_meta_only",
+        "auditMeta": {
+            "timestamp": now_timestamp()
+        },
+        "error": Value::Null
+    })
+}
+
+fn diagnostics_status(runtime: &WindowsHostRuntime) -> Value {
+    let ui = ui_status(runtime);
+    json!({
+        "status": "success",
+        "capability": "windowsHostDiagnostics",
+        "executionLocation": "local",
+        "result": {
+            "generatedAt": now_timestamp(),
+            "host": runtime.config.health_json(),
+            "ui": ui.get("result").cloned().unwrap_or(Value::Null),
+            "localEndpoints": {
+                "management": format!("http://127.0.0.1:{}/ui", runtime.config.host_port),
+                "diagnostics": format!("http://127.0.0.1:{}/diagnostics", runtime.config.host_port),
+                "shutdown": format!("http://127.0.0.1:{}/shutdown", runtime.config.host_port)
+            },
+            "redaction": {
+                "level": "audit_meta_only",
+                "hidden": ["answers", "password", "privateKey", "signingKeyBytes", "storyRawText", "sharedSecret"]
+            }
+        },
+        "redactionLevel": "audit_meta_only",
+        "retentionGranted": "audit_meta_only",
+        "auditMeta": {
+            "timestamp": now_timestamp()
+        },
+        "error": Value::Null
+    })
+}
+
+fn windows_host_ui_html() -> &'static str {
+    r##"<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yian Windows Host</title>
+    <style>
+      :root { color-scheme: light; --bg:#f4f7f8; --surface:#fff; --line:#d5e0e5; --text:#12202b; --muted:#5c6d79; --accent:#0d6d77; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+      main { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 28px 0 44px; }
+      header { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 28px; line-height: 1.2; }
+      .muted { color: var(--muted); line-height: 1.65; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+      .wide { grid-column: span 2; }
+      section { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+      h2 { margin-bottom: 12px; font-size: 18px; }
+      dl { display: grid; gap: 10px; margin: 0; }
+      dt { color: var(--muted); font-size: 12px; }
+      dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+      .pill { display: inline-flex; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--accent); font-size: 12px; }
+      .ok { color: #0a6a38; }
+      .warn { color: #9b5a00; }
+      pre { margin: 0; max-height: 260px; overflow: auto; padding: 12px; border-radius: 8px; background: #101820; color: #d9e6ee; white-space: pre-wrap; overflow-wrap: anywhere; }
+      button, a { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--text); text-decoration: none; cursor: pointer; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+      @media (max-width: 840px) { header, .grid { grid-template-columns: 1fr; display: grid; } .wide { grid-column: auto; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="muted">StoryLock Local Core</p>
+          <h1>Yian Windows Host 本地管理页</h1>
+        </div>
+        <div class="actions">
+          <button type="button" id="refresh">刷新</button>
+          <a href="/health">Health JSON</a>
+          <a href="/diagnostics">诊断信息</a>
+          <a href="/question-bank/status">题库状态</a>
+        </div>
+      </header>
+      <div class="grid">
+        <section>
+          <h2>宿主状态</h2>
+          <dl id="host"></dl>
+        </section>
+        <section>
+          <h2>Relay</h2>
+          <dl id="relay"></dl>
+        </section>
+        <section>
+          <h2>题库</h2>
+          <dl id="question-bank"></dl>
+        </section>
+        <section class="wide">
+          <h2>最近确认请求</h2>
+          <dl id="last-confirmation"></dl>
+        </section>
+        <section>
+          <h2>最近执行摘要</h2>
+          <dl id="last-execution"></dl>
+        </section>
+        <section>
+          <h2>能力边界</h2>
+          <dl id="boundaries"></dl>
+        </section>
+        <section class="wide">
+          <h2>原始状态 JSON</h2>
+          <pre id="raw">loading...</pre>
+        </section>
+      </div>
+    </main>
+    <script>
+      const fields = (target, rows) => {
+        document.querySelector(target).innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v ?? "未配置"}</dd></div>`).join("");
+      };
+      async function loadStatus() {
+        const response = await fetch("/ui/status", { headers: { accept: "application/json" } });
+        const payload = await response.json();
+        const result = payload.result || {};
+        const host = result.host || {};
+        const relay = result.relay || {};
+        const remote = result.remote || {};
+        const bank = result.questionBank || {};
+        const confirmation = result.lastConfirmation || {};
+        const last = result.lastExecution || {};
+        const boundaries = result.boundaries || {};
+        fields("#host", [
+          ["产品", `${host.product || ""} ${host.version || ""}`],
+          ["状态", `<span class="pill">${host.status || "unknown"}</span>`],
+          ["identityId", host.identityId],
+          ["deviceId", host.deviceId],
+          ["本地 API", host.executeUrl],
+          ["数据目录", host.storage?.path],
+        ]);
+        fields("#relay", [
+          ["Remote", remote.enabled ? `enabled: ${remote.gatewayUrl || ""}` : "local only"],
+          ["状态", `<span class="${relay.status === "online" ? "ok" : "warn"}">${relay.status || "unknown"}</span>`],
+          ["最近轮询", relay.lastPollAt],
+          ["最近错误", relay.lastError || "无"],
+        ]);
+        fields("#question-bank", [
+          ["版本", bank.questionSetVersion],
+          ["规范化", bank.normalizationVersion],
+          ["题目数量", bank.questionCount],
+          ["路径", bank.path],
+        ]);
+        fields("#last-confirmation", [
+          ["请求", confirmation.requestId || "暂无"],
+          ["状态", confirmation.status || "暂无"],
+          ["能力", confirmation.capability || "暂无"],
+          ["对象", confirmation.objectRef || "暂无"],
+          ["请求方", confirmation.requester || "暂无"],
+          ["来源", confirmation.origin || "暂无"],
+          ["强度", confirmation.requiredStrength || "暂无"],
+          ["过期", confirmation.expiry || "暂无"],
+          ["风险", confirmation.risk || "暂无"],
+        ]);
+        fields("#last-execution", [
+          ["请求", last.requestId || "暂无"],
+          ["状态", last.status || "暂无"],
+          ["能力", last.capability || "暂无"],
+          ["对象", last.objectRef || "暂无"],
+          ["授权", last.authorizationId || "暂无"],
+          ["强度", last.requiredStrength || "暂无"],
+          ["脱敏等级", last.redactionLevel || "audit_meta_only"],
+        ]);
+        fields("#boundaries", [
+          ["远程能力", (boundaries.remoteCapabilities || []).join(", ")],
+          ["UI 隐藏字段", (boundaries.hiddenFromUi || []).join(", ")],
+          ["本地调用链", (boundaries.localCoreCallChain || []).join(" -> ")],
+        ]);
+        document.querySelector("#raw").textContent = JSON.stringify(payload, null, 2);
+      }
+      document.querySelector("#refresh").addEventListener("click", loadStatus);
+      loadStatus();
+      setInterval(loadStatus, 5000);
+    </script>
+  </body>
+</html>"##
 }
 
 fn question_bank_import(runtime: &WindowsHostRuntime, request: &Value) -> Value {
@@ -1265,7 +1749,7 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
             }
         }
     } else {
-        if !is_confirmation_approved(config, &request, &object_ref) {
+        if !is_confirmation_approved(runtime, &request, &object_ref) {
             return error_response(
                 config,
                 &request_id,
@@ -1396,6 +1880,32 @@ fn start_local_server(runtime: WindowsHostRuntime) -> Result<thread::JoinHandle<
                     .to_string(),
                 )
                 .with_header(content_type_json()),
+                (&Method::Get, "/ui") => {
+                    Response::from_string(windows_host_ui_html()).with_header(content_type_html())
+                }
+                (&Method::Get, "/ui/status") => {
+                    Response::from_string(ui_status(&runtime).to_string())
+                        .with_header(content_type_json())
+                }
+                (&Method::Get, "/diagnostics") => {
+                    Response::from_string(diagnostics_status(&runtime).to_string())
+                        .with_header(content_type_json())
+                }
+                (&Method::Post, "/shutdown") => {
+                    thread::spawn(|| {
+                        thread::sleep(Duration::from_millis(150));
+                        std::process::exit(0);
+                    });
+                    Response::from_string(
+                        json!({
+                            "status": "success",
+                            "capability": "windowsHostShutdown",
+                            "message": "shutdown scheduled"
+                        })
+                        .to_string(),
+                    )
+                    .with_header(content_type_json())
+                }
                 (&Method::Post, "/verify") => {
                     let mut body = String::new();
                     let payload = match request.as_reader().read_to_string(&mut body) {
@@ -1440,8 +1950,9 @@ fn start_local_server(runtime: WindowsHostRuntime) -> Result<thread::JoinHandle<
                         Ok(_) => serde_json::from_str::<Value>(&body).unwrap_or_else(|_| json!({})),
                         Err(_) => json!({}),
                     };
-                    Response::from_string(execute_request(&runtime, payload).to_string())
-                        .with_header(content_type_json())
+                    let execution = execute_request(&runtime, payload);
+                    runtime.record_execution_summary(&execution);
+                    Response::from_string(execution.to_string()).with_header(content_type_json())
                 }
                 _ => Response::from_string("{\"status\":\"error\",\"message\":\"not found\"}")
                     .with_status_code(StatusCode(404))
@@ -1522,10 +2033,12 @@ fn run_relay_loop(runtime: WindowsHostRuntime) -> Result<()> {
                     }
                 }
                 println!("registered; polling relay at {poll_url}");
+                runtime.set_relay_status("online", None);
                 break;
             }
             Err(error) => {
                 eprintln!("registration failed: {error}");
+                runtime.set_relay_status("registration_error", Some(error.to_string()));
                 thread::sleep(Duration::from_secs(3));
             }
         }
@@ -1550,6 +2063,8 @@ fn run_relay_loop(runtime: WindowsHostRuntime) -> Result<()> {
                     .to_string();
                 let remote_request = value.get("request").cloned().unwrap_or_else(|| json!({}));
                 let response = execute_request(&runtime, remote_request);
+                runtime.record_execution_summary(&response);
+                runtime.set_relay_status("handled_request", None);
                 let _ = post_json(
                     &client,
                     &runtime.config,
@@ -1560,9 +2075,13 @@ fn run_relay_loop(runtime: WindowsHostRuntime) -> Result<()> {
                     }),
                 );
             }
-            Ok(_) => thread::sleep(Duration::from_millis(750)),
+            Ok(_) => {
+                runtime.set_relay_status("idle", None);
+                thread::sleep(Duration::from_millis(750));
+            }
             Err(error) => {
                 eprintln!("relay poll failed: {error}");
+                runtime.set_relay_status("poll_error", Some(error.to_string()));
                 thread::sleep(Duration::from_secs(2));
             }
         }
@@ -1644,6 +2163,13 @@ fn dpapi_unprotect_from_base64(cipher_text: &str) -> Result<Vec<u8>> {
 fn main() -> Result<()> {
     let config = WindowsHostConfig::from_env();
     let args: Vec<String> = std::env::args().collect();
+    let start_mode = std::env::var("STORYLOCK_WINDOWS_START_MODE")
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+
+    if args.iter().any(|arg| arg == "--slint-ui") {
+        return run_slint_ui_entry(config);
+    }
     if args.iter().any(|arg| arg == "--print-config") {
         println!("{}", serde_json::to_string_pretty(&config)?);
         return Ok(());
@@ -1683,12 +2209,122 @@ fn main() -> Result<()> {
         );
         return Ok(());
     }
+    if args.iter().any(|arg| arg == "--console")
+        || matches!(start_mode.as_str(), "console" | "debug")
+    {
+        return run_console_entry(config);
+    }
+    if args.iter().any(|arg| arg == "--tray") || start_mode == "tray" {
+        return run_tray_entry(config);
+    }
 
+    run_default_entry(config)
+}
+
+fn run_console_entry(config: WindowsHostConfig) -> Result<()> {
     let runtime = WindowsHostRuntime::new(config)?;
     println!("{}", serde_json::to_string_pretty(&runtime.config)?);
     let server_runtime = runtime.clone();
     let _server = start_local_server(server_runtime)?;
-    run_relay_loop(runtime)
+    run_runtime_loop(runtime)
+}
+
+#[cfg(feature = "ui-slint")]
+fn run_default_entry(config: WindowsHostConfig) -> Result<()> {
+    run_desktop_ui_entry(config)
+}
+
+#[cfg(not(feature = "ui-slint"))]
+fn run_default_entry(config: WindowsHostConfig) -> Result<()> {
+    run_console_entry(config)
+}
+
+#[cfg(feature = "ui-slint")]
+fn run_slint_ui_entry(config: WindowsHostConfig) -> Result<()> {
+    run_desktop_ui_entry(config)
+}
+
+#[cfg(not(feature = "ui-slint"))]
+fn run_slint_ui_entry(_config: WindowsHostConfig) -> Result<()> {
+    Err(anyhow!(
+        "Slint UI is not enabled. Run with: cargo run --features ui-slint -- --slint-ui"
+    ))
+}
+
+#[cfg(feature = "ui-slint")]
+fn run_desktop_ui_entry(config: WindowsHostConfig) -> Result<()> {
+    let runtime = WindowsHostRuntime::new(config.clone())?;
+    let server_runtime = runtime.clone();
+    let _server = match start_local_server(server_runtime) {
+        Ok(server) => server,
+        Err(error) if error.to_string().contains("failed to bind local server") => {
+            return slint_ui::run(config);
+        }
+        Err(error) => return Err(error),
+    };
+    thread::spawn(move || run_runtime_loop(runtime));
+    slint_ui::run(config)
+}
+
+#[cfg(feature = "ui-tray")]
+fn run_tray_entry(config: WindowsHostConfig) -> Result<()> {
+    let runtime = WindowsHostRuntime::new(config.clone())?;
+    let server_runtime = runtime.clone();
+    let _server = match start_local_server(server_runtime) {
+        Ok(server) => server,
+        Err(error) if error.to_string().contains("failed to bind local server") => {
+            if should_open_ui_on_start() {
+                open_local_management_page(config.host_port);
+            }
+            return Ok(());
+        }
+        Err(error) => return Err(error),
+    };
+    thread::spawn(move || run_runtime_loop(runtime));
+    if should_open_ui_on_start() {
+        open_local_management_page(config.host_port);
+    }
+    tray_ui::run(config)
+}
+
+#[cfg(not(feature = "ui-tray"))]
+fn run_tray_entry(_config: WindowsHostConfig) -> Result<()> {
+    Err(anyhow!(
+        "Tray UI is not enabled. Run with: cargo run --features ui-tray -- --tray"
+    ))
+}
+
+fn run_runtime_loop(runtime: WindowsHostRuntime) -> Result<()> {
+    if runtime.config.remote_enabled {
+        run_relay_loop(runtime)
+    } else {
+        runtime.set_relay_status("local_only", None);
+        loop {
+            thread::sleep(Duration::from_secs(3600));
+        }
+    }
+}
+
+#[cfg(feature = "ui-tray")]
+fn should_open_ui_on_start() -> bool {
+    !matches!(
+        std::env::var("STORYLOCK_WINDOWS_OPEN_UI_ON_START")
+            .unwrap_or_else(|_| "1".to_string())
+            .to_ascii_lowercase()
+            .as_str(),
+        "0" | "false" | "no" | "off"
+    )
+}
+
+#[cfg(feature = "ui-tray")]
+fn open_local_management_page(port: u16) {
+    let url = format!("http://127.0.0.1:{port}/ui");
+    if let Err(error) = std::process::Command::new("cmd")
+        .args(["/C", "start", "", &url])
+        .spawn()
+    {
+        eprintln!("failed to open local management page {url}: {error}");
+    }
 }
 
 #[cfg(test)]
@@ -1713,6 +2349,7 @@ mod tests {
             relay_poll_path: "/local-host/relay/poll".to_string(),
             relay_respond_path: "/local-host/relay/respond".to_string(),
             approval_mode: "auto_approve".to_string(),
+            remote_enabled: false,
             data_dir: std::env::temp_dir()
                 .join(format!("yian_windows_host_test_{}", Uuid::new_v4())),
         }

@@ -58,11 +58,33 @@ const linuxPackageTest = read('scripts/test/linux-package-contents.mjs');
 assert.match(linuxPackageTest, /STORYLOCK_WSL_DISTRO/u, 'Linux package test must allow WSL distro override');
 assert.match(linuxPackageTest, /tarPackagePath/u, 'Linux package test must support tar.gz artifacts');
 assert.match(linuxPackageTest, /debPackagePath/u, 'Linux package test must support deb artifacts');
+assert.match(linuxPackageTest, /EncodedCommand/u, 'Linux zip package test must preserve Unicode paths on Windows');
+
+const androidReadinessTest = read('scripts/test/android-readiness.mjs');
+assert.match(androidReadinessTest, /AndroidKeyStore/u, 'Android readiness must guard AndroidKeyStore usage');
+assert.match(androidReadinessTest, /BiometricPrompt/u, 'Android readiness must guard BiometricPrompt usage');
+assert.match(androidReadinessTest, /validate_android_question_set\.mjs/u, 'Android readiness must validate the bundled question set');
+assert.match(androidReadinessTest, /STORYLOCK_ANDROID_APK_CHECKSUM/u, 'Android readiness must guard APK metadata output');
 
 const buildScript = read('scripts/vercel/build_yian_web.mjs');
 assert.match(buildScript, /metadataNameFor/u);
 assert.match(buildScript, /-tar-gz\.json/u);
 assert.match(buildScript, /-\$1\.json/u);
+
+const windowsTrayManualCheck = read('scripts/windows/start_windows_host_tray_manual_check.ps1');
+assert.match(windowsTrayManualCheck, /--features ui-tray -- --tray/u, 'Windows tray manual check must run the tray feature');
+assert.match(windowsTrayManualCheck, /Get-NetTCPConnection -LocalPort \$Port -State Listen/u, 'Windows tray manual check must fail fast when the port is occupied');
+assert.match(windowsTrayManualCheck, /STORYLOCK_WINDOWS_DATA_DIR/u, 'Windows tray manual check must isolate runtime data');
+assert.match(windowsTrayManualCheck, /Copy Diagnostics/u, 'Windows tray manual check must prompt the diagnostics clipboard check');
+
+const windowsTrayManualRecord = read('docs/test/Windows托盘人工验收记录_20260620.md');
+for (const requiredToken of ['TRAY-01', 'TRAY-02', 'TRAY-03', 'TRAY-04', 'TRAY-05']) {
+  assert.match(
+    windowsTrayManualRecord,
+    new RegExp(requiredToken, 'u'),
+    `Windows tray manual record must include ${requiredToken}`,
+  );
+}
 
 console.log(JSON.stringify({
   status: 'passed',
@@ -77,5 +99,6 @@ console.log(JSON.stringify({
     'vercel-wsl-token-deploy',
     'linux-package-format-flexibility',
     'download-metadata-name-collision',
+    'windows-tray-manual-check-entry',
   ],
 }, null, 2));

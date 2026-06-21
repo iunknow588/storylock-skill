@@ -11,6 +11,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Set-Utf8NoBomContent {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$LiteralPath,
+    [Parameter(Mandatory = $true)]
+    [string]$Value
+  )
+  $normalized = $Value -replace "`r`n", "`n"
+  [System.IO.File]::WriteAllText($LiteralPath, $normalized, [System.Text.UTF8Encoding]::new($false))
+}
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 if ([string]::IsNullOrWhiteSpace($ProjectDir)) {
   $ProjectDir = Join-Path $repoRoot "src\host\windows-host"
@@ -75,7 +86,7 @@ $manifest = [PSCustomObject]@{
   artifacts = $artifacts
   envFile = (Resolve-Path -LiteralPath $EnvOutput).Path
 }
-$manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
+Set-Utf8NoBomContent -LiteralPath $manifestPath -Value (($manifest | ConvertTo-Json -Depth 6) + "`n")
 
 $manifestEnvScript = Join-Path $PSScriptRoot "manifest_to_windows_env.ps1"
 if (Test-Path -LiteralPath $manifestEnvScript) {

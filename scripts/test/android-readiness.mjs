@@ -1,0 +1,156 @@
+import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+
+const root = fileURLToPath(new URL('../../', import.meta.url));
+
+function read(relativePath) {
+  return readFileSync(join(root, relativePath), 'utf8');
+}
+
+function required(relativePath) {
+  assert.ok(existsSync(join(root, relativePath)), `${relativePath} must exist`);
+}
+
+const requiredFiles = [
+  'src/host/android-host/settings.gradle.kts',
+  'src/host/android-host/build.gradle.kts',
+  'src/host/android-host/app/build.gradle.kts',
+  'src/host/android-host/app/src/main/AndroidManifest.xml',
+  'src/host/android-host/app/src/main/assets/storylock-question-set.json',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/StoryLockHostApplication.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/MainActivity.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AndroidKeystoreSecretStore.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AndroidKeystoreSigner.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/security/BiometricPromptLocalUserConfirmation.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/security/ChallengePromptLocalUserConfirmation.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AttachedActivityConfirmation.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostBindingStore.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostGatewayClient.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostRegistrationManager.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/LocalAuthorizationRuntime.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/StoryLockAndroidHostService.kt',
+  'scripts/release/android/build_apk.ps1',
+  'scripts/release/android/build_apk.cmd',
+  'scripts/android/validate_android_question_set.mjs',
+  'docs/ref/10-Android真机闭环检查.md',
+];
+
+for (const file of requiredFiles) {
+  required(file);
+}
+
+const buildGradle = read('src/host/android-host/app/build.gradle.kts');
+for (const token of [
+  'applicationId = "org.storylock.androidhost"',
+  'minSdk = 26',
+  'targetSdk = 34',
+  'versionCode = 1',
+  'versionName = "0.1.0"',
+  'STORYLOCK_GATEWAY_URL',
+  'STORYLOCK_CONNECT_MODE',
+  'androidx.biometric:biometric',
+  'org.nanohttpd:nanohttpd',
+]) {
+  assert.ok(buildGradle.includes(token), `Android Gradle config must include ${token}`);
+}
+
+const manifest = read('src/host/android-host/app/src/main/AndroidManifest.xml');
+for (const token of [
+  'android.permission.INTERNET',
+  'android:name=".StoryLockHostApplication"',
+  'android:allowBackup="false"',
+  'android:launchMode="singleTask"',
+  'android:scheme="storylock-host"',
+  'android:host="bind"',
+]) {
+  assert.ok(manifest.includes(token), `Android manifest must include ${token}`);
+}
+
+const keystoreStore = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AndroidKeystoreSecretStore.kt');
+assert.match(keystoreStore, /AndroidKeyStore/u, 'Android SecretStore must use AndroidKeyStore');
+assert.match(keystoreStore, /AES/u, 'Android SecretStore must use encrypted local storage');
+assert.match(keystoreStore, /GCM/u, 'Android SecretStore must use authenticated encryption');
+
+const signer = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AndroidKeystoreSigner.kt');
+assert.match(signer, /KeyPairGenerator/u, 'Android signer must generate platform key pairs');
+assert.match(signer, /AndroidKeyStore/u, 'Android signer must use AndroidKeyStore');
+assert.match(signer, /SHA256withECDSA/u, 'Android signer must sign with the current ECDSA prototype');
+
+const biometric = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/security/BiometricPromptLocalUserConfirmation.kt');
+assert.match(biometric, /BiometricPrompt/u, 'Android confirmation must use BiometricPrompt');
+assert.match(biometric, /biometric_unavailable/u, 'Android confirmation must report biometric unavailable');
+assert.match(biometric, /biometric_cancelled/u, 'Android confirmation must report biometric cancellation');
+
+const challengePrompt = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/security/ChallengePromptLocalUserConfirmation.kt');
+assert.match(challengePrompt, /challenge_failed/u, 'Android challenge prompt must report failed answers');
+assert.match(challengePrompt, /challenge_cancelled/u, 'Android challenge prompt must report cancellation');
+
+const authorizationRuntime = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/LocalAuthorizationRuntime.kt');
+assert.match(authorizationRuntime, /maxFailureCount/u, 'Android authorization runtime must track failure limits');
+assert.match(authorizationRuntime, /ChallengeLockedException/u, 'Android authorization runtime must support temporary lockout');
+assert.match(authorizationRuntime, /requestSignature/u, 'Android authorization runtime must distinguish signature strength');
+
+const hostService = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/StoryLockAndroidHostService.kt');
+for (const token of [
+  'requestSignature',
+  'requestPasswordFill',
+  'challenge_locked',
+  'challenge_failed',
+  'biometric_unavailable',
+  'secretMaterial',
+  'audit_meta_only',
+]) {
+  assert.ok(hostService.includes(token), `Android host service must include ${token}`);
+}
+assert.doesNotMatch(hostService, /\.put\("password"\s*,\s*credential/u, 'Android password-fill response must not return raw password');
+assert.doesNotMatch(hostService, /\.put\("privateKey"/u, 'Android signature response must not expose privateKey fields');
+assert.doesNotMatch(hostService, /\.put\("signingKeyBytes"/u, 'Android signature response must not expose signingKeyBytes fields');
+
+const gatewayClient = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostGatewayClient.kt');
+for (const token of [
+  '/local-host/register',
+  '/local-host/relay/poll',
+  '/local-host/relay/respond',
+  'x-storylock-shared-secret',
+]) {
+  assert.ok(gatewayClient.includes(token), `Android gateway client must include ${token}`);
+}
+
+const bindingStore = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostBindingStore.kt');
+for (const token of ['binding_token', 'registration_id', 'relay_poll_url', 'relay_respond_url']) {
+  assert.ok(bindingStore.includes(token), `Android binding store must include ${token}`);
+}
+
+const buildApkScript = read('scripts/release/android/build_apk.ps1');
+for (const token of [
+  'ValidateSet("debug", "release")',
+  'assemble$($Variant.Substring(0, 1).ToUpper())$($Variant.Substring(1))',
+  'STORYLOCK_ANDROID_APK_CHECKSUM',
+  'STORYLOCK_ANDROID_PACKAGE_KIND',
+  'STORYLOCK_ANDROID_RELEASE_CHANNEL',
+]) {
+  assert.ok(buildApkScript.includes(token), `Android APK build helper must include ${token}`);
+}
+
+const questionSetCheck = spawnSync(process.execPath, ['scripts/android/validate_android_question_set.mjs'], {
+  cwd: root,
+  encoding: 'utf8',
+});
+assert.equal(questionSetCheck.status, 0, questionSetCheck.stderr || questionSetCheck.stdout);
+
+const questionSetResult = JSON.parse(questionSetCheck.stdout);
+assert.equal(questionSetResult.status, 'passed');
+assert.ok(questionSetResult.activeQuestionCount >= 24, 'Android question set must have at least 24 active questions');
+
+console.log(JSON.stringify({
+  status: 'passed',
+  filesChecked: requiredFiles.length,
+  questionSet: {
+    file: relative(root, join(root, 'src/host/android-host/app/src/main/assets/storylock-question-set.json')).replaceAll('\\', '/'),
+    activeQuestionCount: questionSetResult.activeQuestionCount,
+    questionSetVersion: questionSetResult.questionSetVersion,
+  },
+}, null, 2));

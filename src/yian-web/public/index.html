@@ -12,7 +12,7 @@
       .page-panel { display: none; }
       .page-panel.is-active { display: block; }
     </style>
-    <link rel="stylesheet" href="/styles.css?v=20260619-2">
+    <link rel="stylesheet" href="/styles.css?v=20260620-1">
   </head>
   <body>
     <header class="site-header">
@@ -41,7 +41,7 @@
           <a href="#flow" data-page-link="flow" data-i18n="nav.flow">使用流程</a>
           <a href="#faq" data-page-link="faq" data-i18n="nav.faq">常见问题</a>
           <a href="#runtime" data-page-link="runtime" data-i18n="nav.runtime">请求状态</a>
-          <a href="/help.html" data-i18n="nav.help">帮助说明</a>
+          <a href="#help" data-page-link="help" data-i18n="nav.help">帮助说明</a>
         </div>
       </nav>
     </header>
@@ -61,6 +61,8 @@
                 <a class="button" href="/app/download/android" data-i18n="hero.downloadAndroid">下载 Android 版本</a>
                 <a class="button" href="/app/download/linux" data-i18n="hero.downloadLinux">下载 Linux 原型包</a>
                 <a class="button" href="/app/bind" data-i18n="hero.bind">打开绑定入口</a>
+                <a class="button" href="/storylock-app.html">StoryLock 工作台</a>
+                <a class="button" href="/local-agent-app.html">Agent 控制台</a>
               </div>
             </div>
             <figure class="hero-diagram">
@@ -181,6 +183,7 @@
                 <a class="button" href="/app/download/linux" data-i18n="apk.platforms.linux">Linux 原型版本</a>
                 <a class="button" href="/app/download" data-i18n="apk.platforms.all">查看全部版本</a>
               </div>
+              <div class="download-metadata-grid" data-region="download-metadata" aria-live="polite"></div>
               </section>
               <section class="topic-step">
               <h4 data-i18n="apk.install.title">安装流程</h4>
@@ -310,13 +313,56 @@
               </div>
             </dl>
           </div>
-          <div class="console-block">
-            <div class="console-head">
-              <h4 data-i18n="runtime.responseTitle">返回数据</h4>
+          <details class="console-block">
+            <summary class="console-head">
+              <h4 data-i18n="runtime.responseTitle">查看原始 JSON</h4>
               <p class="muted" data-i18n="runtime.responseNote"></p>
-            </div>
+            </summary>
             <pre data-region="output"></pre>
-          </div>
+          </details>
+          </article>
+        </div>
+      </section>
+
+      <section id="help" class="band page-panel" data-page-section data-page-title="nav.help">
+        <div class="wrap">
+          <article class="topic-card help-layout">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="help.kicker">帮助说明</p>
+              <h3 data-i18n="help.title">按同一套页面方式查看帮助说明</h3>
+            </div>
+            <div class="copy-list">
+              <p data-i18n="help.copy1"></p>
+              <p data-i18n="help.copy2"></p>
+            </div>
+            <img class="help-figure" src="/assets/yian-network-banner.png?v=20260620-1" alt="" data-i18n-alt="help.imageAlt">
+            <div class="topic-steps">
+              <section class="topic-step">
+                <h4 data-i18n="help.start.title">快速开始</h4>
+                <ol class="flow-list compact">
+                  <li data-i18n="help.start.step1"></li>
+                  <li data-i18n="help.start.step2"></li>
+                  <li data-i18n="help.start.step3"></li>
+                  <li data-i18n="help.start.step4"></li>
+                </ol>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="help.approve.title">确认请求</h4>
+                <ol class="flow-list compact">
+                  <li data-i18n="help.approve.step1"></li>
+                  <li data-i18n="help.approve.step2"></li>
+                  <li data-i18n="help.approve.step3"></li>
+                </ol>
+              </section>
+              <section class="topic-step">
+                <h4 data-i18n="help.notice.title">注意事项</h4>
+                <ul>
+                  <li data-i18n="help.notice.item1"></li>
+                  <li data-i18n="help.notice.item2"></li>
+                  <li data-i18n="help.notice.item3"></li>
+                </ul>
+              </section>
+            </div>
           </article>
         </div>
       </section>
@@ -337,11 +383,13 @@
         <div class="footer-links">
           <a href="/app/download" data-i18n="footer.androidHost">易安 App</a>
           <a href="/app/registrations" data-i18n="footer.registrations">设备连接</a>
-          <a href="/help.html" data-i18n="footer.help">帮助说明</a>
+          <a href="/storylock-app.html">StoryLock 工作台</a>
+          <a href="/local-agent-app.html">Agent 控制台</a>
+          <a href="#help" data-page-link="help" data-i18n="footer.help">帮助说明</a>
         </div>
       </div>
     </footer>
 
-    <script type="module" src="/main.js?v=20260619-2"></script>
+    <script type="module" src="/main.js?v=20260620-1"></script>
   </body>
 </html>

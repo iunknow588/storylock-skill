@@ -176,7 +176,7 @@ function publicRegistrationsUrl(gatewayBaseUrl) {
 }
 
 function bundledApkDownloadUrl(gatewayBaseUrl) {
-  return new URL('/downloads/storylock-android-host-0.1.0-1-debug.apk', gatewayBaseUrl).toString();
+  return new URL(`/downloads/${DEFAULT_ANDROID_RELEASE_APK_FILE_NAME}`, gatewayBaseUrl).toString();
 }
 
 function bundledWindowsDownloadUrl(gatewayBaseUrl) {
@@ -187,7 +187,9 @@ function bundledLinuxDownloadUrl(gatewayBaseUrl) {
   return new URL(`/downloads/${DEFAULT_LINUX_PACKAGE_FILE_NAME}`, gatewayBaseUrl).toString();
 }
 
-const BUNDLED_APK_FILE_NAME = 'storylock-android-host-0.1.0-1-debug.apk';
+const DEFAULT_ANDROID_RELEASE_APK_FILE_NAME = 'storylock-android-host-0.1.0-1-release.apk';
+const DEFAULT_ANDROID_RELEASE_APK_METADATA_FILE_NAME = 'storylock-android-host-0.1.0-1-release-apk.json';
+const DEFAULT_ANDROID_DEBUG_APK_FILE_NAME = 'storylock-android-host-0.1.0-1-debug.apk';
 const DEFAULT_WINDOWS_PACKAGE_FILE_NAME = 'yian-windows-host-0.1.0-1-prototype.zip';
 const DEFAULT_WINDOWS_PACKAGE_METADATA_FILE_NAME = 'yian-windows-host-0.1.0-1-prototype-zip.json';
 const DEFAULT_LINUX_PACKAGE_FILE_NAME = 'yian-linux-host-0.1.0-1-prototype.deb';
@@ -224,8 +226,17 @@ function resolveApkFilePath(env = process.env, appDistribution = resolveAppDistr
     return existsSync(absolute) ? absolute : null;
   }
   return firstExistingPath([
-    resolve(process.cwd(), 'release', 'app', 'android', BUNDLED_APK_FILE_NAME),
-    resolve(process.cwd(), 'release', 'web', 'public', 'downloads', BUNDLED_APK_FILE_NAME),
+    resolve(process.cwd(), 'release', 'app', 'android', DEFAULT_ANDROID_RELEASE_APK_FILE_NAME),
+    resolve(process.cwd(), 'release', 'web', 'public', 'downloads', DEFAULT_ANDROID_RELEASE_APK_FILE_NAME),
+  ]) ?? findNewestFile(
+    resolve(process.cwd(), 'release', 'app', 'android'),
+    (fileName) => /-release\.apk$/iu.test(fileName),
+  ) ?? findNewestFile(
+    resolve(process.cwd(), 'release', 'web', 'public', 'downloads'),
+    (fileName) => /-release\.apk$/iu.test(fileName),
+  ) ?? firstExistingPath([
+    resolve(process.cwd(), 'release', 'app', 'android', DEFAULT_ANDROID_DEBUG_APK_FILE_NAME),
+    resolve(process.cwd(), 'release', 'web', 'public', 'downloads', DEFAULT_ANDROID_DEBUG_APK_FILE_NAME),
     resolve(process.cwd(), 'android-host', 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk'),
   ]) ?? findNewestFile(
     resolve(process.cwd(), 'release', 'app', 'android'),
@@ -280,6 +291,18 @@ function resolveLinuxPackageFilePath(env = process.env) {
     resolve(process.cwd(), 'release', 'web', 'public', 'downloads'),
     (fileName) => /^yian-linux-host-.+(\.tar\.gz|\.(zip|deb|rpm|appimage))$/iu.test(fileName),
   );
+}
+
+async function readBundledAndroidApkMetadata() {
+  const metadataPath = resolve(process.cwd(), 'release', 'web', 'public', 'downloads', DEFAULT_ANDROID_RELEASE_APK_METADATA_FILE_NAME);
+  if (!existsSync(metadataPath)) {
+    return null;
+  }
+  try {
+    return JSON.parse(await readFile(metadataPath, 'utf8'));
+  } catch {
+    return null;
+  }
 }
 
 async function readBundledWindowsPackageMetadata() {
@@ -410,7 +433,7 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
   const apkFilePath = resolveApkFilePath(env, appDistribution);
   const windowsPackageFilePath = resolveWindowsPackageFilePath(env, appDistribution);
   const linuxPackageFilePath = resolveLinuxPackageFilePath(env);
-  const artifactName = apkFilePath ? basename(apkFilePath) : BUNDLED_APK_FILE_NAME;
+  const artifactName = apkFilePath ? basename(apkFilePath) : DEFAULT_ANDROID_RELEASE_APK_FILE_NAME;
   const windowsArtifactName = windowsPackageFilePath ? basename(windowsPackageFilePath) : DEFAULT_WINDOWS_PACKAGE_FILE_NAME;
   const linuxArtifactName = linuxPackageFilePath ? basename(linuxPackageFilePath) : DEFAULT_LINUX_PACKAGE_FILE_NAME;
   const packageKind = inferAndroidPackageKind(artifactName, optionalString(appDistribution.androidPackageKind));
@@ -425,6 +448,7 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
   const linuxArtifactInfo = linuxPackageFilePath
     ? await stat(linuxPackageFilePath)
     : null;
+  const bundledAndroidMetadata = await readBundledAndroidApkMetadata();
   const bundledWindowsMetadata = await readBundledWindowsPackageMetadata();
   const bundledLinuxMetadata = await readBundledLinuxPackageMetadata();
   const apkChecksum = apkFilePath ? await checksumForFile(apkFilePath) : null;
@@ -441,12 +465,21 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
       available: Boolean(apkFilePath || appDistribution.androidAppDownloadUrl || artifactName),
       localFilePath: apkFilePath,
       fileName: artifactName,
-      fileSizeBytes: artifactInfo?.size ?? optionalPositiveInteger(appDistribution.androidApkSizeBytes),
-      versionName: optionalString(appDistribution.androidApkVersion),
-      versionCode: optionalString(appDistribution.androidApkVersionCode),
-      checksum: optionalString(appDistribution.androidApkChecksum) ?? apkChecksum,
+      fileSizeBytes: artifactInfo?.size
+        ?? optionalPositiveInteger(appDistribution.androidApkSizeBytes)
+        ?? optionalPositiveInteger(bundledAndroidMetadata?.fileSizeBytes),
+      versionName: optionalString(appDistribution.androidApkVersion)
+        ?? optionalString(bundledAndroidMetadata?.versionName),
+      versionCode: optionalString(appDistribution.androidApkVersionCode)
+        ?? optionalString(bundledAndroidMetadata?.versionCode),
+      checksum: optionalString(appDistribution.androidApkChecksum)
+        ?? apkChecksum
+        ?? optionalString(bundledAndroidMetadata?.checksum),
       packageKind,
-      releaseChannel: inferReleaseChannel(packageKind, optionalString(appDistribution.androidReleaseChannel)),
+      releaseChannel: inferReleaseChannel(
+        packageKind,
+        optionalString(appDistribution.androidReleaseChannel) ?? optionalString(bundledAndroidMetadata?.releaseChannel),
+      ),
       downloadStrategy: apkFilePath
         ? 'local_apk_file'
         : appDistribution.androidAppDownloadUrl
@@ -461,12 +494,21 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
         downloadUrl: appDistribution.androidAppDownloadUrl ?? publicAndroidDownloadUrl(gatewayBaseUrl),
         available: Boolean(apkFilePath || appDistribution.androidAppDownloadUrl || artifactName),
         fileName: artifactName,
-        fileSizeBytes: artifactInfo?.size ?? optionalPositiveInteger(appDistribution.androidApkSizeBytes),
-        versionName: optionalString(appDistribution.androidApkVersion),
-        versionCode: optionalString(appDistribution.androidApkVersionCode),
-        checksum: optionalString(appDistribution.androidApkChecksum) ?? apkChecksum,
+        fileSizeBytes: artifactInfo?.size
+          ?? optionalPositiveInteger(appDistribution.androidApkSizeBytes)
+          ?? optionalPositiveInteger(bundledAndroidMetadata?.fileSizeBytes),
+        versionName: optionalString(appDistribution.androidApkVersion)
+          ?? optionalString(bundledAndroidMetadata?.versionName),
+        versionCode: optionalString(appDistribution.androidApkVersionCode)
+          ?? optionalString(bundledAndroidMetadata?.versionCode),
+        checksum: optionalString(appDistribution.androidApkChecksum)
+          ?? apkChecksum
+          ?? optionalString(bundledAndroidMetadata?.checksum),
         packageKind,
-        releaseChannel: inferReleaseChannel(packageKind, optionalString(appDistribution.androidReleaseChannel)),
+        releaseChannel: inferReleaseChannel(
+          packageKind,
+          optionalString(appDistribution.androidReleaseChannel) ?? optionalString(bundledAndroidMetadata?.releaseChannel),
+        ),
       },
       windows: {
         platform: 'windows',

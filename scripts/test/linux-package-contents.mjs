@@ -44,11 +44,12 @@ function listArchiveEntries(path) {
     `$zip = [System.IO.Compression.ZipFile]::OpenRead(${JSON.stringify(path)})`,
     'try { $zip.Entries | ForEach-Object { $_.FullName.Replace("\\", "/") } } finally { $zip.Dispose() }',
   ].join('; ');
+  const encodedScript = Buffer.from(script, 'utf16le').toString('base64');
   return new Set(execFileSync('powershell.exe', [
     '-NoProfile',
     '-NonInteractive',
-    '-Command',
-    script,
+    '-EncodedCommand',
+    encodedScript,
   ], {
     encoding: 'utf8',
     windowsHide: true,

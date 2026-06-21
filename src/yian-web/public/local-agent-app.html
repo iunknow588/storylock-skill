@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="易安本地 Agent 控制台，用于查看网关、设备绑定、受控能力、请求队列和本地宿主健康状态。">
+    <title>易安本地 Agent 控制台</title>
+    <link rel="stylesheet" href="/app-shell.css?v=20260620-1">
+  </head>
+  <body data-app="local-agent">
+    <header class="app-topbar">
+      <div class="app-brand">
+        <p class="app-kicker">Yian Local Agent</p>
+        <h1>本地 Agent 控制台</h1>
+      </div>
+      <div class="app-top-actions">
+        <span class="chip warn" data-region="agent-status">等待检测</span>
+        <a class="app-link" href="/">返回易安首页</a>
+        <a class="app-link primary" href="/storylock-app.html">打开故事锁工作台</a>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <nav class="side-nav" aria-label="Agent 控制台">
+        <button class="is-active" type="button" data-view-target="overview">运行总览</button>
+        <button type="button" data-view-target="requests">请求队列</button>
+        <button type="button" data-view-target="capabilities">受控能力</button>
+        <button type="button" data-view-target="question-set">题库状态</button>
+        <button type="button" data-view-target="diagnostics">诊断日志</button>
+      </nav>
+
+      <section class="workspace">
+        <article id="overview" class="view is-active">
+          <div class="dashboard-grid">
+            <div class="stat-card">
+              <h3>网关</h3>
+              <p class="stat-value" data-region="gateway-state">未知</p>
+            </div>
+            <div class="stat-card">
+              <h3>本地宿主</h3>
+              <p class="stat-value" data-region="host-state">未知</p>
+            </div>
+            <div class="stat-card">
+              <h3>在线设备</h3>
+              <p class="stat-value" data-region="host-count">0</p>
+            </div>
+            <div class="stat-card">
+              <h3>待处理</h3>
+              <p class="stat-value" data-region="pending-count">2</p>
+            </div>
+          </div>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>连接配置</h2>
+                <p>Windows 原型默认监听 127.0.0.1:4510，并通过云端 relay 拉取请求。</p>
+              </div>
+              <div class="button-row">
+                <button class="app-button primary" type="button" data-action="refresh-status">刷新状态</button>
+                <button class="app-button" type="button" data-action="check-local-health">检查本机</button>
+              </div>
+            </div>
+            <pre data-region="config-json"></pre>
+          </section>
+        </article>
+
+        <article id="requests" class="view">
+          <div class="panel-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>请求队列</h2>
+                  <p>远程入口只提交受控请求，本地 Agent 负责解释和转交 StoryLock。</p>
+                </div>
+                <button class="app-button primary" type="button" data-action="simulate-request">模拟请求</button>
+              </div>
+              <div data-region="request-list"></div>
+            </section>
+
+            <aside class="panel">
+              <h3>请求详情</h3>
+              <pre data-region="request-detail"></pre>
+              <div class="button-row" style="margin-top: 14px;">
+                <button class="app-button primary" type="button" data-action="approve-request">批准</button>
+                <button class="app-button danger" type="button" data-action="deny-request">拒绝</button>
+              </div>
+            </aside>
+          </div>
+        </article>
+
+        <article id="capabilities" class="view">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>远程能力边界</h2>
+                <p>远程只看到最小函数面；故事、题库、密钥和密码留在本地。</p>
+              </div>
+            </div>
+            <div class="capability-grid">
+              <div class="capability-item">
+                <strong>requestSignature</strong>
+                <span class="muted">签名请求必须绑定对象、目的、过期时间和本地确认结果。</span>
+              </div>
+              <div class="capability-item">
+                <strong>requestPasswordFill</strong>
+                <span class="muted">密码填充必须由本地用户确认，远程不接收明文密码。</span>
+              </div>
+            </div>
+          </section>
+        </article>
+
+        <article id="question-set" class="view">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>题库状态</h2>
+                <p>题库来自 StoryLock 本地工作台，Agent 只拿到验证挑战所需的最小状态。</p>
+              </div>
+              <button class="app-button primary" type="button" data-action="import-question-set">导入演示题库</button>
+            </div>
+            <div class="resource-grid" data-region="question-set-grid"></div>
+          </section>
+        </article>
+
+        <article id="diagnostics" class="view">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>诊断日志</h2>
+                <p>记录网关读取、本地健康检查、请求批准和拒绝。</p>
+              </div>
+              <button class="app-button" type="button" data-action="clear-log">清空</button>
+            </div>
+            <div class="log-box" data-region="agent-log"></div>
+          </section>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="/local-agent-app.js?v=20260620-1"></script>
+  </body>
+</html>

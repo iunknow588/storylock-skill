@@ -88,12 +88,20 @@ try {
   await check('/', { expectedContentType: /text\/html/u });
   await check('/main.js', { expectedContentType: /text\/javascript/u });
   await check('/styles.css', { expectedContentType: /text\/css/u });
+  await check('/app-shell.css', { expectedContentType: /text\/css/u });
+  await check('/storylock-app.html', { expectedContentType: /text\/html/u });
+  await check('/storylock-app.js', { expectedContentType: /text\/javascript/u });
+  await check('/local-agent-app.html', { expectedContentType: /text\/html/u });
+  await check('/local-agent-app.js', { expectedContentType: /text\/javascript/u });
   await check('/api/storylock-gateway', { expectedContentType: /application\/json/u });
   const download = await check('/app/download', { expectedContentType: /application\/json/u });
   const downloadBody = await download.json();
   assert.equal(downloadBody.platforms.android.platform, 'android');
   assert.equal(downloadBody.platforms.windows.platform, 'windows');
   assert.equal(downloadBody.platforms.linux.platform, 'linux');
+  assert.equal(downloadBody.platforms.android.packageKind, 'release');
+  assert.equal(downloadBody.platforms.android.releaseChannel, 'candidate');
+  assert.ok(downloadBody.platforms.android.fileName.endsWith('-release.apk'));
   assert.equal(downloadBody.platforms.windows.packageKind, 'zip');
   assert.match(downloadBody.platforms.linux.packageKind, /^(deb|tar\.gz|zip)$/u);
   assert.ok(downloadBody.platforms.linux.fileName.startsWith('yian-linux-host-'));
@@ -107,7 +115,7 @@ try {
   console.log(JSON.stringify({
     status: 'passed',
     baseUrl,
-    checks: 10,
+    checks: 15,
   }, null, 2));
 } finally {
   await new Promise((resolve) => server.close(resolve));

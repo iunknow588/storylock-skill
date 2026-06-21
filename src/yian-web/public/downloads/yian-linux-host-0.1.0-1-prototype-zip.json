@@ -1,0 +1,10 @@
+{
+  "fileName": "yian-linux-host-0.1.0-1-prototype.zip",
+  "platform": "linux",
+  "fileSizeBytes": 58150,
+  "checksum": "sha256:e454d45cb7361805b400bc057fe52840664d1ec96e399024b9b9bb58616d7d65",
+  "packageKind": "zip",
+  "releaseChannel": "prototype",
+  "versionName": "0.1.0",
+  "versionCode": "1"
+}

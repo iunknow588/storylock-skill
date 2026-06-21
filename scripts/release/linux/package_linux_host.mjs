@@ -109,6 +109,15 @@ async function createDebStaging() {
   await cp(join(stageDir, 'src', 'host', 'linux-host', 'packaging', 'debian', 'control'), join(debianDir, 'control'));
   await cp(join(stageDir, 'src', 'host', 'linux-host', 'packaging', 'debian', 'postinst'), join(debianDir, 'postinst'));
   await cp(join(stageDir, 'src', 'host', 'linux-host', 'packaging', 'debian', 'prerm'), join(debianDir, 'prerm'));
+  if (process.platform === 'win32') {
+    await writeFile(join(debStageDir, 'DEBIAN-STAGING-README.txt'), [
+      'This directory is a Debian package staging tree.',
+      'Build on Linux with: dpkg-deb --build <staging-dir> <output.deb>',
+      'Windows local packaging skips Unix chmod and dpkg-deb; use npm run package:linux-host:wsl for a .deb.',
+      '',
+    ].join('\n'), 'utf8');
+    return;
+  }
   await run('find', [debStageDir, '-type', 'd', '-exec', 'chmod', '0755', '{}', ';']);
   await run('find', [debStageDir, '-type', 'f', '-exec', 'chmod', '0644', '{}', ';']);
   await run('chmod', ['0644', join(debianDir, 'control')]);
@@ -126,6 +135,10 @@ async function createDebStaging() {
 async function createDebIfAvailable() {
   await rm(debPath, { force: true });
   await createDebStaging();
+  if (process.platform === 'win32') {
+    debBuildError = 'Windows local packaging created Debian staging only; use npm run package:linux-host:wsl to build .deb.';
+    return false;
+  }
   try {
     await run('dpkg-deb', ['--build', debStageDir, debPath]);
     return existsSync(debPath);

@@ -198,9 +198,7 @@ class StoryLockAndroidHostService(
           .put("curve", signingKey.getString("curve"))
           .put("publicKeySpki", signingKey.getString("publicKeySpki"))
           .put("signature", signature)
-          .put("keyId", signingKey.getString("keyId"))
-          .put("privateKey", "android-keystore-local-only")
-          .put("signingKeyBytes", "[android-keystore-protected]"),
+          .put("keyId", signingKey.getString("keyId")),
       )
       .put("redactionLevel", "result_only")
       .put("retentionGranted", "result_only")
@@ -237,10 +235,11 @@ class StoryLockAndroidHostService(
           .put("challenge", challengeSummary(challenge))
           .put("credentialRef", credential.getString("credentialRef"))
           .put("username", credential.getString("username"))
-          .put("password", credential.getString("password"))
-          .put("targetOrigin", credential.getString("targetOrigin")),
+          .put("targetOrigin", credential.getString("targetOrigin"))
+          .put("filled", true)
+          .put("secretMaterial", "android-keystore-local-only"),
       )
-      .put("redactionLevel", "result_only")
+      .put("redactionLevel", "audit_meta_only")
       .put("retentionGranted", "audit_meta_only")
       .put(
         "auditMeta",

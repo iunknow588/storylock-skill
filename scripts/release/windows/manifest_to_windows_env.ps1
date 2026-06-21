@@ -8,6 +8,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Set-Utf8NoBomContent {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$LiteralPath,
+    [Parameter(Mandatory = $true)]
+    [string[]]$Value
+  )
+  $text = ($Value -join "`n") + "`n"
+  [System.IO.File]::WriteAllText($LiteralPath, $text, [System.Text.UTF8Encoding]::new($false))
+}
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 if ([string]::IsNullOrWhiteSpace($EnvOutput)) {
   $EnvOutput = Join-Path $repoRoot "scripts\vercel\.env.windows-package"
@@ -40,7 +51,7 @@ $version = [string]$manifest.version
 $versionCode = [string]$manifest.versionCode
 $releaseChannel = [string]$manifest.releaseChannel
 
-@(
+$envLines = @(
   "STORYLOCK_WINDOWS_PACKAGE_PATH=$path"
   "STORYLOCK_WINDOWS_PACKAGE_VERSION=$version"
   "STORYLOCK_WINDOWS_PACKAGE_VERSION_CODE=$versionCode"
@@ -49,7 +60,8 @@ $releaseChannel = [string]$manifest.releaseChannel
   "STORYLOCK_WINDOWS_PACKAGE_KIND=$kind"
   "STORYLOCK_WINDOWS_RELEASE_CHANNEL=$releaseChannel"
   "STORYLOCK_WINDOWS_APP_DOWNLOAD_URL=$PublicDownloadUrl"
-) | Set-Content -LiteralPath $EnvOutput -Encoding UTF8
+)
+Set-Utf8NoBomContent -LiteralPath $EnvOutput -Value $envLines
 
 Write-Output "Windows env file generated from manifest."
 Write-Output "Manifest: $ManifestPath"

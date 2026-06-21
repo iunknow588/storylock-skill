@@ -2,251 +2,306 @@
 
 | 项目 | 内容 |
 | --- | --- |
-| 文档版本 | v1.0 |
-| 日期 | 2026-06-20 |
-| 适用范围 | `skill/` 主线代码、平台宿主、发布与验证 |
-| 依据 | 当前代码实现、现行设计文档、已完成一致性检查与自测结果 |
+| 文档版本 | v1.1 |
+| 更新日期 | 2026-06-20 |
+| 适用范围 | `skill/` 主线代码、易安站点、StoryLock 三层 Skill、Windows/Android/Linux 本地宿主、发布与验收 |
+| 配套清单 | `docs/management/StoryLock后续开发实施清单_20260620.md` |
 
-## 1. 目标
+## 0. 2026-06-20 补充决策：Windows 原生 UI 采用 Slint 渐进落地
 
-本计划用于明确 StoryLock 当前阶段之后的开发重点，避免继续把“架构设计”“原型代码”“正式交付能力”混写在一起。
+参考 Slint 的 Rust 原生桌面能力后，Windows 本地宿主 UI 的后续方向调整为“先网页原型、再 Slint 原生化、最后托盘与安装器产品化”。
 
-当前项目已经具备：
+核心决策：
 
-1. 三层主线架构与自测闭环。
-2. 第二层本地授权、问题集、session、防重放与撤销能力。
-3. 第三层远程网关、EIP-712 请求包装、脱敏返回、下载入口、绑定与 relay 闭环。
-4. Android 宿主与 Windows 宿主原型工程。
-5. Linux 最小本地宿主原型、WSL 打包入口、`tar.gz` 与 `.deb` 原型包、桌面集成与 Debian staging 预留。
-6. Windows / Linux / macOS 三个平台 SecretStore 适配器与启动期可用性守门。
+1. Slint 只作为 Windows 本地宿主的原生 UI 层，不替代 StoryLock Local Core、安全存储、relay polling 和 localhost API。
+2. `verify / authorize / execute / revoke`、DPAPI、题库、授权会话继续留在 Rust 核心内，UI 通过 Rust 状态和受控回调触发能力。
+3. Slint 以可选 Cargo feature 方式接入，避免默认构建、命令行测试和 zip 原型被 GUI 依赖阻塞。
+4. 当前已经上线的 `/storylock-app.html` 与 `/local-agent-app.html` 作为交互蓝图，后续迁移为 Slint 原生窗口。
+5. 远程网关仍只暴露 `requestSignature` 和 `requestPasswordFill`，不因 UI 丰富化而扩大远程能力面。
 
-当前项目尚未完全具备：
+推荐落地顺序：
 
-1. 生产级 Android 本地签名闭环。
-2. Android 正式 release 真机验收与发布闭环。
-3. Windows / Linux 正式签名包、安装验证与生产分发闭环。
-4. Linux Secret Service 真桌面环境验收。
-5. 以真机和正式构建为基准的交付级验收体系。
+| 顺序 | 形态 | 目标 |
+| --- | --- | --- |
+| 1 | 静态 Web 原型 | 快速验证 StoryLock 工作台和 Agent 控制台的信息架构 |
+| 2 | Slint 只读总览窗口 | 在 Windows host 中显示状态、配置、能力边界和本地 API |
+| 3 | Slint 请求队列窗口 | 展示待确认请求、来源、能力、对象、风险和过期时间 |
+| 4 | Slint 九宫格挑战窗口 | 替代简单 `MessageBoxW`，承接本地授权确认 |
+| 5 | 托盘 + MSI | 提供开机常驻、打开控制台、复制诊断、退出和正式安装体验 |
 
-因此，后续开发目标不是继续扩写概念，而是把“主线可运行”推进到“平台可交付、文档可据实宣讲、构建可重复验证”。
+风险约束：
 
-## 2. 总体原则
+1. Slint 许可证需要在正式发布前复核，确保当前发布形态满足其 GPL / royalty-free / commercial 条款。
+2. UI 事件循环不得阻塞本地 HTTP server 和 relay polling。
+3. UI 不得显示题库答案、明文密码、私钥或可恢复故事原文。
+4. 无头环境和 CI 默认不启用 Slint UI feature。
 
-1. 先补齐当前主线缺口，再扩展新能力。
-2. 先解决“代码已存在但交付口径不清”的问题，再增加新设计。
-3. 先完成平台安全边界和验收闭环，再谈多账户、多平台、多链扩展。
-4. 设计文档只写当前已实现能力和明确的下一步，不把探索项写成已完成项。
+## 1. 当前结论
 
-## 3. 当前结论
+StoryLock / 易安当前已经从“概念验证”进入“主线可运行、交付体验待补齐”的阶段。代码层面已有三层 Skill、远程网关、本地授权、题库、平台宿主和下载发布链路；产品层面仍缺少足够清晰的本地 UI、安装体验、状态管理界面和正式签名发布闭环。
 
-### 3.1 已实现并应继续巩固的部分
+当前线上站点：
 
-1. `src/skills/local-story-processing` 的第一层主线能力。
-2. `src/skills/local-story-access` 的第二层授权主线。
-3. `src/skills/remote-gateway` 的第三层入口、脱敏和 Web API 链路。
-4. 24 题模板生成、校验与导入流程。
-5. 文档一致性检查、文本规范检查与主线 selftest。
+1. `https://yian.cdao.online/` 已部署到 Vercel `storylock-gateway` 项目。
+2. 首页已改为同页分屏导航，包含：产品说明、安全方式、下载绑定、安装版本、使用说明、使用流程、常见问题、请求状态、帮助说明。
+3. `帮助说明` 已并入首页 `#help` 面板，不再跳转到风格不同的 `help.html`。
+4. Windows 下载直链已恢复并可返回 zip 包。
 
-### 3.2 部分实现、需要优先补齐的部分
+当前 Windows 包状态：
 
-1. Android 宿主已有真实工程、Keystore、BiometricPrompt、注册与 relay，但仍有 demo 级签名实现。
-2. Android challenge 流程已有本地输入确认，但高强度多格验证尚未完全按第二层正式模型落地。
-3. Windows 宿主已有 Rust 原型和本地执行闭环，但仍属于 prototype 发布口径。
-4. Android 签名路径已从 demo HMAC 推进到 Android Keystore 非对称签名原型，但请求算法策略、认证绑定、审计与正式 release 验收仍需继续补齐。
-5. Linux 平台已具备 SecretStore 适配、最小本地宿主、`npm run test:linux-host`、WSL 打包、`.deb` / `tar.gz` 原型包、desktop entry、systemd user unit 与站点 downloads 元数据；正式签名包、Secret Service 真环境验收和真实发行版安装验证尚未完成。
-6. Vercel 本地构建、API 入口和下载路由已经对齐，但线上 `yian.cdao.online` 仍返回部署级 `404: NOT_FOUND`；当前本机执行生产部署时曾卡在 Vercel CLI 访问 `https://vercel.com/.well-known/openid-configuration` 的 TLS/OIDC 请求，且本地 `.vercel/project.json` 仍可能指向旧的 `skill` 项目。下一步应先补齐 Vercel token 或网络/TLS 访问条件，再把本地项目 link 到承载 `yian.cdao.online` 的 `storylock-gateway` 项目，并确认域名 alias 到最新生产部署。
+1. 当前包是 `Yian Windows Host` 本地宿主原型，不是完整 StoryLock 图形桌面应用。
+2. 线上 zip 当前包含：
+   - `yian-windows-host.exe`
+   - `README.md`
+   - `start-yian-windows-host.cmd`
+3. 本地宿主提供 localhost API、relay polling、DPAPI 本地保护、题库、verify / authorize / execute / revoke 闭环。
+4. 仍缺少系统托盘、请求列表、确认详情页、题库管理页、设备状态页和正式安装器体验。
 
-### 3.3 尚未实现的部分
+当前远程能力边界：
 
-1. Android 正式 release 构建、签名、验签、发布闭环。
-2. Windows 正式签名分发闭环。
-3. Linux 正式签名包、真实 Linux 桌面安装、Secret Service 真环境验收与发布闭环。
-4. macOS 独立宿主交付材料与平台验收记录。
-5. 真机验证报告沉淀与固定化验收模板。
+1. 远程网关对第三方只暴露两个主能力：`requestSignature`、`requestPasswordFill`。
+2. 远程层不暴露故事读取、故事写入、题库答案、私钥、密码、本地授权细节。
+3. 本地验证、授权、撤销、秘密读取和执行必须留在本地宿主或第二层授权边界内。
 
-## 4. 开发阶段规划
+## 2. 功能界面部署总结
 
-## 第一阶段：主线补强与口径收敛
+### 2.1 易安首页
 
-### 目标
+当前首页是统一的单页面板式产品入口：
 
-把“当前真实状态”写清楚，把最影响评审和后续开发的偏差先收拢。
+| 页面 | 路由 | 当前作用 |
+| --- | --- | --- |
+| 首页 | `#home` | 品牌入口、下载按钮、绑定入口 |
+| 产品说明 | `#overview` | 说明易安如何连接云端请求和本地确认 |
+| 安全方式 | `#architecture` | 说明云端、私人助手、本地核心的边界 |
+| 下载绑定 | `#binding` | 说明下载后如何绑定本地设备 |
+| 安装版本 | `#apk` | 展示 Windows / Android / Linux 下载入口 |
+| 使用说明 | `#user-guide` | 面向普通用户的使用说明 |
+| 使用流程 | `#flow` | 从下载到完成一次确认的步骤 |
+| 常见问题 | `#faq` | 绑定、安装、离线、换设备问题 |
+| 请求状态 | `#runtime` | 调用网关状态与设备连接接口 |
+| 帮助说明 | `#help` | 与其他页面一致的帮助说明入口 |
 
-### 任务
+已完成部署项：
 
-1. 修订 Android 相关设计与评审文档口径：
-   - 明确 Android 真机宿主原型已经存在。
-   - 明确当前仍未完成生产级签名与正式发布闭环。
-2. 修订平台宿主与发布说明：
-   - Windows 宿主标注为 prototype。
-   - Android APK 标注 debug/internal 与 release/candidate 的差异。
-   - Linux 宿主标注为 prototype，区分 WSL 原型打包成功和真实 Linux 发行版验收完成。
-3. 统一管理文档中的当前主线表述：
-   - 三层主线。
-   - Android/Windows/Linux 属于平台宿主实现方向。
-   - 多账户、多平台、多链只保留为后续扩展方向。
-4. 在第二层 Host 启动路径中补强平台 SecretStore 可用性检查与错误提示。
+1. Vercel outputDirectory 使用 `release/web/public`。
+2. `npm run build` 会复制 `src/yian-web/public` 到 `release/web/public`。
+3. downloads 目录生成平台包和 metadata。
+4. WSL 发布入口可成功部署生产环境并 alias 到 `yian.cdao.online`。
 
-### 验收标准
+待完善项：
 
-1. 设计文档、评审文档、代码状态描述不再互相冲突。
-2. 启动时缺失平台存储依赖会明确失败，而不是模糊降级。
-3. `npm run test:docs` 与 `npm run test:text` 通过。
+1. 首页需要显示平台包类型：Windows 当前是“本地宿主原型”，不是完整应用。
+2. 请求状态页需要从“JSON 输出”升级为用户可读的状态面板。
+3. 下载页需要展示文件大小、SHA-256、版本号、渠道、原型限制。
+4. 需要给 Windows、Android、Linux 分别补“安装后下一步”界面说明。
 
-## 第二阶段：Android 宿主安全链补齐
+### 2.2 Windows 本地宿主界面
 
-### 目标
+当前 Windows 端可运行但 UI 不足：
 
-把 Android 宿主从“可运行原型”推进到“安全链条基本成立”。
+| 能力 | 当前形态 | 问题 |
+| --- | --- | --- |
+| 启动 | `start-yian-windows-host.cmd` + 控制台 | 用户会看到命令行输出，产品感弱 |
+| 本地确认 | Windows Yes/No MessageBox | 只能表达允许/拒绝，缺少详情说明 |
+| 请求查看 | localhost API / JSON | 没有可视化请求列表 |
+| 题库管理 | API / CLI | 没有题库导入、版本、状态 UI |
+| 设备状态 | `/health` JSON、`/ui/status` 状态 JSON、`ui-tray` 托盘首版 | 已有浏览器管理页和托盘入口，仍缺在线/离线/待确认状态图标细化和完整设备页 |
+| 日志诊断 | 控制台输出、`/diagnostics` 脱敏诊断 JSON、托盘复制诊断 | 已有复制诊断首版，仍缺日志页面 |
 
-### 任务
+下一阶段应把 Windows 从“host service prototype”推进到“local assistant shell”：
 
-1. 将当前 demo HMAC 签名替换为真正的 Android Keystore 签名能力。
-2. 将 challenge 交互从“局部演示式确认”补齐为与第二层一致的正式本地验证流程。
-3. 梳理 Android 宿主内的长期材料、运行态材料与返回字段边界。
-4. 明确 Android 本地返回结构中哪些字段仅供本地、哪些字段可交给第三层脱敏后返回。
-5. 补充 Android 宿主的负面测试：
-   - challenge 失败
-   - BiometricPrompt 不可用
-   - relay 超时
-   - 无绑定状态
-   - 错误 shared secret
+1. 托盘图标：首版已提供打开管理页、查看健康、复制诊断和退出；后续细化在线、离线、请求待确认状态。
+2. 本地管理页：优先采用 Slint 原生窗口，必要时再保留 `http://127.0.0.1:4510/ui` 浏览器页。
+3. 请求确认页：展示请求来源、能力、对象、风险、过期时间。
+4. 题库页：展示当前题库版本、题目数量、导入按钮。
+5. 设备页：展示 identityId、deviceId、appInstanceId、gateway、relay 状态。
+6. 日志页：展示最近注册、轮询、执行、错误记录。
 
-### 验收标准
+### 2.3 远程网关界面
 
-1. Android 本地签名不再依赖 demo HMAC key material。
-2. challenge 验证流程与第二层正式模型一致，不再依赖内部补答案绕过。
-3. Android 宿主具备可重复执行的真机闭环检查步骤。
+当前远程层有意保持窄接口：
 
-## 第三阶段：平台能力补齐
+| 远程能力 | 当前状态 | 设计理由 |
+| --- | --- | --- |
+| `requestSignature` | 已作为主线能力 | 高敏感操作，必须本地授权 |
+| `requestPasswordFill` | 已作为主线能力 | 远程只拿审计结果，不拿明文密码 |
 
-### 目标
+不建议近期新增远程故事读写能力。StoryLock 的故事内容、题库答案、私钥、密码等应继续留在本地边界内。
 
-补齐当前明确缺口，使平台边界具备最小完整性。
+## 3. StoryLock 功能设计总结
 
-### 任务
+### 3.1 三层 Skill
 
-1. 固化 macOS Keychain SecretStore 适配器的验收口径。
-2. 梳理 `createPlatformSecretStore(...)` 在 Windows、Linux、macOS 下的统一语义。
-3. 为 Host 增加统一的 `checkAvailable()` 守门调用策略。
-4. 补齐 Linux 平台材料、检查说明与目录口径。
-5. 完善 Windows 宿主与第二层/第三层接口契合度检查。
-6. 固化 Linux `.deb` / `tar.gz` 原型包、desktop entry、systemd user unit 与 WSL 打包脚本的回归检查。
-7. 明确各平台 development mode 与 production mode 的限制与告警。
+| 层 | 包 | 当前能力 | UI / 产品含义 |
+| --- | --- | --- | --- |
+| 第一层 | `local-story-processing` | 故事草稿、故事润色、题集强度评估 | 将来可做“故事工作台” |
+| 第二层 | `local-story-access` | 对象强度、九宫格验证、本地授权、撤销、审计 | 本地安全确认核心 |
+| 第三层 | `remote-gateway` | 远程签名、远程密码填充、脱敏返回 | 云端/第三方 Agent 入口 |
 
-### 验收标准
+### 3.2 本地 Agent / Host 能力
 
-1. 三个平台 SecretStore 接口行为一致。
-2. 文档中的平台适配说明与代码完全一致。
-3. 不再存在“文档声称支持、代码实际缺失”的平台能力。
+Windows 本地宿主当前实际能力：
 
-## 第四阶段：发布与交付闭环
+1. `GET /health`
+2. `GET /question-bank/status`
+3. `POST /question-bank/import`
+4. `POST /verify`
+5. `POST /authorize`
+6. `POST /execute`
+7. `POST /revoke`
+8. `/local-host/register`
+9. `/local-host/relay/poll`
+10. `/local-host/relay/respond`
 
-### 目标
+核心执行能力：
 
-把已有下载入口推进为真实的构建、签名、分发、验签闭环。
+1. `requestSignature`
+2. `requestPasswordFill`
 
-### 任务
+### 3.3 产品层功能分组
 
-1. 补齐 Android release 包构建与签名流程。
-2. 固化 `release/app/android/` 的版本、校验值、渠道产物规范。
-3. 补齐 Windows 包构建、签名、上传与元数据发布流程。
-4. 补齐 Linux 正式包签名、真实发行版安装、Secret Service 真环境验收与回滚说明。
-5. 将网站下载入口、Web API 元数据、发布脚本三者完全对齐。
-6. 固化一份正式“发布前检查清单”：
-   - 版本号
-   - checksum
-   - 渠道标识
-   - 安装验证
-   - 回滚策略
+后续产品功能应分成四个界面域：
 
-### 验收标准
+| 域 | 面向用户 | 主要功能 |
+| --- | --- | --- |
+| 易安网站 | 普通用户、评审、第三方接入方 | 下载、绑定、说明、状态、帮助 |
+| 本地宿主 UI | 普通用户 | 待确认请求、设备状态、题库、日志 |
+| StoryLock 工作台 | 创作者 / 私人助手 | 故事草稿、润色、题集强度、保护对象管理 |
+| 管理与发布后台 | 开发 / 运维 | 包版本、metadata、部署、验收报告 |
 
-1. 下载入口指向的产物、元数据和校验值一致。
-2. Android/Windows/Linux 至少各有一条可重复执行的正式构建或候选构建流程。
-3. 调试包、候选包、正式包的口径清晰，不混用。
+## 4. 后续开发阶段
 
-## 第五阶段：测试与验收体系固化
+### 阶段 A：功能界面补齐
 
-### 目标
+目标：让当前可运行能力变成普通用户可理解的界面。
 
-把现在的 selftest 扩展为更适合持续开发和评审交付的验证体系。
+任务：
 
-### 任务
+1. 易安首页下载区显示版本、大小、checksum、渠道和原型限制。
+2. 请求状态页从 JSON 输出改成结构化状态卡片。
+3. Windows 本地宿主增加最小 UI：
+   - 托盘状态
+   - 本地管理页
+   - 请求确认页
+   - 日志页
+4. 帮助说明补充“Windows 当前是本地宿主原型，不是完整桌面应用”。
+5. Android / Linux 下载说明也补充原型、debug、release 差异。
 
-1. 为第二层和第三层补充负面测试与边界测试。
-2. 为 Android 宿主、Windows 宿主与 Linux 宿主补充平台级联调测试。
-3. 固化真机检查报告模板。
-4. 把文档一致性检查、文本规范检查、主线 selftest 纳入固定提交流程。
-5. 对关键能力建立最小验收矩阵：
-   - 本地授权
-   - 防重放
-   - 脱敏
-   - 平台密钥存储
-   - relay/poll/respond
-   - 下载分发
+验收：
 
-### 验收标准
+1. 普通用户下载 Windows 包后能知道下一步运行哪个文件。
+2. 首页不再把原型包误写成正式桌面应用。
+3. 请求状态页无需阅读原始 JSON 即可理解当前状态。
 
-1. 主线能力具备正向与负向双向测试覆盖。
-2. 平台宿主验证不再只依赖人工口头说明。
-3. 任一版本在交付前都能跑通固定验收清单。
+### 阶段 B：Windows 本地宿主产品化
 
-## 5. 优先级排序
+目标：把 Windows 从 zip 原型推进到候选交付形态。
+
+任务：
+
+1. 修正旧配置中 `/android-host/*` 与当前 `/local-host/*` 的路径混用。
+2. 保留 `/storylock-app.html` 与 `/local-agent-app.html` 作为站点级 UI 原型。
+3. 为 Windows host 增加 `--slint-ui` 原型入口，默认构建不启用，使用 `--features ui-slint` 验证。
+4. 将 Slint UI 从只读状态窗口扩展到请求队列、九宫格挑战和授权结果。
+5. 在 Slint 请求确认稳定后，逐步替换当前 Windows Yes/No `MessageBoxW` fallback。
+6. 增加 MSI 构建和桌面快捷方式。
+7. 增加启动项/托盘/退出控制。
+8. 增加日志文件和诊断导出。
+9. 对 `start-yian-windows-host.cmd` 做用户友好提示。
+
+验收：
+
+1. `npm run test:windows-host` 或指定端口闭环通过。
+2. zip / msi 包内容可被脚本检查。
+3. 默认无 UI 构建不受 Slint 影响。
+4. `cargo check --features ui-slint` 通过。
+5. 双击启动后用户能看到状态和下一步，不只看到控制台。
+
+### 阶段 C：安全链路正式化
+
+目标：减少 demo 语义，保留明确的安全边界。
+
+任务：
+
+1. Android Keystore 签名从 prototype 推进到 release 验收路径。
+2. Windows DPAPI 存储增加生产模式检查。
+3. Linux Secret Service 做真实桌面环境验收。
+4. 第二层题库、challenge、authorization 与各平台 host 对齐。
+5. 远程层继续只暴露 `requestSignature`、`requestPasswordFill`。
+
+验收：
+
+1. 各平台不返回明文密码、私钥、答案。
+2. replay、expiry、nonce、requestId 检查稳定。
+3. 本地授权失败、过期、撤销路径都有测试覆盖。
+
+### 阶段 D：发布与部署闭环
+
+目标：让“构建、打包、部署、验收”可重复执行。
+
+任务：
+
+1. 将 `src/yian-web/public/downloads` 与 `release/app/*` 的关系固定为发布规则。
+2. 每次 Windows 包重打后同步内置 downloads 或调整 Vercel 构建策略。
+3. Vercel 发布继续优先使用 WSL 或 CI token 通道。
+4. 对线上 zip、metadata、首页资源版本做部署后检查。
+5. 建立 release checklist：版本、大小、checksum、包内容、直链、metadata。
+
+验收：
+
+1. `npm run build`
+2. `npm run test:release`
+3. `npm run test:site-http`
+4. 线上 `/downloads/*.zip` 与 metadata checksum 一致。
+
+### 阶段 E：StoryLock 工作台
+
+目标：让第一层故事能力不只停留在 Skill API。
+
+任务：
+
+1. 增加故事草稿 UI。
+2. 增加故事润色 UI。
+3. 增加题集强度评估 UI。
+4. 增加题集模板导入/导出。
+5. 明确 StoryLock 工作台与本地授权边界：处理故事文本不等于读取受保护对象。
+
+验收：
+
+1. 第一层能力有可演示界面。
+2. 受保护对象仍必须经第二层授权。
+3. 远程网关不直接读取故事内容。
+
+## 5. 优先级
 
 ### P0
 
-1. 文档口径收敛到当前真实状态。
-2. Android Keystore 签名原型继续推进到正式 release 验收口径。
-3. Vercel 线上生产部署和 `yian.cdao.online` 404 问题闭环，优先补齐 `VERCEL_TOKEN` 或修复当前机器到 Vercel OIDC 端点的 TLS 访问，并确认 `.vercel/project.json`、`VERCEL_PROJECT_NAME=storylock-gateway` 与域名绑定项目一致。
+1. 修正并固化 Windows 本地宿主原型说明。
+2. 建立 Windows 最小 UI 或本地管理页。
+3. 固化线上发布后检查：zip 内容、metadata、首页导航。
+4. 修正 `/android-host/*` 与 `/local-host/*` 路径混用风险。
 
 ### P1
 
-1. Android challenge 正式化。
-2. Linux Secret Service 真环境验收、正式签名包与真实发行版安装验证。
-3. Windows/Android/Linux 发布脚本与元数据闭环。
-4. macOS 独立宿主交付材料与验收说明固化。
+1. 请求状态页产品化。
+2. Windows MSI / 快捷方式 / 托盘。
+3. Android release 安全链路验收。
+4. Linux 真桌面 Secret Service 验收。
 
 ### P2
 
-1. 平台宿主更多 UI 与易用性补强。
-2. 多账户、多对象、多链扩展能力。
-3. 更完整的对外演示包装。
+1. StoryLock 工作台 UI。
+2. 多账户、多对象、多设备管理。
+3. 更完整的演示和评审模式。
 
-## 6. 交付物清单
+## 6. 不建议近期扩展
 
-后续每阶段建议至少产出以下交付物：
+1. 不建议近期开放远程故事读写。
+2. 不建议把题库答案、私钥、密码暴露给远程 API。
+3. 不建议在本地 UI 未补齐前继续扩展过多新 capability。
+4. 不建议把 Windows 原型包包装成“正式 StoryLock 应用”。
 
-1. 代码提交与对应自测结果。
-2. 更新后的设计/评审/管理文档。
-3. 平台级操作说明或检查脚本。
-4. 阶段验收记录。
+## 7. 总结
 
-## 7. 不建议当前阶段展开的事项
-
-以下事项可以保留在设计参考中，但不应抢占当前主线资源：
-
-1. 多链统一签名生态适配。
-2. 多账户复杂授权编排。
-3. 新的故事读写能力扩展。
-4. 过度前置的产品包装与市场化表述。
-
-## 8. 近期建议执行顺序
-
-建议按以下顺序推进：
-
-1. 先修正文档口径与计划基线，确保计划、清单、README 与验收矩阵一致。
-2. 再处理 Vercel 线上生产部署，确认 `yian.cdao.online` 不再是部署级 404。
-3. 再补 Android release 真机安全链、Windows 正式签名和 Linux 真桌面验收。
-4. 再补 macOS 独立宿主交付材料。
-5. 最后做扩展能力和更强的对外演示包装。
-
-## 9. 结论
-
-StoryLock 当前已经不是“只有概念”的阶段，而是“主线已跑通、平台原型已出现、但交付级闭环尚未完成”的阶段。
-
-后续开发的核心不是继续扩写设想，而是把以下三件事做实：
-
-1. 让代码状态、文档口径、评审表述完全一致。
-2. 让 Android / Windows / Linux / SecretStore 的平台安全边界真正闭合。
-3. 让构建、发布、验收流程具备可重复执行能力，并把线上部署状态纳入发布验收。
+后续开发重点不是继续增加远程函数数量，而是把当前“安全边界正确但用户界面偏弱”的能力产品化。远程保持窄接口，本地补 UI 和安装体验，StoryLock 工作台补故事处理界面，发布链路补可重复验收。

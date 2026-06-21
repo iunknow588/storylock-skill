@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="StoryLock 底层故事锁工作台，用于故事草稿、问题节点、保护对象、九宫格挑战和授权会话原型演示。">
+    <title>StoryLock 底层故事锁工作台</title>
+    <link rel="stylesheet" href="/app-shell.css?v=20260620-1">
+  </head>
+  <body data-app="storylock">
+    <header class="app-topbar">
+      <div class="app-brand">
+        <p class="app-kicker">StoryLock Local Core</p>
+        <h1>底层故事锁工作台</h1>
+      </div>
+      <div class="app-top-actions">
+        <span class="chip good" data-region="story-status">本地草稿</span>
+        <span class="chip warn" data-region="session-status">未授权</span>
+        <a class="app-link" href="/">返回易安首页</a>
+        <a class="app-link primary" href="/local-agent-app.html">打开 Agent 控制台</a>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <nav class="side-nav" aria-label="StoryLock 工作区">
+        <button class="is-active" type="button" data-view-target="draft">故事草稿</button>
+        <button type="button" data-view-target="nodes">24 节点题集</button>
+        <button type="button" data-view-target="resources">保护对象</button>
+        <button type="button" data-view-target="challenge">九宫格挑战</button>
+        <button type="button" data-view-target="session">授权会话</button>
+        <button type="button" data-view-target="export">导出包与审计</button>
+      </nav>
+
+      <section class="workspace">
+        <article id="draft" class="view is-active">
+          <div class="panel-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>故事草稿</h2>
+                  <p>本地生成和维护一个用于身份确认的问题故事，不上传原文。</p>
+                </div>
+                <button class="app-button primary" type="button" data-action="polish-story">润色草稿</button>
+              </div>
+              <label class="field">
+                <span>故事标题</span>
+                <input data-field="story-title" value="旧书店里的蓝色票根">
+              </label>
+              <label class="field">
+                <span>故事摘要</span>
+                <textarea data-field="story-summary">你在大学城旧书店帮店主整理二楼库房，偶然把一张蓝色电影票根夹进《小王子》旧书。多年后，这张票根成为你与好友重逢时确认身份的私人线索。</textarea>
+              </label>
+              <div class="button-row">
+                <button class="app-button" type="button" data-action="generate-nodes">生成 24 节点</button>
+                <button class="app-button" type="button" data-action="score-strength">强度评估</button>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <h3>强度概览</h3>
+              <div class="dashboard-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px;">
+                <div class="stat-card">
+                  <h3>可回忆性</h3>
+                  <p class="stat-value" data-region="recall-score">84</p>
+                </div>
+                <div class="stat-card">
+                  <h3>抗猜测性</h3>
+                  <p class="stat-value" data-region="guess-score">78</p>
+                </div>
+              </div>
+              <p data-region="strength-note">当前故事包含地点、物品、关系和时间线，适合作为本地挑战题源。</p>
+            </aside>
+          </div>
+        </article>
+
+        <article id="nodes" class="view">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>24 节点题集</h2>
+                <p>节点覆盖地点、人物、物件、顺序和细节。每次授权只抽取最小必要问题。</p>
+              </div>
+              <button class="app-button primary" type="button" data-action="shuffle-nodes">重排节点</button>
+            </div>
+            <div class="node-grid" data-region="node-grid"></div>
+          </section>
+        </article>
+
+        <article id="resources" class="view">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>保护对象</h2>
+                <p>本地只暴露受控能力，不让远程直接读取密钥、密码或故事原文。</p>
+              </div>
+              <button class="app-button primary" type="button" data-action="add-resource">添加示例对象</button>
+            </div>
+            <div class="resource-grid" data-region="resource-grid"></div>
+          </section>
+        </article>
+
+        <article id="challenge" class="view">
+          <div class="panel-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>九宫格挑战</h2>
+                  <p>从题集里抽取 9 个候选项，用户选择与目标操作匹配的故事线索。</p>
+                </div>
+                <button class="app-button primary" type="button" data-action="new-challenge">生成挑战</button>
+              </div>
+              <div class="field-row">
+                <label class="field" style="flex: 1 1 220px;">
+                  <span>保护对象</span>
+                  <select data-field="challenge-resource"></select>
+                </label>
+                <label class="field" style="flex: 1 1 220px;">
+                  <span>动作</span>
+                  <select data-field="challenge-action">
+                    <option value="requestSignature">请求签名</option>
+                    <option value="requestPasswordFill">填充密码</option>
+                  </select>
+                </label>
+              </div>
+              <div class="challenge-grid" data-region="challenge-grid"></div>
+            </section>
+
+            <aside class="panel">
+              <h3>挑战结果</h3>
+              <p data-region="challenge-note">生成挑战后选择正确线索。</p>
+              <div class="button-row" style="margin-top: 14px;">
+                <button class="app-button" type="button" data-action="demo-answer">填入演示答案</button>
+                <button class="app-button primary" type="button" data-action="verify-challenge">验证</button>
+              </div>
+            </aside>
+          </div>
+        </article>
+
+        <article id="session" class="view">
+          <div class="panel-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>授权会话</h2>
+                  <p>挑战通过后才创建短时本地会话，并限定能力、对象和有效期。</p>
+                </div>
+                <button class="app-button primary" type="button" data-action="issue-session">签发会话</button>
+              </div>
+              <pre data-region="session-json"></pre>
+            </section>
+
+            <aside class="panel">
+              <h3>能力边界</h3>
+              <div class="capability-grid" style="grid-template-columns: 1fr; margin-top: 12px;">
+                <div class="capability-item">
+                  <strong>requestSignature</strong>
+                  <span class="muted">只返回签名结果，不返回私钥。</span>
+                </div>
+                <div class="capability-item">
+                  <strong>requestPasswordFill</strong>
+                  <span class="muted">只在本地确认后填充目标凭据。</span>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </article>
+
+        <article id="export" class="view">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>导出包与审计</h2>
+                <p>导出的是配置摘要和题集模板，不包含故事原文和敏感秘密。</p>
+              </div>
+              <button class="app-button primary" type="button" data-action="export-bundle">生成导出包</button>
+            </div>
+            <pre data-region="export-json"></pre>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <h3>审计日志</h3>
+              <button class="app-button" type="button" data-action="clear-log">清空</button>
+            </div>
+            <div class="log-box" data-region="audit-log"></div>
+          </section>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="/storylock-app.js?v=20260620-1"></script>
+  </body>
+</html>

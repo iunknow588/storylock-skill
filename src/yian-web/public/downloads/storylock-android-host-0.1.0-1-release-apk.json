@@ -1,0 +1,10 @@
+{
+  "fileName": "storylock-android-host-0.1.0-1-release.apk",
+  "platform": "android",
+  "fileSizeBytes": 4782455,
+  "checksum": "sha256:204370ad3be6c5d3b9bb0d9f00fe82ea175171790f41bbe5e73b45f4fcb0b02f",
+  "packageKind": "release",
+  "releaseChannel": "candidate",
+  "versionName": "0.1.0",
+  "versionCode": "1"
+}

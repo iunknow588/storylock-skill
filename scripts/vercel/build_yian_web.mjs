@@ -186,11 +186,25 @@ async function copyAppArtifactsToDownloads(downloadsDir) {
   return copied;
 }
 
+async function copyBundledDownloads(downloadsDir) {
+  const bundledDownloadsDir = join(source, 'downloads');
+  const packageFiles = await listPackageFiles(bundledDownloadsDir);
+  const copied = [];
+  for (const packageFile of packageFiles) {
+    copied.push(await copyPackageToDownloads(packageFile.absolutePath, {
+      downloadsDir,
+      platform: inferPlatform(packageFile.fileName),
+    }));
+  }
+  return copied;
+}
+
 await rm(target, { recursive: true, force: true });
 await cp(source, target, { recursive: true });
 const downloadsDir = join(target, 'downloads');
 await rm(downloadsDir, { recursive: true, force: true });
 await mkdir(downloadsDir, { recursive: true });
+await copyBundledDownloads(downloadsDir);
 await copyAppArtifactsToDownloads(downloadsDir);
 
 const windowsEnv = await readEnvFile(windowsEnvFile);

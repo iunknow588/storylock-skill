@@ -12,6 +12,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Set-Utf8NoBomContent {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$LiteralPath,
+    [Parameter(Mandatory = $true)]
+    [string[]]$Value
+  )
+  $text = ($Value -join "`n") + "`n"
+  [System.IO.File]::WriteAllText($LiteralPath, $text, [System.Text.UTF8Encoding]::new($false))
+}
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 if ([string]::IsNullOrWhiteSpace($ProjectDir)) {
   $ProjectDir = Join-Path $repoRoot "src\host\windows-host"
@@ -30,7 +41,7 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
 $project = Resolve-Path -LiteralPath $ProjectDir
 Push-Location $project
 try {
-  cargo build --release
+  cargo build --release --features "ui-slint ui-tray"
 } finally {
   Pop-Location
 }
@@ -51,7 +62,12 @@ if (Test-Path -LiteralPath $zipPath) {
   Remove-Item -LiteralPath $zipPath -Force
 }
 
-Compress-Archive -LiteralPath $exe, (Join-Path $project "README.md") -DestinationPath $zipPath
+$packageFiles = @(
+  $exe
+  (Join-Path $project "README.md")
+  (Join-Path $project "start-yian-windows-host.cmd")
+)
+Compress-Archive -LiteralPath $packageFiles -DestinationPath $zipPath
 $hash = Get-FileHash -LiteralPath $zipPath -Algorithm SHA256
 $item = Get-Item -LiteralPath $zipPath
 
@@ -94,7 +110,7 @@ if ($SignArtifacts) {
   }
 }
 
-@(
+$envLines = @(
   "STORYLOCK_WINDOWS_PACKAGE_PATH=$($item.FullName)"
   "STORYLOCK_WINDOWS_PACKAGE_VERSION=$version"
   "STORYLOCK_WINDOWS_PACKAGE_VERSION_CODE=$versionCode"
@@ -106,7 +122,8 @@ if ($SignArtifacts) {
   "STORYLOCK_WINDOWS_MSI_SIZE_BYTES=$(if ($msiItem) { $msiItem.Length } else { '' })"
   "STORYLOCK_WINDOWS_MSI_CHECKSUM=$(if ($msiHash) { 'sha256:' + $msiHash.Hash.ToLowerInvariant() } else { '' })"
   "STORYLOCK_WINDOWS_MSI_UPGRADE_CODE=6F0A7D8B-7F59-4E6B-B4E8-0EAC6959B301"
-) | Set-Content -LiteralPath $EnvOutput -Encoding UTF8
+)
+Set-Utf8NoBomContent -LiteralPath $EnvOutput -Value $envLines
 
 Write-Output "Windows host package: $($item.FullName)"
 Write-Output "SHA-256: $($hash.Hash.ToLowerInvariant())"

@@ -1,0 +1,10 @@
+{
+  "fileName": "yian-windows-host-0.1.0-1-prototype.zip",
+  "platform": "windows",
+  "fileSizeBytes": 1898005,
+  "checksum": "sha256:90e3bcc92c17165bee6afa673d4018d335daf611b8cc5c84343030e9ab3285b9",
+  "packageKind": "zip",
+  "releaseChannel": "prototype",
+  "versionName": "0.1.0",
+  "versionCode": "1"
+}

@@ -20,7 +20,7 @@ const I18N = {
     "hero.title": "用易安把 StoryLock 绑定到你的本地设备",
     "hero.copy": "下载易安 App，完成一次绑定。之后第三方 Agent 或云服务发起的敏感请求，会先到你的私人智能助理，再由 StoryLock 本地核心确认后继续。",
     "hero.download": "下载易安 App",
-    "hero.downloadWindows": "下载 Windows 版本",
+    "hero.downloadWindows": "下载 Windows 本地宿主原型",
     "hero.downloadAndroid": "下载 Android 版本",
     "hero.downloadLinux": "下载 Linux 原型包",
     "hero.bind": "打开绑定入口",
@@ -64,12 +64,12 @@ const I18N = {
     "apk.kicker": "安装版本",
     "apk.title": "安装说明与当前版本",
     "apk.platforms.title": "选择本地版本",
-    "apk.platforms.windows": "Windows 本地电脑版本",
+    "apk.platforms.windows": "Windows 本地宿主原型",
     "apk.platforms.android": "Android 手机版本",
     "apk.platforms.linux": "Linux 原型版本",
     "apk.platforms.all": "查看全部版本",
     "apk.install.title": "安装流程",
-    "apk.install.step1": "根据当前设备选择 Windows 或 Android 安装包。",
+    "apk.install.step1": "根据当前设备选择 Windows 本地宿主原型、Android 或 Linux 原型包。",
     "apk.install.step2": "在本地电脑或 Android 设备上安装，并只允许来自可信来源的安装。",
     "apk.install.step3": "从易安打开绑定链接，按本地设备提示完成绑定。",
     "apk.install.step4": "完成首次注册后，回到站点查看 App 在线状态。",
@@ -79,6 +79,17 @@ const I18N = {
     "apk.rules.name": "文件名称：优先使用带版本号的易安 App 安装包。",
     "apk.rules.version": "版本号：以安装版本页和下载入口展示的信息为准。",
     "apk.rules.policy": "测试版只用于安装验证；正式候选版用于对外试用。安装前请核对版本、来源和校验值。",
+    "apk.metadata.loading": "正在读取版本信息。",
+    "apk.metadata.unavailable": "暂未读取到版本信息。",
+    "apk.metadata.copy": "复制校验值",
+    "apk.metadata.copied": "已复制",
+    "apk.metadata.prototype": "原型限制",
+    "apk.metadata.versionName": "版本号",
+    "apk.metadata.versionCode": "版本代码",
+    "apk.metadata.packageKind": "包类型",
+    "apk.metadata.releaseChannel": "发布渠道",
+    "apk.metadata.fileSizeBytes": "文件大小",
+    "apk.metadata.checksum": "SHA-256",
     "userGuide.kicker": "使用说明",
     "userGuide.title": "普通用户如何使用易安",
     "userGuide.use.title": "开始使用",
@@ -114,8 +125,26 @@ const I18N = {
     "runtime.currentMode": "通信方式",
     "runtime.activeHosts": "在线设备",
     "runtime.pending": "等待加载",
-    "runtime.responseTitle": "状态详情",
+    "runtime.responseTitle": "查看原始 JSON",
     "runtime.responseNote": "这里用于查看当前请求、绑定和在线状态；普通使用时请重点确认是否有待处理请求、来源是否可信、设备是否在线。",
+    "help.kicker": "帮助说明",
+    "help.title": "在同一套页面里完成查看、下载、绑定和确认",
+    "help.copy1": "易安用于把需要确认的重要请求交回到用户自己的本地设备上处理。下载并安装易安 App，完成一次绑定后，就可以在本地设备上查看请求来源、理解请求内容，并确认是否继续。",
+    "help.copy2": "帮助说明现在和产品说明、安全方式、下载绑定等页面使用同一套导航、语言切换和上一页/下一页交互，不再跳到独立页面。",
+    "help.imageAlt": "易安与 StoryLock 本地确认关系示意图",
+    "help.start.title": "快速开始",
+    "help.start.step1": "根据当前设备选择 Windows 本地宿主原型、Android 或 Linux 原型版本。",
+    "help.start.step2": "安装前核对页面展示的版本号、文件大小和校验值。",
+    "help.start.step3": "安装易安 App 后，回到易安页面打开绑定入口。",
+    "help.start.step4": "绑定完成后，在请求状态页确认本地设备是否在线。",
+    "help.approve.title": "确认请求",
+    "help.approve.step1": "先在本地设备上查看请求来源、操作内容和风险提示。",
+    "help.approve.step2": "确认请求与你正在进行的操作一致，再继续本地确认。",
+    "help.approve.step3": "通过本地设备解锁、生物识别或设备凭据完成确认。",
+    "help.notice.title": "注意事项",
+    "help.notice.item1": "只从可信的易安页面下载安装包。",
+    "help.notice.item2": "不要把绑定链接转发给其他人。",
+    "help.notice.item3": "遇到不认识的请求，先不要确认，再检查来源。",
     "pager.prev": "前一页",
     "pager.next": "后一页",
     "footer.brand": "易安 Yian",
@@ -154,7 +183,7 @@ const I18N = {
     "hero.title": "Bind StoryLock to your local device with Yian",
     "hero.copy": "Download the Yian app and complete one binding step. After that, sensitive requests from third-party agents or cloud services go to your private assistant first, then continue only after StoryLock Local Core approves them.",
     "hero.download": "Download Yian App",
-    "hero.downloadWindows": "Download for Windows",
+    "hero.downloadWindows": "Download Windows Host Prototype",
     "hero.downloadAndroid": "Download for Android",
     "hero.downloadLinux": "Download Linux Prototype",
     "hero.bind": "Open Binding Entry",
@@ -198,12 +227,12 @@ const I18N = {
     "apk.kicker": "Install Version",
     "apk.title": "Install guide and current version",
     "apk.platforms.title": "Choose Local Version",
-    "apk.platforms.windows": "Windows Desktop Version",
+    "apk.platforms.windows": "Windows Host Prototype",
     "apk.platforms.android": "Android Phone Version",
     "apk.platforms.linux": "Linux Prototype",
     "apk.platforms.all": "View All Versions",
     "apk.install.title": "Install Flow",
-    "apk.install.step1": "Choose the Windows or Android package for this device.",
+    "apk.install.step1": "Choose the Windows local host prototype, Android package, or Linux prototype for this device.",
     "apk.install.step2": "Install it on the local computer or Android device, and only allow trusted sources.",
     "apk.install.step3": "Open the Yian binding link and follow the local device prompts to finish binding.",
     "apk.install.step4": "After first registration, return to the site and inspect app online status.",
@@ -213,6 +242,17 @@ const I18N = {
     "apk.rules.name": "File name: prefer a Yian app package with a visible version number.",
     "apk.rules.version": "Version: use the information shown on the install page and download entry.",
     "apk.rules.policy": "Test builds are for installation checks. Release candidates are for public trial use. Verify version, source, and checksum before installing.",
+    "apk.metadata.loading": "Loading version information.",
+    "apk.metadata.unavailable": "Version information is not available yet.",
+    "apk.metadata.copy": "Copy checksum",
+    "apk.metadata.copied": "Copied",
+    "apk.metadata.prototype": "Prototype limitation",
+    "apk.metadata.versionName": "Version",
+    "apk.metadata.versionCode": "Version code",
+    "apk.metadata.packageKind": "Package kind",
+    "apk.metadata.releaseChannel": "Release channel",
+    "apk.metadata.fileSizeBytes": "File size",
+    "apk.metadata.checksum": "SHA-256",
     "userGuide.kicker": "User Guide",
     "userGuide.title": "How regular users use Yian",
     "userGuide.use.title": "Get Started",
@@ -248,8 +288,26 @@ const I18N = {
     "runtime.currentMode": "Communication",
     "runtime.activeHosts": "Online Devices",
     "runtime.pending": "Pending",
-    "runtime.responseTitle": "Status Details",
+    "runtime.responseTitle": "View Raw JSON",
     "runtime.responseNote": "This area shows request, binding, and online status. For normal use, focus on pending requests, trusted source, and whether the device is online.",
+    "help.kicker": "Help",
+    "help.title": "Use the same page flow for viewing, downloading, binding, and approving",
+    "help.copy1": "Yian sends important approval requests back to the user's own local device. After downloading the app and completing one binding step, users can review the request source, understand the content, and decide whether to continue.",
+    "help.copy2": "Help now uses the same navigation, language switch, and previous/next behavior as Product, Safety, Download, and the other pages instead of opening a separate page.",
+    "help.imageAlt": "Diagram of the Yian and StoryLock local approval relationship",
+    "help.start.title": "Quick Start",
+    "help.start.step1": "Choose the Windows local host prototype, Android package, or Linux prototype package for this device.",
+    "help.start.step2": "Check the displayed version, file size, and checksum before installing.",
+    "help.start.step3": "After installing the Yian app, return to Yian and open the binding entry.",
+    "help.start.step4": "After binding, use Request Status to confirm that the local device is online.",
+    "help.approve.title": "Approve Requests",
+    "help.approve.step1": "Review the request source, operation, and risk prompt on the local device.",
+    "help.approve.step2": "Continue only when the request matches the operation you are performing.",
+    "help.approve.step3": "Complete approval with local unlock, biometrics, or device credentials.",
+    "help.notice.title": "Notes",
+    "help.notice.item1": "Only download packages from a trusted Yian page.",
+    "help.notice.item2": "Do not forward binding links to other people.",
+    "help.notice.item3": "If you do not recognize a request, do not approve it until you verify the source.",
     "pager.prev": "Previous",
     "pager.next": "Next",
     "footer.brand": "Yian",
@@ -277,6 +335,7 @@ const el = {
   requestQueue: document.querySelector("[data-field='request-queue']"),
   requestSource: document.querySelector("[data-field='request-source']"),
   activeHostCount: document.querySelector("[data-field='active-host-count']"),
+  downloadMetadata: document.querySelector("[data-region='download-metadata']"),
   localeButtons: Array.from(document.querySelectorAll("[data-locale]")),
   metaDescription: document.querySelector("meta[name='description']"),
   pageSections: Array.from(document.querySelectorAll("[data-page-section]")),
@@ -288,6 +347,7 @@ let currentLocale = resolveInitialLocale();
 let currentPageIndex = 0;
 let touchStartX = null;
 let touchStartY = null;
+let currentDownloadPlatforms = null;
 
 function resolveInitialLocale() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -319,6 +379,9 @@ function applyLocale(locale) {
   el.localeButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.locale === currentLocale);
   });
+  if (currentDownloadPlatforms) {
+    renderDownloadMetadata(currentDownloadPlatforms);
+  }
   updatePagerTitle();
 }
 
@@ -374,6 +437,111 @@ function setOutput(value) {
     return;
   }
   el.output.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+}
+
+function formatBytes(value) {
+  const bytes = Number(value);
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return t("unavailable");
+  }
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+  return `${size.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function platformTitle(platform, metadata) {
+  if (platform === "windows") {
+    return currentLocale === "zh" ? "Windows 本地宿主原型" : "Windows Host Prototype";
+  }
+  if (platform === "android") {
+    return currentLocale === "zh" ? "Android 手机版本" : "Android Phone Version";
+  }
+  if (platform === "linux") {
+    return currentLocale === "zh" ? "Linux 原型版本" : "Linux Prototype";
+  }
+  return metadata?.label ?? platform;
+}
+
+function releaseBadge(metadata) {
+  const channel = String(metadata?.releaseChannel ?? "").toLowerCase();
+  if (channel === "prototype" || channel === "internal") {
+    return t("apk.metadata.prototype");
+  }
+  return metadata?.releaseChannel ?? t("unavailable");
+}
+
+function metadataRows(metadata) {
+  return [
+    ["apk.metadata.versionName", metadata?.versionName],
+    ["apk.metadata.versionCode", metadata?.versionCode],
+    ["apk.metadata.packageKind", metadata?.packageKind],
+    ["apk.metadata.releaseChannel", metadata?.releaseChannel],
+    ["apk.metadata.fileSizeBytes", formatBytes(metadata?.fileSizeBytes)],
+    ["apk.metadata.checksum", metadata?.checksum],
+  ];
+}
+
+function renderDownloadMetadata(platforms) {
+  if (!el.downloadMetadata) {
+    return;
+  }
+  if (!platforms || !Object.keys(platforms).length) {
+    el.downloadMetadata.textContent = t("apk.metadata.unavailable");
+    return;
+  }
+
+  el.downloadMetadata.replaceChildren(...["windows", "android", "linux"].map((platform) => {
+    const metadata = platforms[platform] ?? {};
+    const card = document.createElement("article");
+    card.className = "download-card";
+
+    const header = document.createElement("div");
+    header.className = "download-card-head";
+    const title = document.createElement("h5");
+    title.textContent = platformTitle(platform, metadata);
+    const badge = document.createElement("span");
+    badge.textContent = releaseBadge(metadata);
+    header.append(title, badge);
+
+    const list = document.createElement("dl");
+    list.className = "metadata-list";
+    metadataRows(metadata).forEach(([labelKey, value]) => {
+      const row = document.createElement("div");
+      const dt = document.createElement("dt");
+      const dd = document.createElement("dd");
+      dt.textContent = t(labelKey);
+      dd.textContent = value && String(value).trim() ? String(value) : t("unavailable");
+      row.append(dt, dd);
+      list.append(row);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "download-card-actions";
+    if (metadata?.downloadUrl) {
+      const link = document.createElement("a");
+      link.className = "button";
+      link.href = metadata.downloadUrl;
+      link.textContent = platformTitle(platform, metadata);
+      actions.append(link);
+    }
+    if (metadata?.checksum) {
+      const copy = document.createElement("button");
+      copy.className = "button";
+      copy.type = "button";
+      copy.dataset.action = "copy-checksum";
+      copy.dataset.checksum = metadata.checksum;
+      copy.textContent = t("apk.metadata.copy");
+      actions.append(copy);
+    }
+
+    card.append(header, list, actions);
+    return card;
+  }));
 }
 
 async function fetchJsonWithFallback(paths) {
@@ -472,6 +640,18 @@ async function loadRegistrations() {
   setOutput(payload);
 }
 
+async function loadDownloadMetadata() {
+  if (!el.downloadMetadata) {
+    return;
+  }
+  el.downloadMetadata.textContent = t("apk.metadata.loading");
+  const payload = await fetchJsonWithFallback([
+    "/app/download",
+  ]);
+  currentDownloadPlatforms = payload?.platforms ?? {};
+  renderDownloadMetadata(currentDownloadPlatforms);
+}
+
 document.addEventListener("click", async (event) => {
   const target = event.target;
   if (!(target instanceof HTMLElement)) {
@@ -502,6 +682,11 @@ document.addEventListener("click", async (event) => {
   }
 
   try {
+    if (target.matches("[data-action='copy-checksum']")) {
+      await navigator.clipboard.writeText(target.dataset.checksum ?? "");
+      target.textContent = t("apk.metadata.copied");
+      return;
+    }
     if (target.matches("[data-action='gateway-status']")) {
       await loadGatewayStatus();
     }
@@ -564,4 +749,10 @@ loadGatewayStatus().catch((error) => {
     "",
     error?.message ?? String(error),
   ].join("\n"));
+});
+
+loadDownloadMetadata().catch(() => {
+  if (el.downloadMetadata) {
+    el.downloadMetadata.textContent = t("apk.metadata.unavailable");
+  }
 });

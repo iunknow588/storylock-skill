@@ -35,9 +35,13 @@ Default ports and endpoints:
 3. local authorize: `http://127.0.0.1:4510/authorize`
 4. local revoke: `http://127.0.0.1:4510/revoke`
 5. local execute: `http://127.0.0.1:4510/execute`
-6. gateway register: `/local-host/register`
-7. relay poll: `/local-host/relay/poll`
-8. relay respond: `/local-host/relay/respond`
+6. local management page: `http://127.0.0.1:4510/ui`
+7. local management status JSON: `http://127.0.0.1:4510/ui/status`
+8. local redacted diagnostics JSON: `http://127.0.0.1:4510/diagnostics`
+9. local shutdown control: `POST http://127.0.0.1:4510/shutdown`
+10. gateway register: `/local-host/register`
+11. relay poll: `/local-host/relay/poll`
+12. relay respond: `/local-host/relay/respond`
 
 Build:
 
@@ -51,13 +55,85 @@ Print config only:
 cargo run -- --print-config
 ```
 
-Run prototype:
+Run desktop tray app from the zip package:
+
+```powershell
+.\yian-windows-host.exe
+```
+
+The release zip is built with `ui-tray`, so double-clicking `yian-windows-host.exe` starts the desktop tray app without opening a console window and opens the local management page at `http://127.0.0.1:4510/ui`. The tray menu can open the local management page again, open health JSON, copy redacted diagnostics to the clipboard, and request local shutdown.
+
+Run debug console:
 
 ```powershell
 $env:STORYLOCK_GATEWAY_URL="https://yian.cdao.online"
 $env:STORYLOCK_ANDROID_SHARED_SECRET="replace-with-strong-shared-secret"
-cargo run
+.\start-yian-windows-host.cmd
 ```
+
+Run with the optional tray UI:
+
+```powershell
+cargo run --features ui-tray -- --tray
+```
+
+Release packages are built with `ui-tray`; pass `--console` or use `start-yian-windows-host.cmd` only when console logs are needed for debugging.
+
+Zip package desktop entry:
+
+1. double-click `yian-windows-host.exe` to start the tray host without a console window
+2. the local management UI should open automatically in the browser
+3. right-click the tray icon to open local UI, health, diagnostics, or exit
+4. use `start-yian-windows-host.cmd` only when console logs are needed for debugging
+
+No extra script runtime is required for the desktop entry. The shipped app entry is the Rust executable itself; the `.cmd` file is only a debug console helper.
+
+Manual tray acceptance helper:
+
+```powershell
+..\..\..\scripts\windows\start_windows_host_tray_manual_check.cmd
+```
+
+Record the visible tray icon, menu actions, clipboard diagnostics, and exit behavior in `docs\test\Windows托盘人工验收记录_20260620.md`.
+
+Open local management page:
+
+```powershell
+Start-Process http://127.0.0.1:4510/ui
+Invoke-RestMethod -Method Get -Uri http://127.0.0.1:4510/ui/status
+Invoke-RestMethod -Method Get -Uri http://127.0.0.1:4510/diagnostics
+```
+
+The management page shows host health, relay state, question bank version, data directory, allowed capability boundaries, the latest confirmation request summary, and a redacted latest execution summary. The diagnostics endpoint is the data foundation for a future tray "copy diagnostics" action. It does not display challenge answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.
+
+Stop local host through the local control endpoint:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:4510/shutdown
+```
+
+`POST /shutdown` is used by the tray Exit menu item and local management controls. It is bound to localhost with the rest of the prototype server.
+
+Run native Slint status window:
+
+```powershell
+cargo run --features ui-slint -- --slint-ui
+```
+
+Check optional UI build features:
+
+```powershell
+..\..\..\scripts\windows\check_windows_host_features.cmd
+```
+
+Run native Slint request confirmation window for local execution:
+
+```powershell
+$env:STORYLOCK_WINDOWS_APPROVAL_MODE="slint_dialog"
+cargo run --features ui-slint
+```
+
+When `ui-slint` is enabled, `slint_dialog` opens a native Approve / Deny window with capability, object reference, requester, origin, required strength, allowed action, expiry, and risk details. Without the feature, the same mode falls back to the detailed Windows confirmation dialog.
 
 Prototype local execute request:
 
@@ -140,24 +216,24 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:4510/question-bank/import -
 Windows loop check:
 
 ```powershell
-..\..\scripts\windows\check_windows_host_loop.cmd
+..\..\..\scripts\windows\check_windows_host_loop.cmd
 ```
 
 Package:
 
 ```powershell
-..\..\scripts\release\windows\build_windows_host.cmd
-..\..\scripts\release\windows\build_windows_host.ps1 -BuildMsi
-..\..\scripts\release\windows\build_windows_host.ps1 -BuildMsi -Version 0.1.0 -VersionCode 1 -ReleaseChannel prototype
-..\..\scripts\release\windows\build_windows_host.ps1 -BuildMsi -SignArtifacts
-..\..\scripts\release\windows\release_windows_host.cmd
-..\..\scripts\release\windows\publish_windows_release.cmd -ManifestPath E:\path\to\release-manifest.json -PublicDownloadUrl https://example.test/yian-windows-host.zip
-..\..\scripts\release\windows\publish_windows_release.cmd -ManifestPath E:\path\to\release-manifest.json -CopyArtifacts
-..\..\scripts\release\windows\upload_windows_release_to_object_storage.cmd -UploadManifestPath E:\path\to\upload-manifest.json
-..\..\scripts\vercel\sync_env_file_to_vercel.cmd -EnvFilePath ..\..\scripts\vercel\.env.windows-package.publish
-..\..\scripts\vercel\publish_site_release.cmd -Target vercel -Build -Preflight
-..\..\scripts\vercel\publish_site_release.cmd -Target vercel -WindowsEnvFile ..\..\scripts\vercel\.env.windows-package.publish -SyncWindowsEnvToVercel
-..\..\scripts\vercel\publish_site_release.cmd -Target static -Build
+..\..\..\scripts\release\windows\build_windows_host.cmd
+..\..\..\scripts\release\windows\build_windows_host.ps1 -BuildMsi
+..\..\..\scripts\release\windows\build_windows_host.ps1 -BuildMsi -Version 0.1.0 -VersionCode 1 -ReleaseChannel prototype
+..\..\..\scripts\release\windows\build_windows_host.ps1 -BuildMsi -SignArtifacts
+..\..\..\scripts\release\windows\release_windows_host.cmd
+..\..\..\scripts\release\windows\publish_windows_release.cmd -ManifestPath E:\path\to\release-manifest.json -PublicDownloadUrl https://example.test/yian-windows-host.zip
+..\..\..\scripts\release\windows\publish_windows_release.cmd -ManifestPath E:\path\to\release-manifest.json -CopyArtifacts
+..\..\..\scripts\release\windows\upload_windows_release_to_object_storage.cmd -UploadManifestPath E:\path\to\upload-manifest.json
+..\..\..\scripts\vercel\sync_env_file_to_vercel.cmd -EnvFilePath ..\..\..\scripts\vercel\.env.windows-package.publish
+..\..\..\scripts\vercel\publish_site_release.cmd -Target vercel -Build -Preflight
+..\..\..\scripts\vercel\publish_site_release.cmd -Target vercel -WindowsEnvFile ..\..\..\scripts\vercel\.env.windows-package.publish -SyncWindowsEnvToVercel
+..\..\..\scripts\vercel\publish_site_release.cmd -Target static -Build
 ```
 
 Future package names:
@@ -189,7 +265,7 @@ Release and upgrade policy scaffold:
 
 Important limitation:
 
-The current Rust host is still a prototype, but the local execution path is now shaped as a StoryLock Local Core call chain. It can register, expose health, create local grid-like verification challenges with required cells, exchange them for authorization sessions, reject revoked or expired sessions, execute signature and password-fill requests through a `storylock-local-core-call-v1` envelope, poll relay requests, show a Windows Yes/No confirmation dialog for fallback approval, persist signature keys / credential objects / verification records / authorization records under DPAPI protection, and return structured success/error envelopes with `verificationId`, `authorizationId`, `coreCallId`, required strength, allowed action, and expiry metadata. It also includes a WiX-based MSI scaffold, checksum metadata, and a reserved upgrade code for installer continuity. It does not yet implement richer approval UI, tray UI, production certificate provisioning, or automatic update delivery.
+The current Rust host is still a prototype, but the local execution path is now shaped as a StoryLock Local Core call chain. It can register, expose health, open a local management page, show redacted confirmation request details, create local grid-like verification challenges with required cells, exchange them for authorization sessions, reject revoked or expired sessions, execute signature and password-fill requests through a `storylock-local-core-call-v1` envelope, poll relay requests, show a Windows confirmation dialog with request details for fallback approval, optionally show a native Slint Approve / Deny confirmation window, optionally run with a tray menu for local UI / health / diagnostics / exit controls, persist signature keys / credential objects / verification records / authorization records under DPAPI protection, and return structured success/error envelopes with `verificationId`, `authorizationId`, `coreCallId`, required strength, allowed action, and expiry metadata. It also includes a WiX-based MSI scaffold, checksum metadata, and a reserved upgrade code for installer continuity. It does not yet implement production certificate provisioning, automatic update delivery, or detailed tray status icons.
 
 Distribution environment variables:
 

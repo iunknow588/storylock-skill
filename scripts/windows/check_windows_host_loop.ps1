@@ -55,6 +55,19 @@ function Assert-Value {
   }
 }
 
+function Assert-NoSensitiveText {
+  param(
+    [object]$Value,
+    [string]$Name
+  )
+  $text = $Value | ConvertTo-Json -Depth 16
+  foreach ($pattern in @("SUMMIT", "ORBIT", "ANCHOR", "shared_secret", "shared-secret-value", "story raw text")) {
+    if ($text -match $pattern) {
+      throw "$Name leaked sensitive marker: $pattern"
+    }
+  }
+}
+
 if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
   throw "Cargo was not found. Install Rust from https://rustup.rs/ and rerun this script."
 }
@@ -84,7 +97,7 @@ $stderrLog = Join-Path $data "windows-host.stderr.log"
 try {
   if (Test-Path -LiteralPath $stdoutLog) { Remove-Item -LiteralPath $stdoutLog -Force }
   if (Test-Path -LiteralPath $stderrLog) { Remove-Item -LiteralPath $stderrLog -Force }
-  $proc = Start-Process cargo -ArgumentList @("run") -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
+  $proc = Start-Process cargo -ArgumentList @("run", "--", "--console") -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
 
   $health = $null
   for ($attempt = 0; $attempt -lt 20; $attempt++) {
@@ -107,6 +120,28 @@ try {
   Assert-Value $health.approvalMode "health.approvalMode"
   Assert-Value $health.storage.path "health.storage.path"
   Add-Result $rows "health" "ok" ("approvalMode={0}; questionBankPath={1}" -f $health.approvalMode, $health.storage.path)
+
+  $uiPage = Invoke-WebRequest -Method Get -Uri "$baseUrl/ui"
+  if ($uiPage.StatusCode -ne 200 -or $uiPage.Content -notmatch "Yian Windows Host") {
+    throw "GET /ui did not return the local management page"
+  }
+  $uiStatus = Invoke-RestMethod -Method Get -Uri "$baseUrl/ui/status"
+  if ($uiStatus.status -ne "success") {
+    throw "GET /ui/status did not return success"
+  }
+  Assert-Value $uiStatus.result.host.identityId "ui-status.result.host.identityId"
+  Assert-Value $uiStatus.result.questionBank.questionSetVersion "ui-status.result.questionBank.questionSetVersion"
+  Add-Result $rows "ui-status" "ok" ("managementUrl={0}; relay={1}" -f $uiStatus.result.ui.managementUrl, $uiStatus.result.relay.status)
+
+  $diagnostics = Invoke-RestMethod -Method Get -Uri "$baseUrl/diagnostics"
+  Assert-Success $diagnostics "diagnostics"
+  Assert-Value $diagnostics.result.localEndpoints.management "diagnostics.result.localEndpoints.management"
+  Assert-Value $diagnostics.result.localEndpoints.shutdown "diagnostics.result.localEndpoints.shutdown"
+  if (@($diagnostics.result.redaction.hidden) -notcontains "sharedSecret") {
+    throw "diagnostics.result.redaction.hidden did not include sharedSecret"
+  }
+  Assert-NoSensitiveText $diagnostics "diagnostics"
+  Add-Result $rows "diagnostics" "ok" ("redaction={0}; shutdown={1}" -f $diagnostics.result.redaction.level, $diagnostics.result.localEndpoints.shutdown)
 
   $questionBankStatus = Invoke-RestMethod -Method Get -Uri "$baseUrl/question-bank/status"
   Assert-Success $questionBankStatus "question-bank-status"
@@ -200,6 +235,32 @@ try {
   Assert-Value $execute.result.signature "execute.result.signature"
   Add-Result $rows "execute" "ok" ("signature={0}" -f $execute.result.signature)
 
+  $directExecute = Invoke-JsonPost -Uri "$baseUrl/execute" -Body @{
+    requestId = "req-ui-confirm-loop-001"
+    capability = "requestSignature"
+    keyId = "wallet-ui-confirm"
+    requester = "windows-host-loop"
+    origin = "http://127.0.0.1:$Port"
+  }
+  Assert-Success $directExecute "direct-execute-for-ui-confirmation"
+  Assert-Value $directExecute.result.signature "direct-execute-for-ui-confirmation.result.signature"
+  Add-Result $rows "direct-execute-ui-confirmation" "ok" ("signature={0}" -f $directExecute.result.signature)
+
+  $uiStatusAfterExecute = Invoke-RestMethod -Method Get -Uri "$baseUrl/ui/status"
+  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.requestId "ui-status-after-execute.result.lastConfirmation.requestId"
+  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.capability "ui-status-after-execute.result.lastConfirmation.capability"
+  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.requiredStrength "ui-status-after-execute.result.lastConfirmation.requiredStrength"
+  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.risk "ui-status-after-execute.result.lastConfirmation.risk"
+  if ($uiStatusAfterExecute.result.lastConfirmation.requestId -ne "req-ui-confirm-loop-001") {
+    throw "ui lastConfirmation did not track the latest execute request"
+  }
+  Assert-Value $uiStatusAfterExecute.result.lastExecution.requestId "ui-status-after-execute.result.lastExecution.requestId"
+  if ($uiStatusAfterExecute.result.lastExecution.requestId -ne "req-ui-confirm-loop-001") {
+    throw "ui lastExecution did not track the latest execute request"
+  }
+  Add-Result $rows "ui-confirmation" "ok" ("requestId={0}; strength={1}" -f $uiStatusAfterExecute.result.lastConfirmation.requestId, $uiStatusAfterExecute.result.lastConfirmation.requiredStrength)
+  Add-Result $rows "ui-last-execution" "ok" ("requestId={0}; capability={1}" -f $uiStatusAfterExecute.result.lastExecution.requestId, $uiStatusAfterExecute.result.lastExecution.capability)
+
   $revoke = Invoke-JsonPost -Uri "$baseUrl/revoke" -Body @{
     requestId = "req-revoke-loop-001"
     authorizationId = $authorize.result.authorizationId
@@ -211,6 +272,25 @@ try {
     throw "revoke.result.status expected revoked but got $($revoke.result.status)"
   }
   Add-Result $rows "revoke" "ok" ("status={0}; authorizationId={1}" -f $revoke.result.status, $revoke.result.authorizationId)
+
+  $shutdown = Invoke-RestMethod -Method Post -Uri "$baseUrl/shutdown"
+  Assert-Success $shutdown "shutdown"
+  Start-Sleep -Milliseconds 750
+  if ($proc -and -not $proc.HasExited) {
+    try {
+      Invoke-RestMethod -Method Get -Uri "$baseUrl/health" -TimeoutSec 1 | Out-Null
+      throw "Host still responded to /health after shutdown"
+    } catch {
+      if ($_.Exception.Message -eq "Host still responded to /health after shutdown") {
+        throw
+      }
+    }
+  }
+  $listenerAfterShutdown = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+  if ($listenerAfterShutdown) {
+    throw "Port $Port was still listening after /shutdown"
+  }
+  Add-Result $rows "shutdown" "ok" "host accepted local shutdown and released the port"
 
   $rows | Format-Table -AutoSize
   Write-Output "Windows host loop check passed."
