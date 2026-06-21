@@ -66,8 +66,15 @@ assert.equal(inspectCli.output.summary.permissionSummary.items.length, 4);
 const invalidCli = runScript("scripts/storylock-package/validate-package.mjs", invalidFixture);
 assert.notEqual(invalidCli.status, 0);
 assert.equal(invalidCli.output.status, "failed");
-assert.ok(invalidCli.output.errors.some((item) => item.code === "SLP-202"));
-assert.ok(invalidCli.output.errors.some((item) => item.code === "SLP-601"));
+assert.ok(invalidCli.output.errors.some((item) => item.code === "SL_CATALOG_INVALID_OBJECT_ID"));
+assert.ok(invalidCli.output.errors.some((item) => item.code === "SL_PKG_MISSING_MANIFEST"));
+assert.ok(invalidCli.output.errors.every((item) => item.severity));
+
+const leakedPackageData = structuredClone(packageData);
+leakedPackageData.templates.loginSites.items[0].bindings[0].canonicalAnswer = "do-not-export";
+const leakedValidation = validateStoryLockPackage(leakedPackageData);
+assert.equal(leakedValidation.valid, false);
+assert.ok(leakedValidation.errors.some((item) => item.code === "SL_PKG_HOST_READABLE_SECRET_FIELD"));
 
 console.log(JSON.stringify({
   status: "passed",

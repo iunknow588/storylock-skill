@@ -41,6 +41,10 @@ class AndroidHostServer(
         jsonResponse(Status.OK, hostService.health())
       }
 
+      session.method == Method.GET && session.uri == "/permission-summary" -> {
+        jsonResponse(Status.OK, hostService.permissionSummary())
+      }
+
       session.method == Method.POST && session.uri == "/execute" -> {
         val body = readBody(session)
         val request = JSONObject(body)

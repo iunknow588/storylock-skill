@@ -1355,7 +1355,7 @@ fn preflight_storylock_core_package(package_dir: &Path) -> PreflightResult {
     ] {
         if !package_dir.join(required_file).exists() {
             errors.push(PreflightIssue {
-                code: "SLP-601",
+                code: "SL_PKG_OPTIONAL_FILE_MISSING",
                 path: "$.files".to_string(),
                 message: format!("missing required file: {required_file}"),
             });
@@ -1377,7 +1377,7 @@ fn preflight_storylock_core_package(package_dir: &Path) -> PreflightResult {
                 .any(|item| item.as_str() == Some(required_file))
             {
                 errors.push(PreflightIssue {
-                    code: "SLP-601",
+                    code: "SL_PKG_OPTIONAL_FILE_MISSING",
                     path: "$.files".to_string(),
                     message: format!("manifest does not list required file: {required_file}"),
                 });
@@ -1385,7 +1385,7 @@ fn preflight_storylock_core_package(package_dir: &Path) -> PreflightResult {
         }
     } else {
         errors.push(PreflightIssue {
-            code: "SLP-102",
+            code: "SL_MANIFEST_MISSING_CATALOG_FILE",
             path: "$.files".to_string(),
             message: "manifest files must be an array".to_string(),
         });
@@ -1398,7 +1398,7 @@ fn preflight_storylock_core_package(package_dir: &Path) -> PreflightResult {
     match draft.get("nodes").and_then(Value::as_array) {
         Some(nodes) if nodes.len() == 24 => {}
         Some(nodes) => errors.push(PreflightIssue {
-            code: "SLP-401",
+            code: "SL_PKG_AUTHOR_DRAFT_NODE_COUNT",
             path: "$.nodes".to_string(),
             message: format!(
                 "author draft must contain exactly 24 nodes, got {}",
@@ -1406,7 +1406,7 @@ fn preflight_storylock_core_package(package_dir: &Path) -> PreflightResult {
             ),
         }),
         None => errors.push(PreflightIssue {
-            code: "SLP-102",
+            code: "SL_PKG_AUTHOR_DRAFT_NODE_COUNT",
             path: "$.nodes".to_string(),
             message: "author draft nodes must be an array".to_string(),
         }),
@@ -1439,7 +1439,7 @@ fn build_catalog_role_index(
     let mut role_index = HashMap::new();
     let Some(resources) = catalog.get("resources").and_then(Value::as_array) else {
         errors.push(PreflightIssue {
-            code: "SLP-102",
+            code: "SL_CATALOG_MISSING_RESOURCES",
             path: "$.resources".to_string(),
             message: "resource catalog resources must be an array".to_string(),
         });
@@ -1452,7 +1452,7 @@ fn build_catalog_role_index(
             .unwrap_or("");
         if resource_id.is_empty() {
             errors.push(PreflightIssue {
-                code: "SLP-101",
+                code: "SL_RESOURCE_MISSING_RESOURCE_ID",
                 path: format!("$.resources[{resource_index}].resourceId"),
                 message: "resourceId must be a non-empty string".to_string(),
             });
@@ -1464,7 +1464,7 @@ fn build_catalog_role_index(
                 let role = binding.get("role").and_then(Value::as_str).unwrap_or("");
                 if role.is_empty() {
                     errors.push(PreflightIssue {
-                        code: "SLP-101",
+                        code: "SL_RESOURCE_MISSING_ROLE",
                         path: format!(
                             "$.resources[{resource_index}].bindings[{binding_index}].role"
                         ),
@@ -1479,7 +1479,7 @@ fn build_catalog_role_index(
                     .unwrap_or("");
                 if !is_four_segment_object_id(object_id) {
                     errors.push(PreflightIssue {
-                        code: "SLP-202",
+                        code: "SL_CATALOG_INVALID_OBJECT_ID",
                         path: format!(
                             "$.resources[{resource_index}].bindings[{binding_index}].objectId"
                         ),
@@ -1501,7 +1501,7 @@ fn validate_template_references(
 ) {
     let Some(items) = bundle.get("items").and_then(Value::as_array) else {
         errors.push(PreflightIssue {
-            code: "SLP-102",
+            code: "SL_TEMPLATE_MISSING_ITEMS",
             path: format!("$.templates.{file_name}.items"),
             message: "template items must be an array".to_string(),
         });
@@ -1511,7 +1511,7 @@ fn validate_template_references(
         let resource_id = item.get("resourceId").and_then(Value::as_str).unwrap_or("");
         let Some(roles) = role_index.get(resource_id) else {
             errors.push(PreflightIssue {
-                code: "SLP-701",
+                code: "SL_TEMPLATE_UNKNOWN_RESOURCE_ID",
                 path: format!("$.templates.{file_name}.items[{item_index}].resourceId"),
                 message: format!("template references unknown resourceId: {resource_id}"),
             });
@@ -1522,7 +1522,7 @@ fn validate_template_references(
                 let role = binding.get("role").and_then(Value::as_str).unwrap_or("");
                 if !roles.contains(role) {
                     errors.push(PreflightIssue {
-                        code: "SLP-702",
+                        code: "SL_TEMPLATE_UNKNOWN_ROLE",
                         path: format!("$.templates.{file_name}.items[{item_index}].bindings[{binding_index}].role"),
                         message: format!("template role is not defined under resourceId {resource_id}: {role}"),
                     });
@@ -1548,16 +1548,73 @@ fn build_permission_summary_text(package_dir: &Path) -> String {
         &storylock_core_catalog_path(package_dir),
         default_resource_catalog_json(),
     );
-    let Some(resources) = catalog.get("resources").and_then(Value::as_array) else {
+    let summary = build_permission_summary_from_catalog(&catalog);
+    let Some(items) = summary.get("items").and_then(Value::as_array) else {
         return "No managed permission objects. Open StoryLock Core to initialize the local package."
             .to_string();
     };
     let mut lines = Vec::new();
-    for resource in resources {
+    for item in items {
+        let resource_id = item
+            .get("resourceId")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown-resource");
+        let display_name = item
+            .get("displayName")
+            .and_then(Value::as_str)
+            .unwrap_or(resource_id);
+        let role = item
+            .get("role")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown-role");
+        let object_id = item
+            .get("objectId")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown-object");
+        let object_kind = item
+            .get("objectKind")
+            .and_then(Value::as_str)
+            .unwrap_or("secret");
+        let action = item.get("action").and_then(Value::as_str).unwrap_or("read");
+        let challenge_policy = item
+            .get("challengePolicy")
+            .and_then(Value::as_str)
+            .unwrap_or("medium");
+        let required_grid_count = item
+            .get("requiredGridCount")
+            .and_then(Value::as_u64)
+            .unwrap_or(6);
+        lines.push(format!(
+            "{display_name} / {role}: objectId={object_id}, objectKind={object_kind}, action={action}, challengePolicy={challenge_policy}, requiredGridCount={required_grid_count}"
+        ));
+    }
+    if lines.is_empty() {
+        "No managed permission objects. Configure resources inside StoryLock Core.".to_string()
+    } else {
+        lines.join("\n")
+    }
+}
+
+fn build_permission_summary_from_catalog(catalog: &Value) -> Value {
+    let mut items = Vec::new();
+    for resource in catalog
+        .get("resources")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+    {
         let resource_id = resource
             .get("resourceId")
             .and_then(Value::as_str)
             .unwrap_or("unknown-resource");
+        let resource_kind = resource
+            .get("resourceKind")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown");
+        let provider_id = resource
+            .get("providerId")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown");
         let display_name = resource
             .get("displayName")
             .and_then(Value::as_str)
@@ -1585,19 +1642,22 @@ fn build_permission_summary_text(package_dir: &Path) -> String {
                 .get("sensitivity")
                 .and_then(Value::as_str)
                 .unwrap_or("private");
-            let action = permission_action(object_kind);
-            let challenge_policy = permission_challenge_policy(sensitivity);
-            let required_grid_count = permission_required_grid_count(sensitivity);
-            lines.push(format!(
-                "{display_name} / {role}: objectId={object_id}, objectKind={object_kind}, action={action}, challengePolicy={challenge_policy}, requiredGridCount={required_grid_count}"
-            ));
+            items.push(json!({
+                "resourceId": resource_id,
+                "resourceKind": resource_kind,
+                "providerId": provider_id,
+                "displayName": display_name,
+                "role": role,
+                "objectId": object_id,
+                "objectKind": object_kind,
+                "sensitivity": sensitivity,
+                "action": permission_action(object_kind),
+                "challengePolicy": permission_challenge_policy(sensitivity),
+                "requiredGridCount": permission_required_grid_count(sensitivity)
+            }));
         }
     }
-    if lines.is_empty() {
-        "No managed permission objects. Configure resources inside StoryLock Core.".to_string()
-    } else {
-        lines.join("\n")
-    }
+    json!({ "items": items })
 }
 
 fn permission_action(object_kind: &str) -> &'static str {
@@ -1878,6 +1938,7 @@ fn format_all_template_bundles(package_dir: &Path) -> String {
 mod tests {
     use super::*;
     use std::path::PathBuf;
+    use std::process::Command;
     use uuid::Uuid;
 
     fn temp_core_dir() -> PathBuf {
@@ -1925,6 +1986,40 @@ mod tests {
     }
 
     #[test]
+    fn windows_permission_summary_matches_shared_js_contract() {
+        let dir = temp_core_dir();
+        ensure_storylock_core_package(&dir).expect("init package");
+        let catalog = read_json_or_default(
+            &storylock_core_catalog_path(&dir),
+            default_resource_catalog_json(),
+        );
+        let rust_summary = build_permission_summary_from_catalog(&catalog);
+        let output = Command::new("node")
+            .args([
+                "scripts/storylock-package/permission-summary-json.mjs",
+                "--input",
+            ])
+            .arg(storylock_core_catalog_path(&dir))
+            .current_dir(
+                std::env::current_dir()
+                    .expect("current dir")
+                    .ancestors()
+                    .find(|path| path.join("package.json").exists())
+                    .expect("workspace root"),
+            )
+            .output()
+            .expect("run js permission summary");
+        assert!(
+            output.status.success(),
+            "js permission summary failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let js_summary: Value =
+            serde_json::from_slice(&output.stdout).expect("parse js permission summary");
+        assert_eq!(rust_summary, js_summary);
+    }
+
+    #[test]
     fn template_bundle_summary_covers_three_template_files() {
         let dir = temp_core_dir();
         ensure_storylock_core_package(&dir).expect("init package");
@@ -1958,10 +2053,13 @@ mod tests {
         )
         .expect("write broken template");
         let result = preflight_storylock_core_package(&dir);
-        assert!(result.errors.iter().any(|issue| issue.code == "SLP-702"));
+        assert!(result
+            .errors
+            .iter()
+            .any(|issue| issue.code == "SL_TEMPLATE_UNKNOWN_ROLE"));
         let preview = build_export_preview(&dir);
         assert!(preview.contains("preflight=FAILED"));
-        assert!(preview.contains("SLP-702"));
+        assert!(preview.contains("SL_TEMPLATE_UNKNOWN_ROLE"));
     }
 
     #[test]

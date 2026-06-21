@@ -13,10 +13,11 @@ export function validateAuthorDraft(draft) {
   validateArray(draft.memoryAnchors ?? [], "$.memoryAnchors", issues);
   validateArray(draft.elementGroups ?? [], "$.elementGroups", issues);
 
-  if (validateArray(draft.nodes, "$.nodes", issues, { minItems: STORY_NODE_COUNT }) && draft.nodes.length !== STORY_NODE_COUNT) {
+  if (validateArray(draft.nodes, "$.nodes", issues, { minItems: STORY_NODE_COUNT, code: "SL_PKG_AUTHOR_DRAFT_NODE_COUNT" }) && draft.nodes.length !== STORY_NODE_COUNT) {
     issues.push({
-      code: "SLP-401",
+      code: "SL_PKG_AUTHOR_DRAFT_NODE_COUNT",
       level: "error",
+      severity: "blocking",
       path: "$.nodes",
       message: `Story author draft must contain exactly ${STORY_NODE_COUNT} nodes.`,
       suggestion: "Create one node for each StoryLock story position.",

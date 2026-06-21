@@ -20,6 +20,7 @@ const requiredFiles = [
   'src/host/android-host/app/build.gradle.kts',
   'src/host/android-host/app/src/main/AndroidManifest.xml',
   'src/host/android-host/app/src/main/assets/storylock-question-set.json',
+  'src/host/android-host/app/src/main/assets/storylock-resource-catalog.json',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/StoryLockHostApplication.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/MainActivity.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AndroidKeystoreSecretStore.kt',
@@ -31,6 +32,7 @@ const requiredFiles = [
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostGatewayClient.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/HostRegistrationManager.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/LocalAuthorizationRuntime.kt',
+  'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/AndroidStoryLockPackageRepository.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/host/StoryLockAndroidHostService.kt',
   'src/shared/assets/schemas/storylock-resource-catalog.schema.json',
   'src/shared/assets/schemas/storylock-permission-summary.schema.json',
@@ -100,6 +102,8 @@ const hostService = read('src/host/android-host/app/src/main/java/org/storylock/
 for (const token of [
   'requestSignature',
   'requestPasswordFill',
+  'permissionSummary',
+  'storyLockPackage',
   'challenge_locked',
   'challenge_failed',
   'biometric_unavailable',
@@ -111,6 +115,22 @@ for (const token of [
 assert.doesNotMatch(hostService, /\.put\("password"\s*,\s*credential/u, 'Android password-fill response must not return raw password');
 assert.doesNotMatch(hostService, /\.put\("privateKey"/u, 'Android signature response must not expose privateKey fields');
 assert.doesNotMatch(hostService, /\.put\("signingKeyBytes"/u, 'Android signature response must not expose signingKeyBytes fields');
+
+const androidPackageRepository = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/AndroidStoryLockPackageRepository.kt');
+for (const token of [
+  'storylock-resource-catalog.json',
+  'permissionAction',
+  'permissionChallengePolicy',
+  'permissionRequiredGridCount',
+  'password_fill',
+  'signing_key',
+]) {
+  assert.ok(androidPackageRepository.includes(token), `Android package repository must include ${token}`);
+}
+assert.doesNotMatch(androidPackageRepository, /canonicalAnswer|acceptedAnswers|privateKey|signingKeyBytes/u, 'Android permission summary repository must not expose sensitive story/key fields');
+
+const androidServer = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/AndroidHostServer.kt');
+assert.match(androidServer, /\/permission-summary/u, 'Android local server must expose permission summary endpoint');
 
 const sharedPermissionSummary = read('src/shared/storylock-package/permission-summary.js');
 for (const token of [
@@ -163,6 +183,26 @@ const questionSetResult = JSON.parse(questionSetCheck.stdout);
 assert.equal(questionSetResult.status, 'passed');
 assert.ok(questionSetResult.activeQuestionCount >= 24, 'Android question set must have at least 24 active questions');
 
+const catalogSummaryCheck = spawnSync(process.execPath, [
+  'scripts/storylock-package/permission-summary-json.mjs',
+  'src/host/android-host/app/src/main/assets/storylock-resource-catalog.json',
+], {
+  cwd: root,
+  encoding: 'utf8',
+});
+assert.equal(catalogSummaryCheck.status, 0, catalogSummaryCheck.stderr || catalogSummaryCheck.stdout);
+const catalogSummary = JSON.parse(catalogSummaryCheck.stdout);
+assert.equal(catalogSummary.items.length, 4, 'Android resource catalog must expose four permission summary items');
+assert.equal(
+  catalogSummary.items.find((item) => item.objectKind === 'password').action,
+  'password_fill',
+);
+assert.equal(
+  catalogSummary.items.find((item) => item.objectKind === 'private_key').action,
+  'sign',
+);
+assert.equal(JSON.stringify(catalogSummary).includes('signingKeyBytes'), false);
+
 console.log(JSON.stringify({
   status: 'passed',
   filesChecked: requiredFiles.length,
@@ -170,5 +210,9 @@ console.log(JSON.stringify({
     file: relative(root, join(root, 'src/host/android-host/app/src/main/assets/storylock-question-set.json')).replaceAll('\\', '/'),
     activeQuestionCount: questionSetResult.activeQuestionCount,
     questionSetVersion: questionSetResult.questionSetVersion,
+  },
+  permissionSummary: {
+    file: relative(root, join(root, 'src/host/android-host/app/src/main/assets/storylock-resource-catalog.json')).replaceAll('\\', '/'),
+    items: catalogSummary.items.length,
   },
 }, null, 2));

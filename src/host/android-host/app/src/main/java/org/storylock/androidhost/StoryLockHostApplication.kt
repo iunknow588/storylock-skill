@@ -4,6 +4,7 @@ import android.app.Application
 import org.storylock.androidhost.host.AndroidHostConfig
 import org.storylock.androidhost.host.AndroidHostServer
 import org.storylock.androidhost.host.AndroidQuestionSetRepository
+import org.storylock.androidhost.host.AndroidStoryLockPackageRepository
 import org.storylock.androidhost.host.HostBindingStore
 import org.storylock.androidhost.host.HostGatewayClient
 import org.storylock.androidhost.host.HostRegistrationManager
@@ -27,6 +28,9 @@ class StoryLockHostApplication : Application() {
     private set
 
   lateinit var hostService: StoryLockAndroidHostService
+    private set
+
+  lateinit var storyLockPackageRepository: AndroidStoryLockPackageRepository
     private set
 
   lateinit var server: AndroidHostServer
@@ -59,6 +63,7 @@ class StoryLockHostApplication : Application() {
 
     val secretStore = AndroidKeystoreSecretStore(this)
     val questionSet = AndroidQuestionSetRepository(this).loadActiveQuestionSet()
+    storyLockPackageRepository = AndroidStoryLockPackageRepository(this)
     require(questionSet.identityId == hostConfig.identityId) {
       "Android question set identityId (${questionSet.identityId}) does not match host identityId (${hostConfig.identityId})"
     }
@@ -74,6 +79,7 @@ class StoryLockHostApplication : Application() {
       secretStore = secretStore,
       localConfirmation = localConfirmation,
       runtime = runtime,
+      storyLockPackageRepository = storyLockPackageRepository,
       connectivityProvider = {
         registrationManager.healthJson()
       },

@@ -1,0 +1,57 @@
+{
+  "version": "1",
+  "resources": [
+    {
+      "resourceId": "github-main",
+      "resourceKind": "website",
+      "providerId": "github",
+      "displayName": "GitHub main account",
+      "bindings": [
+        {
+          "role": "username",
+          "objectId": "credential/github/main/username",
+          "objectMeta": {
+            "objectKind": "username",
+            "encoding": "text",
+            "sensitivity": "private"
+          }
+        },
+        {
+          "role": "password",
+          "objectId": "credential/github/main/password",
+          "objectMeta": {
+            "objectKind": "password",
+            "encoding": "secret",
+            "sensitivity": "secret"
+          }
+        }
+      ]
+    },
+    {
+      "resourceId": "wallet-main",
+      "resourceKind": "wallet",
+      "providerId": "evm",
+      "displayName": "EVM wallet",
+      "bindings": [
+        {
+          "role": "address",
+          "objectId": "wallet/evm/main/address",
+          "objectMeta": {
+            "objectKind": "address",
+            "encoding": "text",
+            "sensitivity": "private"
+          }
+        },
+        {
+          "role": "signing_key",
+          "objectId": "wallet/evm/main/signing_key",
+          "objectMeta": {
+            "objectKind": "private_key",
+            "encoding": "secret",
+            "sensitivity": "secret"
+          }
+        }
+      ]
+    }
+  ]
+}

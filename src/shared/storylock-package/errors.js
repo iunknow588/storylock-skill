@@ -20,9 +20,11 @@ export class StoryLockPackageError extends Error {
 }
 
 export function createIssue({ code, message, path = "$", level = "error", suggestion = "" }) {
+  const severity = level === "error" ? "blocking" : level;
   return {
     code,
     level,
+    severity,
     message,
     path,
     suggestion,

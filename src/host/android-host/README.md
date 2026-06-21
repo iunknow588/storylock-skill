@@ -5,7 +5,7 @@ This directory contains the Android-host application skeleton for StoryLock Laye
 Current implemented scope:
 
 1. Android application project skeleton
-2. local HTTP host entry at `GET /health` and `POST /execute`
+2. local HTTP host entry at `GET /health`, `GET /permission-summary`, and `POST /execute`
 3. Android Keystore-backed `SecretStore`
 4. local multi-cell challenge prompt and BiometricPrompt confirmation flow
 5. host registration store with stable `deviceId` and `appInstanceId`
@@ -13,7 +13,8 @@ Current implemented scope:
 7. relay polling client for server-side callback execution
 8. `execute` path backed by Android Keystore asymmetric signature keys and Android Keystore-encrypted credential objects
 9. asset-backed local question-set loading for Android challenge execution
-10. shared StoryLock schema and permission summary alignment guarded by `scripts/test/android-readiness.mjs`
+10. asset-backed `storylock-resource-catalog.json` loading for redacted permission summary
+11. shared StoryLock schema and permission summary alignment guarded by `scripts/test/android-readiness.mjs`
 
 Current network flow:
 
@@ -33,7 +34,7 @@ Current non-goals:
 Permission summary boundary:
 
 1. Android Host must not edit StoryLock Core configuration.
-2. Android Host may expose only redacted permission summary metadata derived from the shared StoryLock package model.
+2. Android Host may expose only redacted permission summary metadata derived from `storylock-resource-catalog.json` and the shared StoryLock package model.
 3. Android permission summary semantics must stay aligned with `src/shared/storylock-package/permission-summary.js`.
 4. Android responses must not expose story raw text, answers, passwords, private keys, or `signingKeyBytes`.
 

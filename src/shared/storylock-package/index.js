@@ -11,14 +11,21 @@ async function readJson(path) {
 }
 
 function mergeResults(results) {
-  const errors = results.flatMap((item) => item.errors ?? []);
-  const warnings = results.flatMap((item) => item.warnings ?? []);
-  const infos = results.flatMap((item) => item.infos ?? []);
+  const errors = results.flatMap((item) => item.errors ?? []).map(normalizeIssue);
+  const warnings = results.flatMap((item) => item.warnings ?? []).map(normalizeIssue);
+  const infos = results.flatMap((item) => item.infos ?? []).map(normalizeIssue);
   return {
     valid: errors.length === 0,
     errors,
     warnings,
     infos,
+  };
+}
+
+function normalizeIssue(issue) {
+  return {
+    ...issue,
+    severity: issue.severity ?? (issue.level === "error" ? "blocking" : issue.level ?? "blocking"),
   };
 }
 
@@ -61,6 +68,7 @@ export function validateStoryLockPackage(packageData) {
     validateAuthorDraft(packageData.authorDraft),
     validatePermissionSummary(permissionSummary),
     validateTemplateResourceReferences(packageData),
+    validateHostReadableRedaction(packageData),
     ...templateResults,
   ]);
 }
@@ -99,8 +107,9 @@ function validateTemplateResourceReferences(packageData) {
       const itemPath = `$.templates.${bundleName}.items[${itemIndex}]`;
       if (!resourceIds.has(item.resourceId)) {
         errors.push({
-          code: "SLP-701",
+          code: "SL_TEMPLATE_UNKNOWN_RESOURCE_ID",
           level: "error",
+          severity: "blocking",
           path: `${itemPath}.resourceId`,
           message: `Template references unknown resourceId: ${item.resourceId}.`,
           suggestion: "Add the resource to resource-catalog.json or update the template resourceId.",
@@ -112,8 +121,9 @@ function validateTemplateResourceReferences(packageData) {
         const binding = item.bindings[bindingIndex];
         if (!roles.has(binding.role)) {
           errors.push({
-            code: "SLP-702",
+            code: "SL_TEMPLATE_UNKNOWN_ROLE",
             level: "error",
+            severity: "blocking",
             path: `${itemPath}.bindings[${bindingIndex}].role`,
             message: `Template role ${binding.role} is not defined under resourceId ${item.resourceId}.`,
             suggestion: "Use a role declared in resource-catalog.json bindings.",
@@ -128,4 +138,59 @@ function validateTemplateResourceReferences(packageData) {
     warnings: [],
     infos: [],
   };
+}
+
+const HOST_READABLE_FORBIDDEN_KEYS = new Set([
+  "canonicalAnswer",
+  "acceptedAnswers",
+  "correctOptions",
+  "answer",
+  "password",
+  "privateKey",
+  "signingKeyBytes",
+  "seed",
+  "challengeMaterial",
+]);
+
+function validateHostReadableRedaction(packageData) {
+  const errors = [];
+  const scanTargets = [
+    ["package-manifest.json", packageData.manifest],
+    ["resource-catalog.json", packageData.catalog],
+    ["templates/login-sites.json", packageData.templates?.loginSites],
+    ["templates/signing-actions.json", packageData.templates?.signingActions],
+    ["templates/agent-tasks.json", packageData.templates?.agentTasks],
+  ];
+  for (const [fileName, value] of scanTargets) {
+    scanForbiddenKeys(value, fileName, "$", errors);
+  }
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings: [],
+    infos: [],
+  };
+}
+
+function scanForbiddenKeys(value, fileName, path, errors) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => scanForbiddenKeys(item, fileName, `${path}[${index}]`, errors));
+    return;
+  }
+  if (!value || typeof value !== "object") {
+    return;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    const childPath = `${path}.${key}`;
+    if (HOST_READABLE_FORBIDDEN_KEYS.has(key)) {
+      errors.push({
+        code: "SL_PKG_HOST_READABLE_SECRET_FIELD",
+        level: "error",
+        path: childPath,
+        message: `${fileName} must not expose host-readable secret field ${key}.`,
+        suggestion: "Keep answers, passwords, private keys, and challenge material inside StoryLock Core or encrypted vault data.",
+      });
+    }
+    scanForbiddenKeys(child, fileName, childPath, errors);
+  }
 }

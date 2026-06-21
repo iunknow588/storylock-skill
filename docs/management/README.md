@@ -13,24 +13,42 @@
 3. `StoryLock文档对齐后续开发计划_20260621.md`
    - 当前文档对齐总账。用于说明 `story-lock/doc` 与 `skill/docs` 的差异、已修复的文档入口问题，以及后续需要补齐的架构接线、usecase 映射、命名归档规则和文档-代码-测试映射表。
 
-4. `StoryLock后续开发计划_20260620.md`
-   - Windows 本地宿主、托盘、下载包和早期 StoryLock 工作台推进记录，作为当前计划的阶段性背景。
+4. `StoryLock文档命名与归档规则_20260621.md`
+   - 当前文档治理规则。用于说明 `docs/design`、`docs/management`、`docs/management/BACK`、`docs/test`、`docs/ref` 的边界和归档条件。
 
-5. `StoryLock后续开发实施清单_20260620.md`
-   - 20260620 阶段任务拆解，已被 20260621 设计对齐清单吸收的部分以后续清单为准。
+5. `StoryLock文档代码测试映射表_20260621.md`
+   - 当前发布前检查总表。用于把上游设计、当前代码路径、测试命令和剩余验收项放到同一张表中。
 
 ## 历史归档
 
-`BACK/` 目录保存历史分析、旧版计划和评审意见，仅作为参考，不作为当前执行基线。
+`BACK/` 目录保存历史分析、旧版计划和评审意见，仅作为参考，不作为当前执行基线。20260620 阶段计划和实施清单已归档到 `BACK/`，当前工作以 20260621 文档为准。
 
 ## 当前执行重点
 
-1. 先补齐 StoryLock Core 正式数据模型：`vault.stlk`、`resource-catalog.json`、`package-manifest.json`、`templates/*`、作者稿和 24 节点结构。
-2. 把迁移目录里的 resource catalog / templates 能力提升为 `src/shared` 下的正式共享模块，供 Windows、Android、Linux 共用。
-3. 增加 package / catalog / templates / author draft 的 JSON Schema、CLI 校验和稳定错误码输出。
-4. 补齐 `skill/docs` 与 `story-lock/doc` 的文档对齐说明，优先补架构接线、usecase 到测试 fixture 映射、命名归档规则和文档-代码-测试映射表。
-5. Windows Slint `StoryLock Core` 子应用继续作为底层配置入口，主 Host 只读取脱敏权限摘要，不能直接编辑故事原文、答案、密码、私钥或加密配置。
-6. 远程网关继续只暴露 `requestSignature` 和 `requestPasswordFill` 两个安全出口，不开放远程故事读写。
+1. Windows Slint `StoryLock Core` 子应用继续作为底层配置入口，主 Host 只读取脱敏权限摘要，不能直接编辑故事原文、答案、密码、私钥或加密配置。
+2. 补齐 Windows、Android、Linux 真机或桌面验收记录。
+3. 远程网关继续只暴露 `requestSignature` 和 `requestPasswordFill` 两个安全出口，不开放远程故事读写。
+
+## 当前归档判断
+
+截至 2026-06-21，本目录尚未整体处理完毕，暂不移动当前主文档到 `BACK/`。
+
+已闭环：
+
+1. StoryLock package 第一版共享加载、schema、校验 CLI 和权限摘要说明。
+2. 平台宿主与数据包接线说明。
+3. 用例样例到测试夹具映射说明。
+4. 文档命名与归档规则。
+5. 文档-代码-测试映射表。
+6. Windows package、Android readiness、Linux host、文档一致性和路径一致性自动化检查。
+
+仍待闭环：
+
+1. Windows 桌面托盘和 Slint UI 人工验收记录。
+2. Android 真机运行和 `/permission-summary` 实测记录。
+3. Linux 桌面或 WSL 环境运行验收记录。
+
+完成以上人工验收后，可将 20260621 阶段计划、实施清单和对齐总账移动到 `BACK/`，并在本目录保留新的当前任务入口。
 
 ## 人工验收入口
 

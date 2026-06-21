@@ -15,8 +15,15 @@ export function validateResourceCatalog(catalog) {
   }
 
   validateOptionalString(catalog.version, "$.version", issues);
-  if (validateArray(catalog.resources, "$.resources", issues)) {
-    uniqueBy(catalog.resources, (item) => item?.resourceId, "$.resources", "resourceId", issues);
+  if (validateArray(catalog.resources, "$.resources", issues, { code: "SL_CATALOG_MISSING_RESOURCES" })) {
+    uniqueBy(
+      catalog.resources,
+      (item) => item?.resourceId,
+      "$.resources",
+      "resourceId",
+      issues,
+      "SL_CATALOG_DUPLICATE_RESOURCE_ID",
+    );
 
     for (let resourceIndex = 0; resourceIndex < catalog.resources.length; resourceIndex += 1) {
       const resource = catalog.resources[resourceIndex];
@@ -44,7 +51,7 @@ export function validateResourceCatalog(catalog) {
             continue;
           }
           validateRequiredString(binding.role, `${bindingPath}.role`, issues);
-          validateObjectId(binding.objectId, `${bindingPath}.objectId`, issues);
+          validateObjectId(binding.objectId, `${bindingPath}.objectId`, issues, "SL_CATALOG_INVALID_OBJECT_ID");
           if (binding.objectMeta != null && validateObject(binding.objectMeta, `${bindingPath}.objectMeta`, issues)) {
             validateRequiredString(binding.objectMeta.objectKind, `${bindingPath}.objectMeta.objectKind`, issues);
             validateOptionalString(binding.objectMeta.encoding, `${bindingPath}.objectMeta.encoding`, issues);

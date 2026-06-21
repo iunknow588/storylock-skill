@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun renderStatus(state: HostBindingState) {
     val app = application as StoryLockHostApplication
+    val permissionSummary = app.storyLockPackageRepository.loadPermissionSummary()
     statusView.text = buildString {
       appendLine("StoryLock Android Host")
       appendLine()
@@ -95,6 +96,7 @@ class MainActivity : AppCompatActivity() {
       appendLine("App Instance ID: ${state.appInstanceId}")
       appendLine("Host port: ${app.hostConfig.port}")
       appendLine("Server running: ${app.server.isRunning()}")
+      appendLine("Permission objects: ${permissionSummary.permissionObjects}")
       appendLine()
       appendLine("Gateway: ${state.gatewayBaseUrl.ifBlank { "(not bound yet)" }}")
       appendLine("Preferred mode: ${state.preferredMode}")

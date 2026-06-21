@@ -6,7 +6,7 @@
 | 日期 | 2026-06-21 |
 | 对比来源 | `E:\2026OPC大赛\story-lock\doc` |
 | 当前仓库 | `E:\2026OPC大赛\skill\docs` |
-| 结论 | `skill/docs` 已覆盖实现仓库的三层 Skill、平台宿主、测试和管理入口，但相比 `story-lock/doc` 仍缺少完整产品文档分册、用例样例映射、架构接线索引和文档编号治理说明 |
+| 结论 | `skill/docs` 已覆盖实现仓库的三层 Skill、平台宿主、测试和管理入口；架构接线、用例样例映射、文档编号治理和文档-代码-测试映射已补第一版，剩余主要是真机/桌面验收记录 |
 
 ## 1. 总体结论
 
@@ -60,7 +60,7 @@
 
 新增本文件作为文档对齐总账。
 
-## 3. 仍需完善的问题
+## 3. 已补齐的问题
 
 ### 3.1 缺少 `architecture/` 等价索引
 
@@ -75,12 +75,12 @@
 
 `skill/docs` 当前没有单独 `docs/architecture`，相关内容分散在 `docs/design/cn`、`docs/ref` 和代码脚本中。
 
-后续处理：
+处理结果：
 
 1. 不新建大量历史架构文档。
-2. 新增一份 `docs/design/cn/平台宿主与数据包接线说明.md`。
-3. 将 Windows / Android / Linux 如何调用 `src/shared/storylock-package` 写清楚。
-4. 云备份和 KMS / OBS 仍保持“后续增强”，不提前宣称完成。
+2. 已新增 `docs/design/cn/平台宿主与数据包接线说明_20260621.md`。
+3. 已说明 Windows / Android / Linux 如何读取 StoryLock package 或 permission summary。
+4. 云备份和 KMS / OBS 仍保持“后续增强”，未提前宣称完成。
 
 ### 3.2 缺少 `usecase/` 到测试 fixture 的映射
 
@@ -97,11 +97,11 @@
 
 `skill/docs` 当前只有测试 fixture 的第一版最小样例，还没有说明这些上游样例如何转化。
 
-后续处理：
+处理结果：
 
-1. 新增 `docs/design/cn/StoryLock用例样例到测试夹具映射.md`。
-2. 从 `story-lock/doc/usecase` 选取网站账号、钱包、API、证书四类样例，转为 `scripts/test/fixtures/storylock-package/` 下的合法样例。
-3. 增加非法样例覆盖重复 role、非法 objectId、缺失 template binding、节点数量错误。
+1. 已新增 `docs/design/cn/StoryLock用例样例到测试夹具映射_20260621.md`。
+2. 已说明网站账号、钱包、API、证书四类样例的当前 fixture 映射状态。
+3. 已说明非法样例应覆盖重复 role、非法 objectId、缺失 template binding、节点数量错误和 Host 可读字段泄漏。
 
 ### 3.3 缺少文档编号与命名治理
 
@@ -114,16 +114,16 @@
 3. `docs/management/BACK` 的归档规则。
 4. `docs/ref/` 被排除 Git 管理后的使用边界。
 
-后续处理：
+处理结果：
 
-1. 新增 `docs/management/StoryLock文档命名与归档规则_20260621.md`。
-2. 明确 `docs/design` 放正式技术说明，`docs/management` 放当前任务配置，`docs/management/BACK` 放历史档案，`docs/ref` 为本地参赛参考资料且不进入 Git。
+1. 已新增 `docs/management/StoryLock文档命名与归档规则_20260621.md`。
+2. 已明确 `docs/design` 放正式技术说明，`docs/management` 放当前任务配置，`docs/management/BACK` 放历史档案，`docs/ref` 为本地参赛参考资料且不进入 Git。
 
 ### 3.4 缺少中英文同步策略
 
 `skill/docs/design/en` 有英文文档，但新增的中文文档不一定都有英文版本。
 
-后续处理：
+处理结果：
 
 1. 当前开发阶段以中文设计为主。
 2. 面向外部评审或交付的英文文档只翻译稳定版本。
@@ -137,10 +137,10 @@
 2. `story-lock/doc/usecase` 条目到 fixture / CLI / UI 的映射。
 3. 每条能力的完成度、测试命令和验收方式。
 
-后续处理：
+处理结果：
 
-1. 在 `docs/management` 增加“文档-代码-测试三列表”。
-2. 逐步把该表用于发布前检查。
+1. 已在 `docs/management` 增加 `StoryLock文档代码测试映射表_20260621.md`。
+2. 已把该表作为发布前检查和归档判断依据。
 
 ## 4. 优先级计划
 
@@ -165,6 +165,8 @@ node scripts\verify\path-consistency.mjs
 
 ### P1：补架构接线说明
 
+状态：已完成第一版。
+
 产出：
 
 1. `docs/design/cn/平台宿主与数据包接线说明_20260621.md`
@@ -172,6 +174,8 @@ node scripts\verify\path-consistency.mjs
 3. 云备份、KMS、OBS 标注为后续增强，不写成已完成。
 
 ### P2：补 usecase 到 fixture 映射
+
+状态：已完成第一版。
 
 产出：
 
@@ -181,12 +185,16 @@ node scripts\verify\path-consistency.mjs
 
 ### P3：补文档命名与归档规则
 
+状态：已完成第一版。
+
 产出：
 
 1. `docs/management/StoryLock文档命名与归档规则_20260621.md`
 2. `docs/management/README.md` 更新归档规则。
 
 ### P4：补文档-代码-测试映射表
+
+状态：已完成第一版。
 
 产出：
 

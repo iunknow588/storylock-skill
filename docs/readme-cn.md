@@ -82,10 +82,14 @@ node scripts/android/validate_android_question_set.mjs
 | 参赛与评审资料 | `docs/ref/README.md` |
 | 测试方案 | `docs/test/StoryLock测试方案_v1.0.md` |
 | StoryLock 数据包与校验 CLI | `docs/design/cn/StoryLock数据包与校验CLI说明_20260621.md` |
+| 平台宿主与数据包接线说明 | `docs/design/cn/平台宿主与数据包接线说明_20260621.md` |
+| StoryLock 用例样例到测试夹具映射 | `docs/design/cn/StoryLock用例样例到测试夹具映射_20260621.md` |
 | Android 宿主说明 | `docs/ref/05-Android宿主实现规范.md` |
 | 评审讲解与演示说明 | `docs/ref/06-评审讲解与演示说明.md` |
 | Linux 平台密钥存储与检查说明 | `docs/ref/11-Linux平台密钥存储与检查说明.md` |
 | Windows Host 菜单配置说明 | `docs/design/cn/YianWindowsHost菜单配置说明_20260621.md` |
+| 文档命名与归档规则 | `docs/management/StoryLock文档命名与归档规则_20260621.md` |
+| 文档代码测试映射表 | `docs/management/StoryLock文档代码测试映射表_20260621.md` |
 | 当前设计对齐后续开发计划 | `docs/management/StoryLock设计对齐后续开发计划_20260621.md` |
 | 当前设计对齐实施清单 | `docs/management/StoryLock设计对齐后续开发实施清单_20260621.md` |
 | 文档对齐后续开发计划 | `docs/management/StoryLock文档对齐后续开发计划_20260621.md` |

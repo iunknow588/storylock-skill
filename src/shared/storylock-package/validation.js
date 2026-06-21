@@ -26,10 +26,10 @@ export function validateOptionalString(value, path, issues) {
   return validateRequiredString(value, path, issues);
 }
 
-export function validateArray(value, path, issues, { minItems = 0 } = {}) {
+export function validateArray(value, path, issues, { minItems = 0, code = "SL_PKG_INVALID_ARRAY" } = {}) {
   if (!Array.isArray(value)) {
     issues.push(createIssue({
-      code: "SLP-102",
+      code,
       path,
       message: `${path} must be an array.`,
       suggestion: "Use an array value.",
@@ -38,7 +38,7 @@ export function validateArray(value, path, issues, { minItems = 0 } = {}) {
   }
   if (value.length < minItems) {
     issues.push(createIssue({
-      code: "SLP-103",
+      code,
       path,
       message: `${path} must contain at least ${minItems} item(s).`,
       suggestion: "Add the required items before exporting.",
@@ -61,13 +61,13 @@ export function validateObject(value, path, issues) {
   return true;
 }
 
-export function validateObjectId(value, path, issues) {
+export function validateObjectId(value, path, issues, invalidCode = "SL_CATALOG_INVALID_OBJECT_ID") {
   if (!validateRequiredString(value, path, issues, "SLP-201")) {
     return false;
   }
   if (!OBJECT_ID_PATTERN.test(value)) {
     issues.push(createIssue({
-      code: "SLP-202",
+      code: invalidCode,
       path,
       message: `${path} must be a four-segment objectId.`,
       suggestion: "Use <resourceKind>/<providerId>/<instanceSegment>/<role>.",
@@ -77,7 +77,7 @@ export function validateObjectId(value, path, issues) {
   return true;
 }
 
-export function uniqueBy(items, keyFn, path, label, issues) {
+export function uniqueBy(items, keyFn, path, label, issues, code = "SLP-203") {
   const seen = new Map();
   for (let index = 0; index < items.length; index += 1) {
     const key = keyFn(items[index], index);
@@ -86,7 +86,7 @@ export function uniqueBy(items, keyFn, path, label, issues) {
     }
     if (seen.has(key)) {
       issues.push(createIssue({
-        code: "SLP-203",
+        code,
         path: `${path}[${index}]`,
         message: `Duplicate ${label}: ${key}.`,
         suggestion: `Keep ${label} unique inside ${path}.`,

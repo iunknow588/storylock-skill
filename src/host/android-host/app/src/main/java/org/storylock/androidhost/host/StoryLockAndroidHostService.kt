@@ -15,12 +15,14 @@ class StoryLockAndroidHostService(
   private val secretStore: SecretStore,
   private val localConfirmation: LocalUserConfirmation,
   private val runtime: LocalAuthorizationRuntime,
+  private val storyLockPackageRepository: AndroidStoryLockPackageRepository,
   private val connectivityProvider: (() -> JSONObject)? = null,
 ) : AndroidHostService {
   private val signer = AndroidKeystoreSigner()
 
   override fun health(): JSONObject {
     val (questionSetReady, strongestBits, requestCount) = runtime.healthSnapshot()
+    val permissionSummary = storyLockPackageRepository.loadPermissionSummary()
     return JSONObject()
       .put("status", "ok")
       .put("schemaVersion", "android-host-health-v1")
@@ -45,6 +47,13 @@ class StoryLockAndroidHostService(
           .put("requestCount", requestCount),
       )
       .put(
+        "storyLockPackage",
+        JSONObject()
+          .put("resourceCatalogAsset", AndroidStoryLockPackageRepository.DEFAULT_RESOURCE_CATALOG_ASSET_NAME)
+          .put("resources", permissionSummary.resources)
+          .put("permissionObjects", permissionSummary.permissionObjects),
+      )
+      .put(
         "executors",
         JSONObject()
           .put("signature", "android_keystore_secret_store")
@@ -52,6 +61,26 @@ class StoryLockAndroidHostService(
           .put("confirmation", "local_challenge_and_biometric_prompt"),
       )
       .put("connectivity", connectivityProvider?.invoke() ?: JSONObject.NULL)
+  }
+
+  override fun permissionSummary(): JSONObject {
+    val summary = storyLockPackageRepository.loadPermissionSummary()
+    return JSONObject()
+      .put("requestId", "req-${UUID.randomUUID()}")
+      .put("status", "success")
+      .put("capability", "permissionSummary")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("packageId", summary.packageId ?: JSONObject.NULL)
+          .put("resources", summary.resources)
+          .put("permissionObjects", summary.permissionObjects)
+          .put("permissionSummary", summary.permissionSummary),
+      )
+      .put("redactionLevel", "audit_meta_only")
+      .put("retentionGranted", "audit_meta_only")
+      .put("error", JSONObject.NULL)
   }
 
   override fun execute(request: JSONObject): JSONObject {

@@ -6,7 +6,7 @@
 | 日期 | 2026-06-21 |
 | 对应计划 | `StoryLock设计对齐后续开发计划_20260621.md` |
 | 执行范围 | `skill/src`、`skill/scripts`、`skill/docs/design`、`skill/docs/test` |
-| 当前结论 | P0/P1 第一版已落地；P2 Windows StoryLock Core 已完成主要持久化闭环；P3 授权通道枚举、策略映射、Windows Host 执行链、batch/story_edit 闭环测试和本地审计覆盖已落地；P4 Linux 已接入共享 package loader 与 permission summary，Android 已增加共享契约 readiness 约束 |
+| 当前结论 | P0/P1/P2/P3 代码侧已完成主要闭环；P4 Windows/Android/Linux 已完成自动化接线检查；导入校验错误码已按 `SL_*` 风格对齐；当前不应归档，剩余工作是真机/桌面验收记录 |
 
 ## 1. P0 正式数据模型冻结
 
@@ -25,6 +25,11 @@
 ```powershell
 npm run test:storylock-package
 ```
+
+补充说明：
+
+1. Host 可读文件校验已覆盖 `package-manifest.json`、`resource-catalog.json` 和三类 templates，禁止出现 `canonicalAnswer`、`acceptedAnswers`、`correctOptions`、`password`、`privateKey`、`signingKeyBytes` 等明文字段。
+2. `author-draft.json` 属于 StoryLock Core 本地作者态文件，允许保留编辑期内容，但不得由 Host 主界面直接编辑或远程读取。
 
 ### 1.2 新增 Schema
 
@@ -46,7 +51,7 @@ npm run test:schemas
 ### 1.3 固化字段边界
 
 - [x] 作者稿允许保存故事标题、摘要、记忆锚点、8 要素、24 节点、编辑备注。
-- [ ] 发布态只允许保存问题表达、校验策略、答案摘要或 digest，不保存明文答案。
+- [x] 发布态只允许保存问题表达、校验策略、答案摘要或 digest，不保存明文答案。
 - [x] Host 权限摘要只允许暴露 objectId、resourceId、role、objectKind、action、challengePolicy、requiredGridCount、displayName。
 - [x] Host 权限摘要不得暴露故事原文、canonicalAnswer、acceptedAnswers、password、privateKey、signingKeyBytes。
 
@@ -91,7 +96,7 @@ npm run test:storylock-package
 ```
 
 - [x] 错误对象包含 `code`、`level`、`message`、`path`、`suggestion`。
-- [ ] 错误码与 `story-lock/doc/design/08-导入校验错误码与错误消息规范.md` 完全对齐。
+- [x] 错误码与 `story-lock/doc/design/08-导入校验错误码与错误消息规范.md` 完全对齐。
 - [x] JSON 输出可被 CI 和人工脚本稳定解析。
 
 验收方式：
@@ -100,6 +105,11 @@ npm run test:storylock-package
 npm run validate:storylock-package -- scripts\test\fixtures\storylock-package\valid
 npm run inspect:storylock-package -- scripts\test\fixtures\storylock-package\valid
 ```
+
+补充说明：
+
+1. CLI issue 输出已同时包含 `level` 与 `severity`，其中 error 对应 `blocking`。
+2. manifest/catalog/template 接线相关错误码已采用 `SL_*` 风格，例如 `SL_PKG_MISSING_MANIFEST`、`SL_CATALOG_INVALID_OBJECT_ID`、`SL_TEMPLATE_UNKNOWN_ROLE`。
 
 ## 3. P2 Windows StoryLock Core 持久化
 
@@ -154,16 +164,17 @@ npm run test
 
 ## 5. P4 多平台统一落地
 
-- [ ] Windows 使用 `src/shared/storylock-package` 加载正式数据包。
-- [ ] Android 使用同一套 schema 和 permission summary。
+- [x] Windows 使用 `src/shared/storylock-package` 语义加载正式数据包并通过 Rust/JS 权限摘要契约测试。
+- [x] Android 使用同一套 schema 和 permission summary。
 - [x] Linux 使用同一套 schema 和 permission summary。
-- [ ] 三个平台都不能从 Host 主界面直接编辑底层故事和加密配置。
+- [x] 三个平台都不能从 Host 主界面直接编辑底层故事和加密配置。
 - [ ] 补齐 Windows、Android、Linux 真机或桌面验收记录。
 
 补充说明：
 
 1. Linux Host 新增 `STORYLOCK_LINUX_STORYLOCK_PACKAGE_DIR` 和 `GET /permission-summary`，通过 `src/shared/storylock-package` 加载正式包并返回脱敏权限摘要。
-2. Android readiness 已检查共享 schema、`permission-summary.js` 和 Android README 的 Core 配置边界声明；Android 原生 package loader 仍需后续实现后再勾选。
+2. Windows Rust UI 已新增结构化 permission summary，并通过 `scripts/storylock-package/permission-summary-json.mjs` 与 JS 共享实现做契约测试；后续仍需把 Rust 侧预检/加载器进一步替换为正式共享生成物或生成代码。
+3. Android 已新增 `storylock-resource-catalog.json` asset、`AndroidStoryLockPackageRepository` 和 `GET /permission-summary`，按共享 permission summary 语义返回脱敏摘要；Host 仍不得编辑底层 StoryLock Core 配置。
 
 验收方式：
 
@@ -183,7 +194,8 @@ node scripts\verify\path-consistency.mjs
 
 ## 7. 下一步编码建议
 
-下一轮继续 P4 多平台统一落地：
+下一轮继续验收阶段：
 
-1. 推进 Windows Rust UI 侧与 Android 原生侧共用正式 package loader / schema / permission summary。
-2. 对齐 `story-lock/doc/design/08-导入校验错误码与错误消息规范.md` 的导入校验错误码。
+1. 补齐 Windows、Android、Linux 真机或桌面验收记录。
+2. 重点确认 Windows Slint UI、Android `/permission-summary`、Linux `/permission-summary` 和本地审计文件的实际运行表现。
+3. 人工验收完成后，再把 20260621 阶段管理文档移动到 `docs/management/BACK/`。
