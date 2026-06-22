@@ -24,6 +24,11 @@
       "type": "string",
       "enum": ["low", "medium", "high", "story_edit"]
     },
+    "requiredGridCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 24
+    },
     "requestId": {
       "type": "string",
       "minLength": 1

@@ -11,6 +11,25 @@
     "recommendedSelectionMode": { "type": "string" },
     "recommendedCorrectCount": { "type": "integer", "minimum": 1 },
     "candidatePoolSize": { "type": "integer", "minimum": 1 },
+    "answerOptionsLocalOnly": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "required": ["text", "isCorrect"],
+        "properties": {
+          "text": { "type": "string" },
+          "isCorrect": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "canonicalAnswerLocalOnly": { "type": "string" },
+    "acceptedAnswersLocalOnly": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "recallPriority": { "type": "integer", "minimum": 1 },
     "verifyPolicy": { "type": "string" },
     "editorNotes": { "type": "string" }

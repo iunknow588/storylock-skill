@@ -49,8 +49,8 @@ scripts\vercel\link_project.cmd
 scripts\vercel\publish_site_release.cmd -Target static -Build
 scripts\vercel\publish_site_release.cmd -Target vercel -Build -SiteHttpSmoke -Preflight
 scripts\vercel\publish_site_release.cmd -Target vercel -Build -SiteHttpSmoke -Prod -Execute
-scripts\vercel\sync_env_file_to_vercel.cmd -EnvFilePath scripts\vercel\.env.windows-package.publish
-scripts\vercel\publish_site_release.cmd -Target vercel -WindowsEnvFile scripts\vercel\.env.windows-package.publish -SyncWindowsEnvToVercel
+scripts\vercel\sync_env_file_to_vercel.cmd -EnvFilePath .temp\vercel\windows-package.publish.env
+scripts\vercel\publish_site_release.cmd -Target vercel -WindowsEnvFile .temp\vercel\windows-package.publish.env -SyncWindowsEnvToVercel
 scripts\release\android\build_apk.cmd -Variant debug
 node scripts\android\validate_android_question_set.mjs
 scripts\release\windows\release_windows_host.cmd
@@ -73,6 +73,7 @@ scripts\verify\encoding-check.ps1
 - `scripts\text\` utilities skip binary files and common generated directories.
 - `scripts\verify\encoding-check.ps1` now combines line-ending checks with UTF-8/LF normalization dry-run; add `-Fix` to rewrite text files to UTF-8 without BOM and LF.
 - `scripts\vercel\` reads `scripts/vercel/.env` when present, otherwise falls back to `.env.example`.
+- Generated package metadata should not be stored under `scripts\vercel\`. Android and Windows package scripts now write `.temp\vercel\android-package.env`, `.temp\vercel\windows-package.env`, and `.temp\vercel\output.json`; copy values into `scripts\vercel\.env` only when a manual deployment needs overrides.
 - `scripts\vercel\preflight.ps1`, `publish_site_release.ps1`, and `sync_env_file_to_vercel.ps1` check `.vercel/project.json` against `VERCEL_PROJECT_NAME` before deployment or env sync. Re-run `scripts\vercel\link_project.cmd` if the local link does not match the Vercel project that owns `yian.cdao.online`.
 - `scripts\vercel\publish_site_release.ps1` supports two skeleton targets: `vercel` for CLI deployment planning or execution and `static` for copying the built `release/web/public/` directory into a release folder. Add `-SiteHttpSmoke` before Vercel deployment to run the local rewrite-equivalent HTTP check for `/`, `/api/storylock-gateway`, `/app/download`, platform downloads, binding, and registrations. Add `-Preflight` to run local env/project checks before deploy and online HTTP checks after deploy, so stale production 404s do not block the first corrective deployment.
 - `scripts\vercel\sync_env_file_to_vercel.ps1` converts a local env fragment into a Vercel env sync plan and can optionally execute `vercel env update` with `add` fallback for `preview` and `production`.

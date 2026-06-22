@@ -9,23 +9,55 @@ param(
 $ErrorActionPreference = "Stop"
 
 $exampleEnvPath = Join-Path $PSScriptRoot ".env.example"
+$script:EnvValues = @{}
 
-function Import-EnvFile {
-  param([string]$Path)
+function Merge-EnvFile {
+  param(
+    [string]$Path,
+    [switch]$Override
+  )
   if (-not (Test-Path -LiteralPath $Path)) {
     return
   }
-  Get-Content -LiteralPath $Path | ForEach-Object {
-    $line = $_.Trim()
+  foreach ($rawLine in Get-Content -LiteralPath $Path) {
+    $line = $rawLine.Trim()
     if (-not $line -or $line.StartsWith("#")) {
-      return
+      continue
     }
     $parts = $line -split "=", 2
     if ($parts.Count -ne 2) {
-      return
+      continue
     }
-    [System.Environment]::SetEnvironmentVariable($parts[0].Trim(), $parts[1].Trim(), "Process")
+    $name = $parts[0].Trim()
+    $value = $parts[1].Trim()
+    if (-not [string]::IsNullOrWhiteSpace($value)) {
+      if ($Override -or -not $script:EnvValues.ContainsKey($name)) {
+        $script:EnvValues[$name] = $value
+      }
+    }
   }
+}
+
+function Import-EnvValues {
+  param([hashtable]$Values)
+  foreach ($name in $Values.Keys) {
+    if (-not [string]::IsNullOrWhiteSpace([System.Environment]::GetEnvironmentVariable($name, "Process"))) {
+      continue
+    }
+    Set-Item -Path ("Env:{0}" -f $name) -Value $Values[$name]
+  }
+}
+
+function Get-EnvValue {
+  param([string]$Name)
+  $value = [System.Environment]::GetEnvironmentVariable($Name, "Process")
+  if (-not [string]::IsNullOrWhiteSpace($value)) {
+    return $value
+  }
+  if ($script:EnvValues.ContainsKey($Name)) {
+    return [string]$script:EnvValues[$Name]
+  }
+  return ""
 }
 
 function Test-Env {
@@ -33,7 +65,7 @@ function Test-Env {
     [string]$Name,
     [switch]$Required
   )
-  $value = [System.Environment]::GetEnvironmentVariable($Name, "Process")
+  $value = Get-EnvValue -Name $Name
   $ok = -not [string]::IsNullOrWhiteSpace($value)
   if ($Required -and -not $ok) {
     throw "$Name is required"
@@ -47,7 +79,8 @@ function Test-Env {
 
 function Test-VercelProjectLink {
   param(
-    [string]$ExpectedProjectName
+    [string]$ExpectedProjectName,
+    [string]$ExpectedScope
   )
   $projectJsonPath = Join-Path (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path ".vercel\project.json"
   if (-not (Test-Path -LiteralPath $projectJsonPath)) {
@@ -60,12 +93,17 @@ function Test-VercelProjectLink {
   try {
     $project = Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
     $actualProjectName = [string]$project.projectName
+    $actualOrgId = [string]$project.orgId
     $matchesExpected = [string]::IsNullOrWhiteSpace($ExpectedProjectName) -or $actualProjectName -eq $ExpectedProjectName
+    $matchesScope = -not ($ExpectedScope -eq "iunknow588" -and $actualOrgId.StartsWith("team_"))
+    $ok = $matchesExpected -and $matchesScope
     return [PSCustomObject]@{
       Check = "vercel:project-link"
-      Status = if ($matchesExpected) { "ok" } else { "failed" }
-      Value = if ($matchesExpected) {
-        "linked project: $actualProjectName"
+      Status = if ($ok) { "ok" } else { "failed" }
+      Value = if ($ok) {
+        "linked project: $actualProjectName; orgId: $actualOrgId"
+      } elseif (-not $matchesScope) {
+        "linked orgId '$actualOrgId' is a team org, but VERCEL_SCOPE='$ExpectedScope' requires the personal iunknow588 scope"
       } else {
         "VERCEL_PROJECT_NAME='$ExpectedProjectName' but .vercel/project.json is linked to '$actualProjectName'"
       }
@@ -155,13 +193,23 @@ function Test-JsonField {
   }
 }
 
-Import-EnvFile -Path $exampleEnvPath
-Import-EnvFile -Path $EnvFile
+Merge-EnvFile -Path $exampleEnvPath
+Merge-EnvFile -Path $EnvFile -Override
+Import-EnvValues -Values $script:EnvValues
+if ($env:STORYLOCK_PREFLIGHT_DEBUG -eq "1") {
+  Write-Host ("[DEBUG] EnvFile={0}" -f $EnvFile) -ForegroundColor Yellow
+  Write-Host ("[DEBUG] ExampleEnvFile={0}" -f $exampleEnvPath) -ForegroundColor Yellow
+  Write-Host ("[DEBUG] EnvValues.Count={0}" -f $script:EnvValues.Count) -ForegroundColor Yellow
+  Write-Host ("[DEBUG] Has STORYLOCK_ANDROID_CONNECT_MODE={0}" -f $script:EnvValues.ContainsKey("STORYLOCK_ANDROID_CONNECT_MODE")) -ForegroundColor Yellow
+  Write-Host ("[DEBUG] STORYLOCK_ANDROID_CONNECT_MODE={0}" -f (Get-EnvValue -Name "STORYLOCK_ANDROID_CONNECT_MODE")) -ForegroundColor Yellow
+}
 
 $rows = @()
 $rows += Test-Env -Name "VERCEL_PROJECT_NAME" -Required
-$expectedProjectName = [System.Environment]::GetEnvironmentVariable("VERCEL_PROJECT_NAME", "Process")
-$rows += Test-VercelProjectLink -ExpectedProjectName $expectedProjectName
+$rows += Test-Env -Name "VERCEL_SCOPE" -Required
+$expectedProjectName = Get-EnvValue -Name "VERCEL_PROJECT_NAME"
+$expectedScope = Get-EnvValue -Name "VERCEL_SCOPE"
+$rows += Test-VercelProjectLink -ExpectedProjectName $expectedProjectName -ExpectedScope $expectedScope
 $rows += Test-Env -Name "STORYLOCK_GATEWAY_PUBLIC_URL" -Required:$RequireDomain
 $rows += Test-Env -Name "STORYLOCK_ANDROID_CONNECT_MODE" -Required
 $rows += Test-Env -Name "STORYLOCK_ANDROID_DEEP_LINK" -Required
@@ -182,8 +230,8 @@ $rows += Test-Env -Name "STORYLOCK_LINUX_PACKAGE_VERSION"
 $rows += Test-Env -Name "STORYLOCK_LINUX_PACKAGE_VERSION_CODE"
 $rows += Test-Env -Name "STORYLOCK_LINUX_PACKAGE_CHECKSUM"
 
-$apkPath = [System.Environment]::GetEnvironmentVariable("STORYLOCK_ANDROID_APK_PATH", "Process")
-$apkUrl = [System.Environment]::GetEnvironmentVariable("STORYLOCK_ANDROID_APP_DOWNLOAD_URL", "Process")
+$apkPath = Get-EnvValue -Name "STORYLOCK_ANDROID_APK_PATH"
+$apkUrl = Get-EnvValue -Name "STORYLOCK_ANDROID_APP_DOWNLOAD_URL"
 if ($RequireApkSource -and [string]::IsNullOrWhiteSpace($apkPath) -and [string]::IsNullOrWhiteSpace($apkUrl)) {
   throw "Either STORYLOCK_ANDROID_APK_PATH or STORYLOCK_ANDROID_APP_DOWNLOAD_URL is required"
 }
@@ -196,7 +244,7 @@ if (-not [string]::IsNullOrWhiteSpace($apkPath)) {
   }
 }
 
-$windowsPackagePath = [System.Environment]::GetEnvironmentVariable("STORYLOCK_WINDOWS_PACKAGE_PATH", "Process")
+$windowsPackagePath = Get-EnvValue -Name "STORYLOCK_WINDOWS_PACKAGE_PATH"
 if (-not [string]::IsNullOrWhiteSpace($windowsPackagePath)) {
   $resolved = Resolve-Path -LiteralPath $windowsPackagePath -ErrorAction SilentlyContinue
   $rows += [PSCustomObject]@{
@@ -206,7 +254,7 @@ if (-not [string]::IsNullOrWhiteSpace($windowsPackagePath)) {
   }
 }
 
-$linuxPackagePath = [System.Environment]::GetEnvironmentVariable("STORYLOCK_LINUX_PACKAGE_PATH", "Process")
+$linuxPackagePath = Get-EnvValue -Name "STORYLOCK_LINUX_PACKAGE_PATH"
 if (-not [string]::IsNullOrWhiteSpace($linuxPackagePath)) {
   $resolved = Resolve-Path -LiteralPath $linuxPackagePath -ErrorAction SilentlyContinue
   $rows += [PSCustomObject]@{
@@ -219,7 +267,7 @@ if (-not [string]::IsNullOrWhiteSpace($linuxPackagePath)) {
 $targetBaseUrl = if ($BaseUrl) {
   $BaseUrl.TrimEnd("/")
 } else {
-  $configuredBaseUrl = [System.Environment]::GetEnvironmentVariable("STORYLOCK_GATEWAY_PUBLIC_URL", "Process")
+  $configuredBaseUrl = Get-EnvValue -Name "STORYLOCK_GATEWAY_PUBLIC_URL"
   if ($null -eq $configuredBaseUrl) {
     $configuredBaseUrl = ""
   }

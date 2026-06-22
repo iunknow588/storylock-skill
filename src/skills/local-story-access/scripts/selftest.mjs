@@ -12,6 +12,7 @@ import {
   LocalAuthorizationSkill,
   LocalRevocationSkill,
   ObjectStrengthPolicySkill,
+  PermissionObjectPolicySkill,
   startAccessHostCleanup,
 } from '../index.js';
 import { SignatureAuthorizationSkill } from '../../../engine/assets/migrated/skills/authorization-skills.js';
@@ -86,7 +87,7 @@ await withDb(async (ctx) => {
   });
   assert.equal(signaturePolicy.status, 'success');
   assert.equal(signaturePolicy.result.requiredStrength, 'high');
-  assert.equal(signaturePolicy.result.gridPolicy.requiredCells, 9);
+  assert.equal(signaturePolicy.result.gridPolicy.requiredCells, 12);
   assert.equal(signaturePolicy.result.authorizationChannel, 'single_read');
   assert.equal(signaturePolicy.result.channelPolicy.storyNodeThreshold, 6);
   const credentialPolicy = await policy.run({
@@ -147,9 +148,38 @@ await withDb(async (ctx) => {
 
 await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
+  const policy = new PermissionObjectPolicySkill({ dbPath, secretStore });
+  ctx.hosts = [policy.host];
+  const result = await policy.run({
+    identityId: 'id-permission-policy',
+    objectRef: 'wallet/evm/main/signing_key',
+    permissionSummary: {
+      items: [{
+        resourceId: 'wallet-main',
+        role: 'signing_key',
+        objectId: 'wallet/evm/main/signing_key',
+        objectKind: 'private_key',
+        action: 'sign',
+        challengePolicy: 'high',
+        requiredGridCount: 12,
+      }],
+    },
+    requestId: 'req-permission-policy',
+  });
+  assert.equal(result.status, 'success');
+  assert.equal(result.result.objectRef, 'wallet/evm/main/signing_key');
+  assert.equal(result.result.requestedAction, 'signature');
+  assert.equal(result.result.requiredStrength, 'high');
+  assert.equal(result.result.requiredGridCount, 12);
+  assert.equal(result.result.gridPolicy.requiredCells, 12);
+  pass('permission-object-policy-from-summary');
+});
+
+await withDb(async (ctx) => {
+  const { dbPath, secretStore } = ctx;
   const grid = new GridChallengeSkill({ dbPath, secretStore });
   ctx.hosts = [grid.host];
-  grid.host.enrollQuestionSet('id-grid', sampleQuestions(9));
+  grid.host.enrollQuestionSet('id-grid', sampleQuestions(24));
   const result = await grid.run({
     identityId: 'id-grid',
     objectRef: 'wallet-key-main',
@@ -159,8 +189,8 @@ await withDb(async (ctx) => {
     expiry: Date.now() + 10_000,
   });
   assert.equal(result.status, 'success');
-  assert.equal(result.result.grid.requiredCells, 9);
-  assert.equal(result.result.grid.cells.length, 9);
+  assert.equal(result.result.grid.requiredCells, 12);
+  assert.equal(result.result.grid.cells.length, 12);
   assert.equal(result.result.grid.cells[0].answer, undefined);
   assert.equal(result.result.grid.cells[0].questionId, 'q-1');
   assert.equal(result.result.grid.cells[0].versionTag, 'v1');
@@ -228,10 +258,10 @@ await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
   const grid = new GridChallengeSkill({ dbPath, secretStore });
   ctx.hosts = [grid.host];
-  grid.host.enrollQuestionSet('id-pending-grid', sampleQuestions(9), {
+  grid.host.enrollQuestionSet('id-pending-grid', sampleQuestions(24), {
     questionSetVersion: 'active-set-v1',
   });
-  grid.host.enrollQuestionSet('id-pending-grid', sampleQuestions(9).map((question, index) => ({
+  grid.host.enrollQuestionSet('id-pending-grid', sampleQuestions(24).map((question, index) => ({
     ...question,
     questionId: `pending-q-${index + 1}`,
     versionTag: 'pending-v2',
@@ -637,7 +667,7 @@ await withDb(async (ctx) => {
   const grid = new GridChallengeSkill({ dbPath, secretStore });
   const auth = new LocalAuthorizationSkill({ host: grid.host });
   ctx.hosts = [grid.host];
-  grid.host.enrollQuestionSet('id-auth-partial', sampleQuestions(9));
+  grid.host.enrollQuestionSet('id-auth-partial', sampleQuestions(24));
   const verification = await grid.run({
     identityId: 'id-auth-partial',
     objectRef: 'wallet-key-main',
@@ -656,7 +686,7 @@ await withDb(async (ctx) => {
   });
   assert.equal(result.status, 'error');
   assert.equal(result.error.code, 'SLG-003');
-  pass('high-strength-requires-nine-cells');
+  pass('high-strength-requires-twelve-cells');
 });
 
 await withDb(async (ctx) => {
@@ -869,7 +899,7 @@ await withDb(async (ctx) => {
   const { dbPath, secretStore } = ctx;
   const grid = new GridChallengeSkill({ dbPath, secretStore });
   ctx.hosts = [grid.host];
-  grid.host.enrollQuestionSet('id-sign-audit', sampleQuestions(9));
+  grid.host.enrollQuestionSet('id-sign-audit', sampleQuestions(24));
   const challenges = new Map();
   const host = {
     createChallenge(identityId, scope) {
@@ -912,7 +942,7 @@ await withDb(async (ctx) => {
     algorithm: 'ed25519',
     payload: 'sign me',
     secretObjectId: 'wallet/main/private_key',
-    answers: answersFor(9),
+    answers: answersFor(12),
   });
   const db = new DatabaseSync(dbPath);
   const row = db.prepare(

@@ -116,11 +116,11 @@ npm run inspect:storylock-package -- scripts\test\fixtures\storylock-package\val
 ### 3.1 Slint Core 子应用接入真实数据
 
 - [x] `StoryLock Core` 子应用启动时加载本地 author draft。
-- [x] Story 菜单保存故事标题、摘要、记忆锚点和 8 要素。
-- [x] `24 Nodes` 菜单保存完整 24 个节点的 nodeId、title、elementId、question、selectionMode、candidatePoolSize、verifyPolicy。
-- [x] Resources 菜单保存 resource catalog 第一版资源。
-- [x] Templates 菜单保存登录、签名和 Agent 三类模板。
-- [x] Export 菜单生成导出预览，不直接把私密字段交给 Host 主窗口。
+- [x] `24 Questions` 作为第一主功能，支持 1-24 下拉选择和前后切换，保存 24 个问题，每题固定 9 个候选答案，并保存每个答案的正确/错误标记。
+- [x] `Managed Objects` 作为第二主功能，保存待管理对象的 `resourceId`、`objectId`、对象类型、权限答对数量和本地秘密引用。
+- [x] `Save & Confirm` 作为第三主功能，展示保存前学习训练、高阶授权确认频率和导出预检入口。
+- [x] `Story Aids` 和 `Templates` 作为附属功能，只为 24 个问题和管理对象工作流提供参考和绑定。
+- [x] 导出预览不直接把私密字段交给 Host 主窗口。
 - [x] Export 页面执行本地结构预检，覆盖必需文件、24 节点数量、四段式 objectId、模板 resourceId/role 引用。
 - [x] Host 主窗口读取真实 resource catalog 派生的权限摘要，不再使用硬编码 managed object 示例。
 - [x] Windows Rust 侧权限摘要字段语义与 `src/shared/storylock-package/permission-summary.js` 保持一致。

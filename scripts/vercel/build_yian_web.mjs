@@ -1,4 +1,4 @@
-import { access, cp, mkdir, readdir, rm, readFile, stat, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, readdir, rename, rm, readFile, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { basename, dirname, join } from 'node:path';
@@ -8,7 +8,11 @@ const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const source = join(root, 'src', 'yian-web', 'public');
 const target = join(root, 'release', 'web', 'public');
 const appArtifactsRoot = join(root, 'release', 'app');
-const windowsEnvFile = join(root, 'scripts', 'vercel', '.env.windows-package');
+const vercelTempRoot = join(root, '.temp', 'vercel');
+const vercelEnvExampleFile = join(root, 'scripts', 'vercel', '.env.example');
+const androidEnvFile = join(vercelTempRoot, 'android-package.env');
+const windowsEnvFile = join(vercelTempRoot, 'windows-package.env');
+const outputJsonFile = join(vercelTempRoot, 'output.json');
 const defaultWindowsPackageName = 'yian-windows-host-0.1.0-1-prototype.zip';
 const packagePattern = /(\.tar\.gz|\.(apk|zip|msi|exe|appimage|deb|rpm))$/iu;
 
@@ -31,6 +35,24 @@ async function readEnvFile(path) {
       })
       .filter(Boolean),
   );
+}
+
+async function readPackageOutputJson(path) {
+  if (!existsSync(path)) {
+    return {};
+  }
+  const content = await readFile(path, 'utf8');
+  const data = JSON.parse(content);
+  return {
+    android: data.android ?? {},
+    windows: data.windows ?? {},
+  };
+}
+
+async function writePackageOutputJson(path, output) {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(`${path}.tmp`, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
+  await rename(`${path}.tmp`, path);
 }
 
 async function listPackageFiles(directory, predicate = () => true) {
@@ -207,7 +229,18 @@ await mkdir(downloadsDir, { recursive: true });
 await copyBundledDownloads(downloadsDir);
 await copyAppArtifactsToDownloads(downloadsDir);
 
-const windowsEnv = await readEnvFile(windowsEnvFile);
+const packageOutput = await readPackageOutputJson(outputJsonFile);
+const exampleEnv = await readEnvFile(vercelEnvExampleFile);
+const androidEnv = {
+  ...exampleEnv,
+  ...await readEnvFile(androidEnvFile),
+  ...(packageOutput.android?.env ?? {}),
+};
+const windowsEnv = {
+  ...exampleEnv,
+  ...await readEnvFile(windowsEnvFile),
+  ...(packageOutput.windows?.env ?? {}),
+};
 const windowsPackagePath = windowsEnv.STORYLOCK_WINDOWS_PACKAGE_PATH;
 const appWindowsPackagePath = join(appArtifactsRoot, 'windows', defaultWindowsPackageName);
 const newestAppWindowsPackage = (await listPackageFiles(
@@ -238,6 +271,39 @@ if (resolvedWindowsPackagePath) {
     },
   });
 }
+
+const generatedOutput = {
+  generatedAt: new Date().toISOString(),
+  note: 'Generated build/package summary. Copy values into scripts/vercel/.env only when a manual deployment needs them.',
+  files: {
+    androidEnvFile,
+    windowsEnvFile,
+    outputJsonFile,
+  },
+  android: {
+    env: {
+      STORYLOCK_ANDROID_APK_PATH: androidEnv.STORYLOCK_ANDROID_APK_PATH ?? '',
+      STORYLOCK_ANDROID_APK_VERSION: androidEnv.STORYLOCK_ANDROID_APK_VERSION ?? '',
+      STORYLOCK_ANDROID_APK_VERSION_CODE: androidEnv.STORYLOCK_ANDROID_APK_VERSION_CODE ?? '',
+      STORYLOCK_ANDROID_APK_SIZE_BYTES: androidEnv.STORYLOCK_ANDROID_APK_SIZE_BYTES ?? '',
+      STORYLOCK_ANDROID_APK_CHECKSUM: androidEnv.STORYLOCK_ANDROID_APK_CHECKSUM ?? '',
+      STORYLOCK_ANDROID_PACKAGE_KIND: androidEnv.STORYLOCK_ANDROID_PACKAGE_KIND ?? '',
+      STORYLOCK_ANDROID_RELEASE_CHANNEL: androidEnv.STORYLOCK_ANDROID_RELEASE_CHANNEL ?? '',
+    },
+  },
+  windows: {
+    env: {
+      STORYLOCK_WINDOWS_PACKAGE_PATH: windowsEnv.STORYLOCK_WINDOWS_PACKAGE_PATH ?? '',
+      STORYLOCK_WINDOWS_PACKAGE_VERSION: windowsEnv.STORYLOCK_WINDOWS_PACKAGE_VERSION ?? '',
+      STORYLOCK_WINDOWS_PACKAGE_VERSION_CODE: windowsEnv.STORYLOCK_WINDOWS_PACKAGE_VERSION_CODE ?? '',
+      STORYLOCK_WINDOWS_PACKAGE_SIZE_BYTES: windowsEnv.STORYLOCK_WINDOWS_PACKAGE_SIZE_BYTES ?? '',
+      STORYLOCK_WINDOWS_PACKAGE_CHECKSUM: windowsEnv.STORYLOCK_WINDOWS_PACKAGE_CHECKSUM ?? '',
+      STORYLOCK_WINDOWS_PACKAGE_KIND: windowsEnv.STORYLOCK_WINDOWS_PACKAGE_KIND ?? '',
+      STORYLOCK_WINDOWS_RELEASE_CHANNEL: windowsEnv.STORYLOCK_WINDOWS_RELEASE_CHANNEL ?? '',
+    },
+  },
+};
+await writePackageOutputJson(outputJsonFile, generatedOutput);
 
 for (const requiredFile of ['index.html', 'main.js', 'styles.css']) {
   await access(join(target, requiredFile));

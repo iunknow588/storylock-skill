@@ -77,4 +77,4 @@ scripts\release\android\build_apk.cmd -Variant debug
 Pop-Location
 ```
 
-The helper requires either a local `gradlew.bat` under `src/host/android-host/` or a system `gradle` command. It writes APK metadata to `scripts/vercel/.env.android-apk` for the Yian download entry.
+The helper requires either a local `gradlew.bat` under `src/host/android-host/` or a system `gradle` command. It writes APK metadata to `.temp/vercel/android-package.env` and updates `.temp/vercel/output.json` for the Yian download entry.

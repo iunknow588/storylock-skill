@@ -37,6 +37,36 @@ export function validateAuthorDraft(draft) {
     validateOptionalString(node.recommendedSelectionMode, `${path}.recommendedSelectionMode`, issues);
     validateOptionalString(node.verifyPolicy, `${path}.verifyPolicy`, issues);
     validateOptionalString(node.editorNotes, `${path}.editorNotes`, issues);
+    if (node.answerOptionsLocalOnly != null) {
+      if (validateArray(node.answerOptionsLocalOnly, `${path}.answerOptionsLocalOnly`, issues, { minItems: 9, code: "SL_PKG_AUTHOR_DRAFT_ANSWER_OPTIONS" }) && node.answerOptionsLocalOnly.length !== 9) {
+        issues.push({
+          code: "SL_PKG_AUTHOR_DRAFT_ANSWER_OPTIONS",
+          level: "error",
+          severity: "blocking",
+          path: `${path}.answerOptionsLocalOnly`,
+          message: "Each StoryLock node must contain exactly 9 local answer options when answer options are configured.",
+          suggestion: "Provide 9 candidate answers and mark each one as correct or incorrect.",
+        });
+      }
+      for (let optionIndex = 0; optionIndex < (node.answerOptionsLocalOnly ?? []).length; optionIndex += 1) {
+        const option = node.answerOptionsLocalOnly[optionIndex];
+        const optionPath = `${path}.answerOptionsLocalOnly[${optionIndex}]`;
+        if (!validateObject(option, optionPath, issues)) {
+          continue;
+        }
+        validateRequiredString(option.text, `${optionPath}.text`, issues, "SL_PKG_AUTHOR_DRAFT_ANSWER_OPTION_TEXT");
+        if (typeof option.isCorrect !== "boolean") {
+          issues.push({
+            code: "SL_PKG_AUTHOR_DRAFT_ANSWER_OPTION_FLAG",
+            level: "error",
+            severity: "blocking",
+            path: `${optionPath}.isCorrect`,
+            message: "Answer option correctness must be a boolean.",
+            suggestion: "Use true for correct options and false for distractors.",
+          });
+        }
+      }
+    }
   }
 
   return {

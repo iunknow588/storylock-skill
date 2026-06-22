@@ -31,7 +31,7 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
   $OutputDir = Join-Path $repoRoot "release\app\windows"
 }
 if ([string]::IsNullOrWhiteSpace($EnvOutput)) {
-  $EnvOutput = Join-Path $repoRoot "scripts\vercel\.env.windows-package"
+  $EnvOutput = Join-Path $repoRoot ".temp\vercel\windows-package.env"
 }
 
 if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
@@ -124,6 +124,11 @@ $envLines = @(
   "STORYLOCK_WINDOWS_MSI_UPGRADE_CODE=6F0A7D8B-7F59-4E6B-B4E8-0EAC6959B301"
 )
 Set-Utf8NoBomContent -LiteralPath $EnvOutput -Value $envLines
+
+$packageOutputScript = Join-Path $repoRoot "scripts\vercel\write_package_output.mjs"
+if (Test-Path -LiteralPath $packageOutputScript) {
+  node $packageOutputScript windows $EnvOutput (Join-Path $repoRoot ".temp\vercel\output.json")
+}
 
 Write-Output "Windows host package: $($item.FullName)"
 Write-Output "SHA-256: $($hash.Hash.ToLowerInvariant())"

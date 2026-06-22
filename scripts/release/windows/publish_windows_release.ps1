@@ -11,7 +11,7 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 if ([string]::IsNullOrWhiteSpace($EnvOutput)) {
-  $EnvOutput = Join-Path $repoRoot "scripts\vercel\.env.windows-package.publish"
+  $EnvOutput = Join-Path $repoRoot ".temp\vercel\windows-package.publish.env"
 }
 if ([string]::IsNullOrWhiteSpace($PublishOutputDir)) {
   $PublishOutputDir = Join-Path $repoRoot ".temp\dist\windows-publish"

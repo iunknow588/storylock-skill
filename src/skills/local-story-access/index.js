@@ -11,8 +11,9 @@ const REPLAY_DRIFT_MS = 30_000;
 const MAX_REQUEST_ID_LENGTH = 128;
 const MAX_NONCE_LENGTH = 128;
 const MAX_ID_LENGTH = 128;
-const MAX_ANSWERS = 10;
+const MAX_ANSWERS = 24;
 const MAX_ANSWER_LENGTH = 512;
+const MAX_GRID_COUNT = 24;
 
 function nowMs() {
   return Date.now();
@@ -129,6 +130,14 @@ function normalizeStrength(value, fieldName = 'requiredStrength') {
   return strength;
 }
 
+function normalizeGridCount(value, fieldName = 'requiredGridCount') {
+  const count = Number(value);
+  if (!Number.isInteger(count) || count < 1 || count > MAX_GRID_COUNT) {
+    throw new Error(`${fieldName} must be an integer between 1 and ${MAX_GRID_COUNT}`);
+  }
+  return count;
+}
+
 function resolveStrength({ objectType, requestedAction, policyHints = {} }) {
   if (policyHints.requiredStrength) {
     return normalizeStrength(policyHints.requiredStrength, 'policyHints.requiredStrength');
@@ -147,13 +156,119 @@ function gridPolicyForStrength(requiredStrength) {
   const requiredCells = {
     low: 3,
     medium: 6,
-    high: 9,
+    high: 12,
     story_edit: 22,
   }[strength];
   return {
-    gridSize: strength === 'story_edit' ? 24 : 9,
+    gridSize: strength === 'story_edit' ? 24 : Math.max(9, requiredCells),
     requiredCells,
   };
+}
+
+function gridPolicyWithOverride(requiredStrength, requiredGridCount) {
+  const base = gridPolicyForStrength(requiredStrength);
+  if (requiredGridCount === undefined || requiredGridCount === null) {
+    return base;
+  }
+  const requiredCells = normalizeGridCount(requiredGridCount);
+  return {
+    gridSize: Math.max(base.gridSize, requiredCells),
+    requiredCells,
+  };
+}
+
+function strengthForPermissionItem(item) {
+  const explicit = item?.challengePolicy;
+  if (explicit === 'story_edit') {
+    return 'story_edit';
+  }
+  if (explicit === 'high') {
+    return 'high';
+  }
+  if (explicit === 'low') {
+    return 'low';
+  }
+  const count = Number(item?.requiredGridCount);
+  if (Number.isFinite(count)) {
+    if (count >= 22) {
+      return 'story_edit';
+    }
+    if (count >= 12) {
+      return 'high';
+    }
+    if (count <= 3) {
+      return 'low';
+    }
+  }
+  return 'medium';
+}
+
+function requestedActionForPermissionItem(item) {
+  const action = String(item?.action ?? '').trim();
+  if (action === 'sign') {
+    return 'signature';
+  }
+  if (action === 'password_fill') {
+    return 'password_fill';
+  }
+  if (action === 'story_edit') {
+    return 'story_edit';
+  }
+  if (action === 'batch_read') {
+    return 'batch_read';
+  }
+  return 'authorize';
+}
+
+function objectTypeForPermissionItem(item) {
+  const kind = String(item?.objectKind ?? '').trim();
+  if (kind === 'private_key' || kind === 'signing_key') {
+    return 'signature_key';
+  }
+  if (kind === 'password' || kind === 'credential') {
+    return 'credential';
+  }
+  if (kind === 'file_key') {
+    return 'file_key';
+  }
+  if (kind === 'story_object') {
+    return 'story_object';
+  }
+  return 'generic_secret';
+}
+
+function permissionItemsFrom(input = {}) {
+  const summary = input.permissionSummary ?? input.summary ?? {};
+  const items = Array.isArray(summary?.items) ? summary.items : [];
+  if (items.length === 0) {
+    throw new Error('permissionSummary.items must contain at least one item');
+  }
+  return items;
+}
+
+function findPermissionItem(input = {}) {
+  const items = permissionItemsFrom(input);
+  const objectRef = input.objectRef ?? input.objectId ?? input.credentialRef ?? input.keyId;
+  const resourceId = input.resourceId;
+  const role = input.role;
+  let item = null;
+  if (objectRef) {
+    const normalizedObjectRef = normalizeString(objectRef, 'objectRef', { maxLength: MAX_ID_LENGTH });
+    item = items.find((candidate) => candidate?.objectId === normalizedObjectRef);
+  }
+  if (!item && resourceId && role) {
+    const normalizedResourceId = normalizeString(resourceId, 'resourceId', { maxLength: MAX_ID_LENGTH });
+    const normalizedRole = normalizeString(role, 'role', { maxLength: MAX_ID_LENGTH });
+    item = items.find((candidate) => candidate?.resourceId === normalizedResourceId && candidate?.role === normalizedRole);
+  }
+  if (!item) {
+    const err = new Error('permission object was not found in permission summary');
+    err.code = 'SLG-007';
+    err.type = 'object_not_found';
+    err.retryable = false;
+    throw err;
+  }
+  return item;
 }
 
 function buildGridCells(challenge) {
@@ -283,7 +398,7 @@ export class ObjectStrengthPolicySkill {
           requiredStrength,
           authorizationChannel,
           channelPolicy,
-          gridPolicy: gridPolicyForStrength(requiredStrength),
+          gridPolicy: gridPolicyWithOverride(requiredStrength, input.policyHints?.requiredGridCount),
         },
         redactionLevel: 'none',
         retentionGranted: 'audit_meta_only',
@@ -294,6 +409,90 @@ export class ObjectStrengthPolicySkill {
       };
     } catch (error) {
       return toErrorResponse({ requestId: fallbackRequestId, capability: 'resolveObjectStrength', error });
+    }
+  }
+}
+
+export class PermissionObjectPolicySkill {
+  constructor({
+    host,
+    dbPath,
+    secretStore,
+    usePlatformSecretStore = false,
+    developmentMode = false,
+    allowLegacyFallback,
+    databaseFactory,
+    cleanupIntervalMs,
+    cleanupBatchSize,
+    cleanupOnError,
+  } = {}) {
+    this.host = host ?? createAccessHost({
+      dbPath,
+      secretStore,
+      usePlatformSecretStore,
+      developmentMode,
+      allowLegacyFallback,
+      databaseFactory,
+      cleanupIntervalMs,
+      cleanupBatchSize,
+      cleanupOnError,
+    });
+  }
+
+  skillId() {
+    return 'permission_object_policy';
+  }
+
+  async run(input = {}) {
+    const fallbackRequestId = input?.requestId ?? `req-${Date.now().toString(16)}`;
+    try {
+      const identityId = normalizeString(input.identityId, 'identityId', { maxLength: MAX_ID_LENGTH });
+      const item = findPermissionItem(input);
+      const objectRef = normalizeString(item.objectId, 'objectId', { maxLength: MAX_ID_LENGTH });
+      const objectType = objectTypeForPermissionItem(item);
+      const requestedAction = normalizeRequestedAction(input.requestedAction ?? requestedActionForPermissionItem(item));
+      const requiredStrength = normalizeStrength(input.requiredStrength ?? strengthForPermissionItem(item));
+      const requiredGridCount = normalizeGridCount(input.requiredGridCount ?? item.requiredGridCount ?? gridPolicyForStrength(requiredStrength).requiredCells);
+      const authorizationChannel = resolveAuthorizationChannel({
+        objectType,
+        requestedAction,
+        policyHints: {
+          authorizationChannel: input.authorizationChannel ?? input.policyHints?.authorizationChannel,
+        },
+      });
+      if (input.remoteRequest === true) {
+        assertRemoteChannelAllowed(authorizationChannel);
+      }
+      return {
+        requestId: fallbackRequestId,
+        status: 'success',
+        capability: 'resolvePermissionObjectPolicy',
+        executionLocation: 'local',
+        result: {
+          identityId,
+          resourceId: item.resourceId,
+          role: item.role,
+          objectRef,
+          objectId: objectRef,
+          objectKind: item.objectKind,
+          objectType,
+          requestedAction,
+          requiredStrength,
+          authorizationChannel,
+          channelPolicy: channelPolicyFor(authorizationChannel),
+          gridPolicy: gridPolicyWithOverride(requiredStrength, requiredGridCount),
+          requiredGridCount,
+          displayName: item.displayName,
+        },
+        redactionLevel: 'audit_meta_only',
+        retentionGranted: 'audit_meta_only',
+        auditMeta: {
+          timestamp: new Date().toISOString(),
+        },
+        error: null,
+      };
+    } catch (error) {
+      return toErrorResponse({ requestId: fallbackRequestId, capability: 'resolvePermissionObjectPolicy', error });
     }
   }
 }
@@ -349,7 +548,7 @@ export class GridChallengeSkill {
       if (replay?.replayed) {
         return replay.response;
       }
-      const policy = gridPolicyForStrength(requiredStrength);
+      const policy = gridPolicyWithOverride(requiredStrength, input.requiredGridCount);
       const challenge = this.host.createChallenge(identityId, `grid_${requiredStrength}`, {
         requiredCells: policy.requiredCells,
         questionSetVersion,

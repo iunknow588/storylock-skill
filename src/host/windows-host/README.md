@@ -230,9 +230,9 @@ Package:
 ..\..\..\scripts\release\windows\publish_windows_release.cmd -ManifestPath E:\path\to\release-manifest.json -PublicDownloadUrl https://example.test/yian-windows-host.zip
 ..\..\..\scripts\release\windows\publish_windows_release.cmd -ManifestPath E:\path\to\release-manifest.json -CopyArtifacts
 ..\..\..\scripts\release\windows\upload_windows_release_to_object_storage.cmd -UploadManifestPath E:\path\to\upload-manifest.json
-..\..\..\scripts\vercel\sync_env_file_to_vercel.cmd -EnvFilePath ..\..\..\scripts\vercel\.env.windows-package.publish
+..\..\..\scripts\vercel\sync_env_file_to_vercel.cmd -EnvFilePath ..\..\..\.temp\vercel\windows-package.publish.env
 ..\..\..\scripts\vercel\publish_site_release.cmd -Target vercel -Build -Preflight
-..\..\..\scripts\vercel\publish_site_release.cmd -Target vercel -WindowsEnvFile ..\..\..\scripts\vercel\.env.windows-package.publish -SyncWindowsEnvToVercel
+..\..\..\scripts\vercel\publish_site_release.cmd -Target vercel -WindowsEnvFile ..\..\..\.temp\vercel\windows-package.publish.env -SyncWindowsEnvToVercel
 ..\..\..\scripts\vercel\publish_site_release.cmd -Target static -Build
 ```
 

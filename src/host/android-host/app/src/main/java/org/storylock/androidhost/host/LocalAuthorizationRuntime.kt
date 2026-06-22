@@ -1,6 +1,7 @@
 package org.storylock.androidhost.host
 
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 class LocalAuthorizationRuntime(
   private val identityId: String,
@@ -13,6 +14,7 @@ class LocalAuthorizationRuntime(
   private val requestCount = AtomicInteger(0)
   private val challengeBits = 36
   private val failureCount = AtomicInteger(0)
+  private val challenges = ConcurrentHashMap<String, ChallengeSession>()
   @Volatile
   private var lockUntilMs = 0L
   fun healthSnapshot(): Triple<Boolean, Int, Int> {
@@ -23,26 +25,31 @@ class LocalAuthorizationRuntime(
     return if (capability == "requestSignature") "high" else "medium"
   }
 
-  fun requiredCells(requiredStrength: String): Int {
+  fun requiredCells(requiredStrength: String, requiredGridCount: Int? = null): Int {
+    if (requiredGridCount != null) {
+      require(requiredGridCount in 1..24) { "requiredGridCount must be between 1 and 24" }
+      return requiredGridCount
+    }
     return when (requiredStrength) {
-      "high" -> 9
+      "story_edit" -> 22
+      "high" -> 12
       "medium" -> 6
       else -> 3
     }
   }
 
-  fun createChallenge(requiredStrength: String): ChallengeSession {
+  fun createChallenge(requiredStrength: String, requiredGridCount: Int? = null): ChallengeSession {
     if (isLocked()) {
       throw ChallengeLockedException(lockUntilMs)
     }
-    val count = requiredCells(requiredStrength)
+    val count = requiredCells(requiredStrength, requiredGridCount)
     val rotation = requestCount.get() % questions.size
     val selected = (questions.drop(rotation) + questions.take(rotation))
       .take(count)
       .mapIndexed { index, cell ->
         cell.copy(position = index + 1)
       }
-    return ChallengeSession(
+    val session = ChallengeSession(
       challengeId = "chl-${UUID.randomUUID()}",
       requiredStrength = requiredStrength,
       requiredCells = count,
@@ -53,7 +60,11 @@ class LocalAuthorizationRuntime(
       lockUntil = lockUntilMs,
       cells = selected,
     )
+    challenges[session.challengeId] = session
+    return session
   }
+
+  fun getChallenge(challengeId: String): ChallengeSession? = challenges[challengeId]
 
   fun verifyChallengeAnswers(challenge: ChallengeSession, answers: Map<String, String>): ChallengeVerificationResult {
     val matchedCount = challenge.cells.count { cell ->
@@ -63,6 +74,7 @@ class LocalAuthorizationRuntime(
     if (approved) {
       failureCount.set(0)
       lockUntilMs = 0L
+      challenges.remove(challenge.challengeId)
       return ChallengeVerificationResult(
         approved = true,
         matchedCount = matchedCount,
@@ -76,6 +88,7 @@ class LocalAuthorizationRuntime(
     if (nextFailureCount >= maxFailuresPerWindow) {
       lockUntilMs = System.currentTimeMillis() + failureLockMs
     }
+    challenges.remove(challenge.challengeId)
     return ChallengeVerificationResult(
       approved = false,
       matchedCount = matchedCount,

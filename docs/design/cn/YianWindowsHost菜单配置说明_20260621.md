@@ -199,22 +199,31 @@ $env:STORYLOCK_WINDOWS_DATA_DIR="E:\2026OPC大赛\skill\.temp\runtime\windows-ho
 
 `Open StoryLock Core` 表示打开底层本地应用，不代表启动远程服务，也不代表允许外部 Host 读取受保护故事对象。
 
-底层应用当前包含五个菜单，字段口径参考 `E:\2026OPC大赛\story-lock\doc\usecase` 下的故事模板、资源目录样例和模板文件样例：
+底层应用当前以三个主功能为中心，字段口径参考 `E:\2026OPC大赛\story-lock\doc\usecase` 下的故事模板、资源目录样例和模板文件样例：
 
-1. `Story`
+1. `24 Questions`
+   - 第一主功能，维护固定 24 个问题。
+   - 顶部通过 1-24 下拉框选择当前问题，同时保留前一个 / 后一个按钮。
+   - 每个问题必须围绕一个故事节点保存 9 个候选答案。
+   - 每个候选答案单独占一行，包含答案文本和 `correct` / `wrong` 选择项。
+   - 故事设置和情节模板只能作为辅助信息服务于这 24 个问题。
+2. `Managed Objects`
+   - 第二主功能，维护每个待管理对象的属性配置。
+   - 字段包括 `resourceId`、`objectId`、对象类型、显示名、访问需要答对的问题个数和本地秘密引用。
+   - 对象签名私钥、密码等秘密材料只保存为本地安全引用，不在 Host 主窗口展示明文。
+3. `Save & Confirm`
+   - 第三主功能，负责保存确认、保存前学习训练和高阶授权确认频率设置。
+   - 保存确认必须覆盖 24 问题完整性、每题 9 个候选答案、管理对象权限阈值和导出预检。
+
+附属功能：
+
+1. `Story Aids`
    - 维护故事标题、摘要、记忆锚点和 8 个要素分组。
    - 默认要素为：时间、地点、人物、外部、起步、核心、过程、收束。
-2. `24 Nodes`
-   - 维护固定 24 节点作者稿。
-   - 字段包括 `nodeId`、`title`、`elementId`、问题、标准答案、可接受答案、正确项、干扰项、选择模式、候选池大小、记忆优先级、校验策略和作者备注。
-3. `Resources`
-   - 维护 `resource-catalog.json` 口径的资源目录。
-   - 字段包括 `resourceId`、`resourceKind`、`providerId`、`displayName`、`bindings` 和 `objectMeta`。
-4. `Templates`
+   - 该功能只辅助生成和记忆 24 个问题，不是独立主线。
+2. `Templates`
    - 维护 `templates/login-sites.json`、`templates/signing-actions.json`、`templates/agent-tasks.json` 口径的模板绑定。
    - 模板只描述动作，引用 `resourceId + role`，不保存秘密值。
-5. `Export`
-   - 预览导出包结构：`vault.stlk`、`resource-catalog.json`、`package-manifest.json` 和 `templates/*`。
 
 底层故事处理输出会显式保留第一层边界：
 

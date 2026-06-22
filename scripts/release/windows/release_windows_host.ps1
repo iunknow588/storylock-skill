@@ -30,7 +30,7 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
   $OutputDir = Join-Path $repoRoot "release\app\windows"
 }
 if ([string]::IsNullOrWhiteSpace($EnvOutput)) {
-  $EnvOutput = Join-Path $repoRoot "scripts\vercel\.env.windows-package"
+  $EnvOutput = Join-Path $repoRoot ".temp\vercel\windows-package.env"
 }
 
 $buildScript = Join-Path $PSScriptRoot "build_windows_host.ps1"

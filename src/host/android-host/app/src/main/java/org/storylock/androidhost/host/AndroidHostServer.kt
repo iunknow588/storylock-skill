@@ -45,6 +45,24 @@ class AndroidHostServer(
         jsonResponse(Status.OK, hostService.permissionSummary())
       }
 
+      session.method == Method.POST && session.uri == "/authorization-policy" -> {
+        val body = readBody(session)
+        val request = JSONObject(body)
+        jsonResponse(Status.OK, hostService.authorizationPolicy(request))
+      }
+
+      session.method == Method.POST && session.uri == "/verify" -> {
+        val body = readBody(session)
+        val request = JSONObject(body)
+        jsonResponse(Status.OK, hostService.verify(request))
+      }
+
+      session.method == Method.POST && session.uri == "/authorize" -> {
+        val body = readBody(session)
+        val request = JSONObject(body)
+        jsonResponse(Status.OK, hostService.authorize(request))
+      }
+
       session.method == Method.POST && session.uri == "/execute" -> {
         val body = readBody(session)
         val request = JSONObject(body)

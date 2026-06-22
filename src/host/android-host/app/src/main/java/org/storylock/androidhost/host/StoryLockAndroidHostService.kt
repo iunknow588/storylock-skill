@@ -2,6 +2,7 @@ package org.storylock.androidhost.host
 
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import org.json.JSONArray
 import org.json.JSONObject
 import org.storylock.androidhost.security.AndroidKeystoreSigner
 import org.storylock.androidhost.security.LocalChallengeItem
@@ -77,6 +78,153 @@ class StoryLockAndroidHostService(
           .put("resources", summary.resources)
           .put("permissionObjects", summary.permissionObjects)
           .put("permissionSummary", summary.permissionSummary),
+      )
+      .put("redactionLevel", "audit_meta_only")
+      .put("retentionGranted", "audit_meta_only")
+      .put("error", JSONObject.NULL)
+  }
+
+  override fun authorizationPolicy(request: JSONObject): JSONObject {
+    val requestId = request.optString("requestId", "req-${UUID.randomUUID()}")
+    val item = findPermissionItem(request)
+      ?: return errorResponse(
+        requestId = requestId,
+        capability = "resolvePermissionObjectPolicy",
+        code = "SLG-007",
+        type = "object_not_found",
+        message = "permission object was not found in permission summary",
+        suggestedAction = "Use objectId, or resourceId plus role from /permission-summary.",
+      )
+    val requiredStrength = request.optString("requiredStrength", strengthForPermissionItem(item))
+    val requiredGridCount = request.optInt("requiredGridCount", item.optInt("requiredGridCount", runtime.requiredCells(requiredStrength)))
+    val action = request.optString("requestedAction", actionForPermissionItem(item))
+    return JSONObject()
+      .put("requestId", requestId)
+      .put("status", "success")
+      .put("capability", "resolvePermissionObjectPolicy")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("identityId", request.optString("identityId", runtime.identityId()))
+          .put("resourceId", item.optString("resourceId"))
+          .put("role", item.optString("role"))
+          .put("objectRef", item.optString("objectId"))
+          .put("objectId", item.optString("objectId"))
+          .put("objectKind", item.optString("objectKind"))
+          .put("requestedAction", action)
+          .put("requiredStrength", requiredStrength)
+          .put("requiredGridCount", requiredGridCount)
+          .put(
+            "gridPolicy",
+            JSONObject()
+              .put("gridSize", maxOf(9, requiredGridCount))
+              .put("requiredCells", requiredGridCount),
+          )
+          .put("displayName", item.optString("displayName")),
+      )
+      .put("redactionLevel", "audit_meta_only")
+      .put("retentionGranted", "audit_meta_only")
+      .put("error", JSONObject.NULL)
+  }
+
+  override fun verify(request: JSONObject): JSONObject {
+    val requestId = request.optString("requestId", "req-${UUID.randomUUID()}")
+    val policy = authorizationPolicy(request)
+    if (policy.optString("status") != "success") {
+      return policy
+    }
+    val result = policy.getJSONObject("result")
+    val requiredStrength = result.getString("requiredStrength")
+    val requiredGridCount = result.getInt("requiredGridCount")
+    val challenge = try {
+      runtime.createChallenge(requiredStrength, requiredGridCount)
+    } catch (error: ChallengeLockedException) {
+      return errorResponse(
+        requestId = requestId,
+        capability = "createGridVerification",
+        code = "SLG-004",
+        type = "challenge_locked",
+        message = error.message ?: "challenge is locked",
+        suggestedAction = "Wait until retryAfter before retrying the local challenge.",
+        retryAfter = error.retryAfter,
+      )
+    }
+    return JSONObject()
+      .put("requestId", requestId)
+      .put("status", "success")
+      .put("capability", "createGridVerification")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("verificationId", challenge.challengeId)
+          .put("identityId", request.optString("identityId", runtime.identityId()))
+          .put("objectRef", result.getString("objectRef"))
+          .put("requiredStrength", requiredStrength)
+          .put("grid", challengeSummary(challenge))
+          .put("expiresAt", System.currentTimeMillis() + 5 * 60 * 1000L),
+      )
+      .put("redactionLevel", "audit_meta_only")
+      .put("retentionGranted", "audit_meta_only")
+      .put("error", JSONObject.NULL)
+  }
+
+  override fun authorize(request: JSONObject): JSONObject {
+    val requestId = request.optString("requestId", "req-${UUID.randomUUID()}")
+    val verificationId = request.optString("verificationId")
+    if (verificationId.isBlank()) {
+      return errorResponse(
+        requestId = requestId,
+        capability = "authorizeLocalAction",
+        code = "SLG-001",
+        type = "validation_error",
+        message = "verificationId is required",
+        suggestedAction = "Call /verify first, then submit answers with the returned verificationId.",
+      )
+    }
+    val challenge = runtime.getChallenge(verificationId)
+      ?: return errorResponse(
+        requestId = requestId,
+        capability = "authorizeLocalAction",
+        code = "SLG-003",
+        type = "challenge_failed",
+        message = "challenge verification failed",
+        suggestedAction = "Create a fresh grid verification and submit answers before it expires.",
+      )
+    val verification = runtime.verifyChallengeAnswers(challenge, answersFrom(request.optJSONArray("answers")))
+    if (!verification.approved) {
+      return errorResponse(
+        requestId = requestId,
+        capability = "authorizeLocalAction",
+        code = if (verification.lockUntil > 0L) "SLG-004" else "SLG-003",
+        type = if (verification.lockUntil > 0L) "challenge_locked" else "challenge_failed",
+        message = "challenge answer verification failed",
+        suggestedAction = "Retry with valid local challenge answers.",
+        challenge = challenge,
+        retryAfter = verification.lockUntil.takeIf { it > 0L },
+        extraErrorFields = mapOf(
+          "matchedCount" to verification.matchedCount,
+          "requiredThreshold" to verification.requiredThreshold,
+        ),
+      )
+    }
+    val objectRef = request.optString("objectRef", request.optString("objectId", "android-object"))
+    val allowedAction = request.optString("allowedAction", request.optString("requestedAction", "authorize"))
+    val session = runtime.issueSession(allowedAction, objectRef)
+    return JSONObject()
+      .put("requestId", requestId)
+      .put("status", "success")
+      .put("capability", "authorizeLocalAction")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("approved", true)
+          .put("authorizationId", session.authorizationId)
+          .put("identityId", request.optString("identityId", runtime.identityId()))
+          .put("objectRef", objectRef)
+          .put("allowedAction", allowedAction),
       )
       .put("redactionLevel", "audit_meta_only")
       .put("retentionGranted", "audit_meta_only")
@@ -294,6 +442,78 @@ class StoryLockAndroidHostService(
       .put("createdAt", System.currentTimeMillis())
     secretStore.setSecret(alias, created.toString().encodeToByteArray())
     return created
+  }
+
+  private fun findPermissionItem(request: JSONObject): JSONObject? {
+    val summary = request.optJSONObject("permissionSummary")
+      ?: storyLockPackageRepository.loadPermissionSummary().permissionSummary
+    val items = summary.optJSONArray("items") ?: JSONArray()
+    val objectRef = request.optString("objectRef", request.optString("objectId", request.optString("keyId", request.optString("credentialRef"))))
+    if (objectRef.isNotBlank()) {
+      for (index in 0 until items.length()) {
+        val item = items.optJSONObject(index) ?: continue
+        if (item.optString("objectId") == objectRef) {
+          return item
+        }
+      }
+    }
+    val resourceId = request.optString("resourceId")
+    val role = request.optString("role")
+    if (resourceId.isNotBlank() && role.isNotBlank()) {
+      for (index in 0 until items.length()) {
+        val item = items.optJSONObject(index) ?: continue
+        if (item.optString("resourceId") == resourceId && item.optString("role") == role) {
+          return item
+        }
+      }
+    }
+    return null
+  }
+
+  private fun strengthForPermissionItem(item: JSONObject): String {
+    val policy = item.optString("challengePolicy")
+    if (policy in setOf("low", "medium", "high", "story_edit")) {
+      return policy
+    }
+    val requiredGridCount = item.optInt("requiredGridCount", 6)
+    return when {
+      requiredGridCount >= 22 -> "story_edit"
+      requiredGridCount >= 12 -> "high"
+      requiredGridCount <= 3 -> "low"
+      else -> "medium"
+    }
+  }
+
+  private fun actionForPermissionItem(item: JSONObject): String {
+    return when (item.optString("action")) {
+      "sign" -> "signature"
+      "password_fill" -> "password_fill"
+      "story_edit" -> "story_edit"
+      "batch_read" -> "batch_read"
+      else -> "authorize"
+    }
+  }
+
+  private fun answersFrom(raw: JSONArray?): Map<String, String> {
+    if (raw == null) {
+      return emptyMap()
+    }
+    val answers = linkedMapOf<String, String>()
+    for (index in 0 until raw.length()) {
+      val value = raw.opt(index)
+      if (value is JSONObject) {
+        val answer = value.optString("answer")
+        if (answer.isNotBlank()) {
+          answers[value.optString("cellId", "cell-${index + 1}")] = answer
+        }
+      } else {
+        val answer = value?.toString().orEmpty()
+        if (answer.isNotBlank()) {
+          answers["cell-${index + 1}"] = answer
+        }
+      }
+    }
+    return answers
   }
 
   private fun challengeSummary(challenge: ChallengeSession): JSONObject {

@@ -26,11 +26,12 @@
     },
     "allowedAction": {
       "type": "string",
-      "enum": ["authorize", "password_fill", "signature", "local_processing"],
+      "enum": ["authorize", "password_fill", "signature", "local_processing", "batch_read", "story_edit"],
       "default": "authorize"
     },
     "answers": {
       "type": "array",
+      "maxItems": 24,
       "items": {
         "oneOf": [
           {

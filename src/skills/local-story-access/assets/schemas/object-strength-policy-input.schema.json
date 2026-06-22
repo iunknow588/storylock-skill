@@ -44,6 +44,11 @@
         "authorizationChannel": {
           "type": "string",
           "enum": ["single_read", "batch_read", "story_edit"]
+        },
+        "requiredGridCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24
         }
       },
       "additionalProperties": true,

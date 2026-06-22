@@ -23,16 +23,19 @@ function Import-EnvFile {
   if (-not $Path -or -not (Test-Path -LiteralPath $Path)) {
     return
   }
-  Get-Content -LiteralPath $Path | ForEach-Object {
-    $line = $_.Trim()
+  foreach ($rawLine in Get-Content -LiteralPath $Path) {
+    $line = $rawLine.Trim()
     if (-not $line -or $line.StartsWith("#")) {
-      return
+      continue
     }
     $parts = $line -split "=", 2
     if ($parts.Count -ne 2) {
-      return
+      continue
     }
-    [System.Environment]::SetEnvironmentVariable($parts[0].Trim(), $parts[1], "Process")
+    if (-not [string]::IsNullOrWhiteSpace([System.Environment]::GetEnvironmentVariable($parts[0].Trim(), "Process"))) {
+      continue
+    }
+    Set-Item -Path ("Env:{0}" -f $parts[0].Trim()) -Value $parts[1]
   }
 }
 
@@ -73,17 +76,40 @@ function Get-LocalVercelProjectName {
   }
 }
 
+function Get-LocalVercelProjectLink {
+  param([string]$RootDir)
+  $projectJsonPath = Join-Path $RootDir ".vercel\project.json"
+  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
+    return $null
+  }
+  try {
+    return Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
+  } catch {
+    throw "Unable to parse local Vercel project link: $projectJsonPath"
+  }
+}
+
 function Assert-VercelProjectLink {
   param(
     [string]$RootDir,
-    [string]$ExpectedProjectName
+    [string]$ExpectedProjectName,
+    [string]$ExpectedScope
   )
-  $localProjectName = Get-LocalVercelProjectName -RootDir $RootDir
+  $project = Get-LocalVercelProjectLink -RootDir $RootDir
+  if ($null -eq $project) {
+    $localProjectName = ""
+  } else {
+    $localProjectName = [string]$project.projectName
+  }
   if ([string]::IsNullOrWhiteSpace($localProjectName)) {
     throw "Local Vercel project link was not found. Run scripts\vercel\link_project.cmd from the skill/ directory before syncing env."
   }
   if (-not [string]::IsNullOrWhiteSpace($ExpectedProjectName) -and $localProjectName -ne $ExpectedProjectName) {
     throw "Local Vercel project link mismatch. VERCEL_PROJECT_NAME='$ExpectedProjectName' but .vercel/project.json is linked to '$localProjectName'. Re-run scripts\vercel\link_project.cmd after confirming which Vercel project owns yian.cdao.online."
+  }
+  $localOrgId = [string]$project.orgId
+  if ($ExpectedScope -eq "iunknow588" -and $localOrgId.StartsWith("team_")) {
+    throw "Local Vercel project link is bound to a team org ($localOrgId), but storylock-gateway env sync must use personal scope '$ExpectedScope'. Delete .vercel/project.json and re-run scripts\vercel\link_project.cmd."
   }
   return $localProjectName
 }
@@ -121,8 +147,8 @@ if (-not (Test-Path -LiteralPath $EnvFilePath)) {
 
 $exampleEnvPath = Join-Path $scriptRoot ".env.example"
 $defaultEnvPath = Join-Path $scriptRoot ".env"
-Import-EnvFile -Path $exampleEnvPath
 Import-EnvFile -Path $defaultEnvPath
+Import-EnvFile -Path $exampleEnvPath
 
 $entries = Read-EnvEntries -Path $EnvFilePath
 if ($entries.Count -eq 0) {
@@ -133,8 +159,8 @@ $resolvedProjectDir = (Resolve-Path -LiteralPath $ProjectDir).Path
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 
 $projectName = [System.Environment]::GetEnvironmentVariable("VERCEL_PROJECT_NAME", "Process")
-$localVercelProjectName = Assert-VercelProjectLink -RootDir $resolvedProjectDir -ExpectedProjectName $projectName
 $scopeValue = [System.Environment]::GetEnvironmentVariable("VERCEL_SCOPE", "Process")
+$localVercelProjectName = Assert-VercelProjectLink -RootDir $resolvedProjectDir -ExpectedProjectName $projectName -ExpectedScope $scopeValue
 $tokenValue = if ([string]::IsNullOrWhiteSpace($VercelToken)) {
   [System.Environment]::GetEnvironmentVariable("VERCEL_TOKEN", "Process")
 } else {

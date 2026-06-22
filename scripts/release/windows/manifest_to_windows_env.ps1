@@ -21,7 +21,7 @@ function Set-Utf8NoBomContent {
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 if ([string]::IsNullOrWhiteSpace($EnvOutput)) {
-  $EnvOutput = Join-Path $repoRoot "scripts\vercel\.env.windows-package"
+  $EnvOutput = Join-Path $repoRoot ".temp\vercel\windows-package.env"
 }
 
 if (-not (Test-Path -LiteralPath $ManifestPath)) {
@@ -62,6 +62,11 @@ $envLines = @(
   "STORYLOCK_WINDOWS_APP_DOWNLOAD_URL=$PublicDownloadUrl"
 )
 Set-Utf8NoBomContent -LiteralPath $EnvOutput -Value $envLines
+
+$packageOutputScript = Join-Path $repoRoot "scripts\vercel\write_package_output.mjs"
+if (Test-Path -LiteralPath $packageOutputScript) {
+  node $packageOutputScript windows $EnvOutput (Join-Path $repoRoot ".temp\vercel\output.json")
+}
 
 Write-Output "Windows env file generated from manifest."
 Write-Output "Manifest: $ManifestPath"

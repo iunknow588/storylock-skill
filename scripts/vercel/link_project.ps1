@@ -10,24 +10,30 @@ function Import-EnvFile {
   if (-not (Test-Path -LiteralPath $Path)) {
     return
   }
-  Get-Content -LiteralPath $Path | ForEach-Object {
-    $line = $_.Trim()
+  foreach ($rawLine in Get-Content -LiteralPath $Path) {
+    $line = $rawLine.Trim()
     if (-not $line -or $line.StartsWith('#')) {
-      return
+      continue
     }
     $parts = $line -split '=', 2
     if ($parts.Count -ne 2) {
-      return
+      continue
     }
-    [System.Environment]::SetEnvironmentVariable($parts[0].Trim(), $parts[1].Trim(), 'Process')
+    if (-not [string]::IsNullOrWhiteSpace([System.Environment]::GetEnvironmentVariable($parts[0].Trim(), 'Process'))) {
+      continue
+    }
+    Set-Item -Path ("Env:{0}" -f $parts[0].Trim()) -Value $parts[1].Trim()
   }
 }
 
-Import-EnvFile -Path $exampleEnvPath
 Import-EnvFile -Path $envPath
+Import-EnvFile -Path $exampleEnvPath
 
 if (-not $env:VERCEL_PROJECT_NAME) {
   throw 'VERCEL_PROJECT_NAME is required. Set it in scripts/vercel/.env'
+}
+if (-not $env:VERCEL_SCOPE) {
+  throw 'VERCEL_SCOPE is required. storylock-gateway production should use VERCEL_SCOPE=iunknow588, not the LUCKEE team scope.'
 }
 
 if (-not (Get-Command vercel -ErrorAction SilentlyContinue)) {
@@ -44,7 +50,7 @@ try {
   if ($env:VERCEL_TOKEN) {
     $args += @('--token', $env:VERCEL_TOKEN)
   }
-  Write-Host "[INFO] Linking Vercel project $($env:VERCEL_PROJECT_NAME)" -ForegroundColor Green
+  Write-Host "[INFO] Linking Vercel project $($env:VERCEL_PROJECT_NAME) under scope $($env:VERCEL_SCOPE)" -ForegroundColor Green
   & vercel @args
 } finally {
   Pop-Location

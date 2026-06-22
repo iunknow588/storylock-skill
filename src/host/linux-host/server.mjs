@@ -10,6 +10,7 @@ import {
   GridChallengeSkill,
   LocalAuthorizationSkill,
   LocalRevocationSkill,
+  PermissionObjectPolicySkill,
 } from '../../skills/local-story-access/index.js';
 import { MemorySecretStore } from '../../shared/secret-store.js';
 import {
@@ -174,6 +175,7 @@ export async function createLinuxHostRuntime({
     grid: new GridChallengeSkill({ host }),
     auth: new LocalAuthorizationSkill({ host }),
     revoke: new LocalRevocationSkill({ host }),
+    permissionPolicy: new PermissionObjectPolicySkill({ host }),
   };
 }
 
@@ -215,6 +217,26 @@ function requireSession(runtime, identityId, authorizationId, objectRef) {
     throw new Error('authorization session does not cover requested objectRef');
   }
   return row;
+}
+
+function permissionSummary(runtime) {
+  return runtime.storyLockPackage.summary.permissionSummary;
+}
+
+async function resolvePermissionObjectPolicy(runtime, body) {
+  return runtime.permissionPolicy.run({
+    identityId: body.identityId ?? runtime.identityId,
+    permissionSummary: body.permissionSummary ?? permissionSummary(runtime),
+    objectRef: body.objectRef ?? body.objectId ?? body.keyId ?? body.credentialRef,
+    resourceId: body.resourceId,
+    role: body.role,
+    requestedAction: body.requestedAction,
+    requiredStrength: body.requiredStrength,
+    requiredGridCount: body.requiredGridCount,
+    authorizationChannel: body.authorizationChannel,
+    remoteRequest: body.remoteRequest === true,
+    requestId: body.requestId ?? `req-${randomUUID()}`,
+  });
 }
 
 async function handleLinuxHostRequest(runtime, req, res) {
@@ -329,15 +351,32 @@ async function handleLinuxHostRequest(runtime, req, res) {
   }
 
   if (url.pathname === '/verify') {
+    const policy = (body.objectId || body.resourceId || body.role || body.usePermissionSummary === true)
+      ? await resolvePermissionObjectPolicy(runtime, {
+          ...body,
+          requestId: `${body.requestId ?? `req-${randomUUID()}`}:policy`,
+        })
+      : null;
+    if (policy && policy.status !== 'success') {
+      jsonResponse(res, 400, policy);
+      return;
+    }
     const result = await runtime.grid.run({
       identityId: body.identityId ?? runtime.identityId,
-      objectRef: body.objectRef ?? body.keyId ?? body.credentialRef ?? 'linux-object',
-      requiredStrength: body.requiredStrength ?? (body.capability === 'requestSignature' ? 'high' : 'medium'),
+      objectRef: policy?.result?.objectRef ?? body.objectRef ?? body.keyId ?? body.credentialRef ?? 'linux-object',
+      requiredStrength: policy?.result?.requiredStrength ?? body.requiredStrength ?? (body.capability === 'requestSignature' ? 'high' : 'medium'),
+      requiredGridCount: policy?.result?.requiredGridCount ?? body.requiredGridCount,
       requestId: body.requestId ?? `req-${randomUUID()}`,
       nonce: body.nonce ?? `nonce-${randomUUID()}`,
       expiry: body.expiry ?? Date.now() + 60_000,
       questionSetVersion: body.questionSetVersion ?? runtime.questionBank.questionSetVersion,
     });
+    jsonResponse(res, result.status === 'success' ? 200 : 400, result);
+    return;
+  }
+
+  if (url.pathname === '/authorization-policy') {
+    const result = await resolvePermissionObjectPolicy(runtime, body);
     jsonResponse(res, result.status === 'success' ? 200 : 400, result);
     return;
   }

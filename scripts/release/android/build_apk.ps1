@@ -16,7 +16,7 @@ if ([string]::IsNullOrWhiteSpace($PackageOutputDir)) {
   $PackageOutputDir = Join-Path $repoRoot "release\app\android"
 }
 if ([string]::IsNullOrWhiteSpace($EnvOutput)) {
-  $EnvOutput = Join-Path $repoRoot "scripts\vercel\.env.android-apk"
+  $EnvOutput = Join-Path $repoRoot ".temp\vercel\android-package.env"
 }
 
 $resolvedProject = Resolve-Path -LiteralPath $ProjectDir
@@ -95,6 +95,11 @@ New-Item -ItemType Directory -Force -Path $envDir | Out-Null
   "STORYLOCK_ANDROID_PACKAGE_KIND=$Variant"
   "STORYLOCK_ANDROID_RELEASE_CHANNEL=$releaseChannel"
 ) | Set-Content -Encoding utf8 -Path $EnvOutput
+
+$packageOutputScript = Join-Path $repoRoot "scripts\vercel\write_package_output.mjs"
+if (Test-Path -LiteralPath $packageOutputScript) {
+  node $packageOutputScript android $EnvOutput (Join-Path $repoRoot ".temp\vercel\output.json")
+}
 
 [PSCustomObject]@{
   GradleApkPath = $apk.FullName

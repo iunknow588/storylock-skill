@@ -36,7 +36,7 @@
 | 编号 | 检查项 | 类型 | 入口 | 通过标准 |
 | --- | --- | --- | --- | --- |
 | AND-01 | APK 构建 | 自动/本地 | `scripts\release\android\build_apk.cmd -Variant debug` | 生成 `release\app\android\storylock-android-host-<version>-<versionCode>-debug.apk` |
-| AND-02 | release 构建候选 | 自动/本地 | `scripts\release\android\build_apk.cmd -Variant release` | 生成 candidate APK，并写入 `.env.android-apk` |
+| AND-02 | release 构建候选 | 自动/本地 | `scripts\release\android\build_apk.cmd -Variant release` | 生成 candidate APK，并写入 `.temp\vercel\android-package.env` 和 `.temp\vercel\output.json` |
 | AND-03 | 元数据对齐 | 自动 | `npm run build` 后执行 `npm run test:release` | 网站 downloads JSON 与 APK 一致 |
 | AND-04 | 下载入口 | 人工/接口 | `/app/download/android` | 返回 APK 或明确跳转到配置下载地址 |
 | AND-05 | 绑定入口 | 人工/接口 | `/app/bind?identityId=...&preferredMode=relay_url` | 返回 binding token 或 deep link |
@@ -53,7 +53,7 @@
 | WIN-02 | prototype 包构建 | 自动/本地 | `scripts\release\windows\release_windows_host.cmd` | 生成 zip 和 release manifest |
 | WIN-03 | MSI 候选 | 自动/本地 | `scripts\release\windows\release_windows_host.ps1 -BuildMsi` | 本地有 WiX 时生成 MSI 与 checksum |
 | WIN-04 | 签名入口 | 人工/本地 | `scripts\release\windows\sign_windows_package.ps1` | 配置证书后签名成功 |
-| WIN-05 | manifest 转 env | 自动/本地 | `scripts\release\windows\manifest_to_windows_env.ps1` | `.env.windows-package` 字段完整 |
+| WIN-05 | manifest 转 env | 自动/本地 | `scripts\release\windows\manifest_to_windows_env.ps1` | `.temp\vercel\windows-package.env` 与 `.temp\vercel\output.json` 字段完整 |
 | WIN-06 | 发布准备 | 自动/本地 | `scripts\release\windows\publish_windows_release.cmd` | 生成发布摘要、上传清单和可复制产物目录 |
 | WIN-07 | 下载入口 | 人工/接口 | `/app/download/windows` | 返回 Windows 包或明确跳转 |
 | WIN-08 | 元数据对齐 | 自动 | `npm run build` 后执行 `npm run test:release` | Windows JSON 与 zip/msi/exe 一致 |
