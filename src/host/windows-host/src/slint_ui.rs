@@ -1,4 +1,4 @@
-use crate::{load_or_init_question_bank, question_bank_path, WindowsHostConfig};
+﻿use crate::WindowsHostConfig;
 use anyhow::Result;
 use serde_json::json;
 use serde_json::Value;
@@ -431,6 +431,30 @@ slint::slint! {
         }
     }
 
+    component SettingsIconButton inherits Rectangle {
+        in property <bool> selected;
+        callback clicked();
+
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border-width: 1px;
+        border-color: selected ? #45606b : #c9d5da;
+        background: selected ? #d7e1e6 : #f7fafb;
+        TouchArea {
+            clicked => { root.clicked(); }
+        }
+        Text {
+            text: "⚙";
+            width: parent.width;
+            height: parent.height;
+            color: #17252f;
+            font-size: 18px;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+
     component StaticRow inherits HorizontalLayout {
         in property <string> name;
         in property <string> value;
@@ -484,27 +508,20 @@ slint::slint! {
 
     export component HostDashboard inherits Window {
         property <int> active-page: 0;
+        property <string> language: "zh";
+        property <bool> is-zh: language == "zh";
         in property <string> product;
         in property <string> version;
         in property <string> mode;
         in property <string> identity-id;
         in property <string> device-id;
         in property <string> local-api;
-        in property <string> question-bank;
-        in property <string> data-dir;
-        in property <string> storage-provider;
         in property <string> capabilities;
         in property <string> call-chain;
+        in property <string> management-stats;
         in property <string> diagnostics;
-        in property <string> managed-objects;
-        in property <string> core-package-dir;
-        in property <string> core-manifest-path;
-        in property <string> core-catalog-path;
-        in property <string> core-author-draft-path;
-        in property <string> core-temp-draft-path;
-        in property <string> core-templates-dir;
-        property <string> core-launch-status: "StoryLock Core is closed. The host can only view redacted permission metadata.";
-        property <string> current-title: active-page == 0 ? "Status" : active-page == 1 ? "Local Core" : active-page == 2 ? "Data" : active-page == 3 ? "StoryLock Core" : "Diagnostics";
+        property <string> core-launch-status: "StoryLock UI is closed. Yian Host does not read StoryLock drafts, vaults, templates, or package paths.";
+        property <string> current-title: active-page == 0 ? (is-zh ? "状态" : "Status") : active-page == 1 ? (is-zh ? "本地主机" : "Local Host") : active-page == 2 ? (is-zh ? "管理" : "Management") : active-page == 3 ? "StoryLock UI" : active-page == 4 ? (is-zh ? "诊断" : "Diagnostics") : (is-zh ? "设置" : "Settings");
         callback close-requested();
         callback open-storylock-core();
 
@@ -526,31 +543,31 @@ slint::slint! {
                     x: 18px;
                     y: 28px;
                     width: 144px;
-                    height: 236px;
+                    height: 300px;
                     spacing: 14px;
 
                     MenuButton {
-                        label: "Status";
+                        label: root.is-zh ? "状态" : "Status";
                         selected: root.active-page == 0;
                         clicked => { root.active-page = 0; }
                     }
                     MenuButton {
-                        label: "Local Core";
+                        label: root.is-zh ? "本地主机" : "Local Host";
                         selected: root.active-page == 1;
                         clicked => { root.active-page = 1; }
                     }
                     MenuButton {
-                        label: "Data";
+                        label: root.is-zh ? "管理" : "Management";
                         selected: root.active-page == 2;
                         clicked => { root.active-page = 2; }
                     }
                     MenuButton {
-                        label: "StoryLock Core";
+                        label: "StoryLock UI";
                         selected: root.active-page == 3;
                         clicked => { root.active-page = 3; }
                     }
                     MenuButton {
-                        label: "Diagnostics";
+                        label: root.is-zh ? "诊断" : "Diagnostics";
                         selected: root.active-page == 4;
                         clicked => { root.active-page = 4; }
                     }
@@ -577,13 +594,19 @@ slint::slint! {
                         Text {
                             x: 38px;
                             y: 4px;
-                            width: 520px;
+                            width: 480px;
                             height: 28px;
                             text: "Yian: StoryLock - " + root.current-title;
                             font-size: 16px;
                             font-weight: 800;
                             color: #17252f;
                             overflow: elide;
+                        }
+                        SettingsIconButton {
+                            x: 556px;
+                            y: 2px;
+                            selected: root.active-page == 5;
+                            clicked => { root.active-page = 5; }
                         }
                     }
 
@@ -603,16 +626,10 @@ slint::slint! {
                             width: 600px;
                             height: 420px;
                             spacing: 12px;
-                            FormRow { name: "Identity"; value: root.identity-id; }
-                            FormRow { name: "Device"; value: root.device-id; }
-                            FormRow { name: "Local API"; value: root.local-api; }
-                            StaticRow { name: "Mode"; value: root.mode; }
-                            StaticRow { name: "Core Package"; value: root.core-package-dir; }
-                            StaticRow { name: "Manifest"; value: root.core-manifest-path; }
-                            StaticRow { name: "Catalog"; value: root.core-catalog-path; }
-                            StaticRow { name: "Author Draft"; value: root.core-author-draft-path; }
-                            StaticRow { name: "Temp Draft"; value: root.core-temp-draft-path; }
-                            StaticRow { name: "Templates"; value: root.core-templates-dir; }
+                            FormRow { name: root.is-zh ? "身份" : "Identity"; value: root.identity-id; }
+                            FormRow { name: root.is-zh ? "设备" : "Device"; value: root.device-id; }
+                            FormRow { name: root.is-zh ? "本地 API" : "Local API"; value: root.local-api; }
+                            StaticRow { name: root.is-zh ? "模式" : "Mode"; value: root.mode; }
                         }
 
                         if root.active-page == 1: VerticalBox {
@@ -621,10 +638,11 @@ slint::slint! {
                             width: 600px;
                             height: 420px;
                             spacing: 12px;
-                            FormRow { name: "Capabilities"; value: root.capabilities; }
-                            FormRow { name: "Call Chain"; value: root.call-chain; }
-                            StaticRow { name: "Boundary"; value: "Windows DPAPI local only"; }
-                            StaticRow { name: "Remote Access"; value: "Disabled by default"; }
+                            FormRow { name: root.is-zh ? "能力" : "Capabilities"; value: root.capabilities; }
+                            FormRow { name: root.is-zh ? "调用链" : "Call Chain"; value: root.call-chain; }
+                            StaticRow { name: root.is-zh ? "边界" : "Boundary"; value: root.is-zh ? "仅 Relay、本地 API 与授权代理" : "Relay, localhost API, and approval broker only"; }
+                            StaticRow { name: root.is-zh ? "远程访问" : "Remote Access"; value: root.is-zh ? "默认关闭" : "Disabled by default"; }
+                            StaticRow { name: root.is-zh ? "StoryLock 数据" : "StoryLock Data"; value: root.is-zh ? "Yian Host 不可读取" : "Not readable from Yian Host"; }
                         }
 
                         if root.active-page == 2: VerticalBox {
@@ -633,9 +651,10 @@ slint::slint! {
                             width: 600px;
                             height: 420px;
                             spacing: 12px;
-                            FormRow { name: "Question Bank"; value: root.question-bank; }
-                            FormRow { name: "Data Directory"; value: root.data-dir; }
-                            StaticRow { name: "Storage"; value: root.storage-provider; }
+                            StaticRow { name: root.is-zh ? "单项读取" : "Single Read"; value: root.is-zh ? "解锁 9 格中的 6 格，中等强度，允许远程" : "6 of 9 cells, medium strength, remote allowed"; }
+                            StaticRow { name: root.is-zh ? "批量读取" : "Batch Read"; value: root.is-zh ? "解锁 12 格中的 12 格，高强度，允许远程" : "12 of 12 cells, high strength, remote allowed"; }
+                            StaticRow { name: root.is-zh ? "故事编辑" : "Story Edit"; value: root.is-zh ? "解锁 24 格中的 22 格，仅本地 StoryLock UI" : "22 of 24 cells, local StoryLock UI only"; }
+                            LogPanel { value: root.management-stats; panel-height: 220px; }
                         }
 
                         if root.active-page == 3: VerticalBox {
@@ -645,15 +664,16 @@ slint::slint! {
                             height: 420px;
                             spacing: 12px;
                             ActionButton {
-                                label: "Open StoryLock Core";
+                                label: root.is-zh ? "打开 StoryLock Core" : "Open StoryLock Core";
                                 primary: true;
                                 clicked => {
-                                    root.core-launch-status = "StoryLock Core opened in a separate local window. Host remains read-only.";
+                                    root.core-launch-status = root.is-zh ? "StoryLock UI 已在独立本地窗口打开。Yian Host 仍不读取底层存储。" : "StoryLock UI opened in a separate local window. Yian Host remains storage-blind.";
                                     root.open-storylock-core();
                                 }
                             }
-                            StaticRow { name: "Status"; value: root.core-launch-status; }
-                            StaticRow { name: "Mode"; value: "Local editor only"; }
+                            StaticRow { name: root.is-zh ? "状态" : "Status"; value: root.core-launch-status; }
+                            StaticRow { name: root.is-zh ? "模式" : "Mode"; value: root.is-zh ? "StoryLock 拥有本地编辑器与存储" : "StoryLock-owned local editor and storage"; }
+                            StaticRow { name: root.is-zh ? "Host 访问" : "Host Access"; value: root.is-zh ? "不访问草稿、Vault、清单、目录、模板或文件路径" : "No draft, vault, manifest, catalog, template, or file path access"; }
                         }
 
                         if root.active-page == 4: VerticalBox {
@@ -664,6 +684,30 @@ slint::slint! {
                             spacing: 12px;
                             LogPanel { value: root.diagnostics; }
                         }
+
+                        if root.active-page == 5: VerticalBox {
+                            x: 0px;
+                            y: 0px;
+                            width: 600px;
+                            height: 420px;
+                            spacing: 12px;
+                            StaticRow { name: root.is-zh ? "语言" : "Language"; value: root.is-zh ? "中文" : "English"; }
+                            HorizontalBox {
+                                spacing: 12px;
+                                ActionButton {
+                                    label: "中文";
+                                    primary: root.language == "zh";
+                                    clicked => { root.language = "zh"; }
+                                }
+                                ActionButton {
+                                    label: "English";
+                                    primary: root.language == "en";
+                                    clicked => { root.language = "en"; }
+                                }
+                            }
+                            StaticRow { name: root.is-zh ? "说明" : "Note"; value: root.is-zh ? "语言切换立即作用于 Host 界面。" : "Language changes apply to the Host UI immediately."; }
+                            StaticRow { name: root.is-zh ? "范围" : "Scope"; value: root.is-zh ? "当前支持中文与英文。" : "Chinese and English are supported for now."; }
+                        }
                     }
 
                 }
@@ -673,65 +717,65 @@ slint::slint! {
 
     export component StoryLockCoreApp inherits Window {
         property <int> active-page: 0;
-        in-out property <string> story-title: "梅雨傍晚的旧火车站录音卡";
-        in-out property <string> story-summary: "梅雨季的周三傍晚，林澈在南城旧火车站二号候车厅取到藏有录音卡的蓝色保温杯，并在发车铃前把它交给记者周苓。";
-        in-out property <string> memory-anchors: "梅雨季 / 周三傍晚 / 17号寄存柜 / 蓝色保温杯 / 发车铃前二十分钟";
-        in-out property <string> element-group: "时间,地点,人物,外部,起步,核心,过程,收束";
+        in-out property <string> story-title: "Local Memory Story";
+        in-out property <string> story-summary: "A local-only memory story used by StoryLock UI to prepare authorization questions.";
+        in-out property <string> memory-anchors: "spring / station / blue cup / recorder card / departure bell";
+        in-out property <string> element-group: "time,place,person,object,event,reaction,choice,result";
         in-out property <int> node-index: 0;
         in-out property <string> node-position: "1 / 24";
         in-out property <string> node-id: "node-01";
-        in-out property <string> node-title: "日期";
+        in-out property <string> node-title: "Question 01";
         in-out property <string> element-id: "time";
         in-out property <string> selected-question: "1";
-        in-out property <string> question-text: "故事发生在什么季节和星期几？";
-        in-out property <string> canonical-answer: "梅雨季的一个周三傍晚。";
-        in-out property <string> accepted-answers: "梅雨季周三; 周三傍晚; 梅雨季";
-        in-out property <string> answer-options: "1. 梅雨季 | correct\n2. 周三傍晚 | correct\n3. 发车铃前二十分钟 | correct\n4. 初雪清晨 | wrong\n5. 周日午夜 | wrong\n6. 海边码头 | wrong\n7. 红色背包 | wrong\n8. 3号寄存柜 | wrong\n9. 午夜电台 | wrong";
+        in-out property <string> question-text: "Which season appears in the memory story?";
+        in-out property <string> canonical-answer: "spring";
+        in-out property <string> accepted-answers: "spring; rainy spring";
+        in-out property <string> answer-options: "1. spring | correct\n2. rainy spring | correct\n3. departure bell | correct\n4. winter | wrong\n5. noon | wrong\n6. harbor | wrong\n7. red bag | wrong\n8. locker 3 | wrong\n9. radio tower | wrong";
         in-out property <string> correct-options: "1,2,3";
-        in-out property <string> answer-1: "梅雨季";
+        in-out property <string> answer-1: "spring";
         in-out property <string> answer-1-state: "correct";
-        in-out property <string> answer-2: "周三傍晚";
+        in-out property <string> answer-2: "rainy spring";
         in-out property <string> answer-2-state: "correct";
-        in-out property <string> answer-3: "发车铃前二十分钟";
+        in-out property <string> answer-3: "departure bell";
         in-out property <string> answer-3-state: "correct";
-        in-out property <string> answer-4: "初雪清晨";
+        in-out property <string> answer-4: "winter";
         in-out property <string> answer-4-state: "wrong";
-        in-out property <string> answer-5: "周日午夜";
+        in-out property <string> answer-5: "noon";
         in-out property <string> answer-5-state: "wrong";
-        in-out property <string> answer-6: "海边码头";
+        in-out property <string> answer-6: "harbor";
         in-out property <string> answer-6-state: "wrong";
-        in-out property <string> answer-7: "红色背包";
+        in-out property <string> answer-7: "red bag";
         in-out property <string> answer-7-state: "wrong";
-        in-out property <string> answer-8: "3号寄存柜";
+        in-out property <string> answer-8: "locker 3";
         in-out property <string> answer-8-state: "wrong";
-        in-out property <string> answer-9: "午夜电台";
+        in-out property <string> answer-9: "radio tower";
         in-out property <string> answer-9-state: "wrong";
         in-out property <string> selection-mode: "multi_select";
         in-out property <string> correct-count: "3";
         in-out property <string> candidate-pool-size: "9";
         in-out property <string> recall-priority: "high";
         in-out property <string> verify-policy: "caseInsensitive + trim";
-        in-out property <string> editor-notes: "作者稿可编辑；发布态不得暴露正确项数量、答案或训练备注。";
-        in-out property <string> node-output: "编辑 24 节点作者稿后，可生成本地运行时题目预览。";
+        in-out property <string> editor-notes: "StoryLock UI local draft only.";
+        in-out property <string> node-output: "Configure 24 local questions before export.";
         in-out property <string> vault-name: "storylock-local-vault";
         in-out property <string> resource-id: "github-main";
         in-out property <string> resource-kind: "website_account";
         in-out property <string> provider-id: "github";
-        in-out property <string> display-name: "GitHub 主账号";
+        in-out property <string> display-name: "GitHub main account";
         in-out property <string> object-id: "wallet/evm/main/signing_key";
         in-out property <string> object-kind: "private_key";
         in-out property <string> required-correct-count: "12";
         in-out property <string> authorization-frequency: "Every high-risk request";
-        in-out property <string> secret-reference: "Windows DPAPI / Credential Manager local reference";
+        in-out property <string> secret-reference: "StoryLock local secret reference";
         in-out property <string> training-policy: "Complete local learning review before saving.";
         in-out property <string> resource-bindings: "username -> credential/github/main/username\npassword -> credential/github/main/password\ntotp_secret -> credential/github/main/totp_secret";
         in-out property <string> object-meta: "username: reference utf8\npassword: secret utf8\ntotp_secret: secret utf8";
         in-out property <string> template-kind: "login-sites.json";
         in-out property <string> template-id: "github.com";
-        in-out property <string> template-display-name: "GitHub 主账号登录";
+        in-out property <string> template-display-name: "GitHub main login";
         in-out property <string> template-bindings: "login-sites.json\n  username -> username\n  password -> password\n\nsigning-actions.json\n  username -> username\n\nagent-tasks.json\n  username -> username";
         in-out property <string> export-preview: "identity-package/\n  vault.stlk\n  resource-catalog.json\n  package-manifest.json\n  templates/login-sites.json\n  templates/signing-actions.json\n  templates/agent-tasks.json";
-        in-out property <string> config-status: "All edits stay inside StoryLock Core. Host receives only derived permission metadata.";
+        in-out property <string> config-status: "All edits stay inside StoryLock UI. Yian Host receives no draft, vault, catalog, template, or package path.";
         in-out property <string> learning-status: "Learning test is required before export.";
         in-out property <bool> export-ready: false;
         in-out property <int> learning-index: 0;
@@ -962,7 +1006,7 @@ slint::slint! {
                             EditableRow { name: "Summary"; value <=> root.story-summary; }
                             EditableRow { name: "Memory Anchors"; value <=> root.memory-anchors; }
                             EditableRow { name: "Element Groups"; value <=> root.element-group; }
-                            StaticRow { name: "Fixed Nodes"; value: "时间/地点/人物/外部/起步/核心/过程/收束 x 3 = 24"; }
+                            StaticRow { name: "Fixed Nodes"; value: "鏃堕棿/鍦扮偣/浜虹墿/澶栭儴/璧锋/鏍稿績/杩囩▼/鏀舵潫 x 3 = 24"; }
                             HorizontalBox {
                                 spacing: 10px;
                                 Rectangle { width: 164px; height: 1px; background: transparent; }
@@ -1078,7 +1122,6 @@ slint::slint! {
 }
 
 pub fn run(config: WindowsHostConfig) -> Result<()> {
-    let bank = load_or_init_question_bank(&config.data_dir)?;
     let app = HostDashboard::new()?;
     app.set_product(SharedString::from(config.product.clone()));
     app.set_version(SharedString::from(config.version.clone()));
@@ -1090,13 +1133,6 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     app.set_identity_id(SharedString::from(config.identity_id.clone()));
     app.set_device_id(SharedString::from(config.device_id.clone()));
     app.set_local_api(SharedString::from(config.health_url.clone()));
-    app.set_question_bank(SharedString::from(format!(
-        "{} ({} questions)",
-        bank.question_set_version,
-        bank.questions.len()
-    )));
-    app.set_storage_provider(SharedString::from("Windows DPAPI"));
-    app.set_data_dir(SharedString::from(config.data_dir.display().to_string()));
     app.set_capabilities(SharedString::from(if config.remote_enabled {
         "health, verify, authorize, revoke, execute, relay_poll"
     } else {
@@ -1105,37 +1141,16 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     app.set_call_chain(SharedString::from(
         "verify -> authorize -> execute -> revoke",
     ));
-    let core_package_dir = config.data_dir.join("storylock-core");
-    ensure_storylock_core_package(&core_package_dir)?;
-    app.set_managed_objects(SharedString::from(build_permission_summary_text(
-        &core_package_dir,
+    app.set_management_stats(SharedString::from(format!(
+        "Live redacted statistics are available at http://127.0.0.1:{}/ui and /ui/status.\n\nYian Host may show authorization modes, required grid cells, managed-object call counts, agent/requester counts, remote-interface access counts, and error-call totals.\n\nStory template candidates can be generated by Host and queued at /story-template/generate; StoryLock must explicitly pull them from /story-template/candidates. Host never invokes StoryLock.\n\nLLM keys are direct-access generator config. Host may show configured/missing, but must not display key values.\n\nIt must not display StoryLock drafts, vault files, package paths, question answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.",
+        config.host_port
     )));
-    app.set_core_package_dir(SharedString::from(core_package_dir.display().to_string()));
-    app.set_core_manifest_path(SharedString::from(
-        storylock_core_manifest_path(&core_package_dir).display().to_string(),
+    app.set_diagnostics(SharedString::from(
+        "Yian Host is storage-blind. It does not read or display StoryLock drafts, vault files, manifests, catalogs, templates, package paths, question answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.",
     ));
-    app.set_core_catalog_path(SharedString::from(
-        storylock_core_catalog_path(&core_package_dir).display().to_string(),
-    ));
-    app.set_core_author_draft_path(SharedString::from(
-        storylock_core_author_draft_path(&core_package_dir).display().to_string(),
-    ));
-    app.set_core_temp_draft_path(SharedString::from(
-        storylock_core_pending_author_draft_path(&core_package_dir)
-            .display()
-            .to_string(),
-    ));
-    app.set_core_templates_dir(SharedString::from(
-        core_package_dir.join("templates").display().to_string(),
-    ));
-    app.set_diagnostics(SharedString::from(format!(
-        "Sensitive values are hidden. Question answers, passwords, private keys, signing key bytes, and raw story text are never shown in this UI.\nQuestion bank path: {}\nStoryLock Core package path: {}",
-        question_bank_path(&config.data_dir).display(),
-        core_package_dir.display()
-    )));
+    let core_package_dir = storylock_core_package_dir();
     let core_windows: Rc<RefCell<Vec<StoryLockCoreApp>>> = Rc::new(RefCell::new(Vec::new()));
     let core_windows_for_callback = Rc::clone(&core_windows);
-    let host_weak_for_core = app.as_weak();
     app.on_open_storylock_core(move || {
         if let Err(error) = ensure_storylock_core_package(&core_package_dir) {
             eprintln!("failed to initialize StoryLock Core package: {error}");
@@ -1153,11 +1168,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
         match StoryLockCoreApp::new() {
             Ok(core) => {
                 initialize_storylock_core_window(&core, &core_package_dir);
-                wire_storylock_core_callbacks(
-                    &core,
-                    core_package_dir.clone(),
-                    host_weak_for_core.clone(),
-                );
+                wire_storylock_core_callbacks(&core, core_package_dir.clone());
                 if let Err(error) = core.show() {
                     eprintln!("failed to show StoryLock Core window: {error}");
                     return;
@@ -1181,6 +1192,24 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
 
 fn storylock_core_manifest_path(package_dir: &Path) -> std::path::PathBuf {
     package_dir.join("package-manifest.json")
+}
+
+fn storylock_core_package_dir() -> std::path::PathBuf {
+    if let Ok(configured) = std::env::var("STORYLOCK_CORE_DATA_DIR") {
+        let trimmed = configured.trim();
+        if !trimmed.is_empty() {
+            return std::path::PathBuf::from(trimmed).join("identity-package");
+        }
+    }
+    if let Ok(appdata) = std::env::var("LOCALAPPDATA") {
+        return std::path::PathBuf::from(appdata)
+            .join("StoryLock")
+            .join("core")
+            .join("identity-package");
+    }
+    std::path::PathBuf::from(".")
+        .join(".storylock-core-data")
+        .join("identity-package")
 }
 
 fn storylock_core_catalog_path(package_dir: &Path) -> std::path::PathBuf {
@@ -1253,7 +1282,7 @@ fn replace_legacy_default_author_draft(package_dir: &Path) -> Result<()> {
         .and_then(|node| node.get("question"))
         .and_then(Value::as_str)
         .unwrap_or("");
-    if title.contains("旧火车站") || title.contains("棫鐏") || first_question.starts_with("Story memory question") {
+    if title.contains("鏃х伀杞︾珯") || title.contains("妫悘") || first_question.starts_with("Story memory question") {
         fs::write(path, serde_json::to_vec_pretty(&default_author_draft_json())?)?;
     }
     Ok(())
@@ -1372,7 +1401,6 @@ fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_dir: &Path)
 fn wire_storylock_core_callbacks(
     core: &StoryLockCoreApp,
     package_dir: std::path::PathBuf,
-    host_weak: slint::Weak<HostDashboard>,
 ) {
     let learning_passed = Rc::new(RefCell::new(vec![false; 24]));
     let weak = core.as_weak();
@@ -1384,7 +1412,6 @@ fn wire_storylock_core_callbacks(
 
     let weak = core.as_weak();
     let temp_draft_dir = package_dir.clone();
-    let temp_draft_host_weak = host_weak.clone();
     let temp_draft_learning_passed = Rc::clone(&learning_passed);
     core.on_save_temp_draft(move || {
         if let Some(core) = weak.upgrade() {
@@ -1399,7 +1426,6 @@ fn wire_storylock_core_callbacks(
                 result,
                 "Current StoryLock Core memory saved as temporary draft.",
             );
-            refresh_host_permission_summary(&temp_draft_host_weak, &temp_draft_dir);
         }
     });
 
@@ -1466,7 +1492,6 @@ fn wire_storylock_core_callbacks(
 
     let weak = core.as_weak();
     let resource_dir = package_dir.clone();
-    let resource_host_weak = host_weak.clone();
     let resource_learning_passed = Rc::clone(&learning_passed);
     core.on_save_resource(move || {
         if let Some(core) = weak.upgrade() {
@@ -1477,7 +1502,6 @@ fn wire_storylock_core_callbacks(
                 "Managed object changed. Run learning test again before export.",
             );
             set_core_status(&core, result, "Resource catalog saved locally.");
-            refresh_host_permission_summary(&resource_host_weak, &resource_dir);
         }
     });
 
@@ -1497,7 +1521,6 @@ fn wire_storylock_core_callbacks(
     });
 
     let weak = core.as_weak();
-    let refresh_host_weak = host_weak.clone();
     let refresh_dir = package_dir.clone();
     core.on_refresh_export(move || {
         if let Some(core) = weak.upgrade() {
@@ -1505,7 +1528,6 @@ fn wire_storylock_core_callbacks(
             core.set_config_status(SharedString::from(
                 "Export preview refreshed from local StoryLock Core package.",
             ));
-            refresh_host_permission_summary(&refresh_host_weak, &refresh_dir);
         }
     });
 
@@ -1582,7 +1604,6 @@ fn wire_storylock_core_callbacks(
 
     let weak = core.as_weak();
     let export_dir = package_dir.clone();
-    let export_host_weak = host_weak.clone();
     core.on_export_package(move || {
         if let Some(core) = weak.upgrade() {
             if !core.get_export_ready() {
@@ -1601,7 +1622,6 @@ fn wire_storylock_core_callbacks(
                     core.set_learning_status(SharedString::from(
                         "Learning test passed. Export completed.",
                     ));
-                    refresh_host_permission_summary(&export_host_weak, &export_dir);
                 }
                 Err(error) => {
                     core.set_config_status(SharedString::from(format!(
@@ -1611,14 +1631,6 @@ fn wire_storylock_core_callbacks(
             }
         }
     });
-}
-
-fn refresh_host_permission_summary(host_weak: &slint::Weak<HostDashboard>, package_dir: &Path) {
-    if let Some(host) = host_weak.upgrade() {
-        host.set_managed_objects(SharedString::from(build_permission_summary_text(
-            package_dir,
-        )));
-    }
 }
 
 fn set_core_status(core: &StoryLockCoreApp, result: Result<()>, success_message: &str) {
@@ -2003,7 +2015,7 @@ fn save_template_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Res
         "templateType": "signing-actions",
         "items": [{
             "templateId": format!("{}-sign", core.get_template_id()),
-            "displayName": format!("{} 签名", core.get_template_display_name()),
+            "displayName": format!("{} 绛惧悕", core.get_template_display_name()),
             "resourceId": core.get_resource_id().to_string(),
             "bindings": [
                 { "fieldName": "username", "role": "username" }
@@ -2015,7 +2027,7 @@ fn save_template_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Res
         "templateType": "agent-tasks",
         "items": [{
             "templateId": format!("{}-agent", core.get_template_id()),
-            "displayName": format!("{} Agent 任务", core.get_template_display_name()),
+            "displayName": format!("{} Agent 浠诲姟", core.get_template_display_name()),
             "resourceId": core.get_resource_id().to_string(),
             "bindings": [
                 { "fieldName": "username", "role": "username" }
@@ -2086,7 +2098,7 @@ fn build_export_preview(package_dir: &Path) -> String {
             .join("\n")
     };
     format!(
-        "identity-package/\n  vault.stlk\n  package-manifest.json\n  resource-catalog.json\n  author-draft.json\n  templates/login-sites.json\n  templates/signing-actions.json\n  templates/agent-tasks.json\n\nLocal path: {}\ntemporaryDraft={pending_state}\nresources={resources}\npermissionObjects={permission_objects}\npreflight={status}\nerrors:\n{errors}\n\nHost-readable permission summary only; raw story, answers, passwords, private keys, and signingKeyBytes remain inside StoryLock Core.",
+        "identity-package/\n  vault.stlk\n  package-manifest.json\n  resource-catalog.json\n  author-draft.json\n  templates/login-sites.json\n  templates/signing-actions.json\n  templates/agent-tasks.json\n\nLocal path: {}\ntemporaryDraft={pending_state}\nresources={resources}\npermissionObjects={permission_objects}\npreflight={status}\nerrors:\n{errors}\n\nStoryLock UI internal export preview only; Yian Host does not read drafts, vault files, catalogs, templates, raw story, answers, passwords, private keys, or signingKeyBytes.",
         package_dir.display()
     )
 }
@@ -2431,201 +2443,46 @@ fn is_four_segment_object_id(value: &str) -> bool {
         })
 }
 
-fn build_permission_summary_text(package_dir: &Path) -> String {
-    let catalog = read_json_or_default(
-        &storylock_core_catalog_path(package_dir),
-        default_resource_catalog_json(),
-    );
-    let summary = build_permission_summary_from_catalog(&catalog);
-    let Some(items) = summary.get("items").and_then(Value::as_array) else {
-        return "No managed permission objects. Open StoryLock Core to initialize the local package."
-            .to_string();
-    };
-    let mut lines = Vec::new();
-    for item in items {
-        let resource_id = item
-            .get("resourceId")
-            .and_then(Value::as_str)
-            .unwrap_or("unknown-resource");
-        let display_name = item
-            .get("displayName")
-            .and_then(Value::as_str)
-            .unwrap_or(resource_id);
-        let role = item
-            .get("role")
-            .and_then(Value::as_str)
-            .unwrap_or("unknown-role");
-        let object_id = item
-            .get("objectId")
-            .and_then(Value::as_str)
-            .unwrap_or("unknown-object");
-        let object_kind = item
-            .get("objectKind")
-            .and_then(Value::as_str)
-            .unwrap_or("secret");
-        let action = item.get("action").and_then(Value::as_str).unwrap_or("read");
-        let challenge_policy = item
-            .get("challengePolicy")
-            .and_then(Value::as_str)
-            .unwrap_or("medium");
-        let required_grid_count = item
-            .get("requiredGridCount")
-            .and_then(Value::as_u64)
-            .unwrap_or(6);
-        lines.push(format!(
-            "{display_name} / {role}: objectId={object_id}, objectKind={object_kind}, action={action}, challengePolicy={challenge_policy}, requiredGridCount={required_grid_count}"
-        ));
-    }
-    if lines.is_empty() {
-        "No managed permission objects. Configure resources inside StoryLock Core.".to_string()
-    } else {
-        lines.join("\n")
-    }
-}
-
-fn build_permission_summary_from_catalog(catalog: &Value) -> Value {
-    let mut items = Vec::new();
-    for resource in catalog
-        .get("resources")
-        .and_then(Value::as_array)
-        .into_iter()
-        .flatten()
-    {
-        let resource_id = resource
-            .get("resourceId")
-            .and_then(Value::as_str)
-            .unwrap_or("unknown-resource");
-        let resource_kind = resource
-            .get("resourceKind")
-            .and_then(Value::as_str)
-            .unwrap_or("unknown");
-        let provider_id = resource
-            .get("providerId")
-            .and_then(Value::as_str)
-            .unwrap_or("unknown");
-        let display_name = resource
-            .get("displayName")
-            .and_then(Value::as_str)
-            .unwrap_or(resource_id);
-        for binding in resource
-            .get("bindings")
-            .and_then(Value::as_array)
-            .into_iter()
-            .flatten()
-        {
-            let role = binding
-                .get("role")
-                .and_then(Value::as_str)
-                .unwrap_or("unknown-role");
-            let object_id = binding
-                .get("objectId")
-                .and_then(Value::as_str)
-                .unwrap_or("unknown-object");
-            let meta = binding.get("objectMeta").unwrap_or(&Value::Null);
-            let object_kind = meta
-                .get("objectKind")
-                .and_then(Value::as_str)
-                .unwrap_or("secret");
-            let sensitivity = meta
-                .get("sensitivity")
-                .and_then(Value::as_str)
-                .unwrap_or("private");
-            let required_grid_count = meta
-                .get("requiredGridCount")
-                .and_then(Value::as_u64)
-                .unwrap_or_else(|| permission_required_grid_count(sensitivity) as u64);
-            items.push(json!({
-                "resourceId": resource_id,
-                "resourceKind": resource_kind,
-                "providerId": provider_id,
-                "displayName": display_name,
-                "role": role,
-                "objectId": object_id,
-                "objectKind": object_kind,
-                "sensitivity": sensitivity,
-                "action": permission_action(object_kind),
-                "challengePolicy": permission_challenge_policy(sensitivity),
-                "requiredGridCount": required_grid_count
-            }));
-        }
-    }
-    json!({ "items": items })
-}
-
-fn permission_action(object_kind: &str) -> &'static str {
-    match object_kind {
-        "private_key" | "signing_key" => "sign",
-        "password" => "password_fill",
-        _ => "read",
-    }
-}
-
-fn permission_challenge_policy(sensitivity: &str) -> &'static str {
-    match sensitivity {
-        "secret" | "high" => "high",
-        _ => "medium",
-    }
-}
-
-fn permission_required_grid_count(sensitivity: &str) -> u8 {
-    match sensitivity {
-        "secret" | "high" => 12,
-        _ => 6,
-    }
-}
-
 fn default_author_draft_json() -> Value {
     return default_shouzhudaitu_author_draft_json();
 }
 
 fn default_shouzhudaitu_author_draft_json() -> Value {
-    let questions = vec![
-        ("time", "故事发生在什么季节？", ["春天", "春耕时节", "万物生长的时候"], ["秋天", "冬天", "雨夜", "腊月", "盛夏", "元宵"]),
-        ("place", "宋人主要在哪里劳作？", ["田地里", "庄稼地旁", "自己耕作的田间"], ["集市", "河边", "山洞", "城门", "书院", "码头"]),
-        ("person", "故事中的主要人物是谁？", ["宋国农夫", "种田人", "守株的人"], ["渔夫", "樵夫", "商人", "将军", "书生", "猎户"]),
-        ("object", "兔子撞到了什么地方？", ["树桩", "田边的树桩", "断树根"], ["石碑", "井沿", "木门", "车轮", "竹篱", "桥柱"]),
-        ("event", "兔子为什么被农夫得到？", ["撞树而死", "奔跑时撞上树桩", "意外撞死"], ["被网捕住", "被箭射中", "自己睡着", "掉进井里", "被狗追到家", "被雨淋倒"]),
-        ("reaction", "农夫看到兔子后的反应是什么？", ["非常高兴", "觉得捡到便宜", "以为好运会再来"], ["立刻继续耕田", "把树砍掉", "马上搬家", "责怪邻居", "放走兔子", "写信报官"]),
-        ("choice", "农夫后来做出了什么选择？", ["放下农具", "不再认真耕作", "守在树桩旁"], ["扩大田地", "学习打猎", "卖掉农具", "修水渠", "去城里经商", "种更多庄稼"]),
-        ("goal", "农夫守着树桩想等什么？", ["再有兔子撞来", "再次白得兔子", "重复上次的好运"], ["等人买田", "等雨停", "等官府赏钱", "等树结果", "等牛回来", "等邻居道歉"]),
-        ("result", "农夫的田地后来怎样了？", ["田地荒芜", "庄稼长不好", "农事被耽误"], ["粮食大丰收", "田地变成花园", "长出金子", "变成池塘", "被别人偷走", "马上卖高价"]),
-        ("lesson", "这个故事主要讽刺什么？", ["侥幸心理", "不劳而获", "死守偶然经验"], ["勤劳致富", "诚实守信", "尊老爱幼", "团结合作", "知错能改", "乐于助人"]),
-        ("logic", "兔子撞树这件事在故事里属于什么？", ["偶然事件", "不可重复的巧合", "意外收获"], ["日常规律", "农夫计划", "官府安排", "自然法则", "交易结果", "长期经验"]),
-        ("contrast", "农夫应该依靠什么获得收成？", ["耕作", "持续劳动", "按时种田"], ["守树桩", "等兔子", "占卜", "睡觉", "赶集", "听传闻"]),
-        ("symbol", "树桩在故事中象征什么？", ["偶然机会", "死守的经验", "错误依赖"], ["丰收秘诀", "官府权力", "家族荣耀", "市场价格", "远方道路", "善良品质"]),
-        ("risk", "农夫把一次偶然当成规律会导致什么？", ["耽误生产", "失去收成", "越来越被动"], ["马上发财", "得到更多田", "学会医术", "成为官员", "找到宝藏", "获得名声"]),
-        ("memory", "故事中最关键的画面是什么？", ["兔子撞树", "农夫守株", "田地荒芜"], ["老人钓鱼", "孩子读书", "商人赶路", "将军练兵", "船夫摆渡", "木匠造屋"]),
-        ("order", "事件顺序应当怎样理解？", ["耕田时见兔", "捡到兔子", "放下农具守株"], ["先卖兔子", "先砍树", "先搬家", "先捕鱼", "先下雪", "先修桥"]),
-        ("identity", "故事里的人为什么被称为宋人？", ["来自宋国", "宋国的农夫", "寓言中的宋国人"], ["姓宋", "住在宋山", "会写宋体字", "来自楚国", "来自齐国", "官名叫宋"]),
-        ("action", "守株这个动作具体指什么？", ["守着树桩", "等待兔子再撞来", "停止劳动等好运"], ["守城门", "守仓库", "守桥头", "保护树苗", "看守羊群", "守夜巡逻"]),
-        ("failure", "农夫失败的根本原因是什么？", ["误判偶然", "放弃劳动", "把巧合当方法"], ["不会识字", "天气太冷", "田太小", "兔子太多", "邻居阻拦", "工具太新"]),
-        ("training", "学习这个故事时最应该记住哪三点？", ["兔子撞树", "农夫守株", "田地荒芜"], ["金斧银斧", "狼来了", "刻舟求剑", "井底之蛙", "狐假虎威", "画蛇添足"]),
-        ("policy", "用于授权训练时，这个故事适合作为什么提示？", ["反侥幸提示", "坚持主动验证", "不要依赖偶然"], ["公开密码", "远程私钥", "自动放行", "无需确认", "删除题库", "跳过训练"]),
-        ("review", "如果用户只记得兔子撞树，还需要补充记住什么？", ["农夫停止耕作", "守着树桩等待", "最后田地荒芜"], ["兔子会说话", "农夫成了国王", "树桩开花", "田里有井", "邻居送粮", "天上下金"]),
-        ("export", "导出前学习训练要确认什么？", ["24个问题已配置", "每题9个候选答案", "正确错误已标记"], ["直接暴露私钥", "跳过本地确认", "上传答案原文", "删除故事", "关闭题库", "开放远程写入"]),
-        ("ending", "守株待兔最终告诉我们什么？", ["不能坐等侥幸", "要靠持续行动", "不能把偶然当规律"], ["等着就会成功", "兔子每天会来", "树桩能带来财富", "田地不用管理", "好运一定重复", "农具没有用"]),
+    const ELEMENTS: [&str; 8] = [
+        "time", "place", "person", "object", "event", "reaction", "choice", "result",
     ];
-    let nodes = questions
-        .into_iter()
-        .enumerate()
-        .map(|(offset, (element_id, question, correct, wrong))| {
-            let index = offset + 1;
+    let nodes = (1..=24)
+        .map(|index| {
+            let element_id = ELEMENTS[(index - 1) % ELEMENTS.len()];
+            let correct = [
+                format!("node {index:02} anchor one"),
+                format!("node {index:02} anchor two"),
+                format!("node {index:02} anchor three"),
+            ];
+            let wrong = [
+                format!("node {index:02} distractor four"),
+                format!("node {index:02} distractor five"),
+                format!("node {index:02} distractor six"),
+                format!("node {index:02} distractor seven"),
+                format!("node {index:02} distractor eight"),
+                format!("node {index:02} distractor nine"),
+            ];
             let answer_options = correct
-                .into_iter()
+                .iter()
                 .map(|text| json!({ "text": text, "isCorrect": true }))
-                .chain(wrong.into_iter().map(|text| json!({ "text": text, "isCorrect": false })))
+                .chain(wrong.iter().map(|text| json!({ "text": text, "isCorrect": false })))
                 .collect::<Vec<_>>();
             json!({
                 "nodeId": format!("node-{index:02}"),
-                "title": format!("守株待兔问题 {index:02}"),
+                "title": format!("Question {index:02}"),
                 "elementId": element_id,
-                "question": question,
+                "question": format!("Which three anchors belong to memory node {index:02}?"),
                 "recommendedSelectionMode": "multi_select",
                 "recommendedCorrectCount": 3,
                 "candidatePoolSize": 9,
                 "recallPriority": "high",
                 "verifyPolicy": "caseInsensitive + trim",
-                "editorNotes": "守株待兔默认模板，仅保存在 StoryLock Core 本地草稿中。",
+                "editorNotes": "StoryLock UI local draft only.",
                 "canonicalAnswerLocalOnly": correct[0],
                 "acceptedAnswersLocalOnly": correct,
                 "answerOptionsLocalOnly": answer_options
@@ -2634,47 +2491,13 @@ fn default_shouzhudaitu_author_draft_json() -> Value {
         .collect::<Vec<_>>();
     json!({
         "version": "1",
-        "storyTitle": "守株待兔",
-        "summary": "宋国有个农夫在田里耕作时，看见一只兔子奔跑撞到树桩上死了。农夫因此放下农具，天天守着树桩等待下一只兔子，结果兔子没有再来，田地也荒芜了。",
-        "memoryAnchors": ["宋国农夫", "田地", "兔子撞树", "树桩", "放下农具", "田地荒芜"],
-        "elementGroups": ["时间", "地点", "人物", "物件", "事件", "反应", "选择", "结果"],
+        "storyTitle": "Local Memory Story",
+        "summary": "A local-only StoryLock memory story used to prepare authorization questions.",
+        "memoryAnchors": ["spring", "station", "blue cup", "recorder card", "departure bell", "locker"],
+        "elementGroups": ["time", "place", "person", "object", "event", "reaction", "choice", "result"],
         "nodes": nodes
     })
 }
-
-#[allow(dead_code)]
-fn legacy_default_author_draft_json() -> Value {
-    const ELEMENTS: [&str; 8] = [
-        "time", "place", "person", "theme", "conflict", "plot", "choice", "ending",
-    ];
-    let nodes = (1..=24)
-        .map(|index| {
-            let element_id = ELEMENTS[(index - 1) % ELEMENTS.len()];
-            json!({
-                "nodeId": format!("node-{index:02}"),
-                "title": format!("Node {index:02}"),
-                "elementId": element_id,
-                "question": format!("Story memory question {index:02}?"),
-                "recommendedSelectionMode": "multi_select",
-                "recommendedCorrectCount": 3,
-                "candidatePoolSize": 9,
-                "recallPriority": "medium",
-                "verifyPolicy": "caseInsensitive + trim",
-                "editorNotes": "Local author draft only.",
-                "answerOptionsLocalOnly": default_answer_options(index)
-            })
-        })
-        .collect::<Vec<_>>();
-    json!({
-        "version": "1",
-        "storyTitle": "梅雨傍晚的旧火车站录音卡",
-        "summary": "梅雨季的周三傍晚，林澈在南城旧火车站二号候车厅取到藏有录音卡的蓝色保温杯。",
-        "memoryAnchors": ["梅雨季", "周三傍晚", "17号寄存柜", "蓝色保温杯"],
-        "elementGroups": ["时间", "地点", "人物", "外部", "起步", "核心", "过程", "收束"],
-        "nodes": nodes
-    })
-}
-
 fn default_resource_catalog_json() -> Value {
     json!({
         "version": "1",
@@ -2682,7 +2505,7 @@ fn default_resource_catalog_json() -> Value {
             "resourceId": "github-main",
             "resourceKind": "website_account",
             "providerId": "github",
-            "displayName": "GitHub 主账号",
+            "displayName": "GitHub main account",
             "bindings": [
                 {
                     "role": "username",
@@ -2705,7 +2528,7 @@ fn default_login_templates_json() -> Value {
         "templateType": "login-sites",
         "items": [{
             "templateId": "github.com",
-            "displayName": "GitHub 主账号登录",
+            "displayName": "GitHub main login",
             "resourceId": "github-main",
             "bindings": [
                 { "fieldName": "username", "role": "username" },
@@ -2842,7 +2665,7 @@ fn node_answer_options(node: &Value) -> Vec<Value> {
             .collect::<Vec<_>>();
         while normalized.len() < 9 {
             let index = normalized.len() + 1;
-            normalized.push(json!({ "text": format!("候选答案 {index}"), "isCorrect": false }));
+            normalized.push(json!({ "text": format!("鍊欓€夌瓟妗?{index}"), "isCorrect": false }));
         }
         return normalized;
     }
@@ -2864,7 +2687,7 @@ fn node_answer_options(node: &Value) -> Vec<Value> {
                 .into_iter()
                 .map(|item| json!({ "text": item.as_str().unwrap_or(""), "isCorrect": false })),
         )
-        .chain((1..=9).map(|index| json!({ "text": format!("候选答案 {index}"), "isCorrect": false })))
+        .chain((1..=9).map(|index| json!({ "text": format!("鍊欓€夌瓟妗?{index}"), "isCorrect": false })))
         .take(9)
         .collect()
 }
@@ -2921,17 +2744,6 @@ fn sanitize_segment(value: &str) -> String {
     } else {
         normalized
     }
-}
-
-fn default_answer_options(index: usize) -> Vec<Value> {
-    (1..=9)
-        .map(|option_index| {
-            json!({
-                "text": format!("Node {index:02} answer option {option_index}"),
-                "isCorrect": option_index <= 3
-            })
-        })
-        .collect()
 }
 
 fn format_bindings(resource: &Value) -> String {
@@ -3054,7 +2866,6 @@ fn format_all_template_bundles(package_dir: &Path) -> String {
 mod tests {
     use super::*;
     use std::path::PathBuf;
-    use std::process::Command;
     use uuid::Uuid;
 
     fn temp_core_dir() -> PathBuf {
@@ -3080,7 +2891,8 @@ mod tests {
         let preview = build_export_preview(&dir);
         assert!(preview.contains("permissionObjects=2"));
         assert!(preview.contains("preflight=OK"));
-        assert!(preview.contains("Host-readable permission summary only"));
+        assert!(preview.contains("StoryLock UI internal export preview only"));
+        assert!(preview.contains("Yian Host does not read drafts"));
         assert!(!preview.contains("signingKeyBytes="));
         assert!(!preview.contains("privateKey="));
         assert!(!preview.contains("password="));
@@ -3125,55 +2937,6 @@ mod tests {
             promoted.get("storyTitle").and_then(Value::as_str),
             Some("promoted title")
         );
-    }
-
-    #[test]
-    fn host_permission_summary_is_derived_and_redacted() {
-        let dir = temp_core_dir();
-        ensure_storylock_core_package(&dir).expect("init package");
-        let summary = build_permission_summary_text(&dir);
-        assert!(summary.contains("GitHub 主账号 / username"));
-        assert!(summary.contains("action=password_fill"));
-        assert!(summary.contains("requiredGridCount=12"));
-        assert!(!summary.contains("canonicalAnswer"));
-        assert!(!summary.contains("acceptedAnswers"));
-        assert!(!summary.contains("signingKeyBytes"));
-        assert!(!summary.contains("privateKey="));
-        assert!(!summary.contains("password="));
-    }
-
-    #[test]
-    fn windows_permission_summary_matches_shared_js_contract() {
-        let dir = temp_core_dir();
-        ensure_storylock_core_package(&dir).expect("init package");
-        let catalog = read_json_or_default(
-            &storylock_core_catalog_path(&dir),
-            default_resource_catalog_json(),
-        );
-        let rust_summary = build_permission_summary_from_catalog(&catalog);
-        let output = Command::new("node")
-            .args([
-                "scripts/storylock-package/permission-summary-json.mjs",
-                "--input",
-            ])
-            .arg(storylock_core_catalog_path(&dir))
-            .current_dir(
-                std::env::current_dir()
-                    .expect("current dir")
-                    .ancestors()
-                    .find(|path| path.join("package.json").exists())
-                    .expect("workspace root"),
-            )
-            .output()
-            .expect("run js permission summary");
-        assert!(
-            output.status.success(),
-            "js permission summary failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        let js_summary: Value =
-            serde_json::from_slice(&output.stdout).expect("parse js permission summary");
-        assert_eq!(rust_summary, js_summary);
     }
 
     #[test]

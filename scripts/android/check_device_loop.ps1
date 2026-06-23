@@ -5,6 +5,9 @@ param(
   [string]$IdentityId = "android-demo-001",
   [string]$PackageKind = "",
   [string]$ReleaseChannel = "",
+  [int]$AndroidHostPort = 4500,
+  [int]$LocalForwardPort = 14500,
+  [string]$SharedSecret = "replace-with-strong-shared-secret",
   [string]$ReportPath = (Join-Path ([System.IO.Path]::GetTempPath()) "android-device-loop-report.local.md")
 )
 
@@ -66,6 +69,46 @@ if ($DeepLink -and $adb) {
   $rows += Add-Result "deep link" "skipped" "Pass -DeepLink from /android-host/bind"
 }
 
+if ($adb -and ($deviceLines.Count -gt 0)) {
+  try {
+    & adb forward "tcp:$LocalForwardPort" "tcp:$AndroidHostPort" | Out-Null
+    $rows += Add-Result "adb forward" "ok" "tcp:$LocalForwardPort -> tcp:$AndroidHostPort"
+
+    $headers = @{}
+    if ($SharedSecret) {
+      $headers["x-storylock-shared-secret"] = $SharedSecret
+    }
+
+    foreach ($path in @("/health", "/permission-summary")) {
+      try {
+        $localUrl = "http://127.0.0.1:$LocalForwardPort$path"
+        $response = Invoke-WebRequest -Uri $localUrl -Headers $headers -UseBasicParsing -ErrorAction Stop
+        $body = $response.Content
+        $redactionOk = ($body -notmatch "canonicalAnswer|acceptedAnswers|privateKey|signingKeyBytes|`"password`"\s*:")
+        $detail = "$($response.StatusCode) $($response.Headers['Content-Type'])"
+        if ($path -eq "/permission-summary") {
+          $detail = "$detail; redactionOk=$redactionOk"
+        }
+        $rows += Add-Result "android host $path" $(if ($redactionOk) { "ok" } else { "failed" }) $detail
+      } catch {
+        $response = $_.Exception.Response
+        $detail = if ($response) { "$([int]$response.StatusCode) $($response.Headers['Content-Type'])" } else { $_.Exception.Message }
+        $rows += Add-Result "android host $path" "failed" $detail
+      }
+    }
+  } catch {
+    $rows += Add-Result "adb forward" "failed" $_.Exception.Message
+  } finally {
+    try {
+      & adb forward --remove "tcp:$LocalForwardPort" | Out-Null
+    } catch {
+      # Best-effort cleanup only.
+    }
+  }
+} elseif ($adb) {
+  $rows += Add-Result "android host local http" "blocked" "Connect a device, start Android Host, then rerun to test /health and /permission-summary"
+}
+
 if ($GatewayBaseUrl) {
   $base = $GatewayBaseUrl.TrimEnd("/")
   foreach ($path in @("/", "/api/storylock-gateway", "/app/download", "/app/download/android", "/android-host/bind")) {
@@ -113,6 +156,8 @@ $lines = @(
   "IdentityId: $IdentityId",
   "PackageKind: $PackageKind",
   "ReleaseChannel: $ReleaseChannel",
+  "AndroidHostPort: $AndroidHostPort",
+  "LocalForwardPort: $LocalForwardPort",
   "",
   "| Check | Status | Detail |",
   "| --- | --- | --- |"

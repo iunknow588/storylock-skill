@@ -38,7 +38,7 @@ function importedQuestionBank() {
     identityId: 'linux-demo-001',
     questionSetVersion: 'linux-loop-v2',
     normalizationVersion: 'nfkc-lower-v1',
-    questions: Array.from({ length: 9 }, (_, index) => ({
+    questions: Array.from({ length: 24 }, (_, index) => ({
       questionId: `linux-loop-q-${index + 1}`,
       promptRef: `linux-loop-prompt-${index + 1}`,
       versionTag: 'v2',
@@ -47,6 +47,10 @@ function importedQuestionBank() {
       status: 'active',
     })),
   };
+}
+
+function answerMapFor(bank) {
+  return new Map(bank.questions.map((question) => [question.questionId, question.answer]));
 }
 
 const dataDir = await mkdtemp(join(tmpdir(), 'storylock-linux-host-loop-'));
@@ -87,17 +91,19 @@ try {
 
   const statusBefore = await getJson(`${baseUrl}/question-bank/status`);
   assertSuccess(statusBefore, 'question-bank-status');
-  assert.equal(statusBefore.result.questionCount, 9);
+  assert.equal(statusBefore.result.questionCount, 24);
 
   const importPath = join(dataDir, 'import-question-bank.json');
-  await writeFile(importPath, `\uFEFF${JSON.stringify(importedQuestionBank(), null, 2)}`, 'utf8');
+  const bank = importedQuestionBank();
+  const answerMap = answerMapFor(bank);
+  await writeFile(importPath, `\uFEFF${JSON.stringify(bank, null, 2)}`, 'utf8');
   const imported = await postJson(`${baseUrl}/question-bank/import`, {
     requestId: 'req-linux-import',
     sourcePath: importPath,
   });
   assertSuccess(imported, 'question-bank-import');
   assert.equal(imported.result.questionSetVersion, 'linux-loop-v2');
-  assert.equal(imported.result.questionCount, 9);
+  assert.equal(imported.result.questionCount, 24);
 
   const verification = await postJson(`${baseUrl}/verify`, {
     requestId: 'req-linux-verify',
@@ -107,11 +113,11 @@ try {
   });
   assertSuccess(verification, 'verify');
   assert.match(verification.result.verificationId, /^chl-/);
-  assert.equal(verification.result.grid.cells.length, 9);
+  assert.equal(verification.result.grid.cells.length, 12);
 
   const answers = verification.result.grid.cells.map((cell) => ({
     cellId: cell.cellId,
-    answer: `linux-answer-${cell.position}`,
+    answer: answerMap.get(cell.questionId),
   }));
   const authorization = await postJson(`${baseUrl}/authorize`, {
     requestId: 'req-linux-authorize',

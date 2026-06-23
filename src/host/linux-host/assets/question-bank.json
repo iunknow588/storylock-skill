@@ -12,6 +12,21 @@
     { "questionId": "linux-q-06", "promptRef": "linux-prompt-06", "versionTag": "v1", "promptText": "Recall the sixth Linux local checkpoint word.", "answer": "mirror", "status": "active" },
     { "questionId": "linux-q-07", "promptRef": "linux-prompt-07", "versionTag": "v1", "promptText": "Recall the seventh Linux local checkpoint word.", "answer": "anchor", "status": "active" },
     { "questionId": "linux-q-08", "promptRef": "linux-prompt-08", "versionTag": "v1", "promptText": "Recall the eighth Linux local checkpoint word.", "answer": "maple", "status": "active" },
-    { "questionId": "linux-q-09", "promptRef": "linux-prompt-09", "versionTag": "v1", "promptText": "Recall the ninth Linux local checkpoint word.", "answer": "ember", "status": "active" }
+    { "questionId": "linux-q-09", "promptRef": "linux-prompt-09", "versionTag": "v1", "promptText": "Recall the ninth Linux local checkpoint word.", "answer": "ember", "status": "active" },
+    { "questionId": "linux-q-10", "promptRef": "linux-prompt-10", "versionTag": "v1", "promptText": "Recall the tenth Linux local checkpoint word.", "answer": "summit", "status": "active" },
+    { "questionId": "linux-q-11", "promptRef": "linux-prompt-11", "versionTag": "v1", "promptText": "Recall the eleventh Linux local checkpoint word.", "answer": "copper", "status": "active" },
+    { "questionId": "linux-q-12", "promptRef": "linux-prompt-12", "versionTag": "v1", "promptText": "Recall the twelfth Linux local checkpoint word.", "answer": "willow", "status": "active" },
+    { "questionId": "linux-q-13", "promptRef": "linux-prompt-13", "versionTag": "v1", "promptText": "Recall the thirteenth Linux local checkpoint word.", "answer": "quartz", "status": "active" },
+    { "questionId": "linux-q-14", "promptRef": "linux-prompt-14", "versionTag": "v1", "promptText": "Recall the fourteenth Linux local checkpoint word.", "answer": "meadow", "status": "active" },
+    { "questionId": "linux-q-15", "promptRef": "linux-prompt-15", "versionTag": "v1", "promptText": "Recall the fifteenth Linux local checkpoint word.", "answer": "orbit", "status": "active" },
+    { "questionId": "linux-q-16", "promptRef": "linux-prompt-16", "versionTag": "v1", "promptText": "Recall the sixteenth Linux local checkpoint word.", "answer": "silver", "status": "active" },
+    { "questionId": "linux-q-17", "promptRef": "linux-prompt-17", "versionTag": "v1", "promptText": "Recall the seventeenth Linux local checkpoint word.", "answer": "canyon", "status": "active" },
+    { "questionId": "linux-q-18", "promptRef": "linux-prompt-18", "versionTag": "v1", "promptText": "Recall the eighteenth Linux local checkpoint word.", "answer": "horizon", "status": "active" },
+    { "questionId": "linux-q-19", "promptRef": "linux-prompt-19", "versionTag": "v1", "promptText": "Recall the nineteenth Linux local checkpoint word.", "answer": "signal", "status": "active" },
+    { "questionId": "linux-q-20", "promptRef": "linux-prompt-20", "versionTag": "v1", "promptText": "Recall the twentieth Linux local checkpoint word.", "answer": "violet", "status": "active" },
+    { "questionId": "linux-q-21", "promptRef": "linux-prompt-21", "versionTag": "v1", "promptText": "Recall the twenty-first Linux local checkpoint word.", "answer": "keystone", "status": "active" },
+    { "questionId": "linux-q-22", "promptRef": "linux-prompt-22", "versionTag": "v1", "promptText": "Recall the twenty-second Linux local checkpoint word.", "answer": "canvas", "status": "active" },
+    { "questionId": "linux-q-23", "promptRef": "linux-prompt-23", "versionTag": "v1", "promptText": "Recall the twenty-third Linux local checkpoint word.", "answer": "fountain", "status": "active" },
+    { "questionId": "linux-q-24", "promptRef": "linux-prompt-24", "versionTag": "v1", "promptText": "Recall the twenty-fourth Linux local checkpoint word.", "answer": "compass", "status": "active" }
   ]
 }

@@ -20,6 +20,8 @@
 | Android Host | `story-lock/doc/design/03`、平台宿主设计 | `src/host/android-host` | `npm run test:android-readiness` | 原型已实现，需真机验收 |
 | Linux Host | 平台宿主设计 | `src/host/linux-host` | `npm run test:linux-host` | 原型已实现，需桌面验收 |
 
+2026-06-22 复核：Linux Host 自动检查已覆盖 `/permission-summary`，并完成 24 题题库导入、12 格 verify、authorize、execute、revoke 闭环；仍需 Linux 桌面或 WSL 环境的人工实测记录。
+
 ## 2. 用例夹具映射
 
 | 用例主题 | 上游来源 | 当前 fixture | 状态 |
@@ -37,8 +39,8 @@
 | 平台 | 自动化检查 | 人工验收记录 | 当前状态 |
 | --- | --- | --- | --- |
 | Windows | `npm run test:windows-package`、`npm run test:windows-host-features` | `docs/test/Windows托盘人工验收记录_20260620.md` | 需要桌面实测补记录 |
-| Android | `npm run test:android-readiness` | 待新增 Android 真机验收记录 | 需要真机实测 |
-| Linux | `npm run test:linux-host`、`npm run test:linux-package`、`npm run test:linux-desktop` | `docs/test/StoryLock平台验收矩阵_20260620.md` | 需要 Linux 桌面或 WSL 实测 |
+| Android | `npm run test:android-readiness` | `docs/test/Android真机验收记录_20260622.md` | 记录模板已补；需要真机实测 |
+| Linux | `npm run test:linux-host`、`npm run test:linux-package`、`npm run test:linux-desktop` | `docs/test/Linux桌面WSL验收记录_20260622.md` | 自动闭环已复核，记录模板已补；需要 Linux 桌面或 WSL 实测 |
 
 ## 4. 安全边界检查
 

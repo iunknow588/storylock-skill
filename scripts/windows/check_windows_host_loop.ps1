@@ -97,7 +97,7 @@ $stderrLog = Join-Path $data "windows-host.stderr.log"
 try {
   if (Test-Path -LiteralPath $stdoutLog) { Remove-Item -LiteralPath $stdoutLog -Force }
   if (Test-Path -LiteralPath $stderrLog) { Remove-Item -LiteralPath $stderrLog -Force }
-  $proc = Start-Process cargo -ArgumentList @("run", "--", "--console") -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
+  $proc = Start-Process cargo -ArgumentList @("run", "--no-default-features") -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
 
   $health = $null
   for ($attempt = 0; $attempt -lt 20; $attempt++) {

@@ -19,17 +19,7 @@ echo Gateway: %STORYLOCK_GATEWAY_URL%
 echo Local health: http://127.0.0.1:4510/health
 echo Local management: http://127.0.0.1:4510/ui
 echo.
-if /I "%STORYLOCK_WINDOWS_START_MODE%"=="tray" (
-  echo Starting in tray mode. Use the tray menu to open local UI, copy diagnostics, or exit.
-  echo.
-  "%HOST_EXE%" --tray
-  exit /b %ERRORLEVEL%
-)
-
-echo Keep this window open while using the Windows local host.
-echo Double-click yian-windows-host.exe for the desktop tray app.
-echo This script is kept for debug logs and console troubleshooting.
-echo Press Ctrl+C to stop it.
+echo Starting the Slint desktop UI.
 echo.
 
-"%HOST_EXE%" --console
+"%HOST_EXE%"

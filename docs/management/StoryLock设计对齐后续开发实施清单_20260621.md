@@ -6,7 +6,9 @@
 | 日期 | 2026-06-21 |
 | 对应计划 | `StoryLock设计对齐后续开发计划_20260621.md` |
 | 执行范围 | `skill/src`、`skill/scripts`、`skill/docs/design`、`skill/docs/test` |
-| 当前结论 | P0/P1/P2/P3 代码侧已完成主要闭环；P4 Windows/Android/Linux 已完成自动化接线检查；导入校验错误码已按 `SL_*` 风格对齐；当前不应归档，剩余工作是真机/桌面验收记录 |
+| 当前结论 | P0/P1/P2/P3 代码侧已完成主要闭环；P4 Windows/Android/Linux 已完成自动化接线检查；导入校验错误码已按 `SL_*` 风格对齐；真机实测之外的内容已纳入 `npm run test:non-device-validation`，状态汇总以 `non_device_ready` 表示完成；当前不应归档，剩余工作是真机/真实桌面验收记录 |
+
+2026-06-22 复核补充：`npm run test:linux-host` 已修复并通过。修复内容为 Linux 默认 `question-bank.json` 和测试导入夹具从 9 题补齐到 24 题，并按 challenge cell 的 `questionId` 提交答案，确保 `requestSignature` 高强度 12 格验证可以完成自动闭环。
 
 ## 1. P0 正式数据模型冻结
 
@@ -179,7 +181,11 @@ npm run test
 验收方式：
 
 ```powershell
+npm run test:non-device-validation
 npm run test:windows-package
+npm run test:android-readiness
+npm run test:linux-host
+npm run diagnose:linux-secret-service:wsl
 node scripts\test\docs-consistency.mjs
 node scripts\verify\path-consistency.mjs
 ```
@@ -197,5 +203,5 @@ node scripts\verify\path-consistency.mjs
 下一轮继续验收阶段：
 
 1. 补齐 Windows、Android、Linux 真机或桌面验收记录。
-2. 重点确认 Windows Slint UI、Android `/permission-summary`、Linux `/permission-summary` 和本地审计文件的实际运行表现。
+2. 重点确认 Windows Slint UI、Android 通过 `adb forward` 暴露的 `/permission-summary`、Linux `/permission-summary` 和 Linux Secret Service 的实际运行表现。
 3. 人工验收完成后，再把 20260621 阶段管理文档移动到 `docs/management/BACK/`。

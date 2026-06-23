@@ -13,10 +13,8 @@ $project = Resolve-Path -LiteralPath $ProjectDir
 Push-Location $project
 try {
   cargo check
-  cargo check --features ui-slint
-  cargo check --features ui-tray
-  cargo check --features "ui-slint ui-tray"
-  Write-Output "Windows host feature checks passed."
+  cargo check --no-default-features
+  Write-Output "Windows host Slint UI checks passed."
 }
 finally {
   Pop-Location

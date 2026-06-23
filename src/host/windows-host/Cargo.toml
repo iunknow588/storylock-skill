@@ -27,6 +27,5 @@ windows-sys = { version = "0.59", features = [
 ] }
 
 [features]
-default = []
-ui-tray = []
+default = ["ui-slint"]
 ui-slint = ["dep:slint"]

@@ -1,4 +1,4 @@
-#![cfg_attr(all(windows, feature = "ui-tray"), windows_subsystem = "windows")]
+#![cfg_attr(all(windows, feature = "ui-slint"), windows_subsystem = "windows")]
 
 use anyhow::{anyhow, Context, Result};
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
@@ -6,6 +6,7 @@ use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -23,9 +24,6 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{MessageBoxW, IDYES, MB_ICONQUE
 
 #[cfg(feature = "ui-slint")]
 mod slint_ui;
-#[cfg(feature = "ui-tray")]
-mod tray_ui;
-
 #[derive(Clone, Debug, Serialize)]
 struct WindowsHostConfig {
     product: String,
@@ -164,7 +162,7 @@ struct RuntimeUiState {
     last_confirmation: Option<Value>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct LocalAuditEvent {
     timestamp: String,
     event_type: String,
@@ -251,12 +249,12 @@ impl WindowsHostConfig {
                 "callChain": ["verify", "authorize", "execute", "revoke"]
             },
             "approvalMode": self.approval_mode,
-        "storage": {
+            "storage": {
                 "provider": "dpapi",
-                "path": self.data_dir.display().to_string()
+                "visibility": "host_internal_only"
             },
             "questionBank": {
-                "path": question_bank_path(&self.data_dir).display().to_string()
+                "visibility": "host_internal_only"
             }
         })
     }
@@ -351,6 +349,7 @@ impl SecretStore {
         fs::create_dir_all(root.join("credentials"))?;
         fs::create_dir_all(root.join("authorizations"))?;
         fs::create_dir_all(root.join("audit"))?;
+        fs::create_dir_all(root.join("story-template-requests"))?;
         Ok(Self { root })
     }
 
@@ -381,6 +380,18 @@ impl SecretStore {
 
     fn audit_log_path(&self) -> PathBuf {
         self.root.join("audit").join("local-audit.jsonl")
+    }
+
+    fn story_template_candidates_path(&self) -> PathBuf {
+        self.root
+            .join("story-template-requests")
+            .join("story-template-candidates.jsonl")
+    }
+
+    fn story_template_interface_manifest_path(&self) -> PathBuf {
+        self.root
+            .join("story-template-requests")
+            .join("interface-manifest.json")
     }
 
     fn get_or_create_signature_key(&self, key_id: &str) -> Result<String> {
@@ -476,6 +487,33 @@ impl SecretStore {
         writeln!(file, "{line}")?;
         Ok(())
     }
+
+    fn append_story_template_candidate(&self, candidate: &Value) -> Result<()> {
+        write_host_json_if_missing(
+            &self.story_template_interface_manifest_path(),
+            &story_template_interface_manifest(),
+        )?;
+        let mut file = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(self.story_template_candidates_path())?;
+        writeln!(file, "{}", serde_json::to_string(candidate)?)?;
+        Ok(())
+    }
+
+    fn read_story_template_candidates(&self, limit: usize) -> Vec<Value> {
+        let Ok(content) = fs::read_to_string(self.story_template_candidates_path()) else {
+            return Vec::new();
+        };
+        let mut items = content
+            .lines()
+            .filter(|line| !line.trim().is_empty())
+            .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+            .collect::<Vec<_>>();
+        items.reverse();
+        items.truncate(limit);
+        items
+    }
 }
 
 fn env_or(name: &str, fallback: &str) -> String {
@@ -511,6 +549,16 @@ fn resolve_data_dir() -> PathBuf {
 
 fn question_bank_path(data_dir: &Path) -> PathBuf {
     data_dir.join("question-bank.json")
+}
+
+fn write_host_json_if_missing(path: &Path, value: &Value) -> Result<()> {
+    if !path.exists() {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, serde_json::to_vec_pretty(value)?)?;
+    }
+    Ok(())
 }
 
 fn default_question_bank_json() -> &'static str {
@@ -830,6 +878,237 @@ fn confirmation_summary_for(
         "redactionLevel": "audit_meta_only",
         "hiddenFromUi": ["answers", "password", "privateKey", "signingKeyBytes", "storyRawText"],
         "timestamp": now_timestamp()
+    })
+}
+
+fn known_authorization_modes() -> Vec<AuthorizationChannelPolicy> {
+    vec![
+        AuthorizationChannelPolicy {
+            channel: "single_read",
+            required_strength: "medium",
+            allowed_action: "password_fill_or_signature",
+            grid_size: 9,
+            required_cells: 6,
+            remote_allowed: true,
+        },
+        AuthorizationChannelPolicy {
+            channel: "batch_read",
+            required_strength: "high",
+            allowed_action: "batch_read",
+            grid_size: 12,
+            required_cells: 12,
+            remote_allowed: true,
+        },
+        AuthorizationChannelPolicy {
+            channel: "story_edit",
+            required_strength: "story_edit",
+            allowed_action: "story_edit",
+            grid_size: 24,
+            required_cells: 22,
+            remote_allowed: false,
+        },
+    ]
+}
+
+fn management_authorization_modes_json() -> Value {
+    Value::Array(
+        known_authorization_modes()
+            .into_iter()
+            .map(|policy| {
+                json!({
+                    "channel": policy.channel,
+                    "requiredStrength": policy.required_strength,
+                    "allowedAction": policy.allowed_action,
+                    "gridSize": policy.grid_size,
+                    "requiredCells": policy.required_cells,
+                    "remoteAllowed": policy.remote_allowed
+                })
+            })
+            .collect(),
+    )
+}
+
+fn increment_counter(map: &mut BTreeMap<String, u64>, key: &str) {
+    let normalized = key.trim();
+    if !normalized.is_empty() {
+        *map.entry(normalized.to_string()).or_insert(0) += 1;
+    }
+}
+
+fn audit_meta_str<'a>(event: &'a LocalAuditEvent, key: &str) -> Option<&'a str> {
+    event
+        .meta
+        .get(key)
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+}
+
+fn request_audit_context(request: &Value) -> Value {
+    json!({
+        "requester": requester_from(request),
+        "origin": origin_from(request),
+        "remoteRequest": request
+            .get("remoteRequest")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+        "remoteInterface": request
+            .get("remoteInterface")
+            .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .unwrap_or("local_api")
+    })
+}
+
+fn merge_audit_meta(mut base: Value, context: Value) -> Value {
+    if let (Some(base), Some(context)) = (base.as_object_mut(), context.as_object()) {
+        for (key, value) in context {
+            base.entry(key.clone()).or_insert_with(|| value.clone());
+        }
+    }
+    base
+}
+
+fn read_local_audit_events(path: &Path) -> Vec<LocalAuditEvent> {
+    let Ok(content) = fs::read_to_string(path) else {
+        return Vec::new();
+    };
+    content
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .filter_map(|line| serde_json::from_str::<LocalAuditEvent>(line).ok())
+        .collect()
+}
+
+fn counter_entries(map: BTreeMap<String, u64>) -> Value {
+    Value::Array(
+        map.into_iter()
+            .map(|(name, calls)| json!({ "name": name, "calls": calls }))
+            .collect(),
+    )
+}
+
+fn host_management_stats(runtime: &WindowsHostRuntime) -> Value {
+    let events = read_local_audit_events(&runtime.secret_store.audit_log_path());
+    let mut object_calls: BTreeMap<String, u64> = BTreeMap::new();
+    let mut object_successes: BTreeMap<String, u64> = BTreeMap::new();
+    let mut object_failures: BTreeMap<String, u64> = BTreeMap::new();
+    let mut object_last_seen: BTreeMap<String, String> = BTreeMap::new();
+    let mut object_capabilities: BTreeMap<String, BTreeMap<String, u64>> = BTreeMap::new();
+    let mut agent_calls: BTreeMap<String, u64> = BTreeMap::new();
+    let mut channel_calls: BTreeMap<String, u64> = BTreeMap::new();
+    let mut remote_interfaces: BTreeMap<String, u64> = BTreeMap::new();
+    let mut error_calls: BTreeMap<String, u64> = BTreeMap::new();
+    let mut total_calls = 0_u64;
+    let mut success_calls = 0_u64;
+    let mut failed_calls = 0_u64;
+    let mut remote_calls = 0_u64;
+
+    for event in &events {
+        total_calls += 1;
+        let result = event.result.as_str();
+        if matches!(result, "success" | "approved") {
+            success_calls += 1;
+        }
+        if matches!(result, "error" | "failed" | "denied") || event.error_code.is_some() {
+            failed_calls += 1;
+        }
+
+        if let Some(object_ref) = event.object_ref.as_deref().map(str::trim).filter(|v| !v.is_empty()) {
+            increment_counter(&mut object_calls, object_ref);
+            object_last_seen.insert(object_ref.to_string(), event.timestamp.clone());
+            increment_counter(
+                object_capabilities
+                    .entry(object_ref.to_string())
+                    .or_default(),
+                &event.capability,
+            );
+            if matches!(result, "success" | "approved") {
+                increment_counter(&mut object_successes, object_ref);
+            }
+            if matches!(result, "error" | "failed" | "denied") || event.error_code.is_some() {
+                increment_counter(&mut object_failures, object_ref);
+            }
+        }
+
+        let requester = audit_meta_str(event, "requester")
+            .or_else(|| audit_meta_str(event, "agentId"))
+            .or_else(|| audit_meta_str(event, "origin"))
+            .unwrap_or("unknown agent");
+        increment_counter(&mut agent_calls, requester);
+
+        if let Some(channel) = audit_meta_str(event, "authorizationChannel") {
+            increment_counter(&mut channel_calls, channel);
+        } else if let Some(action) = audit_meta_str(event, "allowedAction") {
+            increment_counter(&mut channel_calls, action);
+        }
+
+        let remote_interface = audit_meta_str(event, "remoteInterface")
+            .or_else(|| audit_meta_str(event, "origin"))
+            .unwrap_or(if event.meta.get("remoteRequest").and_then(Value::as_bool).unwrap_or(false) {
+                "remote_gateway"
+            } else {
+                "local_api"
+            });
+        increment_counter(&mut remote_interfaces, remote_interface);
+        if remote_interface != "local_api"
+            || event
+                .meta
+                .get("remoteRequest")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        {
+            remote_calls += 1;
+        }
+
+        if let Some(error_code) = event.error_code.as_deref() {
+            let key = match event.error_type.as_deref() {
+                Some(error_type) if !error_type.trim().is_empty() => {
+                    format!("{error_code}:{error_type}")
+                }
+                _ => error_code.to_string(),
+            };
+            increment_counter(&mut error_calls, &key);
+        }
+    }
+
+    let objects = Value::Array(
+        object_calls
+            .into_iter()
+            .map(|(object_ref, calls)| {
+                json!({
+                    "objectRef": object_ref,
+                    "calls": calls,
+                    "successes": object_successes.get(&object_ref).copied().unwrap_or(0),
+                    "failures": object_failures.get(&object_ref).copied().unwrap_or(0),
+                    "lastSeenAt": object_last_seen.get(&object_ref).cloned().unwrap_or_default(),
+                    "capabilities": counter_entries(object_capabilities.remove(&object_ref).unwrap_or_default())
+                })
+            })
+            .collect(),
+    );
+
+    json!({
+        "schemaVersion": "windows-host-management-stats-v1",
+        "generatedAt": now_timestamp(),
+        "authorizationModes": management_authorization_modes_json(),
+        "summary": {
+            "auditEvents": total_calls,
+            "successes": success_calls,
+            "failures": failed_calls,
+            "managedObjects": objects.as_array().map(Vec::len).unwrap_or(0),
+            "remoteInterfaceCalls": remote_calls
+        },
+        "objects": objects,
+        "agents": counter_entries(agent_calls),
+        "authorizationChannels": counter_entries(channel_calls),
+        "remoteInterfaces": counter_entries(remote_interfaces),
+        "errors": counter_entries(error_calls),
+        "redaction": {
+            "level": "audit_meta_only",
+            "hidden": ["answers", "password", "privateKey", "signingKeyBytes", "storyRawText", "sharedSecret", "drafts", "vaultFiles", "packagePaths"]
+        }
     })
 }
 
@@ -1364,6 +1643,22 @@ fn ui_status(runtime: &WindowsHostRuntime) -> Value {
         }),
     );
     let state = runtime.ui_state_snapshot();
+    let question_bank_result = question_bank.get("result").cloned().unwrap_or(Value::Null);
+    let question_bank_summary = json!({
+        "questionSetVersion": question_bank_result
+            .get("questionSetVersion")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown"),
+        "normalizationVersion": question_bank_result
+            .get("normalizationVersion")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown"),
+        "questionCount": question_bank_result
+            .get("questionCount")
+            .and_then(Value::as_u64)
+            .unwrap_or(0),
+        "visibility": "host_internal_only"
+    });
     json!({
         "status": "success",
         "capability": "windowsHostUiStatus",
@@ -1384,7 +1679,9 @@ fn ui_status(runtime: &WindowsHostRuntime) -> Value {
                     Value::Null
                 }
             },
-            "questionBank": question_bank.get("result").cloned().unwrap_or(Value::Null),
+            "questionBank": question_bank_summary,
+            "managementStats": host_management_stats(runtime),
+            "storyTemplateGenerator": story_template_generator_status(runtime),
             "lastConfirmation": state.last_confirmation,
             "lastExecution": state.last_execution,
             "ui": {
@@ -1436,6 +1733,150 @@ fn diagnostics_status(runtime: &WindowsHostRuntime) -> Value {
     })
 }
 
+fn windows_host_management_ui_html() -> &'static str {
+    r##"<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yian Windows Host</title>
+    <style>
+      :root { color-scheme: light; --bg:#f4f7f8; --surface:#fff; --line:#d5e0e5; --text:#12202b; --muted:#5c6d79; --accent:#0d6d77; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+      main { width: min(1180px, calc(100vw - 32px)); margin: 0 auto; padding: 28px 0 44px; }
+      header { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 28px; line-height: 1.2; }
+      .muted { color: var(--muted); line-height: 1.65; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+      .wide { grid-column: span 2; }
+      section { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+      h2 { margin-bottom: 12px; font-size: 18px; }
+      dl { display: grid; gap: 10px; margin: 0; }
+      dt { color: var(--muted); font-size: 12px; }
+      dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+      .pill { display: inline-flex; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--accent); font-size: 12px; }
+      .ok { color: #0a6a38; }
+      .warn { color: #9b5a00; }
+      pre { margin: 0; max-height: 260px; overflow: auto; padding: 12px; border-radius: 8px; background: #101820; color: #d9e6ee; white-space: pre-wrap; overflow-wrap: anywhere; }
+      button, a { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--text); text-decoration: none; cursor: pointer; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+      @media (max-width: 900px) { header, .grid { grid-template-columns: 1fr; display: grid; } .wide { grid-column: auto; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="muted">Yian Host audit and authorization surface</p>
+          <h1>Yian Windows Host Management</h1>
+        </div>
+        <div class="actions">
+          <button type="button" id="refresh">Refresh</button>
+          <a href="/health">Health JSON</a>
+          <a href="/diagnostics">Diagnostics</a>
+        </div>
+      </header>
+      <div class="grid">
+        <section><h2>Host</h2><dl id="host"></dl></section>
+        <section><h2>Relay</h2><dl id="relay"></dl></section>
+        <section><h2>Authorization Modes</h2><dl id="authorization-modes"></dl></section>
+        <section><h2>Managed Objects</h2><dl id="managed-objects"></dl></section>
+        <section><h2>Agents</h2><dl id="agents"></dl></section>
+        <section><h2>Remote Interfaces</h2><dl id="remote-interfaces"></dl></section>
+        <section><h2>Error Calls</h2><dl id="error-calls"></dl></section>
+        <section><h2>Story Template Queue</h2><dl id="story-template"></dl></section>
+        <section class="wide"><h2>Last Confirmation</h2><dl id="last-confirmation"></dl></section>
+        <section><h2>Last Execution</h2><dl id="last-execution"></dl></section>
+        <section><h2>Boundaries</h2><dl id="boundaries"></dl></section>
+        <section class="wide"><h2>Raw Redacted Status JSON</h2><pre id="raw">loading...</pre></section>
+      </div>
+    </main>
+    <script>
+      const fields = (target, rows) => {
+        document.querySelector(target).innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v ?? "not configured"}</dd></div>`).join("");
+      };
+      const emptyRows = (label) => [[label, "No calls recorded yet"]];
+      async function loadStatus() {
+        const response = await fetch("/ui/status", { headers: { accept: "application/json" } });
+        const payload = await response.json();
+        const result = payload.result || {};
+        const host = result.host || {};
+        const relay = result.relay || {};
+        const remote = result.remote || {};
+        const management = result.managementStats || {};
+        const templateGenerator = result.storyTemplateGenerator || {};
+        const confirmation = result.lastConfirmation || {};
+        const last = result.lastExecution || {};
+        const boundaries = result.boundaries || {};
+        fields("#host", [
+          ["Product", `${host.product || ""} ${host.version || ""}`],
+          ["Status", `<span class="pill">${host.status || "unknown"}</span>`],
+          ["Identity", host.identityId],
+          ["Device", host.deviceId],
+          ["Local API", host.executeUrl],
+          ["Storage Visibility", host.storage?.visibility || "host_internal_only"],
+        ]);
+        fields("#relay", [
+          ["Remote", remote.enabled ? `enabled: ${remote.gatewayUrl || ""}` : "local only"],
+          ["Status", `<span class="${relay.status === "online" ? "ok" : "warn"}">${relay.status || "unknown"}</span>`],
+          ["Last Poll", relay.lastPollAt],
+          ["Last Error", relay.lastError || "none"],
+        ]);
+        fields("#authorization-modes", (management.authorizationModes || []).map(mode => [
+          mode.channel,
+          `${mode.requiredCells}/${mode.gridSize} grid cells, ${mode.requiredStrength}, ${mode.remoteAllowed ? "remote allowed" : "local only"}`
+        ]));
+        fields("#managed-objects", (management.objects || []).length ? management.objects.map(item => [
+          item.objectRef,
+          `${item.calls} calls, ${item.successes} ok, ${item.failures} errors, last ${item.lastSeenAt || "never"}`
+        ]) : emptyRows("Managed objects"));
+        fields("#agents", (management.agents || []).length ? management.agents.map(item => [item.name, `${item.calls} calls`]) : emptyRows("Agents"));
+        fields("#remote-interfaces", (management.remoteInterfaces || []).length ? management.remoteInterfaces.map(item => [item.name, `${item.calls} calls`]) : emptyRows("Remote interfaces"));
+        fields("#error-calls", (management.errors || []).length ? management.errors.map(item => [item.name, `${item.calls} calls`]) : [["No errors", "0 calls"]]);
+        fields("#story-template", [
+          ["Mode", templateGenerator.mode || "local_template_fallback"],
+          ["LLM Key", templateGenerator.llmKey || "missing"],
+          ["Candidate Count", templateGenerator.candidateCount ?? 0],
+          ["Pull Rule", "StoryLock must pull; Host never invokes StoryLock"],
+        ]);
+        fields("#last-confirmation", [
+          ["Request", confirmation.requestId || "none"],
+          ["Status", confirmation.status || "none"],
+          ["Capability", confirmation.capability || "none"],
+          ["Object", confirmation.objectRef || "none"],
+          ["Requester", confirmation.requester || "none"],
+          ["Origin", confirmation.origin || "none"],
+          ["Strength", confirmation.requiredStrength || "none"],
+          ["Expiry", confirmation.expiry || "none"],
+          ["Risk", confirmation.risk || "none"],
+        ]);
+        fields("#last-execution", [
+          ["Request", last.requestId || "none"],
+          ["Status", last.status || "none"],
+          ["Capability", last.capability || "none"],
+          ["Object", last.objectRef || "none"],
+          ["Authorization", last.authorizationId || "none"],
+          ["Strength", last.requiredStrength || "none"],
+          ["Redaction", last.redactionLevel || "audit_meta_only"],
+        ]);
+        fields("#boundaries", [
+          ["Remote Capabilities", (boundaries.remoteCapabilities || []).join(", ")],
+          ["Hidden From UI", (boundaries.hiddenFromUi || []).join(", ")],
+          ["Local Call Chain", (boundaries.localCoreCallChain || []).join(" -> ")],
+        ]);
+        document.querySelector("#raw").textContent = JSON.stringify(payload, null, 2);
+      }
+      document.querySelector("#refresh").addEventListener("click", loadStatus);
+      loadStatus();
+      setInterval(loadStatus, 5000);
+    </script>
+  </body>
+</html>"##
+}
+
+#[allow(dead_code)]
 fn windows_host_ui_html() -> &'static str {
     r##"<!doctype html>
 <html lang="zh-CN">
@@ -1479,7 +1920,6 @@ fn windows_host_ui_html() -> &'static str {
           <button type="button" id="refresh">刷新</button>
           <a href="/health">Health JSON</a>
           <a href="/diagnostics">诊断信息</a>
-          <a href="/question-bank/status">题库状态</a>
         </div>
       </header>
       <div class="grid">
@@ -1534,7 +1974,7 @@ fn windows_host_ui_html() -> &'static str {
           ["identityId", host.identityId],
           ["deviceId", host.deviceId],
           ["本地 API", host.executeUrl],
-          ["数据目录", host.storage?.path],
+          ["Storage", host.storage?.visibility || "host_internal_only"],
         ]);
         fields("#relay", [
           ["Remote", remote.enabled ? `enabled: ${remote.gatewayUrl || ""}` : "local only"],
@@ -1546,7 +1986,7 @@ fn windows_host_ui_html() -> &'static str {
           ["版本", bank.questionSetVersion],
           ["规范化", bank.normalizationVersion],
           ["题目数量", bank.questionCount],
-          ["路径", bank.path],
+          ["Visibility", bank.visibility || "host_internal_only"],
         ]);
         fields("#last-confirmation", [
           ["请求", confirmation.requestId || "暂无"],
@@ -1631,6 +2071,195 @@ fn question_bank_import(runtime: &WindowsHostRuntime, request: &Value) -> Value 
             "Validate the source JSON file and retry the question bank import request.",
         ),
     }
+}
+
+fn story_template_interface_manifest() -> Value {
+    json!({
+        "schemaVersion": "story-template-interface-manifest-v1",
+        "owner": "yian-windows-host",
+        "direction": "storylock_pulls_candidates",
+        "interfaces": {
+            "candidateQueue": "story-template-candidates.jsonl",
+            "localHttpGenerate": "/story-template/generate",
+            "localHttpCandidates": "/story-template/candidates"
+        },
+        "boundary": {
+            "hostMayGenerateCandidates": true,
+            "hostMustNotInvokeStoryLock": true,
+            "storyLockImportsOnlyAfterExplicitPull": true,
+            "llmKeysAreDirectAccessConfig": true
+        }
+    })
+}
+
+fn story_template_generator_status(runtime: &WindowsHostRuntime) -> Value {
+    let key_configured = std::env::var("STORYLOCK_STORY_LLM_API_KEY")
+        .or_else(|_| std::env::var("OPENAI_API_KEY"))
+        .ok()
+        .map(|value| !value.trim().is_empty())
+        .unwrap_or(false);
+    let endpoint_configured = std::env::var("STORYLOCK_STORY_LLM_ENDPOINT")
+        .ok()
+        .map(|value| !value.trim().is_empty())
+        .unwrap_or(false);
+    json!({
+        "schemaVersion": "story-template-generator-status-v1",
+        "mode": if key_configured && endpoint_configured { "llm_ready" } else { "local_template_fallback" },
+        "llmKey": if key_configured { "configured_direct_access" } else { "missing" },
+        "llmEndpoint": if endpoint_configured { "configured" } else { "missing" },
+        "candidateCount": runtime.secret_store.read_story_template_candidates(1000).len(),
+        "interfaces": {
+            "generate": format!("http://127.0.0.1:{}/story-template/generate", runtime.config.host_port),
+            "candidates": format!("http://127.0.0.1:{}/story-template/candidates", runtime.config.host_port)
+        },
+        "boundary": "Host generates and queues candidates only. StoryLock must pull; Host never invokes StoryLock."
+    })
+}
+
+fn safe_story_slug(value: &str) -> String {
+    let slug = sanitize_ref(value);
+    if slug.is_empty() {
+        short_id()
+    } else {
+        slug
+    }
+}
+
+fn generate_local_story_framework(request: &Value) -> Value {
+    let theme = request
+        .get("theme")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("memory authorization story");
+    let audience = request
+        .get("audience")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("local StoryLock user");
+    let tone = request
+        .get("tone")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("clear and memorable");
+    let slug = safe_story_slug(theme);
+    json!({
+        "title": format!("Story Framework: {theme}"),
+        "summary": format!("A {tone} story framework for {audience}, prepared as a candidate template for StoryLock to pull later."),
+        "memoryAnchors": [
+            format!("{theme} origin"),
+            "trusted local device",
+            "nine-grid recall",
+            "agent request",
+            "remote interface check",
+            "safe completion"
+        ],
+        "chapters": [
+            { "id": format!("{slug}-setup"), "purpose": "Introduce the person, place, and object that make the memory easy to recall." },
+            { "id": format!("{slug}-challenge"), "purpose": "Connect the managed object request to a concrete event and choice." },
+            { "id": format!("{slug}-resolution"), "purpose": "Close with the correct authorization boundary and outcome." }
+        ],
+        "questionPlan": {
+            "targetCount": request.get("questionCount").and_then(Value::as_u64).unwrap_or(24),
+            "grid": "StoryLock decides final grid cells and answers after import.",
+            "hostBoundary": "candidate_framework_only"
+        }
+    })
+}
+
+fn story_template_generate(runtime: &WindowsHostRuntime, request: &Value) -> Value {
+    let request_id = request_id_from(request);
+    let framework = generate_local_story_framework(request);
+    let candidate_id = format!("story-template-{}", Uuid::new_v4());
+    let candidate = json!({
+        "schemaVersion": "story-template-candidate-v1",
+        "candidateId": candidate_id,
+        "requestId": request_id,
+        "createdAt": now_timestamp(),
+        "generator": {
+            "owner": "yian-host",
+            "mode": story_template_generator_status(runtime)
+                .get("mode")
+                .and_then(Value::as_str)
+                .unwrap_or("local_template_fallback"),
+            "llmKey": story_template_generator_status(runtime)
+                .get("llmKey")
+                .and_then(Value::as_str)
+                .unwrap_or("missing")
+        },
+        "framework": framework,
+        "consumption": {
+            "direction": "storylock_pulls_candidate",
+            "hostInvokesStoryLock": false,
+            "status": "queued"
+        },
+        "redactionLevel": "candidate_only"
+    });
+    match runtime.secret_store.append_story_template_candidate(&candidate) {
+        Ok(()) => json!({
+            "requestId": request_id,
+            "status": "success",
+            "capability": "generateStoryTemplateCandidate",
+            "executionLocation": "local",
+            "result": {
+                "candidateId": candidate.get("candidateId").cloned().unwrap_or(Value::Null),
+                "queued": true,
+                "storyLockPullRequired": true,
+                "framework": candidate.get("framework").cloned().unwrap_or(Value::Null)
+            },
+            "redactionLevel": "candidate_only",
+            "retentionGranted": "candidate_queue_only",
+            "auditMeta": {
+                "timestamp": now_timestamp(),
+                "interface": "story-template/generate",
+                "llmKey": candidate
+                    .get("generator")
+                    .and_then(|value| value.get("llmKey"))
+                    .cloned()
+                    .unwrap_or(Value::String("missing".to_string()))
+            },
+            "error": Value::Null
+        }),
+        Err(error) => error_response(
+            &runtime.config,
+            &request_id,
+            "generateStoryTemplateCandidate",
+            "SLG-005",
+            "host_storage_error",
+            &format!("failed to queue story template candidate: {error}"),
+            "Check the Windows host data directory and retry template generation.",
+        ),
+    }
+}
+
+fn story_template_candidates(runtime: &WindowsHostRuntime, request: &Value) -> Value {
+    let request_id = request_id_from(request);
+    let limit = request
+        .get("limit")
+        .and_then(Value::as_u64)
+        .unwrap_or(20)
+        .clamp(1, 100) as usize;
+    json!({
+        "requestId": request_id,
+        "status": "success",
+        "capability": "storyTemplateCandidates",
+        "executionLocation": "local",
+        "result": {
+            "pullModel": "storylock_explicit_pull_only",
+            "hostInvokesStoryLock": false,
+            "interfaceManifest": story_template_interface_manifest(),
+            "candidates": runtime.secret_store.read_story_template_candidates(limit)
+        },
+        "redactionLevel": "candidate_only",
+        "retentionGranted": "candidate_queue_only",
+        "auditMeta": {
+            "timestamp": now_timestamp(),
+            "interface": "story-template/candidates"
+        },
+        "error": Value::Null
+    })
 }
 
 fn authorize_local_action(runtime: &WindowsHostRuntime, request: &Value) -> Value {
@@ -2027,6 +2656,7 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
     }
 
     let object_ref = object_ref_for_request(&capability, &request);
+    let audit_context = request_audit_context(&request);
 
     let resolved_authorization = if let Some(authorization_id) = request
         .get("authorizationId")
@@ -2051,12 +2681,12 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                         "error",
                         Some("SLG-003"),
                         Some("authorization_failed"),
-                        json!({
+                        merge_audit_meta(json!({
                             "reason": error.to_string(),
                             "authorizationId": authorization_id,
                             "authorizationStatus": record.status,
                             "allowedAction": record.allowed_action
-                        }),
+                        }), audit_context.clone()),
                     );
                     return error_response(
                         config,
@@ -2080,10 +2710,10 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                     "error",
                     Some("SLG-003"),
                     Some("authorization_failed"),
-                    json!({
+                    merge_audit_meta(json!({
                         "reason": format!("authorizationId could not be resolved: {error}"),
                         "authorizationId": authorization_id
-                    }),
+                    }), audit_context.clone()),
                 );
                 return error_response(
                     config,
@@ -2109,10 +2739,10 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                     "denied",
                     Some("SLG-002"),
                     Some("policy_denied"),
-                    json!({
+                    merge_audit_meta(json!({
                         "reason": error.to_string(),
                         "authorizationChannel": authorization_channel_for_request(&capability, &request)
-                    }),
+                    }), audit_context.clone()),
                 );
                 return error_response(
                     config,
@@ -2135,10 +2765,10 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                 "denied",
                 Some("SLG-003"),
                 Some("authorization_failed"),
-                json!({
+                merge_audit_meta(json!({
                     "reason": "local_confirmation_denied",
                     "approvalMode": config.approval_mode
-                }),
+                }), audit_context.clone()),
             );
             return error_response(
                 config,
@@ -2207,13 +2837,14 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                 "success",
                 None,
                 None,
-                json!({
+                merge_audit_meta(json!({
                     "verificationId": verification_id,
                     "authorizationId": authorization_id,
                     "allowedAction": allowed_action,
                     "requiredStrength": required_strength,
+                    "authorizationChannel": authorization_channel_for_request(&capability, &request),
                     "confirmationMethod": confirmation_method
-                }),
+                }), audit_context.clone()),
             );
             json!({
             "requestId": request_id,
@@ -2261,12 +2892,13 @@ fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> Value {
                 "error",
                 Some(code),
                 Some(error_type),
-                json!({
+                merge_audit_meta(json!({
                     "reason": error.to_string(),
                     "verificationId": verification_id,
                     "authorizationId": authorization_id,
-                    "allowedAction": allowed_action
-                }),
+                    "allowedAction": allowed_action,
+                    "authorizationChannel": authorization_channel_for_request(&capability, &request)
+                }), audit_context.clone()),
             );
             error_response(
                 config,
@@ -2306,7 +2938,8 @@ fn start_local_server(runtime: WindowsHostRuntime) -> Result<thread::JoinHandle<
                 )
                 .with_header(content_type_json()),
                 (&Method::Get, "/ui") => {
-                    Response::from_string(windows_host_ui_html()).with_header(content_type_html())
+                    Response::from_string(windows_host_management_ui_html())
+                        .with_header(content_type_html())
                 }
                 (&Method::Get, "/ui/status") => {
                     Response::from_string(ui_status(&runtime).to_string())
@@ -2316,6 +2949,16 @@ fn start_local_server(runtime: WindowsHostRuntime) -> Result<thread::JoinHandle<
                     Response::from_string(diagnostics_status(&runtime).to_string())
                         .with_header(content_type_json())
                 }
+                (&Method::Get, "/story-template/candidates") => Response::from_string(
+                    story_template_candidates(
+                        &runtime,
+                        &json!({
+                            "requestId": format!("req-{}", Uuid::new_v4())
+                        }),
+                    )
+                    .to_string(),
+                )
+                .with_header(content_type_json()),
                 (&Method::Post, "/shutdown") => {
                     thread::spawn(|| {
                         thread::sleep(Duration::from_millis(150));
@@ -2367,6 +3010,15 @@ fn start_local_server(runtime: WindowsHostRuntime) -> Result<thread::JoinHandle<
                         Err(_) => json!({}),
                     };
                     Response::from_string(question_bank_import(&runtime, &payload).to_string())
+                        .with_header(content_type_json())
+                }
+                (&Method::Post, "/story-template/generate") => {
+                    let mut body = String::new();
+                    let payload = match request.as_reader().read_to_string(&mut body) {
+                        Ok(_) => serde_json::from_str::<Value>(&body).unwrap_or_else(|_| json!({})),
+                        Err(_) => json!({}),
+                    };
+                    Response::from_string(story_template_generate(&runtime, &payload).to_string())
                         .with_header(content_type_json())
                 }
                 (&Method::Post, "/execute") => {
@@ -2486,7 +3138,17 @@ fn run_relay_loop(runtime: WindowsHostRuntime) -> Result<()> {
                     .and_then(Value::as_str)
                     .unwrap_or("")
                     .to_string();
-                let remote_request = value.get("request").cloned().unwrap_or_else(|| json!({}));
+                let mut remote_request = value.get("request").cloned().unwrap_or_else(|| json!({}));
+                if let Some(request) = remote_request.as_object_mut() {
+                    request.insert("remoteRequest".to_string(), Value::Bool(true));
+                    request.insert(
+                        "remoteInterface".to_string(),
+                        Value::String("relay_gateway".to_string()),
+                    );
+                    request
+                        .entry("requester".to_string())
+                        .or_insert_with(|| Value::String("relay_gateway".to_string()));
+                }
                 let response = execute_request(&runtime, remote_request);
                 runtime.record_execution_summary(&response);
                 runtime.set_relay_status("handled_request", None);
@@ -2634,18 +3296,16 @@ fn main() -> Result<()> {
         );
         return Ok(());
     }
-    if args.iter().any(|arg| arg == "--console")
-        || matches!(start_mode.as_str(), "console" | "debug")
-    {
-        return run_console_entry(config);
-    }
-    if args.iter().any(|arg| arg == "--tray") || start_mode == "tray" {
-        return run_tray_entry(config);
+    if matches!(start_mode.as_str(), "console" | "debug") {
+        eprintln!(
+            "STORYLOCK_WINDOWS_START_MODE={start_mode} is ignored by the default Windows Slint UI build."
+        );
     }
 
     run_default_entry(config)
 }
 
+#[cfg(not(feature = "ui-slint"))]
 fn run_console_entry(config: WindowsHostConfig) -> Result<()> {
     let runtime = WindowsHostRuntime::new(config)?;
     println!("{}", serde_json::to_string_pretty(&runtime.config)?);
@@ -2691,34 +3351,6 @@ fn run_desktop_ui_entry(config: WindowsHostConfig) -> Result<()> {
     slint_ui::run(config)
 }
 
-#[cfg(feature = "ui-tray")]
-fn run_tray_entry(config: WindowsHostConfig) -> Result<()> {
-    let runtime = WindowsHostRuntime::new(config.clone())?;
-    let server_runtime = runtime.clone();
-    let _server = match start_local_server(server_runtime) {
-        Ok(server) => server,
-        Err(error) if error.to_string().contains("failed to bind local server") => {
-            if should_open_ui_on_start() {
-                open_local_management_page(config.host_port);
-            }
-            return Ok(());
-        }
-        Err(error) => return Err(error),
-    };
-    thread::spawn(move || run_runtime_loop(runtime));
-    if should_open_ui_on_start() {
-        open_local_management_page(config.host_port);
-    }
-    tray_ui::run(config)
-}
-
-#[cfg(not(feature = "ui-tray"))]
-fn run_tray_entry(_config: WindowsHostConfig) -> Result<()> {
-    Err(anyhow!(
-        "Tray UI is not enabled. Run with: cargo run --features ui-tray -- --tray"
-    ))
-}
-
 fn run_runtime_loop(runtime: WindowsHostRuntime) -> Result<()> {
     if runtime.config.remote_enabled {
         run_relay_loop(runtime)
@@ -2727,28 +3359,6 @@ fn run_runtime_loop(runtime: WindowsHostRuntime) -> Result<()> {
         loop {
             thread::sleep(Duration::from_secs(3600));
         }
-    }
-}
-
-#[cfg(feature = "ui-tray")]
-fn should_open_ui_on_start() -> bool {
-    !matches!(
-        std::env::var("STORYLOCK_WINDOWS_OPEN_UI_ON_START")
-            .unwrap_or_else(|_| "1".to_string())
-            .to_ascii_lowercase()
-            .as_str(),
-        "0" | "false" | "no" | "off"
-    )
-}
-
-#[cfg(feature = "ui-tray")]
-fn open_local_management_page(port: u16) {
-    let url = format!("http://127.0.0.1:{port}/ui");
-    if let Err(error) = std::process::Command::new("cmd")
-        .args(["/C", "start", "", &url])
-        .spawn()
-    {
-        eprintln!("failed to open local management page {url}: {error}");
     }
 }
 
@@ -2985,6 +3595,176 @@ mod tests {
             .and_then(|value| value.get("coreCallId"))
             .and_then(Value::as_str)
             .is_some());
+    }
+
+    #[test]
+    fn ui_status_reports_redacted_management_stats() {
+        let runtime = test_runtime();
+        let success = execute_request(
+            &runtime,
+            json!({
+                "requestId": "req-management-success",
+                "capability": "requestPasswordFill",
+                "credentialRef": "mailbox-management",
+                "requester": "agent-alpha",
+                "origin": "https://agent.example.test",
+                "remoteRequest": true,
+                "remoteInterface": "relay_gateway"
+            }),
+        );
+        assert_eq!(success.get("status").and_then(Value::as_str), Some("success"));
+
+        let denied = execute_request(
+            &runtime,
+            json!({
+                "requestId": "req-management-denied",
+                "capability": "requestPasswordFill",
+                "credentialRef": "mailbox-management",
+                "requester": "agent-alpha",
+                "remoteRequest": true,
+                "remoteInterface": "relay_gateway",
+                "authorizationChannel": "story_edit"
+            }),
+        );
+        assert_eq!(denied.get("status").and_then(Value::as_str), Some("error"));
+
+        let status = ui_status(&runtime);
+        let stats = status
+            .get("result")
+            .and_then(|value| value.get("managementStats"))
+            .expect("management stats");
+
+        assert!(stats
+            .get("authorizationModes")
+            .and_then(Value::as_array)
+            .expect("authorization modes")
+            .iter()
+            .any(|mode| {
+                mode.get("channel").and_then(Value::as_str) == Some("story_edit")
+                    && mode.get("requiredCells").and_then(Value::as_u64) == Some(22)
+                    && mode.get("remoteAllowed").and_then(Value::as_bool) == Some(false)
+            }));
+
+        let object = stats
+            .get("objects")
+            .and_then(Value::as_array)
+            .expect("objects")
+            .iter()
+            .find(|item| item.get("objectRef").and_then(Value::as_str) == Some("mailbox-management"))
+            .expect("managed object");
+        assert_eq!(object.get("calls").and_then(Value::as_u64), Some(2));
+        assert_eq!(object.get("successes").and_then(Value::as_u64), Some(1));
+        assert_eq!(object.get("failures").and_then(Value::as_u64), Some(1));
+
+        assert!(stats
+            .get("agents")
+            .and_then(Value::as_array)
+            .expect("agents")
+            .iter()
+            .any(|item| {
+                item.get("name").and_then(Value::as_str) == Some("agent-alpha")
+                    && item.get("calls").and_then(Value::as_u64) == Some(2)
+            }));
+        assert!(stats
+            .get("remoteInterfaces")
+            .and_then(Value::as_array)
+            .expect("remote interfaces")
+            .iter()
+            .any(|item| item.get("name").and_then(Value::as_str) == Some("relay_gateway")));
+        assert!(stats
+            .get("errors")
+            .and_then(Value::as_array)
+            .expect("errors")
+            .iter()
+            .any(|item| {
+                item.get("name")
+                    .and_then(Value::as_str)
+                    .is_some_and(|name| name.contains("SLG-002"))
+            }));
+
+        assert_eq!(
+            status
+                .get("result")
+                .and_then(|value| value.get("questionBank"))
+                .and_then(|value| value.get("path")),
+            None
+        );
+    }
+
+    #[test]
+    fn story_template_generation_queues_candidates_for_storylock_pull() {
+        let runtime = test_runtime();
+        std::env::set_var("STORYLOCK_STORY_LLM_API_KEY", "sk-test-secret-value");
+
+        let generated = story_template_generate(
+            &runtime,
+            &json!({
+                "requestId": "req-story-template",
+                "theme": "train station memory",
+                "audience": "desktop tester",
+                "tone": "precise",
+                "questionCount": 24
+            }),
+        );
+        assert_eq!(
+            generated.get("status").and_then(Value::as_str),
+            Some("success")
+        );
+        assert_eq!(
+            generated
+                .get("result")
+                .and_then(|value| value.get("storyLockPullRequired"))
+                .and_then(Value::as_bool),
+            Some(true)
+        );
+
+        let candidates = story_template_candidates(
+            &runtime,
+            &json!({
+                "requestId": "req-story-template-candidates",
+                "limit": 10
+            }),
+        );
+        let result = candidates.get("result").expect("candidate result");
+        assert_eq!(
+            result
+                .get("hostInvokesStoryLock")
+                .and_then(Value::as_bool),
+            Some(false)
+        );
+        assert_eq!(
+            result
+                .get("pullModel")
+                .and_then(Value::as_str),
+            Some("storylock_explicit_pull_only")
+        );
+        assert!(result
+            .get("candidates")
+            .and_then(Value::as_array)
+            .expect("candidate array")
+            .iter()
+            .any(|candidate| {
+                candidate
+                    .get("framework")
+                    .and_then(|framework| framework.get("title"))
+                    .and_then(Value::as_str)
+                    .is_some_and(|title| title.contains("train station memory"))
+            }));
+
+        let status = ui_status(&runtime);
+        let template_status = status
+            .get("result")
+            .and_then(|value| value.get("storyTemplateGenerator"))
+            .expect("template generator status");
+        assert_eq!(
+            template_status.get("llmKey").and_then(Value::as_str),
+            Some("configured_direct_access")
+        );
+        assert!(!serde_json::to_string(&status)
+            .expect("status json")
+            .contains("sk-test-secret-value"));
+
+        std::env::remove_var("STORYLOCK_STORY_LLM_API_KEY");
     }
 
     #[test]

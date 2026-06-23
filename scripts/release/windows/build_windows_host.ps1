@@ -41,7 +41,7 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
 $project = Resolve-Path -LiteralPath $ProjectDir
 Push-Location $project
 try {
-  cargo build --release --features "ui-slint ui-tray"
+  cargo build --release
 } finally {
   Pop-Location
 }

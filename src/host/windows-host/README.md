@@ -1,4 +1,4 @@
-# Yian Windows Host
+﻿# Yian Windows Host
 
 This directory is the Windows desktop local host skeleton for Yian / StoryLock.
 
@@ -8,7 +8,7 @@ Why Rust for Windows:
 
 1. produces a direct-run `.exe`, `.msi`, or `.zip` package for regular users
 2. avoids requiring Python or a separate runtime on the user's machine
-3. fits a long-running local host with localhost HTTP, relay polling, tray integration, and Windows credential APIs
+3. fits a long-running local host with localhost HTTP, relay polling, native Slint UI, and Windows credential APIs
 4. can integrate with Windows Credential Manager or DPAPI for local secret protection
 
 Current scope in this directory:
@@ -49,21 +49,23 @@ Build:
 cargo build --release
 ```
 
+Debug and release builds enable the Slint desktop UI by default. A plain `cargo build` creates `target\debug\yian-windows-host.exe` as a desktop entry: double-clicking it opens the native Slint window without a console window.
+
 Print config only:
 
 ```powershell
 cargo run -- --print-config
 ```
 
-Run desktop tray app from the zip package:
+Run desktop app from the zip package:
 
 ```powershell
 .\yian-windows-host.exe
 ```
 
-The release zip is built with `ui-tray`, so double-clicking `yian-windows-host.exe` starts the desktop tray app without opening a console window and opens the local management page at `http://127.0.0.1:4510/ui`. The tray menu can open the local management page again, open health JSON, copy redacted diagnostics to the clipboard, and request local shutdown.
+The release zip is built with the default `ui-slint` feature, so double-clicking `yian-windows-host.exe` starts the native desktop UI without opening a console window.
 
-Run debug console:
+Run packaged desktop entry from a command prompt:
 
 ```powershell
 $env:STORYLOCK_GATEWAY_URL="https://yian.cdao.online"
@@ -71,30 +73,22 @@ $env:STORYLOCK_ANDROID_SHARED_SECRET="replace-with-strong-shared-secret"
 .\start-yian-windows-host.cmd
 ```
 
-Run with the optional tray UI:
+Slint is the only Windows UI path:
 
 ```powershell
-cargo run --features ui-tray -- --tray
+cargo run
 ```
 
-Release packages are built with `ui-tray`; pass `--console` or use `start-yian-windows-host.cmd` only when console logs are needed for debugging.
+Release packages are built with the Slint UI. Internal automation can still compile without default features to exercise the localhost HTTP loop, but the Windows user-facing build has a single UI path.
 
 Zip package desktop entry:
 
-1. double-click `yian-windows-host.exe` to start the tray host without a console window
-2. the local management UI should open automatically in the browser
-3. right-click the tray icon to open local UI, health, diagnostics, or exit
-4. use `start-yian-windows-host.cmd` only when console logs are needed for debugging
+1. double-click `yian-windows-host.exe` to start the Slint desktop UI without a console window
+2. the window should show host status, local core data, and diagnostics
+3. use `start-yian-windows-host.cmd` only when starting from a command prompt is useful
 
-No extra script runtime is required for the desktop entry. The shipped app entry is the Rust executable itself; the `.cmd` file is only a debug console helper.
+No extra script runtime is required for the desktop entry. The shipped app entry is the Rust executable itself.
 
-Manual tray acceptance helper:
-
-```powershell
-..\..\..\scripts\windows\start_windows_host_tray_manual_check.cmd
-```
-
-Record the visible tray icon, menu actions, clipboard diagnostics, and exit behavior in `docs\test\Windows托盘人工验收记录_20260620.md`.
 
 Open local management page:
 
@@ -104,7 +98,7 @@ Invoke-RestMethod -Method Get -Uri http://127.0.0.1:4510/ui/status
 Invoke-RestMethod -Method Get -Uri http://127.0.0.1:4510/diagnostics
 ```
 
-The management page shows host health, relay state, question bank version, data directory, allowed capability boundaries, the latest confirmation request summary, and a redacted latest execution summary. The diagnostics endpoint is the data foundation for a future tray "copy diagnostics" action. It does not display challenge answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.
+The management page and Slint diagnostics view show host health, relay state, question bank version, data directory, allowed capability boundaries, the latest confirmation request summary, and a redacted latest execution summary. They do not display challenge answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.
 
 Stop local host through the local control endpoint:
 
@@ -112,7 +106,7 @@ Stop local host through the local control endpoint:
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:4510/shutdown
 ```
 
-`POST /shutdown` is used by the tray Exit menu item and local management controls. It is bound to localhost with the rest of the prototype server.
+`POST /shutdown` is bound to localhost with the rest of the prototype server.
 
 Run native Slint status window:
 
@@ -120,7 +114,7 @@ Run native Slint status window:
 cargo run --features ui-slint -- --slint-ui
 ```
 
-Check optional UI build features:
+Check the Windows UI build:
 
 ```powershell
 ..\..\..\scripts\windows\check_windows_host_features.cmd
@@ -182,7 +176,7 @@ Default local state path:
 Override local state path:
 
 ```powershell
-$env:STORYLOCK_WINDOWS_DATA_DIR="E:\\2026OPC大赛\\skill\\.temp\\runtime\\windows-host-data"
+$env:STORYLOCK_WINDOWS_DATA_DIR="E:\\2026OPC澶ц禌\\skill\\.temp\\runtime\\windows-host-data"
 ```
 
 Question bank bootstrap:
@@ -265,7 +259,7 @@ Release and upgrade policy scaffold:
 
 Important limitation:
 
-The current Rust host is still a prototype, but the local execution path is now shaped as a StoryLock Local Core call chain. It can register, expose health, open a local management page, show redacted confirmation request details, create local grid-like verification challenges with required cells, exchange them for authorization sessions, reject revoked or expired sessions, execute signature and password-fill requests through a `storylock-local-core-call-v1` envelope, poll relay requests, show a Windows confirmation dialog with request details for fallback approval, optionally show a native Slint Approve / Deny confirmation window, optionally run with a tray menu for local UI / health / diagnostics / exit controls, persist signature keys / credential objects / verification records / authorization records under DPAPI protection, and return structured success/error envelopes with `verificationId`, `authorizationId`, `coreCallId`, required strength, allowed action, and expiry metadata. It also includes a WiX-based MSI scaffold, checksum metadata, and a reserved upgrade code for installer continuity. It does not yet implement production certificate provisioning, automatic update delivery, or detailed tray status icons.
+The current Rust host is still a prototype, but the local execution path is now shaped as a StoryLock Local Core call chain. It can register, expose health, open a local management page, show redacted confirmation request details, create local grid-like verification challenges with required cells, exchange them for authorization sessions, reject revoked or expired sessions, execute signature and password-fill requests through a `storylock-local-core-call-v1` envelope, poll relay requests, show a Windows confirmation dialog with request details for fallback approval, show a native Slint desktop UI and Slint Approve / Deny confirmation window, persist signature keys / credential objects / verification records / authorization records under DPAPI protection, and return structured success/error envelopes with `verificationId`, `authorizationId`, `coreCallId`, required strength, allowed action, and expiry metadata. It also includes a WiX-based MSI scaffold, checksum metadata, and a reserved upgrade code for installer continuity. It does not yet implement production certificate provisioning or automatic update delivery.
 
 Distribution environment variables:
 
