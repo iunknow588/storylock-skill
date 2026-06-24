@@ -125,9 +125,19 @@ assert.match(windowsHostSlint, /StoryLock must explicitly pull/u, 'Slint Host UI
 assert.match(windowsHostSlint, /configured\/missing/u, 'Slint Host UI must not display raw LLM key values');
 assert.match(windowsHostSlint, /SettingsIconButton/u, 'Slint Host UI must expose a settings icon button in the header');
 assert.match(windowsHostSlint, /property <string> language: "zh"/u, 'Slint Host UI must keep a language setting state');
-assert.match(windowsHostSlint, /root\.language = "zh"/u, 'Slint Host UI must support switching to Chinese');
-assert.match(windowsHostSlint, /root\.language = "en"/u, 'Slint Host UI must support switching to English');
-assert.match(windowsHostSlint, /active-page == 5/u, 'Slint Host UI must include a settings page');
+assert.match(windowsHostSlint, /model: \["中文", "English"\]/u, 'Slint Host UI must use a language dropdown');
+assert.match(windowsHostSlint, /root\.language = value == "中文" \? "zh" : "en"/u, 'Slint Host UI language dropdown must switch between Chinese and English');
+assert.match(windowsHostSlint, /SettingsIconButton[\s\S]*active-page = 4/u, 'Slint Host UI settings icon must open the settings page');
+assert.match(windowsHostSlint, /connection-test-status/u, 'Slint Host UI must show local and remote connection test feedback on the main page');
+assert.match(windowsHostSlint, /test-local-host\(\) -> string/u, 'Slint Host UI must expose a local host connection test callback');
+assert.match(windowsHostSlint, /test-remote-connection\(\) -> string/u, 'Slint Host UI must expose a remote connection test callback');
+assert.match(windowsHostSlint, /Manual launch from Settings only/u, 'StoryLock launch must be triggered from the settings page');
+assert.doesNotMatch(windowsHostSlint, /label: "StoryLock UI";[\s\S]{0,120}selected: root\.active-page/u, 'StoryLock launch must not remain as a main navigation page');
+assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*property <string> language: "zh"/u, 'StoryLock Core UI must keep its own language setting state');
+assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*SettingsIconButton[\s\S]*active-page = 5/u, 'StoryLock Core UI must expose a settings icon button');
+assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*model: \["中文", "English"\]/u, 'StoryLock Core UI must use a language dropdown');
+assert.match(windowsHostSlint, /24 个问题/u, 'StoryLock Core UI must include Chinese navigation text');
+assert.match(windowsHostSlint, /StoryLock Core 界面/u, 'StoryLock Core settings page must describe its language scope');
 
 const linuxSecretServiceWslScript = read('scripts/linux/check_linux_secret_service_wsl.ps1');
 assert.match(linuxSecretServiceWslScript, /check_linux_secret_service_wsl\.sh/u, 'Linux WSL Secret Service wrapper must call the shell diagnostic');

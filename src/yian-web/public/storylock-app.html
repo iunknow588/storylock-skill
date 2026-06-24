@@ -1,86 +1,75 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="StoryLock 底层故事锁工作台，用于故事草稿、问题节点、保护对象、九宫格挑战和授权会话原型演示。">
-    <title>StoryLock 底层故事锁工作台</title>
-    <link rel="stylesheet" href="/app-shell.css?v=20260620-1">
+    <meta name="description" content="StoryLock 搴曞眰鏁呬簨閿侀厤缃伐浣滃彴锛岀敤浜庢晠浜嬭崏绋裤€侀棶棰樿妭鐐广€佷繚鎶ゅ璞″拰瀵煎嚭鍖呭師鍨嬫紨绀猴紱Host UI 杩愯鏃堕獙璇佸崟鐙垎鍖哄睍绀恒€?>
+    <title>StoryLock 搴曞眰鏁呬簨閿佸伐浣滃彴</title>
+    <link rel="stylesheet" href="/app-shell.css?v=20260624-10">
   </head>
   <body data-app="storylock">
     <header class="app-topbar">
       <div class="app-brand">
         <p class="app-kicker">StoryLock Local Core</p>
-        <h1>底层故事锁工作台</h1>
+        <h1>搴曞眰鏁呬簨閿佸伐浣滃彴</h1>
       </div>
       <div class="app-top-actions">
-        <span class="chip good" data-region="story-status">本地草稿</span>
-        <span class="chip warn" data-region="session-status">未授权</span>
-        <a class="app-link" href="/">返回易安首页</a>
-        <a class="app-link primary" href="/local-agent-app.html">打开 Agent 控制台</a>
+        <span class="chip good" data-region="story-status">鏈湴鑽夌</span>
+        <span class="chip warn" data-region="session-status">鏈巿鏉?/span>
+        <a class="app-link" href="/">杩斿洖鏄撳畨棣栭〉</a>
+        <a class="app-link primary" href="/local-agent-app.html">鎵撳紑 Agent 鎺у埗鍙?/a>
       </div>
     </header>
 
     <main class="app-shell">
-      <nav class="side-nav" aria-label="StoryLock 工作区">
-        <button class="is-active" type="button" data-view-target="draft">故事草稿</button>
-        <button type="button" data-view-target="nodes">24 节点题集</button>
-        <button type="button" data-view-target="resources">保护对象</button>
-        <button type="button" data-view-target="challenge">九宫格挑战</button>
-        <button type="button" data-view-target="session">授权会话</button>
-        <button type="button" data-view-target="export">导出包与审计</button>
+      <nav class="side-nav" aria-label="StoryLock 涓?Host UI 宸ヤ綔鍖?>
+        <div class="nav-section-label">StoryLock 閰嶇疆</div>
+        <button class="is-active" type="button" data-view-target="draft">鏁呬簨鑽夌</button>
+        <button type="button" data-view-target="nodes">24 个问题</button>
+        <button type="button" data-view-target="resources">淇濇姢瀵硅薄</button>
+        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="normal">普通授权对象</button>
+        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="private">私密对象</button>
+        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="secret">机密对象</button>
+        <button type="button" data-view-target="export">瀵煎嚭鍖呬笌瀹¤</button>
+        <div class="nav-section-label">Host UI 杩愯鏃?/div>
+        <button type="button" data-view-target="host-challenge">Host 涔濆鏍奸獙璇?/button>
+        <button type="button" data-view-target="host-session">Host 鎺堟潈浼氳瘽</button>
       </nav>
 
       <section class="workspace">
-        <article id="draft" class="view is-active">
-          <div class="panel-grid">
-            <section class="panel">
-              <div class="panel-head">
-                <div>
-                  <h2>故事草稿</h2>
-                  <p>本地生成和维护一个用于身份确认的问题故事，不上传原文。</p>
-                </div>
-                <button class="app-button primary" type="button" data-action="polish-story">润色草稿</button>
+                <article id="draft" class="view is-active">
+          <section class="panel draft-panel">
+            <div class="panel-head">
+              <div>
+                <h2>故事草稿</h2>
               </div>
-              <label class="field">
-                <span>故事标题</span>
-                <input data-field="story-title" value="旧书店里的蓝色票根">
+            </div>
+            <label class="field draft-field">
+              <span>故事标题</span>
+              <input data-field="story-title" value="旧书店里的蓝色票根">
+            </label>
+            <label class="field draft-field">
+              <span>故事概要</span>
+              <textarea data-field="story-summary">你在大学城旧书店帮店主整理二楼库房，偶然把一张蓝色电影票根夹进《小王子》旧书。多年后，这张票根成为你与好友重逢时确认身份的私人线索。</textarea>
+            </label>
+            <div class="story-plot-shell">
+              <label class="field draft-field story-plot-field-wrap">
+                <span>故事内容</span>
+                <textarea class="story-plot-preview" data-field="story-plot" readonly>六月雨后的傍晚，你在大学城旧书店二楼库房帮店主整理旧书。因为担心手里的蓝色电影票根被雨水打湿，你顺手把它夹进一本《小王子》旧书的第 21 页。店里正播放老电影配乐，靠窗的木梯旁有些灰尘，票根背面还写着“星星落在票根背面”。多年后，你和好友重逢，对方提起旧书店，你用“票根夹在哪本书、哪一页、背面有什么暗号”这些问题确认彼此身份。</textarea>
               </label>
-              <label class="field">
-                <span>故事摘要</span>
-                <textarea data-field="story-summary">你在大学城旧书店帮店主整理二楼库房，偶然把一张蓝色电影票根夹进《小王子》旧书。多年后，这张票根成为你与好友重逢时确认身份的私人线索。</textarea>
-              </label>
-              <div class="button-row">
-                <button class="app-button" type="button" data-action="generate-nodes">生成 24 节点</button>
-                <button class="app-button" type="button" data-action="score-strength">强度评估</button>
-              </div>
-            </section>
-
-            <aside class="panel">
-              <h3>强度概览</h3>
-              <div class="dashboard-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px;">
-                <div class="stat-card">
-                  <h3>可回忆性</h3>
-                  <p class="stat-value" data-region="recall-score">84</p>
-                </div>
-                <div class="stat-card">
-                  <h3>抗猜测性</h3>
-                  <p class="stat-value" data-region="guess-score">78</p>
-                </div>
-              </div>
-              <p data-region="strength-note">当前故事包含地点、物品、关系和时间线，适合作为本地挑战题源。</p>
-            </aside>
-          </div>
+              <button class="app-button primary story-plot-edit" type="button" data-action="open-story-editor">编辑</button>
+            </div>
+          </section>
         </article>
 
         <article id="nodes" class="view">
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>24 节点题集</h2>
-                <p>节点覆盖地点、人物、物件、顺序和细节。每次授权只抽取最小必要问题。</p>
+                <h2>24 个问题</h2>
+                <p>杩欓噷灞曠ず鍏ㄩ儴 24 涓棶棰樼殑姒傝銆傜偣鍑绘煇涓棶棰樺悗锛屼細鎵撳紑鐙珛绛旀閰嶇疆椤碉紝闆嗕腑璁剧疆璇ラ棶棰樼殑 9 涓€欓€夌瓟妗堛€?/p>
               </div>
-              <button class="app-button primary" type="button" data-action="shuffle-nodes">重排节点</button>
+              <button class="app-button primary" type="button" data-action="shuffle-nodes">閲嶆帓鑺傜偣</button>
             </div>
             <div class="node-grid" data-region="node-grid"></div>
           </section>
@@ -90,35 +79,39 @@
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>保护对象</h2>
-                <p>本地只暴露受控能力，不让远程直接读取密钥、密码或故事原文。</p>
+                <h2>淇濇姢瀵硅薄</h2>
+                <p>鍦ㄥ乏渚ц彍鍗曢€夋嫨瀵硅薄绾у埆锛屾湰椤典互鏅€氬垪琛ㄥ睍绀鸿绾у埆涓嬬殑鍙椾繚鎶ゅ璞°€傜偣鍑诲璞″悗鎵撳紑鐙珛绠＄悊淇℃伅椤点€?/p>
               </div>
-              <button class="app-button primary" type="button" data-action="add-resource">添加示例对象</button>
+              <button class="app-button primary" type="button" data-action="add-resource">娣诲姞绀轰緥瀵硅薄</button>
             </div>
-            <div class="resource-grid" data-region="resource-grid"></div>
+            <div class="resource-groups" data-region="resource-grid"></div>
           </section>
         </article>
 
-        <article id="challenge" class="view">
+        <article id="host-challenge" class="view">
           <div class="panel-grid">
             <section class="panel">
               <div class="panel-head">
                 <div>
-                  <h2>九宫格挑战</h2>
-                  <p>从题集里抽取 9 个候选项，用户选择与目标操作匹配的故事线索。</p>
+                  <h2>Host UI 涔濆鏍奸獙璇?/h2>
+                  <p>杩欓儴鍒嗗睘浜?Host UI 鐨勮繍琛屾椂楠岃瘉锛屼笉灞炰簬 StoryLock 閰嶇疆鍖呫€侶ost 璇诲彇宸插鍑虹殑棰橀泦涓庝繚鎶ゅ璞＄瓥鐣ュ悗锛屽洿缁曚竴涓叿浣撻棶棰樺睍绀?9 涓瓟妗堝€欓€夈€?/p>
                 </div>
-                <button class="app-button primary" type="button" data-action="new-challenge">生成挑战</button>
+                <button class="app-button primary" type="button" data-action="new-challenge">鐢熸垚鎸戞垬</button>
               </div>
               <div class="field-row">
                 <label class="field" style="flex: 1 1 220px;">
-                  <span>保护对象</span>
+                  <span>鎸戞垬闂</span>
+                  <select data-field="challenge-question"></select>
+                </label>
+                <label class="field" style="flex: 1 1 220px;">
+                  <span>淇濇姢瀵硅薄</span>
                   <select data-field="challenge-resource"></select>
                 </label>
                 <label class="field" style="flex: 1 1 220px;">
-                  <span>动作</span>
+                  <span>鍔ㄤ綔</span>
                   <select data-field="challenge-action">
-                    <option value="requestSignature">请求签名</option>
-                    <option value="requestPasswordFill">填充密码</option>
+                    <option value="requestSignature">璇锋眰绛惧悕</option>
+                    <option value="requestPasswordFill">濉厖瀵嗙爜</option>
                   </select>
                 </label>
               </div>
@@ -126,39 +119,39 @@
             </section>
 
             <aside class="panel">
-              <h3>挑战结果</h3>
-              <p data-region="challenge-note">生成挑战后选择正确线索。</p>
+              <h3>鎸戞垬缁撴灉</h3>
+              <p data-region="challenge-note">鐢熸垚鎸戞垬鍚庯紝浠?9 涓瓟妗堥噷閫夋嫨 1 涓纭瓟妗堛€?/p>
               <div class="button-row" style="margin-top: 14px;">
-                <button class="app-button" type="button" data-action="demo-answer">填入演示答案</button>
-                <button class="app-button primary" type="button" data-action="verify-challenge">验证</button>
+                <button class="app-button" type="button" data-action="demo-answer">濉叆婕旂ず绛旀</button>
+                <button class="app-button primary" type="button" data-action="verify-challenge">楠岃瘉</button>
               </div>
             </aside>
           </div>
         </article>
 
-        <article id="session" class="view">
+        <article id="host-session" class="view">
           <div class="panel-grid">
             <section class="panel">
               <div class="panel-head">
                 <div>
-                  <h2>授权会话</h2>
-                  <p>挑战通过后才创建短时本地会话，并限定能力、对象和有效期。</p>
+                  <h2>Host UI 鎺堟潈浼氳瘽</h2>
+                  <p>杩欐槸 Host UI 鐨勬巿鏉冪粨鏋滄紨绀恒€備節瀹牸楠岃瘉閫氳繃鍚庯紝Host 鎵嶅垱寤虹煭鏃舵湰鍦颁細璇濓紝骞堕檺瀹氳兘鍔涖€佸璞″拰鏈夋晥鏈熴€?/p>
                 </div>
-                <button class="app-button primary" type="button" data-action="issue-session">签发会话</button>
+                <button class="app-button primary" type="button" data-action="issue-session">绛惧彂浼氳瘽</button>
               </div>
               <pre data-region="session-json"></pre>
             </section>
 
             <aside class="panel">
-              <h3>能力边界</h3>
+              <h3>鑳藉姏杈圭晫</h3>
               <div class="capability-grid" style="grid-template-columns: 1fr; margin-top: 12px;">
                 <div class="capability-item">
                   <strong>requestSignature</strong>
-                  <span class="muted">只返回签名结果，不返回私钥。</span>
+                  <span class="muted">鍙繑鍥炵鍚嶇粨鏋滐紝涓嶈繑鍥炵閽ャ€?/span>
                 </div>
                 <div class="capability-item">
                   <strong>requestPasswordFill</strong>
-                  <span class="muted">只在本地确认后填充目标凭据。</span>
+                  <span class="muted">鍙湪鏈湴纭鍚庡～鍏呯洰鏍囧嚟鎹€?/span>
                 </div>
               </div>
             </aside>
@@ -169,17 +162,43 @@
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>导出包与审计</h2>
-                <p>导出的是配置摘要和题集模板，不包含故事原文和敏感秘密。</p>
+                <h2>瀵煎嚭鍖呬笌瀹¤</h2>
+                <p>瀵煎嚭鐨勬槸閰嶇疆鎽樿鍜岄闆嗘ā鏉匡紝涓嶅寘鍚晠浜嬪師鏂囧拰鏁忔劅绉樺瘑銆?/p>
               </div>
-              <button class="app-button primary" type="button" data-action="export-bundle">生成导出包</button>
+              <button class="app-button primary" type="button" data-action="export-bundle">鐢熸垚瀵煎嚭鍖?/button>
+            </div>
+            <div class="policy-explain">
+              <div>
+                <strong>瀛︿範淇濈暀绛栫暐</strong>
+                <p>杩欎簺鍙傛暟涓嶆槸鏅€氬鍑洪€夐」锛岃€屾槸涓轰簡闃叉鐢ㄦ埛浠ュ悗蹇樿闂绛旀銆傚鍑哄悗锛屾湰鍦?Host 浼氭寜璁″垝寮哄埗鐢ㄦ埛瀹氭湡澶嶄範銆?/p>
+              </div>
+              <div class="policy-step-grid">
+                <div>
+                  <span class="chip good">22 涓棶棰?/span>
+                  <p>姣忔淇濈暀瀛︿範閮借姹傚浐瀹氬洖绛?22 涓棶棰橈紝鐢ㄦ潵纭鐢ㄦ埛浠嶇劧璁板緱鑷繁鐨勬晠浜嬮攣銆?/p>
+                </div>
+                <div>
+                  <span class="chip warn">閫愭闄嶉</span>
+                  <p>鍒濇湡鎸夊ぉ澶嶄範锛屼箣鍚庤繘鍏ユ瘡鍛ㄣ€佹瘡鏈堛€佹瘡骞寸殑鍛ㄦ湡锛涙椂闂磋秺涔咃紝寮哄埗瀛︿範棰戠巼瓒婁綆銆?/p>
+                </div>
+                <div>
+                  <span class="chip">鍙傛暟鐢ㄩ€?/span>
+                  <p>鈥滃ぉ鏁?鍛ㄦ暟/鏈堟暟/骞存暟鈥濆畾涔夐樁娈垫寔缁涔咃紝鈥滈鐜団€濆畾涔夎闃舵闅斿涔呰Е鍙戜竴娆″涔犮€?/p>
+                </div>
+              </div>
+            </div>
+            <div class="policy-explain">
+              <div>
+                <strong>瀛︿範绛栫暐鎽樿</strong>
+                <p>瀵煎嚭鍐呭浼氬啓鍏ユ湰鍦板涔犵瓥鐣ヤ俊鎭紝鐢ㄦ潵椹卞姩鍚庣画澶嶄範鑺傚銆傚墠鏈熼珮棰戯紝鍚庢湡閫愭闄嶉锛岄伩鍏嶉暱鏈熶笉鐢ㄦ椂绛旀鐢熺枏銆?/p>
+              </div>
             </div>
             <pre data-region="export-json"></pre>
           </section>
           <section class="panel">
             <div class="panel-head">
-              <h3>审计日志</h3>
-              <button class="app-button" type="button" data-action="clear-log">清空</button>
+              <h3>瀹¤鏃ュ織</h3>
+              <button class="app-button" type="button" data-action="clear-log">娓呯┖</button>
             </div>
             <div class="log-box" data-region="audit-log"></div>
           </section>
@@ -187,6 +206,58 @@
       </section>
     </main>
 
-    <script type="module" src="/storylock-app.js?v=20260620-1"></script>
+    <div class="modal-backdrop" data-region="answer-modal" hidden>
+      <section class="modal-page" role="dialog" aria-modal="true" aria-labelledby="answer-modal-title">
+        <div class="panel-head">
+          <div>
+            <h2 id="answer-modal-title" data-region="question-editor-title">闂绛旀閰嶇疆</h2>
+            <p data-region="question-editor-note">涓哄綋鍓嶉棶棰橀厤缃?9 涓€欓€夌瓟妗堬紝骞舵爣璁版纭垨閿欒銆?/p>
+          </div>
+          <button class="app-button" type="button" data-action="close-answer-editor">鍏抽棴</button>
+        </div>
+        <div class="answer-editor" data-region="answer-editor"></div>
+        <div class="button-row modal-actions">
+          <button class="app-button primary" type="button" data-action="save-question-answers">淇濆瓨绛旀閰嶇疆</button>
+          <button class="app-button" type="button" data-action="use-question-challenge">鍙戦€佸埌 Host UI 楠岃瘉</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" data-region="resource-modal" hidden>
+      <section class="modal-page" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
+        <div class="panel-head">
+          <div>
+            <h2 id="resource-modal-title">瀵硅薄缂栬緫</h2>
+            <p data-region="resource-editor-note">缂栬緫淇濇姢瀵硅薄鐨勬巿鏉冭兘鍔涘拰椋庨櫓璇存槑銆?/p>
+          </div>
+          <button class="app-button" type="button" data-action="close-resource-editor">鍏抽棴</button>
+        </div>
+        <div data-region="resource-editor"></div>
+        <div class="button-row modal-actions">
+          <button class="app-button primary" type="button" data-action="save-resource">淇濆瓨瀵硅薄</button>
+        </div>
+      </section>
+    </div>
+
+        <div class="modal-backdrop" data-region="story-modal" hidden>
+      <section class="modal-page story-modal-page" role="dialog" aria-modal="true" aria-labelledby="story-modal-title">
+        <div class="panel-head">
+          <div>
+            <h2 id="story-modal-title">故事内容编辑</h2>
+          </div>
+          <button class="app-button" type="button" data-action="close-story-editor">关闭</button>
+        </div>
+        <label class="field story-modal-field">
+          <span>故事内容</span>
+          <textarea data-region="story-modal-text"></textarea>
+        </label>
+        <div class="button-row modal-actions">
+          <button class="app-button primary" type="button" data-action="save-story-editor">保存</button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/storylock-app.js?v=20260624-10"></script>
   </body>
 </html>
+
