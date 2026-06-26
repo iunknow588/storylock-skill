@@ -518,7 +518,7 @@ slint::slint! {
         height: root.panel-height;
         border-radius: 6px;
         border-width: 0px;
-        background: transparent;
+        background: #eef3f5;
 
         ScrollView {
             x: 10px;
@@ -1107,6 +1107,7 @@ slint::slint! {
         callback export-package();
         callback browse-core-data-dir();
         callback browse-export-package-dir();
+        callback open-core-settings();
 
         title: "StoryLock Core";
         preferred-width: 960px;
@@ -1127,16 +1128,10 @@ slint::slint! {
                 background: #eef3f5;
                 VerticalBox {
                     x: 18px;
-                    y: 2px;
+                    y: 12px;
                     width: 124px;
-                    height: 530px;
-                    spacing: 8px;
-                    Text {
-                        text: root.is-zh ? "StoryLock 配置" : "StoryLock Config";
-                        color: #45606b;
-                        font-size: 12px;
-                        font-weight: 800;
-                    }
+                    height: 528px;
+                    spacing: 7px;
                     MenuButton {
                         label: root.is-zh ? "24 个问题" : "24 Questions";
                         selected: root.active-page == 1;
@@ -1223,8 +1218,8 @@ slint::slint! {
                         SettingsIconButton {
                             x: 688px;
                             y: 2px;
-                            selected: root.active-page == 5;
-                            clicked => { root.active-page = 5; }
+                            selected: false;
+                            clicked => { root.open-core-settings(); }
                         }
                     }
 
@@ -1516,73 +1511,78 @@ slint::slint! {
                             }
                         }
 
-                        if root.active-page == 5: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 12px;
-                            HorizontalBox {
-                                x: 10px;
-                                width: 574px;
-                                spacing: 14px;
-                                Text {
-                                    text: root.is-zh ? "界面语言" : "UI Language";
-                                    width: 140px;
-                                    color: #62727d;
-                                    font-size: 13px;
-                                    vertical-alignment: center;
-                                }
-                                ComboBox {
-                                    width: 420px;
-                                    height: 32px;
-                                    model: ["中文", "English"];
-                                    current-value: root.is-zh ? "中文" : "English";
-                                    selected(value) => {
-                                        root.language = value == "中文" ? "zh" : "en";
-                                    }
-                                }
-                            }
-                            StaticRow { name: root.is-zh ? "说明" : "Note"; value: root.is-zh ? "语言切换立即作用于 StoryLock Core 界面。" : "Language changes apply to the StoryLock Core UI immediately."; }
-                            StaticRow { name: root.is-zh ? "范围" : "Scope"; value: root.is-zh ? "当前支持中文与英文。" : "Chinese and English are supported for now."; }
-                            PathBrowseRow {
-                                name: root.is-zh ? "保存目录" : "Workspace Dir";
-                                value <=> root.core-data-dir;
-                                is-zh: root.is-zh;
-                                browse => { root.browse-core-data-dir(); }
-                            }
-                            StaticRow { name: root.is-zh ? "草稿位置" : "Draft Location"; value: root.draft-file-path; }
-                            StaticRow { name: root.is-zh ? "包清单" : "Package Manifest"; value: root.manifest-file-path; }
-                            StaticRow { name: root.is-zh ? "加密 Vault" : "Encrypted Vault"; value: root.encrypted-vault-path; }
-                            StaticRow { name: root.is-zh ? "资源目录" : "Resource Catalog"; value: root.resource-catalog-path; }
-                            StaticRow { name: root.is-zh ? "学习计划" : "Learning Policy"; value: root.learning-policy-path; }
-                            StaticRow { name: root.is-zh ? "故事模板" : "Story Template"; value: root.template-bindings; }
-                            if root.candidate-template-status != "": StaticRow { name: root.is-zh ? "候选模板" : "Candidates"; value: root.candidate-template-status; }
-                            HorizontalBox {
-                                spacing: 10px;
-                                Rectangle { width: 164px; height: 1px; background: transparent; }
-                                ActionButton {
-                                    label: root.is-zh ? "拉取候选" : "Pull Candidates";
-                                    primary: false;
-                                    button-width: 150px;
-                                    clicked => { root.pull-template-candidates(); }
-                                }
-                                ActionButton {
-                                    label: root.is-zh ? "保存为模板" : "Save Template";
-                                    primary: false;
-                                    button-width: 150px;
-                                    clicked => { root.save-template(); }
-                                }
-                                ActionButton {
-                                    label: root.is-zh ? "恢复模板" : "Load Template";
-                                    primary: true;
-                                    button-width: 150px;
-                                    clicked => { root.apply-template(); }
-                                }
-                            }
+                    }
+                }
+            }
+        }
+    }
+
+    export component StoryLockCoreSettingsDialog inherits Window {
+        in-out property <string> language: "zh";
+        property <bool> is-zh: language == "zh";
+        in-out property <string> core-data-dir: "";
+        callback close-requested();
+        callback language-changed(string);
+        callback browse-core-data-dir();
+
+        title: is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
+        preferred-width: 800px;
+        preferred-height: 450px;
+        min-width: 800px;
+        max-width: 800px;
+        min-height: 450px;
+        max-height: 450px;
+        background: #eef3f5;
+
+        VerticalBox {
+            padding: 20px;
+            spacing: 12px;
+            Rectangle {
+                height: 36px;
+                background: transparent;
+                Text {
+                    x: 0px;
+                    y: 4px;
+                    width: 720px;
+                    height: 28px;
+                    text: root.is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
+                    color: #17252f;
+                    font-size: 16px;
+                    font-weight: 800;
+                    overflow: elide;
+                }
+            }
+            VerticalBox {
+                spacing: 14px;
+                HorizontalBox {
+                    x: 10px;
+                    width: 574px;
+                    spacing: 14px;
+                    Text {
+                        text: root.is-zh ? "界面语言" : "UI Language";
+                        width: 140px;
+                        color: #62727d;
+                        font-size: 13px;
+                        vertical-alignment: center;
+                    }
+                    ComboBox {
+                        width: 420px;
+                        height: 32px;
+                        model: ["中文", "English"];
+                        current-value: root.is-zh ? "中文" : "English";
+                        selected(value) => {
+                            root.language = value == "中文" ? "zh" : "en";
+                            root.language-changed(root.language);
                         }
                     }
                 }
+                PathBrowseRow {
+                    name: root.is-zh ? "工作目录" : "Workspace Dir";
+                    value <=> root.core-data-dir;
+                    is-zh: root.is-zh;
+                    browse => { root.browse-core-data-dir(); }
+                }
+                StaticRow { name: root.is-zh ? "目录内容" : "Directory Files"; value: root.is-zh ? "工作目录中包含 vault.stlk、learning-policy.json、package-manifest.json、resource-catalog.json 等文件。" : "The workspace contains vault.stlk, learning-policy.json, package-manifest.json, resource-catalog.json, and related files."; }
             }
         }
     }
@@ -2796,6 +2796,8 @@ fn wire_storylock_core_callbacks(
 ) {
     let learning_passed = Rc::new(RefCell::new(vec![false; 24]));
     let answer_editor: Rc<RefCell<Option<AnswerEditorDialog>>> = Rc::new(RefCell::new(None));
+    let settings_dialog: Rc<RefCell<Option<StoryLockCoreSettingsDialog>>> =
+        Rc::new(RefCell::new(None));
     let weak = core.as_weak();
     let close_slot = Rc::clone(&core_window_slot);
     let on_button_closed = Rc::clone(&on_closed);
@@ -2817,6 +2819,19 @@ fn wire_storylock_core_callbacks(
         *window_close_slot.borrow_mut() = None;
         on_window_closed();
         slint::CloseRequestResponse::HideWindow
+    });
+
+    let weak = core.as_weak();
+    let settings_dir = package_dir.clone();
+    let settings_dialog_for_open = Rc::clone(&settings_dialog);
+    core.on_open_core_settings(move || {
+        if let Some(core) = weak.upgrade() {
+            open_storylock_core_settings_dialog(
+                &core,
+                &settings_dir,
+                Rc::clone(&settings_dialog_for_open),
+            );
+        }
     });
 
     let weak = core.as_weak();
@@ -3367,6 +3382,97 @@ fn open_answer_editor_dialog(
     }
 }
 
+fn open_storylock_core_settings_dialog(
+    core: &StoryLockCoreApp,
+    package_dir: &Path,
+    settings_dialog: Rc<RefCell<Option<StoryLockCoreSettingsDialog>>>,
+) {
+    if settings_dialog.borrow().is_none() {
+        match StoryLockCoreSettingsDialog::new() {
+            Ok(dialog) => {
+                wire_storylock_core_settings_callbacks(
+                    &dialog,
+                    core.as_weak(),
+                    package_dir.to_path_buf(),
+                    Rc::clone(&settings_dialog),
+                );
+                *settings_dialog.borrow_mut() = Some(dialog);
+            }
+            Err(error) => {
+                core.set_config_status(SharedString::from(format!(
+                    "Settings failed to open: {error}"
+                )));
+                return;
+            }
+        }
+    }
+
+    if let Some(dialog) = settings_dialog.borrow().as_ref() {
+        copy_core_settings_to_dialog(core, dialog);
+        if let Err(error) = dialog.show() {
+            core.set_config_status(SharedString::from(format!(
+                "Settings failed to show: {error}"
+            )));
+        }
+    }
+}
+
+fn wire_storylock_core_settings_callbacks(
+    dialog: &StoryLockCoreSettingsDialog,
+    core_weak: slint::Weak<StoryLockCoreApp>,
+    package_dir: std::path::PathBuf,
+    settings_dialog: Rc<RefCell<Option<StoryLockCoreSettingsDialog>>>,
+) {
+    let weak = dialog.as_weak();
+    let close_slot = Rc::clone(&settings_dialog);
+    dialog.on_close_requested(move || {
+        if let Some(dialog) = weak.upgrade() {
+            let _ = dialog.hide();
+        }
+        *close_slot.borrow_mut() = None;
+    });
+
+    let weak = dialog.as_weak();
+    let core_for_language = core_weak.clone();
+    dialog.on_language_changed(move |language| {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_language.upgrade()) {
+            core.set_language(language);
+            copy_core_settings_to_dialog(&core, &dialog);
+        }
+    });
+
+    let weak = dialog.as_weak();
+    let core_for_browse = core_weak.clone();
+    let browse_fallback_dir = package_dir.clone();
+    dialog.on_browse_core_data_dir(move || {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_browse.upgrade()) {
+            copy_dialog_settings_to_core(&dialog, &core);
+            let current_dir = storylock_core_package_dir_from_window(&core, &browse_fallback_dir);
+            let mut file_dialog = rfd::FileDialog::new();
+            if current_dir.exists() {
+                file_dialog = file_dialog.set_directory(&current_dir);
+            }
+            if let Some(selected_dir) = file_dialog.pick_folder() {
+                match ensure_storylock_core_package(&selected_dir) {
+                    Ok(()) => {
+                        initialize_storylock_core_window(&core, &selected_dir);
+                        core.set_config_status(SharedString::from(
+                            "StoryLock Core workspace loaded from selected directory.",
+                        ));
+                        copy_core_settings_to_dialog(&core, &dialog);
+                    }
+                    Err(error) => {
+                        core.set_config_status(SharedString::from(format!(
+                            "Workspace load failed: {error}"
+                        )));
+                    }
+                }
+            }
+        }
+    });
+
+}
+
 fn wire_answer_editor_callbacks(
     dialog: &AnswerEditorDialog,
     core_weak: slint::Weak<StoryLockCoreApp>,
@@ -3441,6 +3547,16 @@ fn wire_answer_editor_callbacks(
             }
         }
     });
+}
+
+fn copy_core_settings_to_dialog(core: &StoryLockCoreApp, dialog: &StoryLockCoreSettingsDialog) {
+    dialog.set_language(core.get_language());
+    dialog.set_core_data_dir(core.get_core_data_dir());
+}
+
+fn copy_dialog_settings_to_core(dialog: &StoryLockCoreSettingsDialog, core: &StoryLockCoreApp) {
+    core.set_language(dialog.get_language());
+    core.set_core_data_dir(dialog.get_core_data_dir());
 }
 
 fn copy_core_question_to_answer_editor(core: &StoryLockCoreApp, dialog: &AnswerEditorDialog) {
