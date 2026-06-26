@@ -950,7 +950,7 @@ slint::slint! {
     }
 
     export component StoryLockCoreApp inherits Window {
-        in-out property <int> active-page: 0;
+        in-out property <int> active-page: 1;
         in-out property <string> language: "zh";
         property <bool> is-zh: language == "zh";
         in-out property <string> story-title: "守株待兔";
@@ -1127,9 +1127,9 @@ slint::slint! {
                 background: #eef3f5;
                 VerticalBox {
                     x: 18px;
-                    y: 8px;
+                    y: 2px;
                     width: 124px;
-                    height: 524px;
+                    height: 530px;
                     spacing: 8px;
                     Text {
                         text: root.is-zh ? "StoryLock 配置" : "StoryLock Config";
