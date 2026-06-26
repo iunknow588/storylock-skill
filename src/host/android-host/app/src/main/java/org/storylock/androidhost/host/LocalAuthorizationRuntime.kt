@@ -15,6 +15,7 @@ class LocalAuthorizationRuntime(
   private val challengeBits = 36
   private val failureCount = AtomicInteger(0)
   private val challenges = ConcurrentHashMap<String, ChallengeSession>()
+  private val sessions = ConcurrentHashMap<String, AuthorizationSession>()
   @Volatile
   private var lockUntilMs = 0L
   fun healthSnapshot(): Triple<Boolean, Int, Int> {
@@ -101,11 +102,38 @@ class LocalAuthorizationRuntime(
 
   fun issueSession(allowedAction: String, objectRef: String): AuthorizationSession {
     requestCount.incrementAndGet()
-    return AuthorizationSession(
+    val now = System.currentTimeMillis()
+    val session = AuthorizationSession(
       authorizationId = "ses-${UUID.randomUUID()}",
       allowedAction = allowedAction,
       objectRef = objectRef,
+      createdAt = now,
+      expiresAt = now + 5 * 60 * 1000L,
     )
+    sessions[session.authorizationId] = session
+    return session
+  }
+
+  fun sessionStatus(authorizationId: String?, objectRef: String): AuthorizationSession? {
+    if (authorizationId.isNullOrBlank()) {
+      return null
+    }
+    val session = sessions[authorizationId] ?: return null
+    if (session.objectRef != objectRef) {
+      return null
+    }
+    if (session.expiresAt <= System.currentTimeMillis()) {
+      sessions.remove(authorizationId)
+      return null
+    }
+    if (session.status != "active") {
+      return null
+    }
+    return session
+  }
+
+  fun revokeSession(authorizationId: String): AuthorizationSession? {
+    return sessions.remove(authorizationId)
   }
 
   fun questionSetVersion(): String = questionSetVersion

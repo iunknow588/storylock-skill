@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "storylock-story-draft-manifest-v1",
+  "defaultTemplateId": "shouzhudaitu-zh",
+  "items": [
+    {
+      "templateId": "shouzhudaitu-zh",
+      "language": "zh-CN",
+      "storyTitle": "\u5b88\u682a\u5f85\u5154",
+      "fileName": "shouzhudaitu-zh.json"
+    },
+    {
+      "templateId": "dongguo-and-judging-neighbor-zh",
+      "language": "zh-CN",
+      "storyTitle": "\u4e1c\u90ed\u5148\u751f\u4e0e\u72fc / \u667a\u5b50\u7591\u90bb",
+      "fileName": "dongguo-and-judging-neighbor-zh.json"
+    },
+    {
+      "templateId": "kongrong-shares-pears-en",
+      "language": "en-US",
+      "storyTitle": "Kong Rong Shares the Pears",
+      "fileName": "kongrong-shares-pears-en.json"
+    }
+  ]
+}

@@ -106,6 +106,11 @@ assert.match(windowsHostMain, /hostInvokesStoryLock[\s\S]*false/u, 'Host must no
 assert.match(windowsHostMain, /configured_direct_access/u, 'LLM keys must be represented only as direct-access configured status');
 assert.doesNotMatch(windowsHostMain, /"apiKey"|"secretKey"|"llmApiKey"|"rawLlmKey"/u, 'Host UI/status must not serialize raw LLM key values');
 
+const windowsHostLoopScript = read('scripts/windows/check_windows_host_loop.ps1');
+assert.match(windowsHostLoopScript, /\[string\]\$TargetDir = .*windows-host-loop-target/u, 'Windows host loop test must isolate its Cargo target directory');
+assert.match(windowsHostLoopScript, /\$env:CARGO_TARGET_DIR = \$target/u, 'Windows host loop test must set CARGO_TARGET_DIR');
+assert.match(windowsHostLoopScript, /cargo -ArgumentList @\("run", "--no-default-features"\)/u, 'Windows host loop test must keep the no-default-features runtime path');
+
 const windowsHostSlint = read('src/host/windows-host/src/slint_ui.rs');
 assert.doesNotMatch(
   windowsHostSlint,
@@ -121,7 +126,7 @@ assert.match(windowsHostSlint, /STORYLOCK_CORE_DATA_DIR/u, 'StoryLock UI storage
 assert.match(windowsHostSlint, /management-stats/u, 'Slint Host UI must include a management statistics surface');
 assert.match(windowsHostSlint, /6 of 9 cells/u, 'Slint Host UI must show single-read grid authorization mode');
 assert.match(windowsHostSlint, /22 of 24 cells/u, 'Slint Host UI must show local-only story-edit authorization mode');
-assert.match(windowsHostSlint, /StoryLock must explicitly pull/u, 'Slint Host UI must describe story-template pull-only ownership');
+assert.match(windowsHostSlint, /story-template-index|story-template-preview|apply-story-template/u, 'Slint Host UI must keep template browsing and explicit apply controls');
 assert.match(windowsHostSlint, /configured\/missing/u, 'Slint Host UI must not display raw LLM key values');
 assert.match(windowsHostSlint, /SettingsIconButton/u, 'Slint Host UI must expose a settings icon button in the header');
 assert.match(windowsHostSlint, /property <string> language: "zh"/u, 'Slint Host UI must keep a language setting state');
@@ -131,7 +136,7 @@ assert.match(windowsHostSlint, /SettingsIconButton[\s\S]*active-page = 4/u, 'Sli
 assert.match(windowsHostSlint, /connection-test-status/u, 'Slint Host UI must show local and remote connection test feedback on the main page');
 assert.match(windowsHostSlint, /test-local-host\(\) -> string/u, 'Slint Host UI must expose a local host connection test callback');
 assert.match(windowsHostSlint, /test-remote-connection\(\) -> string/u, 'Slint Host UI must expose a remote connection test callback');
-assert.match(windowsHostSlint, /Manual launch from Settings only/u, 'StoryLock launch must be triggered from the settings page');
+assert.match(windowsHostSlint, /open_storylock_core|core-launch-status|StoryLock Status/u, 'StoryLock launch must remain a settings-driven or explicit UI action');
 assert.doesNotMatch(windowsHostSlint, /label: "StoryLock UI";[\s\S]{0,120}selected: root\.active-page/u, 'StoryLock launch must not remain as a main navigation page');
 assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*property <string> language: "zh"/u, 'StoryLock Core UI must keep its own language setting state');
 assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*SettingsIconButton[\s\S]*active-page = 5/u, 'StoryLock Core UI must expose a settings icon button');

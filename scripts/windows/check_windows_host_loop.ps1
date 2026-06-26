@@ -1,6 +1,7 @@
 param(
   [string]$ProjectDir = (Join-Path $PSScriptRoot "..\..\src\host\windows-host"),
   [string]$DataDir = (Join-Path $PSScriptRoot "..\..\.temp\runtime\windows-host-loop-data"),
+  [string]$TargetDir = (Join-Path $PSScriptRoot "..\..\.temp\runtime\windows-host-loop-target"),
   [string]$BindHost = "127.0.0.1",
   [int]$Port = 4510
 )
@@ -74,14 +75,20 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
 
 $project = Resolve-Path -LiteralPath $ProjectDir
 $data = [System.IO.Path]::GetFullPath($DataDir)
+$target = [System.IO.Path]::GetFullPath($TargetDir)
 if (Test-Path -LiteralPath $data) {
   Remove-Item -LiteralPath $data -Recurse -Force
 }
 New-Item -ItemType Directory -Force -Path $data | Out-Null
+if (Test-Path -LiteralPath $target) {
+  Remove-Item -LiteralPath $target -Recurse -Force
+}
+New-Item -ItemType Directory -Force -Path $target | Out-Null
 
 $env:STORYLOCK_WINDOWS_DATA_DIR = $data
 $env:STORYLOCK_WINDOWS_APPROVAL_MODE = "auto_approve"
 $env:STORYLOCK_WINDOWS_HOST_PORT = "$Port"
+$env:CARGO_TARGET_DIR = $target
 
 $listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
 if ($listener) {
@@ -100,7 +107,7 @@ try {
   $proc = Start-Process cargo -ArgumentList @("run", "--no-default-features") -WorkingDirectory $project -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
 
   $health = $null
-  for ($attempt = 0; $attempt -lt 20; $attempt++) {
+  for ($attempt = 0; $attempt -lt 80; $attempt++) {
     Start-Sleep -Milliseconds 750
     try {
       $health = Invoke-RestMethod -Method Get -Uri "$baseUrl/health"
@@ -118,8 +125,10 @@ try {
   }
 
   Assert-Value $health.approvalMode "health.approvalMode"
-  Assert-Value $health.storage.path "health.storage.path"
-  Add-Result $rows "health" "ok" ("approvalMode={0}; questionBankPath={1}" -f $health.approvalMode, $health.storage.path)
+  Assert-Value $health.storage.provider "health.storage.provider"
+  Assert-Value $health.storage.visibility "health.storage.visibility"
+  Assert-Value $health.questionBank.visibility "health.questionBank.visibility"
+  Add-Result $rows "health" "ok" ("approvalMode={0}; storageProvider={1}; questionBankVisibility={2}" -f $health.approvalMode, $health.storage.provider, $health.questionBank.visibility)
 
   $uiPage = Invoke-WebRequest -Method Get -Uri "$baseUrl/ui"
   if ($uiPage.StatusCode -ne 200 -or $uiPage.Content -notmatch "Yian Windows Host") {

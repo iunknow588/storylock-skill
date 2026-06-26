@@ -5,6 +5,7 @@ import org.json.JSONObject
 
 data class AndroidQuestionSet(
   val identityId: String,
+  val schemaVersion: String,
   val questionSetVersion: String,
   val normalizationVersion: String,
   val questions: List<ChallengeCell>,
@@ -17,6 +18,7 @@ class AndroidQuestionSetRepository(
   fun loadActiveQuestionSet(): AndroidQuestionSet {
     val json = context.assets.open(assetName).bufferedReader(Charsets.UTF_8).use { it.readText() }
     val root = JSONObject(json)
+    val schemaVersion = root.optString("schemaVersion", "android-local-question-bank-v1")
     val questionSetVersion = root.getString("questionSetVersion")
     val normalizationVersion = root.optString("normalizationVersion", "nfkc-lower-v1")
     val identityId = root.optString("identityId", "android-demo-001")
@@ -54,13 +56,14 @@ class AndroidQuestionSetRepository(
     }
     return AndroidQuestionSet(
       identityId = identityId,
+      schemaVersion = schemaVersion,
       questionSetVersion = questionSetVersion,
       normalizationVersion = normalizationVersion,
       questions = questions,
     )
   }
 
-  private companion object {
+  companion object {
     const val DEFAULT_ASSET_NAME = "storylock-question-set.json"
   }
 }

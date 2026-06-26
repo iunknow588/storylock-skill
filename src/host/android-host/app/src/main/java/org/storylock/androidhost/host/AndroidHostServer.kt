@@ -45,6 +45,18 @@ class AndroidHostServer(
         jsonResponse(Status.OK, hostService.permissionSummary())
       }
 
+      session.method == Method.GET && session.uri == "/question-bank/status" -> {
+        jsonResponse(Status.OK, hostService.questionBankStatus())
+      }
+
+      session.method == Method.GET && session.uri == "/story-template/status" -> {
+        jsonResponse(Status.OK, hostService.storyTemplateStatus())
+      }
+
+      session.method == Method.GET && session.uri == "/story-templates" -> {
+        jsonResponse(Status.OK, hostService.storyTemplates())
+      }
+
       session.method == Method.POST && session.uri == "/authorization-policy" -> {
         val body = readBody(session)
         val request = JSONObject(body)
@@ -67,6 +79,12 @@ class AndroidHostServer(
         val body = readBody(session)
         val request = JSONObject(body)
         jsonResponse(Status.OK, hostService.execute(request))
+      }
+
+      session.method == Method.POST && session.uri == "/revoke" -> {
+        val body = readBody(session)
+        val request = JSONObject(body)
+        jsonResponse(Status.OK, hostService.revoke(request))
       }
 
       else -> {

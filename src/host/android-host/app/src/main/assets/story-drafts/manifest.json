@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "storylock-story-draft-manifest-v1",
+  "defaultTemplateId": "shouzhudaitu-zh",
+  "items": [
+    {
+      "templateId": "shouzhudaitu-zh",
+      "language": "zh-CN",
+      "storyTitle": "\u5b88\u682a\u5f85\u5154",
+      "fileName": "shouzhudaitu-zh.json"
+    },
+    {
+      "templateId": "caochong-weighs-elephant-zh",
+      "language": "zh-CN",
+      "storyTitle": "\u66f9\u51b2\u79f0\u8c61",
+      "fileName": "caochong-weighs-elephant-zh.json"
+    },
+    {
+      "templateId": "kongrong-shares-pears-en",
+      "language": "en-US",
+      "storyTitle": "Kong Rong Shares the Pears",
+      "fileName": "kongrong-shares-pears-en.json"
+    }
+  ]
+}

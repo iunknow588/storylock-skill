@@ -22,32 +22,92 @@ slint::slint! {
     component MenuButton inherits Rectangle {
         in property <string> label;
         in property <bool> selected;
+        in property <bool> enabled: true;
         callback clicked();
 
         width: 144px;
         height: 36px;
         border-radius: 6px;
-        background: selected ? #b8c8cd : #e2e9ec;
+        background: !enabled ? #d8e0e4 : (selected ? #b8c8cd : #e2e9ec);
         TouchArea {
-            clicked => { root.clicked(); }
+            clicked => {
+                if root.enabled {
+                    root.clicked();
+                }
+            }
         }
         Rectangle {
             x: 0px;
             y: 0px;
-            width: root.selected ? 4px : 0px;
+            width: root.enabled && root.selected ? 4px : 0px;
             height: parent.height;
             border-radius: 4px;
             background: #45606b;
         }
         Text {
             text: root.label;
-            color: #17252f;
+            color: enabled ? #17252f : #8a98a0;
             font-size: 14px;
             font-weight: selected ? 700 : 500;
             vertical-alignment: center;
             x: 10px;
             width: parent.width - 20px;
             height: parent.height;
+        }
+    }
+
+    component SubMenuButton inherits Rectangle {
+        in property <string> label;
+        in property <bool> selected;
+        callback clicked();
+
+        width: 124px;
+        height: 32px;
+        background: transparent;
+
+        Rectangle {
+            x: 10px;
+            y: -8px;
+            width: 1px;
+            height: 48px;
+            background: #9fb0b8;
+        }
+        Rectangle {
+            x: 10px;
+            y: 16px;
+            width: 12px;
+            height: 1px;
+            background: #9fb0b8;
+        }
+        Rectangle {
+            x: 22px;
+            y: 0px;
+            width: 102px;
+            height: 32px;
+            border-radius: 6px;
+            background: selected ? #b8c8cd : #e2e9ec;
+            Rectangle {
+                x: 0px;
+                y: 0px;
+                width: root.selected ? 4px : 0px;
+                height: parent.height;
+                border-radius: 4px;
+                background: #45606b;
+            }
+            Text {
+                text: root.label;
+                color: #17252f;
+                font-size: 12px;
+                font-weight: selected ? 700 : 500;
+                vertical-alignment: center;
+                x: 8px;
+                width: parent.width - 16px;
+                height: parent.height;
+                overflow: elide;
+            }
+            TouchArea {
+                clicked => { root.clicked(); }
+            }
         }
     }
 
@@ -107,12 +167,52 @@ slint::slint! {
         }
     }
 
+    component PathBrowseRow inherits HorizontalLayout {
+        in property <string> name;
+        in-out property <string> value;
+        in property <bool> is-zh: true;
+        callback browse();
+
+        spacing: 10px;
+        Text {
+            text: root.name;
+            width: 150px;
+            color: #62727d;
+            font-size: 13px;
+            vertical-alignment: center;
+        }
+        LineEdit {
+            text <=> root.value;
+            width: 450px;
+            height: 32px;
+        }
+        Rectangle {
+            width: 74px;
+            height: 32px;
+            border-radius: 6px;
+            background: #d7e1e6;
+            TouchArea {
+                clicked => { root.browse(); }
+            }
+            Text {
+                text: root.is-zh ? "浏览" : "Browse";
+                color: #17252f;
+                font-size: 13px;
+                font-weight: 700;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                width: parent.width;
+                height: parent.height;
+            }
+        }
+    }
+
     component LargeEditableText inherits Rectangle {
         in property <string> name;
         in-out property <string> value;
 
-        width: 780px;
-        height: 310px;
+        width: 720px;
+        height: 250px;
         background: #eef3f5;
         Text {
             x: 0px;
@@ -127,8 +227,8 @@ slint::slint! {
         Rectangle {
             x: 164px;
             y: 0px;
-            width: 616px;
-            height: 310px;
+            width: 556px;
+            height: 250px;
             border-radius: 6px;
             background: #eef3f5;
             TextEdit {
@@ -284,7 +384,112 @@ slint::slint! {
         }
     }
 
+    component QuestionTile inherits Rectangle {
+        in property <string> label;
+        in property <bool> selected;
+        callback clicked();
+
+        width: 171px;
+        height: 56px;
+        border-width: 1px;
+        border-color: selected ? #45606b : #d7e1e6;
+        border-radius: 6px;
+        background: selected ? #dbe8eb : #edf3f5;
+        TouchArea {
+            clicked => { root.clicked(); }
+        }
+        Text {
+            x: 10px;
+            y: 8px;
+            width: parent.width - 20px;
+            height: parent.height - 16px;
+            text: root.label;
+            color: #17252f;
+            font-size: 12px;
+            font-weight: selected ? 700 : 500;
+            wrap: word-wrap;
+            overflow: elide;
+        }
+    }
+
+    component QuestionOverviewGrid inherits Rectangle {
+        in-out property <string> selected-question;
+        in property <string> question-1;
+        in property <string> question-2;
+        in property <string> question-3;
+        in property <string> question-4;
+        in property <string> question-5;
+        in property <string> question-6;
+        in property <string> question-7;
+        in property <string> question-8;
+        in property <string> question-9;
+        in property <string> question-10;
+        in property <string> question-11;
+        in property <string> question-12;
+        in property <string> question-13;
+        in property <string> question-14;
+        in property <string> question-15;
+        in property <string> question-16;
+        in property <string> question-17;
+        in property <string> question-18;
+        in property <string> question-19;
+        in property <string> question-20;
+        in property <string> question-21;
+        in property <string> question-22;
+        in property <string> question-23;
+        in property <string> question-24;
+        callback select-node(string);
+
+        width: 720px;
+        height: 374px;
+        background: transparent;
+        GridLayout {
+            x: 0px;
+            y: 0px;
+            width: parent.width;
+            height: parent.height;
+            spacing: 8px;
+            Row {
+                QuestionTile { label: root.question-1; selected: root.selected-question == "1"; clicked => { root.select-node("1"); } }
+                QuestionTile { label: root.question-2; selected: root.selected-question == "2"; clicked => { root.select-node("2"); } }
+                QuestionTile { label: root.question-3; selected: root.selected-question == "3"; clicked => { root.select-node("3"); } }
+                QuestionTile { label: root.question-4; selected: root.selected-question == "4"; clicked => { root.select-node("4"); } }
+            }
+            Row {
+                QuestionTile { label: root.question-5; selected: root.selected-question == "5"; clicked => { root.select-node("5"); } }
+                QuestionTile { label: root.question-6; selected: root.selected-question == "6"; clicked => { root.select-node("6"); } }
+                QuestionTile { label: root.question-7; selected: root.selected-question == "7"; clicked => { root.select-node("7"); } }
+                QuestionTile { label: root.question-8; selected: root.selected-question == "8"; clicked => { root.select-node("8"); } }
+            }
+            Row {
+                QuestionTile { label: root.question-9; selected: root.selected-question == "9"; clicked => { root.select-node("9"); } }
+                QuestionTile { label: root.question-10; selected: root.selected-question == "10"; clicked => { root.select-node("10"); } }
+                QuestionTile { label: root.question-11; selected: root.selected-question == "11"; clicked => { root.select-node("11"); } }
+                QuestionTile { label: root.question-12; selected: root.selected-question == "12"; clicked => { root.select-node("12"); } }
+            }
+            Row {
+                QuestionTile { label: root.question-13; selected: root.selected-question == "13"; clicked => { root.select-node("13"); } }
+                QuestionTile { label: root.question-14; selected: root.selected-question == "14"; clicked => { root.select-node("14"); } }
+                QuestionTile { label: root.question-15; selected: root.selected-question == "15"; clicked => { root.select-node("15"); } }
+                QuestionTile { label: root.question-16; selected: root.selected-question == "16"; clicked => { root.select-node("16"); } }
+            }
+            Row {
+                QuestionTile { label: root.question-17; selected: root.selected-question == "17"; clicked => { root.select-node("17"); } }
+                QuestionTile { label: root.question-18; selected: root.selected-question == "18"; clicked => { root.select-node("18"); } }
+                QuestionTile { label: root.question-19; selected: root.selected-question == "19"; clicked => { root.select-node("19"); } }
+                QuestionTile { label: root.question-20; selected: root.selected-question == "20"; clicked => { root.select-node("20"); } }
+            }
+            Row {
+                QuestionTile { label: root.question-21; selected: root.selected-question == "21"; clicked => { root.select-node("21"); } }
+                QuestionTile { label: root.question-22; selected: root.selected-question == "22"; clicked => { root.select-node("22"); } }
+                QuestionTile { label: root.question-23; selected: root.selected-question == "23"; clicked => { root.select-node("23"); } }
+                QuestionTile { label: root.question-24; selected: root.selected-question == "24"; clicked => { root.select-node("24"); } }
+            }
+        }
+    }
+
     component QuestionConfigPanel inherits Rectangle {
+        in property <length> panel-height: 374px;
         in-out property <string> selected-question;
         in-out property <string> question-text;
         in-out property <string> answer-1;
@@ -310,16 +515,16 @@ slint::slint! {
         callback select-node(string);
 
         width: 740px;
-        height: 540px;
+        height: root.panel-height;
         border-radius: 6px;
         border-width: 0px;
         background: transparent;
 
         ScrollView {
             x: 10px;
-            y: 10px;
+            y: 0px;
             width: 720px;
-            height: 470px;
+            height: root.panel-height;
             vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
             viewport-width: 720px;
             viewport-height: 520px;
@@ -448,7 +653,7 @@ slint::slint! {
     }
 
     export component HostDashboard inherits Window {
-        in-out property <int> active-page: 0;
+        in-out property <int> active-page: 1;
         in-out property <string> language: "zh";
         property <bool> is-zh: language == "zh";
         in-out property <bool> settings-open: false;
@@ -476,7 +681,7 @@ slint::slint! {
 
         title: "Yian Windows Host";
         preferred-width: 960px;
-        preferred-height: 620px;
+        preferred-height: 540px;
         background: #eef3f5;
 
         HorizontalBox {
@@ -528,7 +733,7 @@ slint::slint! {
                 background: #eef3f5;
                 Rectangle {
                     width: 640px;
-                    height: 640px;
+                    height: 540px;
                     background: transparent;
                     VerticalBox {
                         padding: 38px;
@@ -570,14 +775,14 @@ slint::slint! {
 
                         Rectangle {
                             width: 600px;
-                            height: 404px;
+                            height: 360px;
                             background: transparent;
 
                             if root.active-page == 0: VerticalBox {
                                 x: 0px;
                                 y: 0px;
                                 width: 600px;
-                                height: 404px;
+                                height: 360px;
                                 spacing: 12px;
                                 FormRow { name: root.is-zh ? "身份" : "Identity"; value: root.identity-id; }
                                 FormRow { name: root.is-zh ? "设备" : "Device"; value: root.device-id; }
@@ -607,7 +812,7 @@ slint::slint! {
                                 x: 0px;
                                 y: 0px;
                                 width: 600px;
-                                height: 420px;
+                                height: 360px;
                                 spacing: 12px;
                                 FormRow { name: root.is-zh ? "能力" : "Capabilities"; value: root.capabilities; }
                                 FormRow { name: root.is-zh ? "调用链" : "Call Chain"; value: root.call-chain; }
@@ -620,7 +825,7 @@ slint::slint! {
                                 x: 0px;
                                 y: 0px;
                                 width: 600px;
-                                height: 420px;
+                                height: 360px;
                                 spacing: 12px;
                                 StaticRow { name: root.is-zh ? "单项读取" : "Single Read"; value: root.is-zh ? "解锁 9 格中的 6 格，中等强度，允许远程" : "6 of 9 cells, medium strength, remote allowed"; }
                                 StaticRow { name: root.is-zh ? "批量读取" : "Batch Read"; value: root.is-zh ? "解锁 12 格中的 12 格，高强度，允许远程" : "12 of 12 cells, high strength, remote allowed"; }
@@ -657,14 +862,14 @@ slint::slint! {
                                         }
                                     }
                                 }
-                                LogPanel { value: root.management-stats; panel-height: 220px; }
+                                LogPanel { value: root.management-stats; panel-height: 150px; }
                             }
 
                             if root.active-page == 3: VerticalBox {
                                 x: 0px;
                                 y: 0px;
                                 width: 600px;
-                                height: 420px;
+                                height: 360px;
                                 spacing: 12px;
                                 LogPanel { value: root.diagnostics; }
                             }
@@ -672,7 +877,7 @@ slint::slint! {
                     }
                     if root.settings-open: Rectangle {
                         width: 640px;
-                        height: 620px;
+                        height: 540px;
                         background: #00000022;
                         TouchArea { }
                     }
@@ -690,8 +895,8 @@ slint::slint! {
         callback language-changed(string);
 
         title: is-zh ? "设置" : "Settings";
-        preferred-width: 720px;
-        preferred-height: 280px;
+        preferred-width: 640px;
+        preferred-height: 360px;
         background: #eef3f5;
 
         VerticalBox {
@@ -760,6 +965,30 @@ slint::slint! {
         in-out property <string> element-id: "time";
         in-out property <string> selected-question: "1";
         in-out property <string> question-text: "Which season appears in the memory story?";
+        in-out property <string> question-1: "Q1";
+        in-out property <string> question-2: "Q2";
+        in-out property <string> question-3: "Q3";
+        in-out property <string> question-4: "Q4";
+        in-out property <string> question-5: "Q5";
+        in-out property <string> question-6: "Q6";
+        in-out property <string> question-7: "Q7";
+        in-out property <string> question-8: "Q8";
+        in-out property <string> question-9: "Q9";
+        in-out property <string> question-10: "Q10";
+        in-out property <string> question-11: "Q11";
+        in-out property <string> question-12: "Q12";
+        in-out property <string> question-13: "Q13";
+        in-out property <string> question-14: "Q14";
+        in-out property <string> question-15: "Q15";
+        in-out property <string> question-16: "Q16";
+        in-out property <string> question-17: "Q17";
+        in-out property <string> question-18: "Q18";
+        in-out property <string> question-19: "Q19";
+        in-out property <string> question-20: "Q20";
+        in-out property <string> question-21: "Q21";
+        in-out property <string> question-22: "Q22";
+        in-out property <string> question-23: "Q23";
+        in-out property <string> question-24: "Q24";
         in-out property <string> canonical-answer: "spring";
         in-out property <string> accepted-answers: "spring; rainy spring";
         in-out property <string> answer-options: "1. spring | correct\n2. rainy spring | correct\n3. departure bell | correct\n4. winter | wrong\n5. noon | wrong\n6. harbor | wrong\n7. red bag | wrong\n8. locker 3 | wrong\n9. radio tower | wrong";
@@ -822,6 +1051,7 @@ slint::slint! {
         in-out property <string> template-id: "github.com";
         in-out property <string> template-display-name: "GitHub main login";
         in-out property <string> template-bindings: "vault.stlk\n  loginSites\n    username -> username\n    password -> password\n\n  signingActions\n    username -> username\n\n  agentTasks\n    username -> username";
+        in-out property <string> candidate-template-status: "";
         in-out property <string> export-preview: "identity-package/\n  vault.stlk\n  package-manifest.json\n  resource-catalog.json";
         in-out property <string> config-status: "All edits stay inside StoryLock UI. Yian Host receives no draft, vault, catalog, template, or package path.";
         in-out property <string> learning-status: "Pre-export test is required before export.";
@@ -849,7 +1079,15 @@ slint::slint! {
         in-out property <string> learning-answer-9: "";
         in-out property <string> learning-answer-9-state: "wrong";
         in-out property <string> core-data-dir: "";
-        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "保护对象" : "Protected Objects") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案配置" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
+        in-out property <string> draft-file-path: "vault.stlk";
+        in-out property <string> manifest-file-path: "package-manifest.json";
+        in-out property <string> encrypted-vault-path: "vault.stlk";
+        in-out property <string> resource-catalog-path: "resource-catalog.json";
+        in-out property <string> learning-policy-path: "learning-policy.json";
+        in-out property <string> export-package-dir: "";
+        in-out property <string> temp-draft-label: is-zh ? "暂存草稿" : "Save Draft";
+        in-out property <bool> temp-draft-cooling: false;
+        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "保护对象" : "Protected Objects") : active-page == 3 ? (is-zh ? "学习设置" : "Learning Settings") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案配置" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
         callback close-requested();
         callback save-temp-draft();
         callback previous-node();
@@ -858,6 +1096,8 @@ slint::slint! {
         callback select-resource-group(string);
         callback save-resource();
         callback save-template();
+        callback apply-template();
+        callback pull-template-candidates();
         callback refresh-export();
         callback save-learning-policy();
         callback run-learning();
@@ -865,10 +1105,16 @@ slint::slint! {
         callback learning-next();
         callback check-learning-current();
         callback export-package();
+        callback browse-core-data-dir();
+        callback browse-export-package-dir();
 
         title: "StoryLock Core";
-        preferred-width: 1080px;
-        preferred-height: 780px;
+        preferred-width: 960px;
+        preferred-height: 540px;
+        min-width: 960px;
+        max-width: 960px;
+        min-height: 540px;
+        max-height: 540px;
         background: #eef3f5;
 
         HorizontalBox {
@@ -876,14 +1122,14 @@ slint::slint! {
             spacing: 0px;
 
             Rectangle {
-                min-width: 180px;
-                max-width: 180px;
+                min-width: 160px;
+                max-width: 160px;
                 background: #eef3f5;
                 VerticalBox {
                     x: 18px;
-                    y: 16px;
-                    width: 144px;
-                    height: 448px;
+                    y: 8px;
+                    width: 124px;
+                    height: 524px;
                     spacing: 8px;
                     Text {
                         text: root.is-zh ? "StoryLock 配置" : "StoryLock Config";
@@ -892,40 +1138,51 @@ slint::slint! {
                         font-weight: 800;
                     }
                     MenuButton {
-                        label: root.is-zh ? "故事草稿" : "Story Draft";
-                        selected: root.active-page == 0;
-                        clicked => { root.active-page = 0; }
-                    }
-                    MenuButton {
                         label: root.is-zh ? "24 个问题" : "24 Questions";
                         selected: root.active-page == 1;
                         clicked => { root.active-page = 1; }
+                    }
+                    MenuButton {
+                        label: root.is-zh ? "故事草稿" : "Story Draft";
+                        selected: root.active-page == 0;
+                        clicked => { root.active-page = 0; }
                     }
                     MenuButton {
                         label: root.is-zh ? "保护对象" : "Protected Objects";
                         selected: root.active-page == 2;
                         clicked => { root.active-page = 2; }
                     }
-                    MenuButton {
+                    SubMenuButton {
                         label: root.is-zh ? "普通授权对象" : "Normal Objects";
                         selected: root.active-page == 2 && root.resource-group == "normal";
                         clicked => {
                             root.select-resource-group("normal");
                         }
                     }
-                    MenuButton {
+                    SubMenuButton {
                         label: root.is-zh ? "私密对象" : "Private Objects";
                         selected: root.active-page == 2 && root.resource-group == "private";
                         clicked => {
                             root.select-resource-group("private");
                         }
                     }
-                    MenuButton {
+                    SubMenuButton {
                         label: root.is-zh ? "机密对象" : "Secret Objects";
                         selected: root.active-page == 2 && root.resource-group == "secret";
                         clicked => {
                             root.select-resource-group("secret");
                         }
+                    }
+                    MenuButton {
+                        label: root.temp-draft-label;
+                        selected: false;
+                        enabled: !root.temp-draft-cooling;
+                        clicked => { root.save-temp-draft(); }
+                    }
+                    MenuButton {
+                        label: root.is-zh ? "学习设置" : "Learning";
+                        selected: root.active-page == 3;
+                        clicked => { root.active-page = 3; }
                     }
                     MenuButton {
                         label: root.is-zh ? "导出" : "Export";
@@ -936,7 +1193,7 @@ slint::slint! {
             }
 
             Rectangle {
-                min-width: 820px;
+                min-width: 800px;
                 background: #eef3f5;
                 VerticalBox {
                     padding: 24px;
@@ -955,7 +1212,7 @@ slint::slint! {
                         Text {
                             x: 38px;
                             y: 4px;
-                            width: 500px;
+                            width: 470px;
                             height: 28px;
                             text: "StoryLock Core - " + root.current-title;
                             font-size: 16px;
@@ -963,18 +1220,8 @@ slint::slint! {
                             color: #17252f;
                             overflow: elide;
                         }
-                        ActionButton {
-                            x: 588px;
-                            y: 1px;
-                            label: root.is-zh ? "暂存草稿" : "Save Temp Draft";
-                            primary: true;
-                            button-width: 150px;
-                            clicked => {
-                                root.save-temp-draft();
-                            }
-                        }
                         SettingsIconButton {
-                            x: 748px;
+                            x: 688px;
                             y: 2px;
                             selected: root.active-page == 5;
                             clicked => { root.active-page = 5; }
@@ -984,15 +1231,15 @@ slint::slint! {
                     Rectangle { height: 1px; background: #d7e1e6; }
 
                     Rectangle {
-                        width: 780px;
-                        height: 590px;
+                        width: 720px;
+                        height: 374px;
                         background: #eef3f5;
 
                         if root.active-page == 0: VerticalBox {
                             x: 0px;
                             y: 0px;
-                            width: 780px;
-                            height: 590px;
+                            width: 720px;
+                            height: 374px;
                             spacing: 12px;
                             EditableRow { name: root.is-zh ? "故事标题" : "Story Title"; value <=> root.story-title; }
                             EditableRow { name: root.is-zh ? "故事摘要" : "Summary"; value <=> root.story-summary; }
@@ -1002,41 +1249,49 @@ slint::slint! {
                         if root.active-page == 1: VerticalBox {
                             x: 0px;
                             y: 0px;
-                            width: 780px;
-                            height: 590px;
+                            width: 720px;
+                            height: 374px;
                             spacing: 12px;
-                            StaticRow { name: root.is-zh ? "页面目的" : "Purpose"; value: root.is-zh ? "这里给出全部 24 个问题的概览；选择具体问题后进入独立答案配置页。" : "This page gives an overview of all 24 questions; choose one question to open the answer editor."; }
-                            QuestionIdTableRow {
+                            QuestionOverviewGrid {
                                 selected-question <=> root.selected-question;
-                                previous-node => { root.previous-node(); }
-                                next-node => { root.next-node(); }
-                                select-node(value) => { root.select-node(value); }
-                            }
-                            StaticRow { name: root.is-zh ? "当前位置" : "Position"; value: root.node-position; }
-                            StaticRow { name: root.is-zh ? "节点 ID" : "Node ID"; value: root.node-id; }
-                            StaticRow { name: root.is-zh ? "节点标题" : "Node Title"; value: root.node-title; }
-                            StaticRow { name: root.is-zh ? "问题" : "Question"; value: root.question-text; }
-                            StaticRow { name: root.is-zh ? "答案候选" : "Answer Options"; value: root.is-zh ? "每个问题配置 9 个候选答案，并用打勾/打叉标记正确或错误。" : "Each question has 9 answer candidates marked correct or wrong."; }
-                            HorizontalBox {
-                                spacing: 10px;
-                                Rectangle { width: 164px; height: 1px; background: transparent; }
-                                ActionButton {
-                                    label: root.is-zh ? "编辑 9 个答案" : "Edit 9 Answers";
-                                    primary: true;
-                                    button-width: 150px;
-                                    clicked => { root.active-page = 6; }
+                                question-1: root.question-1;
+                                question-2: root.question-2;
+                                question-3: root.question-3;
+                                question-4: root.question-4;
+                                question-5: root.question-5;
+                                question-6: root.question-6;
+                                question-7: root.question-7;
+                                question-8: root.question-8;
+                                question-9: root.question-9;
+                                question-10: root.question-10;
+                                question-11: root.question-11;
+                                question-12: root.question-12;
+                                question-13: root.question-13;
+                                question-14: root.question-14;
+                                question-15: root.question-15;
+                                question-16: root.question-16;
+                                question-17: root.question-17;
+                                question-18: root.question-18;
+                                question-19: root.question-19;
+                                question-20: root.question-20;
+                                question-21: root.question-21;
+                                question-22: root.question-22;
+                                question-23: root.question-23;
+                                question-24: root.question-24;
+                                select-node(value) => {
+                                    root.select-node(value);
                                 }
                             }
-                            LogPanel { value: root.node-overview; panel-height: 230px; }
                         }
 
                         if root.active-page == 6: VerticalBox {
                             x: 0px;
                             y: 0px;
-                            width: 780px;
-                            height: 590px;
+                            width: 720px;
+                            height: 374px;
                             spacing: 8px;
                             QuestionConfigPanel {
+                                panel-height: 330px;
                                 selected-question <=> root.selected-question;
                                 question-text <=> root.question-text;
                                 answer-1 <=> root.answer-1;
@@ -1076,8 +1331,8 @@ slint::slint! {
                         if root.active-page == 2: VerticalBox {
                             x: 0px;
                             y: 0px;
-                            width: 780px;
-                            height: 590px;
+                            width: 720px;
+                            height: 374px;
                             spacing: 12px;
                             StaticRow { name: root.is-zh ? "页面目的" : "Purpose"; value: root.is-zh ? "在左侧菜单选择对象级别，本页以普通列表展示当前级别下的受保护对象。" : "Choose an object level from the left menu; this page shows a plain list for that level."; }
                             StaticRow { name: root.is-zh ? "当前级别" : "Current Level"; value: root.resource-group == "normal" ? (root.is-zh ? "普通授权对象" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "私密对象" : "Private Objects") : (root.is-zh ? "机密对象" : "Secret Objects"); }
@@ -1095,14 +1350,14 @@ slint::slint! {
                                     clicked => { root.active-page = 7; }
                                 }
                             }
-                            LogPanel { value: root.protected-object-list; panel-height: 220px; }
+                            LogPanel { value: root.protected-object-list; panel-height: 120px; }
                         }
 
                         if root.active-page == 7: VerticalBox {
                             x: 0px;
                             y: 0px;
-                            width: 780px;
-                            height: 590px;
+                            width: 720px;
+                            height: 374px;
                             spacing: 12px;
                             EditableRow { name: root.is-zh ? "资源 ID" : "Resource ID"; value <=> root.resource-id; }
                             EditableRow { name: root.is-zh ? "对象 ID" : "Object ID"; value <=> root.object-id; }
@@ -1127,27 +1382,24 @@ slint::slint! {
                             LogPanel { value: root.config-status; panel-height: 120px; }
                         }
 
-                        if root.active-page == 4: VerticalBox {
+                        if root.active-page == 3: VerticalBox {
                             x: 0px;
                             y: 0px;
-                            width: 780px;
-                            height: 590px;
+                            width: 720px;
+                            height: 374px;
                             spacing: 12px;
                             ScrollView {
-                                width: 760px;
-                                height: 500px;
+                                width: 720px;
+                                height: 374px;
                                 vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
-                                viewport-width: 740px;
-                                viewport-height: 840px;
+                                viewport-width: 700px;
+                                viewport-height: 900px;
                                 VerticalBox {
                                     x: 0px;
                                     y: 0px;
-                                    width: 720px;
-                                    height: 840px;
+                                    width: 690px;
+                                    height: 900px;
                                     spacing: 10px;
-                                    StaticRow { name: root.is-zh ? "学习状态" : "Learning Status"; value: root.learning-status; }
-                                    StaticRow { name: root.is-zh ? "测试结果" : "Test Result"; value: root.learning-result; }
-                                    StaticRow { name: root.is-zh ? "加密数据" : "Encrypted Data"; value: root.is-zh ? "通过测试后导出加密 Vault 与相关包数据。" : "After the test passes, export the encrypted vault and package data."; }
                                     StaticRow { name: root.is-zh ? "计划文件" : "Plan File"; value: "learning-policy.json"; }
                                     StaticRow { name: root.is-zh ? "设计目的" : "Design Goal"; value: root.is-zh ? "防止用户长期不用后忘记问题答案；导出后由本地 Host 按计划强制复习。" : "Prevent forgotten answers after long gaps; after export, the local Host schedules mandatory review."; }
                                     StaticRow { name: root.is-zh ? "强制内容" : "Required Review"; value: root.is-zh ? "每次保留学习固定回答 22 个问题，用来确认用户仍然记得自己的故事锁。" : "Each retention review requires 22 fixed questions to confirm the user still remembers the StoryLock."; }
@@ -1166,21 +1418,89 @@ slint::slint! {
                                     EditableRow { name: root.is-zh ? "长期期年数" : "Long Years"; value <=> root.long-term-years; }
                                     EditableRow { name: root.is-zh ? "长期期频率" : "Long Freq"; value <=> root.long-term-frequency-years; }
                                     StaticRow { name: root.is-zh ? "执行计划" : "Plan Summary"; value: root.learning-plan-summary; }
+                                    StaticRow { name: root.is-zh ? "学习状态" : "Learning Status"; value: root.learning-status; }
+                                    StaticRow { name: root.is-zh ? "当前题目" : "Current Question"; value: root.learning-position + "  " + root.learning-question; }
+                                    QuestionTableRow { label: "Answer 1"; value <=> root.learning-answer-1; state <=> root.learning-answer-1-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 2"; value <=> root.learning-answer-2; state <=> root.learning-answer-2-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 3"; value <=> root.learning-answer-3; state <=> root.learning-answer-3-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 4"; value <=> root.learning-answer-4; state <=> root.learning-answer-4-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 5"; value <=> root.learning-answer-5; state <=> root.learning-answer-5-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 6"; value <=> root.learning-answer-6; state <=> root.learning-answer-6-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 7"; value <=> root.learning-answer-7; state <=> root.learning-answer-7-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 8"; value <=> root.learning-answer-8; state <=> root.learning-answer-8-state; show-state: true; }
+                                    QuestionTableRow { label: "Answer 9"; value <=> root.learning-answer-9; state <=> root.learning-answer-9-state; show-state: true; }
                                     HorizontalBox {
                                         spacing: 10px;
                                         Rectangle { width: 164px; height: 1px; background: transparent; }
                                         ActionButton {
                                             label: root.is-zh ? "保存计划" : "Save Plan";
                                             primary: false;
-                                            clicked => {
-                                                root.save-learning-policy();
-                                            }
+                                            clicked => { root.save-learning-policy(); }
                                         }
                                         ActionButton {
                                             label: root.is-zh ? "开始测试" : "Start Test";
                                             primary: true;
+                                            clicked => { root.run-learning(); }
+                                        }
+                                        ActionButton {
+                                            label: root.is-zh ? "上一题" : "Previous";
+                                            primary: false;
+                                            button-width: 110px;
+                                            clicked => { root.learning-previous(); }
+                                        }
+                                        ActionButton {
+                                            label: root.is-zh ? "下一题" : "Next";
+                                            primary: false;
+                                            button-width: 110px;
+                                            clicked => { root.learning-next(); }
+                                        }
+                                        ActionButton {
+                                            label: root.is-zh ? "检查本题" : "Check";
+                                            primary: true;
+                                            button-width: 110px;
+                                            clicked => { root.check-learning-current(); }
+                                        }
+                                    }
+                                    LogPanel { value: root.learning-result; panel-height: 90px; }
+                                }
+                            }
+                        }
+
+                        if root.active-page == 4: VerticalBox {
+                            x: 0px;
+                            y: 0px;
+                            width: 720px;
+                            height: 374px;
+                            spacing: 12px;
+                            ScrollView {
+                                width: 720px;
+                                height: 374px;
+                                vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+                                viewport-width: 700px;
+                                viewport-height: 760px;
+                                VerticalBox {
+                                    x: 0px;
+                                    y: 0px;
+                                    width: 690px;
+                                    height: 760px;
+                                    spacing: 10px;
+                                    PathBrowseRow {
+                                        name: root.is-zh ? "导出目录" : "Export Dir";
+                                        value <=> root.export-package-dir;
+                                        is-zh: root.is-zh;
+                                        browse => { root.browse-export-package-dir(); }
+                                    }
+                                    StaticRow { name: root.is-zh ? "学习状态" : "Learning Status"; value: root.learning-status; }
+                                    StaticRow { name: root.is-zh ? "测试结果" : "Test Result"; value: root.learning-result; }
+                                    StaticRow { name: root.is-zh ? "加密数据" : "Encrypted Data"; value: root.is-zh ? "通过测试后导出加密 Vault 与相关包数据。" : "After the test passes, export the encrypted vault and package data."; }
+                                    HorizontalBox {
+                                        spacing: 10px;
+                                        Rectangle { width: 164px; height: 1px; background: transparent; }
+                                        ActionButton {
+                                            label: root.is-zh ? "学习设置" : "Learning";
+                                            primary: false;
                                             clicked => {
-                                                root.run-learning();
+                                                root.active-page = 3;
                                             }
                                         }
                                         ActionButton {
@@ -1191,7 +1511,7 @@ slint::slint! {
                                             }
                                         }
                                     }
-                                    LogPanel { value: root.export-preview + "\n\nExport writes the encrypted StoryLock vault and related package data only after the pre-export test passes. Host reads learning-policy.json and schedules retention checks from it."; panel-height: 190px; }
+                                    LogPanel { value: root.export-preview + "\n\nExport writes the encrypted StoryLock vault and related package data only after the pre-export test passes. Host reads learning-policy.json and schedules retention checks from it."; panel-height: 150px; }
                                 }
                             }
                         }
@@ -1199,8 +1519,8 @@ slint::slint! {
                         if root.active-page == 5: VerticalBox {
                             x: 0px;
                             y: 0px;
-                            width: 780px;
-                            height: 590px;
+                            width: 720px;
+                            height: 374px;
                             spacing: 12px;
                             HorizontalBox {
                                 x: 10px;
@@ -1225,9 +1545,145 @@ slint::slint! {
                             }
                             StaticRow { name: root.is-zh ? "说明" : "Note"; value: root.is-zh ? "语言切换立即作用于 StoryLock Core 界面。" : "Language changes apply to the StoryLock Core UI immediately."; }
                             StaticRow { name: root.is-zh ? "范围" : "Scope"; value: root.is-zh ? "当前支持中文与英文。" : "Chinese and English are supported for now."; }
+                            PathBrowseRow {
+                                name: root.is-zh ? "保存目录" : "Workspace Dir";
+                                value <=> root.core-data-dir;
+                                is-zh: root.is-zh;
+                                browse => { root.browse-core-data-dir(); }
+                            }
+                            StaticRow { name: root.is-zh ? "草稿位置" : "Draft Location"; value: root.draft-file-path; }
+                            StaticRow { name: root.is-zh ? "包清单" : "Package Manifest"; value: root.manifest-file-path; }
+                            StaticRow { name: root.is-zh ? "加密 Vault" : "Encrypted Vault"; value: root.encrypted-vault-path; }
+                            StaticRow { name: root.is-zh ? "资源目录" : "Resource Catalog"; value: root.resource-catalog-path; }
+                            StaticRow { name: root.is-zh ? "学习计划" : "Learning Policy"; value: root.learning-policy-path; }
+                            StaticRow { name: root.is-zh ? "故事模板" : "Story Template"; value: root.template-bindings; }
+                            if root.candidate-template-status != "": StaticRow { name: root.is-zh ? "候选模板" : "Candidates"; value: root.candidate-template-status; }
+                            HorizontalBox {
+                                spacing: 10px;
+                                Rectangle { width: 164px; height: 1px; background: transparent; }
+                                ActionButton {
+                                    label: root.is-zh ? "拉取候选" : "Pull Candidates";
+                                    primary: false;
+                                    button-width: 150px;
+                                    clicked => { root.pull-template-candidates(); }
+                                }
+                                ActionButton {
+                                    label: root.is-zh ? "保存为模板" : "Save Template";
+                                    primary: false;
+                                    button-width: 150px;
+                                    clicked => { root.save-template(); }
+                                }
+                                ActionButton {
+                                    label: root.is-zh ? "恢复模板" : "Load Template";
+                                    primary: true;
+                                    button-width: 150px;
+                                    clicked => { root.apply-template(); }
+                                }
+                            }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    export component AnswerEditorDialog inherits Window {
+        in-out property <string> language: "zh";
+        property <bool> is-zh: language == "zh";
+        in-out property <string> selected-question: "1";
+        in-out property <string> question-text: "";
+        in-out property <string> answer-1: "";
+        in-out property <string> answer-1-state: "wrong";
+        in-out property <string> answer-2: "";
+        in-out property <string> answer-2-state: "wrong";
+        in-out property <string> answer-3: "";
+        in-out property <string> answer-3-state: "wrong";
+        in-out property <string> answer-4: "";
+        in-out property <string> answer-4-state: "wrong";
+        in-out property <string> answer-5: "";
+        in-out property <string> answer-5-state: "wrong";
+        in-out property <string> answer-6: "";
+        in-out property <string> answer-6-state: "wrong";
+        in-out property <string> answer-7: "";
+        in-out property <string> answer-7-state: "wrong";
+        in-out property <string> answer-8: "";
+        in-out property <string> answer-8-state: "wrong";
+        in-out property <string> answer-9: "";
+        in-out property <string> answer-9-state: "wrong";
+        callback close-requested();
+        callback save-requested();
+        callback previous-node();
+        callback next-node();
+        callback select-node(string);
+
+        title: is-zh ? "答案配置" : "Answer Editor";
+        preferred-width: 960px;
+        preferred-height: 540px;
+        min-width: 960px;
+        max-width: 960px;
+        min-height: 540px;
+        max-height: 540px;
+        background: #eef3f5;
+
+        VerticalBox {
+            padding: 20px;
+            spacing: 12px;
+            Rectangle {
+                height: 36px;
+                background: transparent;
+                Text {
+                    x: 0px;
+                    y: 4px;
+                    width: 700px;
+                    height: 28px;
+                    text: is-zh ? "答案配置 - " + root.selected-question : "Answer Editor - " + root.selected-question;
+                    color: #17252f;
+                    font-size: 16px;
+                    font-weight: 800;
+                    overflow: elide;
+                }
+                ActionButton {
+                    x: 740px;
+                    y: 1px;
+                    label: is-zh ? "保存" : "Save";
+                    primary: true;
+                    button-width: 96px;
+                    clicked => { root.save-requested(); }
+                }
+                ActionButton {
+                    x: 846px;
+                    y: 1px;
+                    label: is-zh ? "关闭" : "Close";
+                    primary: false;
+                    button-width: 96px;
+                    clicked => { root.close-requested(); }
+                }
+            }
+            QuestionConfigPanel {
+                panel-height: 422px;
+                selected-question <=> root.selected-question;
+                question-text <=> root.question-text;
+                answer-1 <=> root.answer-1;
+                answer-1-state <=> root.answer-1-state;
+                answer-2 <=> root.answer-2;
+                answer-2-state <=> root.answer-2-state;
+                answer-3 <=> root.answer-3;
+                answer-3-state <=> root.answer-3-state;
+                answer-4 <=> root.answer-4;
+                answer-4-state <=> root.answer-4-state;
+                answer-5 <=> root.answer-5;
+                answer-5-state <=> root.answer-5-state;
+                answer-6 <=> root.answer-6;
+                answer-6-state <=> root.answer-6-state;
+                answer-7 <=> root.answer-7;
+                answer-7-state <=> root.answer-7-state;
+                answer-8 <=> root.answer-8;
+                answer-8-state <=> root.answer-8-state;
+                answer-9 <=> root.answer-9;
+                answer-9-state <=> root.answer-9-state;
+                previous-node => { root.previous-node(); }
+                next-node => { root.next-node(); }
+                select-node(value) => { root.select-node(value); }
             }
         }
     }
@@ -1246,8 +1702,8 @@ slint::slint! {
         callback deny-requested();
 
         title: "Yian Request Confirmation";
-        preferred-width: 620px;
-        preferred-height: 500px;
+        preferred-width: 640px;
+        preferred-height: 360px;
         background: #eef3f5;
 
         VerticalBox {
@@ -1319,12 +1775,12 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
         config.host_port,
         host_learning_plan_status(&core_package_dir)
     )));
-    let core_windows: Rc<RefCell<Vec<StoryLockCoreApp>>> = Rc::new(RefCell::new(Vec::new()));
+    let core_window: Rc<RefCell<Option<StoryLockCoreApp>>> = Rc::new(RefCell::new(None));
     let settings_window: Rc<RefCell<Option<SettingsDialog>>> = Rc::new(RefCell::new(None));
     let settings_window_for_open = Rc::clone(&settings_window);
     let host_for_settings = app.as_weak();
     let host_language_for_settings = Rc::clone(&host_language);
-    let core_windows_for_settings = Rc::clone(&core_windows);
+    let core_window_for_settings = Rc::clone(&core_window);
     let host_for_settings_lock = app.as_weak();
     let shared_status = Rc::new(RefCell::new(String::from("")));
     let shared_status_for_settings = Rc::clone(&shared_status);
@@ -1357,10 +1813,11 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 let host_for_language = host_for_settings.clone();
                 let host_language_for_language = Rc::clone(&host_language_for_settings);
                 let host_language_for_open_storylock = Rc::clone(&host_language_for_settings);
-                let core_windows_for_language = Rc::clone(&core_windows_for_settings);
+                let core_window_for_language = Rc::clone(&core_window_for_settings);
                 let core_package_dir_for_open_storylock = core_package_dir_for_settings.clone();
-                let core_windows_for_open_storylock = Rc::clone(&core_windows_for_settings);
+                let core_window_for_open_storylock = Rc::clone(&core_window_for_settings);
                 let host_language_for_storylock_core = Rc::clone(&host_language_for_settings);
+                let settings_weak_for_storylock_close = settings.as_weak();
                 settings.on_language_changed(move |language| {
                     let language_string = language.to_string();
                     *host_language_for_language.borrow_mut() = language_string.clone();
@@ -1370,7 +1827,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                     if let Some(host) = host_for_language.upgrade() {
                         host.set_language(SharedString::from(language_string.clone()));
                     }
-                    for core in core_windows_for_language.borrow().iter() {
+                    if let Some(core) = core_window_for_language.borrow().as_ref() {
                         core.set_language(SharedString::from(language_string.clone()));
                     }
                     if let Some(host) = host_for_language.upgrade() {
@@ -1407,25 +1864,55 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                         };
                         host.set_connection_test_status(SharedString::from(storylock_open));
                     }
-                    if let Some(core) = core_windows_for_open_storylock.borrow().last() {
+                    if let Some(core) = core_window_for_open_storylock.borrow().as_ref() {
                         initialize_storylock_core_window(core, &core_package_dir_for_open_storylock);
-                        wire_storylock_core_callbacks(core, core_package_dir_for_open_storylock.clone());
                         core.set_language(SharedString::from(host_language_for_storylock_core.borrow().clone()));
-                        if let Err(error) = core.show() {
-                            eprintln!("failed to show existing StoryLock Core window: {error}");
+                        match core.show() {
+                            Ok(()) => {
+                                return;
+                            }
+                            Err(error) => {
+                                eprintln!("failed to show existing StoryLock Core window: {error}");
+                            }
                         }
-                        return;
                     }
+                    *core_window_for_open_storylock.borrow_mut() = None;
                     match StoryLockCoreApp::new() {
                         Ok(core) => {
                             core.set_language(SharedString::from(host_language_for_storylock_core.borrow().clone()));
                             initialize_storylock_core_window(&core, &core_package_dir_for_open_storylock);
-                            wire_storylock_core_callbacks(&core, core_package_dir_for_open_storylock.clone());
+                            let host_for_storylock_close = host_for_open_storylock.clone();
+                            let settings_for_storylock_close = settings_weak_for_storylock_close.clone();
+                            let shared_status_for_storylock_close = Rc::clone(&shared_status_for_storylock);
+                            let host_language_for_storylock_close =
+                                Rc::clone(&host_language_for_open_storylock);
+                            let notify_storylock_closed: Rc<dyn Fn()> = Rc::new(move || {
+                                let status =
+                                    if host_language_for_storylock_close.borrow().as_str() == "zh" {
+                                        "StoryLock 已关闭".to_string()
+                                    } else {
+                                        "StoryLock closed".to_string()
+                                    };
+                                *shared_status_for_storylock_close.borrow_mut() = status.clone();
+                                if let Some(host) = host_for_storylock_close.upgrade() {
+                                    host.set_connection_test_status(SharedString::from(status.clone()));
+                                }
+                                if let Some(settings) = settings_for_storylock_close.upgrade() {
+                                    settings.set_core_launch_status(SharedString::from(status));
+                                }
+                            });
+                            wire_storylock_core_callbacks(
+                                &core,
+                                core_package_dir_for_open_storylock.clone(),
+                                Rc::clone(&core_window_for_open_storylock),
+                                notify_storylock_closed,
+                                config.host_port,
+                            );
                             if let Err(error) = core.show() {
                                 eprintln!("failed to show StoryLock Core window: {error}");
                                 return;
                             }
-                            core_windows_for_open_storylock.borrow_mut().push(core);
+                            *core_window_for_open_storylock.borrow_mut() = Some(core);
                         }
                         Err(error) => eprintln!("failed to create StoryLock Core window: {error}"),
                     }
@@ -1453,31 +1940,64 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
             Err(error) => eprintln!("failed to create settings window: {error}"),
         }
     });
-    let core_windows_for_callback = Rc::clone(&core_windows);
+    let core_window_for_callback = Rc::clone(&core_window);
     let core_package_dir_for_callback = core_package_dir.clone();
+    let host_for_storylock_close = app.as_weak();
+    let settings_window_for_storylock_close = Rc::clone(&settings_window);
+    let host_language_for_storylock_close = Rc::clone(&host_language);
+    let shared_status_for_storylock_close = Rc::clone(&shared_status);
     app.on_open_storylock_core(move || {
         if let Err(error) = ensure_storylock_core_package(&core_package_dir_for_callback) {
             eprintln!("failed to initialize StoryLock Core package: {error}");
         }
-        if let Some(core) = core_windows_for_callback.borrow().last() {
+        if let Some(core) = core_window_for_callback.borrow().as_ref() {
             initialize_storylock_core_window(core, &core_package_dir_for_callback);
             core.set_config_status(SharedString::from(
                 "StoryLock Core is already open. Existing local window was focused.",
             ));
-            if let Err(error) = core.show() {
-                eprintln!("failed to show existing StoryLock Core window: {error}");
+            match core.show() {
+                Ok(()) => {
+                    return;
+                }
+                Err(error) => {
+                    eprintln!("failed to show existing StoryLock Core window: {error}");
+                }
             }
-            return;
         }
+        *core_window_for_callback.borrow_mut() = None;
         match StoryLockCoreApp::new() {
             Ok(core) => {
                 initialize_storylock_core_window(&core, &core_package_dir_for_callback);
-                wire_storylock_core_callbacks(&core, core_package_dir_for_callback.clone());
+                let host_for_closed = host_for_storylock_close.clone();
+                let settings_window_for_closed = Rc::clone(&settings_window_for_storylock_close);
+                let host_language_for_closed = Rc::clone(&host_language_for_storylock_close);
+                let shared_status_for_closed = Rc::clone(&shared_status_for_storylock_close);
+                let notify_storylock_closed: Rc<dyn Fn()> = Rc::new(move || {
+                    let status = if host_language_for_closed.borrow().as_str() == "zh" {
+                        "StoryLock 已关闭".to_string()
+                    } else {
+                        "StoryLock closed".to_string()
+                    };
+                    *shared_status_for_closed.borrow_mut() = status.clone();
+                    if let Some(host) = host_for_closed.upgrade() {
+                        host.set_connection_test_status(SharedString::from(status.clone()));
+                    }
+                    if let Some(settings) = settings_window_for_closed.borrow().as_ref() {
+                        settings.set_core_launch_status(SharedString::from(status));
+                    }
+                });
+                wire_storylock_core_callbacks(
+                    &core,
+                    core_package_dir_for_callback.clone(),
+                    Rc::clone(&core_window_for_callback),
+                    notify_storylock_closed,
+                    config.host_port,
+                );
                 if let Err(error) = core.show() {
                     eprintln!("failed to show StoryLock Core window: {error}");
                     return;
                 }
-                core_windows_for_callback.borrow_mut().push(core);
+                *core_window_for_callback.borrow_mut() = Some(core);
             }
             Err(error) => {
                 eprintln!("failed to create StoryLock Core window: {error}");
@@ -1636,6 +2156,25 @@ fn storylock_core_package_dir() -> std::path::PathBuf {
         .join("identity-package")
 }
 
+fn storylock_core_package_dir_from_window(core: &StoryLockCoreApp, fallback: &Path) -> std::path::PathBuf {
+    let configured = core.get_core_data_dir();
+    let trimmed = configured.as_str().trim();
+    if trimmed.is_empty() {
+        fallback.to_path_buf()
+    } else {
+        std::path::PathBuf::from(trimmed)
+    }
+}
+
+fn ensure_storylock_core_package_dir_from_window(
+    core: &StoryLockCoreApp,
+    fallback: &Path,
+) -> Result<std::path::PathBuf> {
+    let package_dir = storylock_core_package_dir_from_window(core, fallback);
+    ensure_storylock_core_package(&package_dir)?;
+    Ok(package_dir)
+}
+
 fn storylock_core_catalog_path(package_dir: &Path) -> std::path::PathBuf {
     package_dir.join("resource-catalog.json")
 }
@@ -1662,7 +2201,20 @@ fn default_storylock_vault_json() -> Value {
         "schemaVersion": "1",
         "authorDraft": default_author_draft_json(),
         "pendingAuthorDraft": Value::Null,
+        "storyDraftTemplates": default_story_draft_templates_json(),
         "templates": default_storylock_templates_json()
+    })
+}
+
+fn default_story_draft_templates_json() -> Value {
+    json!({
+        "schemaVersion": "storylock-story-draft-templates-v1",
+        "defaultTemplateId": "dongguo-wolf",
+        "items": [
+            dongguo_wolf_author_draft_json(),
+            zhizi_yilin_author_draft_json(),
+            shouzhudaitu_author_draft_json()
+        ]
     })
 }
 
@@ -1795,6 +2347,16 @@ fn ensure_manifest_lists_required_files(package_dir: &Path) -> Result<()> {
 
 fn ensure_storylock_vault(package_dir: &Path) -> Result<()> {
     if storylock_core_vault_path(package_dir).exists() {
+        let mut vault = read_storylock_vault_payload(package_dir);
+        let before = vault.clone();
+        if vault.get("storyDraftTemplates").is_none() {
+            let draft = storylock_author_draft_from_vault(&vault);
+            vault["storyDraftTemplates"] = story_draft_templates_from_draft(&draft);
+        }
+        merge_builtin_story_draft_templates(&mut vault);
+        if vault != before {
+            save_storylock_vault_payload(package_dir, vault)?;
+        }
         return Ok(());
     }
     let legacy_draft = read_json_or_default(
@@ -1819,9 +2381,57 @@ fn ensure_storylock_vault(package_dir: &Path) -> Result<()> {
         "schemaVersion": "1",
         "authorDraft": legacy_draft,
         "pendingAuthorDraft": Value::Null,
+        "storyDraftTemplates": default_story_draft_templates_json(),
         "templates": legacy_templates,
     });
     write_storylock_vault(package_dir, &vault)
+}
+
+fn story_draft_templates_from_draft(draft: &Value) -> Value {
+    let template_id = draft
+        .get("templateId")
+        .and_then(Value::as_str)
+        .unwrap_or("current-author-draft");
+    json!({
+        "schemaVersion": "storylock-story-draft-templates-v1",
+        "defaultTemplateId": template_id,
+        "items": [draft.clone()]
+    })
+}
+
+fn merge_builtin_story_draft_templates(vault: &mut Value) {
+    let mut templates = vault
+        .get("storyDraftTemplates")
+        .cloned()
+        .unwrap_or_else(default_story_draft_templates_json);
+    if !templates.is_object() {
+        templates = default_story_draft_templates_json();
+    }
+    let mut items = templates
+        .get("items")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    for builtin in [
+        dongguo_wolf_author_draft_json(),
+        zhizi_yilin_author_draft_json(),
+        shouzhudaitu_author_draft_json(),
+    ] {
+        let template_id = builtin
+            .get("templateId")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        if !items
+            .iter()
+            .any(|item| item.get("templateId").and_then(Value::as_str) == Some(template_id))
+        {
+            items.push(builtin);
+        }
+    }
+    templates["schemaVersion"] = json!("storylock-story-draft-templates-v1");
+    templates["defaultTemplateId"] = json!("dongguo-wolf");
+    templates["items"] = Value::Array(items);
+    vault["storyDraftTemplates"] = templates;
 }
 
 fn write_json_if_missing(path: &Path, value: &Value) -> Result<()> {
@@ -2074,8 +2684,28 @@ fn read_effective_author_draft(package_dir: &Path) -> Value {
 
 fn write_pending_author_draft(package_dir: &Path, draft: &Value) -> Result<()> {
     let mut vault = read_storylock_vault_payload(package_dir);
-    vault["pendingAuthorDraft"] = draft.clone();
+    let mut normalized = draft.clone();
+    normalize_author_draft_schema(&mut normalized);
+    vault["pendingAuthorDraft"] = normalized;
     save_storylock_vault_payload(package_dir, vault)
+}
+
+fn normalize_author_draft_schema(draft: &mut Value) {
+    if draft.get("version").is_none() {
+        draft["version"] = json!("1");
+    }
+    for key in ["storyTitle", "summary", "storyPlot"] {
+        if draft.get(key).and_then(Value::as_str).is_none() {
+            draft[key] = json!("");
+        }
+    }
+    if draft.get("memoryAnchors").and_then(Value::as_array).is_none() {
+        draft["memoryAnchors"] = json!([]);
+    }
+    if draft.get("elementGroups").and_then(Value::as_array).is_none() {
+        draft["elementGroups"] = json!([]);
+    }
+    ensure_draft_nodes(draft);
 }
 
 fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_dir: &Path) {
@@ -2087,6 +2717,12 @@ fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_dir: &Path)
         default_resource_catalog_json(),
     );
     core.set_core_data_dir(SharedString::from(package_dir.display().to_string()));
+    core.set_draft_file_path(SharedString::from("vault.stlk"));
+    core.set_manifest_file_path(SharedString::from("package-manifest.json"));
+    core.set_encrypted_vault_path(SharedString::from("vault.stlk"));
+    core.set_resource_catalog_path(SharedString::from("resource-catalog.json"));
+    core.set_learning_policy_path(SharedString::from("learning-policy.json"));
+    core.set_export_package_dir(SharedString::from(default_storylock_export_dir(package_dir).display().to_string()));
     core.set_story_title(json_string(&draft, &["storyTitle"]));
     core.set_story_summary(json_string(&draft, &["summary"]));
     core.set_story_plot(json_string(&draft, &["storyPlot"]));
@@ -2117,6 +2753,7 @@ fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_dir: &Path)
             .unwrap_or_default(),
     ));
     core.set_node_overview(SharedString::from(format_node_overview(&draft)));
+    set_question_overview_titles(core, &draft);
     load_node_into_window(core, package_dir, 0);
     if let Some(resource) = catalog
         .get("resources")
@@ -2143,8 +2780,8 @@ fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_dir: &Path)
     {
         core.set_template_id(json_string(item, &["templateId"]));
         core.set_template_display_name(json_string(item, &["displayName"]));
-        core.set_template_bindings(SharedString::from(format_all_template_bundles(package_dir)));
     }
+    core.set_template_bindings(SharedString::from(format_story_draft_template_summary(package_dir)));
     core.set_export_preview(SharedString::from(build_export_preview(package_dir)));
     load_learning_policy_into_window(core, package_dir);
     load_learning_node_into_window(core, package_dir, 0);
@@ -2153,12 +2790,83 @@ fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_dir: &Path)
 fn wire_storylock_core_callbacks(
     core: &StoryLockCoreApp,
     package_dir: std::path::PathBuf,
+    core_window_slot: Rc<RefCell<Option<StoryLockCoreApp>>>,
+    on_closed: Rc<dyn Fn()>,
+    host_port: u16,
 ) {
     let learning_passed = Rc::new(RefCell::new(vec![false; 24]));
+    let answer_editor: Rc<RefCell<Option<AnswerEditorDialog>>> = Rc::new(RefCell::new(None));
     let weak = core.as_weak();
+    let close_slot = Rc::clone(&core_window_slot);
+    let on_button_closed = Rc::clone(&on_closed);
     core.on_close_requested(move || {
         if let Some(core) = weak.upgrade() {
             let _ = core.hide();
+        }
+        *close_slot.borrow_mut() = None;
+        on_button_closed();
+    });
+
+    let weak = core.as_weak();
+    let window_close_slot = Rc::clone(&core_window_slot);
+    let on_window_closed = Rc::clone(&on_closed);
+    core.window().on_close_requested(move || {
+        if let Some(core) = weak.upgrade() {
+            let _ = core.hide();
+        }
+        *window_close_slot.borrow_mut() = None;
+        on_window_closed();
+        slint::CloseRequestResponse::HideWindow
+    });
+
+    let weak = core.as_weak();
+    let browse_fallback_dir = package_dir.clone();
+    core.on_browse_core_data_dir(move || {
+        if let Some(core) = weak.upgrade() {
+            let current_dir = storylock_core_package_dir_from_window(&core, &browse_fallback_dir);
+            let mut dialog = rfd::FileDialog::new();
+            if current_dir.exists() {
+                dialog = dialog.set_directory(&current_dir);
+            }
+            if let Some(selected_dir) = dialog.pick_folder() {
+                match ensure_storylock_core_package(&selected_dir) {
+                    Ok(()) => {
+                        initialize_storylock_core_window(&core, &selected_dir);
+                        core.set_config_status(SharedString::from(
+                            "StoryLock Core workspace loaded from selected directory.",
+                        ));
+                    }
+                    Err(error) => {
+                        core.set_config_status(SharedString::from(format!(
+                            "Workspace load failed: {error}"
+                        )));
+                    }
+                }
+            }
+        }
+    });
+
+    let weak = core.as_weak();
+    let export_browse_fallback_dir = package_dir.clone();
+    core.on_browse_export_package_dir(move || {
+        if let Some(core) = weak.upgrade() {
+            let current = core.get_export_package_dir();
+            let current_trimmed = current.as_str().trim();
+            let mut dialog = rfd::FileDialog::new();
+            if !current_trimmed.is_empty() {
+                let current_path = std::path::PathBuf::from(current_trimmed);
+                if current_path.exists() {
+                    dialog = dialog.set_directory(current_path);
+                }
+            } else {
+                dialog = dialog.set_directory(default_storylock_export_dir(&export_browse_fallback_dir));
+            }
+            if let Some(selected_dir) = dialog.pick_folder() {
+                core.set_export_package_dir(SharedString::from(selected_dir.display().to_string()));
+                core.set_config_status(SharedString::from(
+                    "Export directory selected for the next package export.",
+                ));
+            }
         }
     });
 
@@ -2167,7 +2875,17 @@ fn wire_storylock_core_callbacks(
     let temp_draft_learning_passed = Rc::clone(&learning_passed);
     core.on_save_temp_draft(move || {
         if let Some(core) = weak.upgrade() {
-            let result = save_temp_draft_from_window(&core, &temp_draft_dir);
+            if core.get_temp_draft_cooling() {
+                return;
+            }
+            core.set_temp_draft_cooling(true);
+            core.set_temp_draft_label(SharedString::from(if core.get_language().as_str() == "zh" {
+                "已暂存"
+            } else {
+                "Saved"
+            }));
+            let result = ensure_storylock_core_package_dir_from_window(&core, &temp_draft_dir)
+                .and_then(|package_dir| save_temp_draft_from_window(&core, &package_dir));
             reset_learning_gate(
                 &core,
                 &temp_draft_learning_passed,
@@ -2178,6 +2896,19 @@ fn wire_storylock_core_callbacks(
                 result,
                 "Current StoryLock Core memory saved as temporary draft.",
             );
+            let weak_for_timer = core.as_weak();
+            slint::Timer::single_shot(Duration::from_millis(900), move || {
+                if let Some(core) = weak_for_timer.upgrade() {
+                    core.set_temp_draft_cooling(false);
+                    core.set_temp_draft_label(SharedString::from(
+                        if core.get_language().as_str() == "zh" {
+                            "暂存草稿"
+                        } else {
+                            "Save Draft"
+                        },
+                    ));
+                }
+            });
         }
     });
 
@@ -2186,7 +2917,15 @@ fn wire_storylock_core_callbacks(
     let previous_learning_passed = Rc::clone(&learning_passed);
     core.on_previous_node(move || {
         if let Some(core) = weak.upgrade() {
-            if let Err(error) = save_current_node_from_window(&core, &previous_node_dir) {
+            let package_dir =
+                match ensure_storylock_core_package_dir_from_window(&core, &previous_node_dir) {
+                    Ok(package_dir) => package_dir,
+                    Err(error) => {
+                        core.set_config_status(SharedString::from(format!("Save failed: {error}")));
+                        return;
+                    }
+                };
+            if let Err(error) = save_current_node_from_window(&core, &package_dir) {
                 core.set_config_status(SharedString::from(format!("Save failed: {error}")));
                 return;
             }
@@ -2196,7 +2935,7 @@ fn wire_storylock_core_callbacks(
                 "Question navigation saved a draft. Run learning test again before export.",
             );
             let next_index = core.get_node_index().saturating_sub(1);
-            load_node_into_window(&core, &previous_node_dir, next_index);
+            load_node_into_window(&core, &package_dir, next_index);
         }
     });
 
@@ -2205,7 +2944,15 @@ fn wire_storylock_core_callbacks(
     let next_learning_passed = Rc::clone(&learning_passed);
     core.on_next_node(move || {
         if let Some(core) = weak.upgrade() {
-            if let Err(error) = save_current_node_from_window(&core, &next_node_dir) {
+            let package_dir = match ensure_storylock_core_package_dir_from_window(&core, &next_node_dir)
+            {
+                Ok(package_dir) => package_dir,
+                Err(error) => {
+                    core.set_config_status(SharedString::from(format!("Save failed: {error}")));
+                    return;
+                }
+            };
+            if let Err(error) = save_current_node_from_window(&core, &package_dir) {
                 core.set_config_status(SharedString::from(format!("Save failed: {error}")));
                 return;
             }
@@ -2215,16 +2962,25 @@ fn wire_storylock_core_callbacks(
                 "Question navigation saved a draft. Run learning test again before export.",
             );
             let next_index = (core.get_node_index() + 1).min(23);
-            load_node_into_window(&core, &next_node_dir, next_index);
+            load_node_into_window(&core, &package_dir, next_index);
         }
     });
 
     let weak = core.as_weak();
     let select_node_dir = package_dir.clone();
     let select_learning_passed = Rc::clone(&learning_passed);
+    let answer_editor_for_select = Rc::clone(&answer_editor);
     core.on_select_node(move |value| {
         if let Some(core) = weak.upgrade() {
-            if let Err(error) = save_current_node_from_window(&core, &select_node_dir) {
+            let package_dir =
+                match ensure_storylock_core_package_dir_from_window(&core, &select_node_dir) {
+                    Ok(package_dir) => package_dir,
+                    Err(error) => {
+                        core.set_config_status(SharedString::from(format!("Save failed: {error}")));
+                        return;
+                    }
+                };
+            if let Err(error) = save_current_node_from_window(&core, &package_dir) {
                 core.set_config_status(SharedString::from(format!("Save failed: {error}")));
                 return;
             }
@@ -2238,7 +2994,8 @@ fn wire_storylock_core_callbacks(
                 .ok()
                 .map(|number| number - 1)
                 .unwrap_or_else(|| core.get_node_index());
-            load_node_into_window(&core, &select_node_dir, selected_index);
+            load_node_into_window(&core, &package_dir, selected_index);
+            open_answer_editor_dialog(&core, &package_dir, Rc::clone(&answer_editor_for_select));
         }
     });
 
@@ -2246,10 +3003,19 @@ fn wire_storylock_core_callbacks(
     let group_dir = package_dir.clone();
     core.on_select_resource_group(move |value| {
         if let Some(core) = weak.upgrade() {
+            let package_dir = match ensure_storylock_core_package_dir_from_window(&core, &group_dir) {
+                Ok(package_dir) => package_dir,
+                Err(error) => {
+                    core.set_config_status(SharedString::from(format!(
+                        "Workspace load failed: {error}"
+                    )));
+                    return;
+                }
+            };
             let group = normalize_resource_group(value.as_str());
             core.set_resource_group(SharedString::from(group.clone()));
             let catalog = read_json_or_default(
-                &storylock_core_catalog_path(&group_dir),
+                &storylock_core_catalog_path(&package_dir),
                 default_resource_catalog_json(),
             );
             if let Some(resource) = first_resource_for_group(&catalog, &group) {
@@ -2273,7 +3039,8 @@ fn wire_storylock_core_callbacks(
     let resource_learning_passed = Rc::clone(&learning_passed);
     core.on_save_resource(move || {
         if let Some(core) = weak.upgrade() {
-            let result = save_resource_from_window(&core, &resource_dir);
+            let result = ensure_storylock_core_package_dir_from_window(&core, &resource_dir)
+                .and_then(|package_dir| save_resource_from_window(&core, &package_dir));
             reset_learning_gate(
                 &core,
                 &resource_learning_passed,
@@ -2288,13 +3055,58 @@ fn wire_storylock_core_callbacks(
     let template_learning_passed = Rc::clone(&learning_passed);
     core.on_save_template(move || {
         if let Some(core) = weak.upgrade() {
-            let result = save_template_from_window(&core, &template_dir);
+            let result = ensure_storylock_core_package_dir_from_window(&core, &template_dir)
+                .and_then(|package_dir| save_template_from_window(&core, &package_dir));
             reset_learning_gate(
                 &core,
                 &template_learning_passed,
                 "Template changed. Run learning test again before export.",
             );
-            set_core_status(&core, result, "Login template saved locally.");
+            set_core_status(&core, result, "Story draft template saved locally.");
+        }
+    });
+
+    let weak = core.as_weak();
+    let apply_template_dir = package_dir.clone();
+    let apply_template_learning_passed = Rc::clone(&learning_passed);
+    core.on_apply_template(move || {
+        if let Some(core) = weak.upgrade() {
+            let result = ensure_storylock_core_package_dir_from_window(&core, &apply_template_dir)
+                .and_then(|package_dir| apply_story_draft_template_to_window(&core, &package_dir));
+            reset_learning_gate(
+                &core,
+                &apply_template_learning_passed,
+                "Story template loaded. Run learning test again before export.",
+            );
+            set_core_status(&core, result, "Story draft template loaded into current UI.");
+        }
+    });
+
+    let weak = core.as_weak();
+    let candidate_dir = package_dir.clone();
+    core.on_pull_template_candidates(move || {
+        if let Some(core) = weak.upgrade() {
+            let result = ensure_storylock_core_package_dir_from_window(&core, &candidate_dir)
+                .and_then(|package_dir| pull_story_template_candidates_into_vault(&core, &package_dir, host_port));
+            match result {
+                Ok(message) => {
+                    core.set_candidate_template_status(SharedString::from(message));
+                    core.set_template_bindings(SharedString::from(format_story_draft_template_summary(
+                        &storylock_core_package_dir_from_window(&core, &candidate_dir),
+                    )));
+                    core.set_config_status(SharedString::from(
+                        "Story template candidates pulled into local StoryLock templates.",
+                    ));
+                }
+                Err(error) => {
+                    core.set_candidate_template_status(SharedString::from(format!(
+                        "Candidate pull failed: {error}"
+                    )));
+                    core.set_config_status(SharedString::from(format!(
+                        "Candidate pull failed: {error}"
+                    )));
+                }
+            }
         }
     });
 
@@ -2302,10 +3114,19 @@ fn wire_storylock_core_callbacks(
     let refresh_dir = package_dir.clone();
     core.on_refresh_export(move || {
         if let Some(core) = weak.upgrade() {
-            core.set_export_preview(SharedString::from(build_export_preview(&refresh_dir)));
-            core.set_config_status(SharedString::from(
-                "Export preview refreshed from local StoryLock Core package.",
-            ));
+            match ensure_storylock_core_package_dir_from_window(&core, &refresh_dir) {
+                Ok(package_dir) => {
+                    core.set_export_preview(SharedString::from(build_export_preview(&package_dir)));
+                    core.set_config_status(SharedString::from(
+                        "Export preview refreshed from local StoryLock Core package.",
+                    ));
+                }
+                Err(error) => {
+                    core.set_config_status(SharedString::from(format!(
+                        "Export preview failed: {error}"
+                    )));
+                }
+            }
         }
     });
 
@@ -2313,7 +3134,9 @@ fn wire_storylock_core_callbacks(
     let learning_policy_dir = package_dir.clone();
     core.on_save_learning_policy(move || {
         if let Some(core) = weak.upgrade() {
-            match save_learning_policy_from_window(&core, &learning_policy_dir) {
+            let result = ensure_storylock_core_package_dir_from_window(&core, &learning_policy_dir)
+                .and_then(|package_dir| save_learning_policy_from_window(&core, &package_dir));
+            match result {
                 Ok(()) => {
                     core.set_config_status(SharedString::from(
                         "Learning policy saved to learning-policy.json for Host execution.",
@@ -2333,7 +3156,21 @@ fn wire_storylock_core_callbacks(
     let run_learning_passed = Rc::clone(&learning_passed);
     core.on_run_learning(move || {
         if let Some(core) = weak.upgrade() {
-            if let Err(error) = save_learning_policy_from_window(&core, &learning_dir) {
+            let package_dir = match ensure_storylock_core_package_dir_from_window(&core, &learning_dir)
+            {
+                Ok(package_dir) => package_dir,
+                Err(error) => {
+                    core.set_export_ready(false);
+                    core.set_learning_result(SharedString::from(
+                        "Pre-export test blocked because the workspace is invalid.",
+                    ));
+                    core.set_config_status(SharedString::from(format!(
+                        "Workspace load failed: {error}"
+                    )));
+                    return;
+                }
+            };
+            if let Err(error) = save_learning_policy_from_window(&core, &package_dir) {
                 core.set_export_ready(false);
                 core.set_learning_result(SharedString::from(
                     "Pre-export test blocked because the learning policy is invalid.",
@@ -2343,12 +3180,12 @@ fn wire_storylock_core_callbacks(
                 )));
                 return;
             }
-            match run_export_learning_test(&learning_dir) {
+            match run_export_learning_test(&package_dir) {
                 Ok(report) => {
                     run_learning_passed.borrow_mut().fill(true);
                     core.set_export_ready(true);
                     core.set_learning_result(SharedString::from(report.clone()));
-                    core.set_export_preview(SharedString::from(build_export_preview(&learning_dir)));
+                    core.set_export_preview(SharedString::from(build_export_preview(&package_dir)));
                     core.set_learning_status(SharedString::from(
                         "Pre-export test passed. Export is enabled.",
                     ));
@@ -2375,8 +3212,17 @@ fn wire_storylock_core_callbacks(
     let previous_learning_dir = package_dir.clone();
     core.on_learning_previous(move || {
         if let Some(core) = weak.upgrade() {
+            let package_dir = match ensure_storylock_core_package_dir_from_window(&core, &previous_learning_dir) {
+                Ok(package_dir) => package_dir,
+                Err(error) => {
+                    core.set_learning_status(SharedString::from(format!(
+                        "Learning load failed: {error}"
+                    )));
+                    return;
+                }
+            };
             let next_index = core.get_learning_index().saturating_sub(1);
-            load_learning_node_into_window(&core, &previous_learning_dir, next_index);
+            load_learning_node_into_window(&core, &package_dir, next_index);
         }
     });
 
@@ -2384,8 +3230,17 @@ fn wire_storylock_core_callbacks(
     let next_learning_dir = package_dir.clone();
     core.on_learning_next(move || {
         if let Some(core) = weak.upgrade() {
+            let package_dir = match ensure_storylock_core_package_dir_from_window(&core, &next_learning_dir) {
+                Ok(package_dir) => package_dir,
+                Err(error) => {
+                    core.set_learning_status(SharedString::from(format!(
+                        "Learning load failed: {error}"
+                    )));
+                    return;
+                }
+            };
             let next_index = (core.get_learning_index() + 1).min(23);
-            load_learning_node_into_window(&core, &next_learning_dir, next_index);
+            load_learning_node_into_window(&core, &package_dir, next_index);
         }
     });
 
@@ -2394,7 +3249,17 @@ fn wire_storylock_core_callbacks(
     let check_learning_passed = Rc::clone(&learning_passed);
     core.on_check_learning_current(move || {
         if let Some(core) = weak.upgrade() {
-            match check_learning_current(&core, &check_learning_dir, &check_learning_passed) {
+            let package_dir = match ensure_storylock_core_package_dir_from_window(&core, &check_learning_dir) {
+                Ok(package_dir) => package_dir,
+                Err(error) => {
+                    core.set_export_ready(false);
+                    core.set_learning_status(SharedString::from(format!(
+                        "Learning check failed: {error}"
+                    )));
+                    return;
+                }
+            };
+            match check_learning_current(&core, &package_dir, &check_learning_passed) {
                 Ok(report) => {
                     core.set_learning_status(SharedString::from(report.clone()));
                     core.set_learning_result(SharedString::from(report));
@@ -2416,7 +3281,17 @@ fn wire_storylock_core_callbacks(
     let export_dir = package_dir.clone();
     core.on_export_package(move || {
         if let Some(core) = weak.upgrade() {
-            if let Err(error) = save_learning_policy_from_window(&core, &export_dir) {
+            let package_dir = match ensure_storylock_core_package_dir_from_window(&core, &export_dir)
+            {
+                Ok(package_dir) => package_dir,
+                Err(error) => {
+                    core.set_config_status(SharedString::from(format!(
+                        "Export blocked. Workspace is invalid: {error}"
+                    )));
+                    return;
+                }
+            };
+            if let Err(error) = save_learning_policy_from_window(&core, &package_dir) {
                 core.set_config_status(SharedString::from(format!(
                     "Export blocked. Learning policy is invalid: {error}"
                 )));
@@ -2428,9 +3303,10 @@ fn wire_storylock_core_callbacks(
                 ));
                 return;
             }
-            match export_storylock_package(&export_dir) {
+            let export_dir = storylock_export_dir_from_window(&core, &package_dir);
+            match export_storylock_package_to(&package_dir, &export_dir) {
                 Ok(path) => {
-                    core.set_export_preview(SharedString::from(build_export_preview(&export_dir)));
+                    core.set_export_preview(SharedString::from(build_export_preview(&package_dir)));
                     core.set_config_status(SharedString::from(format!(
                         "Export complete. Managed key package replaced at {}",
                         path.display()
@@ -2459,6 +3335,159 @@ fn set_core_status(core: &StoryLockCoreApp, result: Result<()>, success_message:
         }
         Err(error) => core.set_config_status(SharedString::from(format!("Save failed: {error}"))),
     }
+}
+
+fn open_answer_editor_dialog(
+    core: &StoryLockCoreApp,
+    package_dir: &Path,
+    answer_editor: Rc<RefCell<Option<AnswerEditorDialog>>>,
+) {
+    if answer_editor.borrow().is_none() {
+        match AnswerEditorDialog::new() {
+            Ok(dialog) => {
+                wire_answer_editor_callbacks(&dialog, core.as_weak(), package_dir.to_path_buf());
+                *answer_editor.borrow_mut() = Some(dialog);
+            }
+            Err(error) => {
+                core.set_config_status(SharedString::from(format!(
+                    "Answer editor failed to open: {error}"
+                )));
+                return;
+            }
+        }
+    }
+
+    if let Some(dialog) = answer_editor.borrow().as_ref() {
+        copy_core_question_to_answer_editor(core, dialog);
+        if let Err(error) = dialog.show() {
+            core.set_config_status(SharedString::from(format!(
+                "Answer editor failed to show: {error}"
+            )));
+        }
+    }
+}
+
+fn wire_answer_editor_callbacks(
+    dialog: &AnswerEditorDialog,
+    core_weak: slint::Weak<StoryLockCoreApp>,
+    package_dir: std::path::PathBuf,
+) {
+    let weak = dialog.as_weak();
+    dialog.on_close_requested(move || {
+        if let Some(dialog) = weak.upgrade() {
+            let _ = dialog.hide();
+        }
+    });
+
+    let weak = dialog.as_weak();
+    let core_for_save = core_weak.clone();
+    let save_dir = package_dir.clone();
+    dialog.on_save_requested(move || {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_save.upgrade()) {
+            copy_answer_editor_to_core(&dialog, &core);
+            match save_current_node_from_window(&core, &save_dir) {
+                Ok(()) => core.set_config_status(SharedString::from(
+                    "Answer editor saved current question.",
+                )),
+                Err(error) => core.set_config_status(SharedString::from(format!(
+                    "Answer editor save failed: {error}"
+                ))),
+            }
+        }
+    });
+
+    let weak = dialog.as_weak();
+    let core_for_previous = core_weak.clone();
+    let previous_dir = package_dir.clone();
+    dialog.on_previous_node(move || {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_previous.upgrade()) {
+            copy_answer_editor_to_core(&dialog, &core);
+            if save_current_node_from_window(&core, &previous_dir).is_ok() {
+                let next_index = core.get_node_index().saturating_sub(1);
+                load_node_into_window(&core, &previous_dir, next_index);
+                copy_core_question_to_answer_editor(&core, &dialog);
+            }
+        }
+    });
+
+    let weak = dialog.as_weak();
+    let core_for_next = core_weak.clone();
+    let next_dir = package_dir.clone();
+    dialog.on_next_node(move || {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_next.upgrade()) {
+            copy_answer_editor_to_core(&dialog, &core);
+            if save_current_node_from_window(&core, &next_dir).is_ok() {
+                let next_index = (core.get_node_index() + 1).min(23);
+                load_node_into_window(&core, &next_dir, next_index);
+                copy_core_question_to_answer_editor(&core, &dialog);
+            }
+        }
+    });
+
+    let weak = dialog.as_weak();
+    let core_for_select = core_weak;
+    let select_dir = package_dir;
+    dialog.on_select_node(move |value| {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_select.upgrade()) {
+            copy_answer_editor_to_core(&dialog, &core);
+            if save_current_node_from_window(&core, &select_dir).is_ok() {
+                let selected_index = value
+                    .parse::<i32>()
+                    .ok()
+                    .map(|number| number - 1)
+                    .unwrap_or_else(|| core.get_node_index());
+                load_node_into_window(&core, &select_dir, selected_index);
+                copy_core_question_to_answer_editor(&core, &dialog);
+            }
+        }
+    });
+}
+
+fn copy_core_question_to_answer_editor(core: &StoryLockCoreApp, dialog: &AnswerEditorDialog) {
+    dialog.set_language(core.get_language());
+    dialog.set_selected_question(core.get_selected_question());
+    dialog.set_question_text(core.get_question_text());
+    dialog.set_answer_1(core.get_answer_1());
+    dialog.set_answer_1_state(core.get_answer_1_state());
+    dialog.set_answer_2(core.get_answer_2());
+    dialog.set_answer_2_state(core.get_answer_2_state());
+    dialog.set_answer_3(core.get_answer_3());
+    dialog.set_answer_3_state(core.get_answer_3_state());
+    dialog.set_answer_4(core.get_answer_4());
+    dialog.set_answer_4_state(core.get_answer_4_state());
+    dialog.set_answer_5(core.get_answer_5());
+    dialog.set_answer_5_state(core.get_answer_5_state());
+    dialog.set_answer_6(core.get_answer_6());
+    dialog.set_answer_6_state(core.get_answer_6_state());
+    dialog.set_answer_7(core.get_answer_7());
+    dialog.set_answer_7_state(core.get_answer_7_state());
+    dialog.set_answer_8(core.get_answer_8());
+    dialog.set_answer_8_state(core.get_answer_8_state());
+    dialog.set_answer_9(core.get_answer_9());
+    dialog.set_answer_9_state(core.get_answer_9_state());
+}
+
+fn copy_answer_editor_to_core(dialog: &AnswerEditorDialog, core: &StoryLockCoreApp) {
+    core.set_selected_question(dialog.get_selected_question());
+    core.set_question_text(dialog.get_question_text());
+    core.set_answer_1(dialog.get_answer_1());
+    core.set_answer_1_state(dialog.get_answer_1_state());
+    core.set_answer_2(dialog.get_answer_2());
+    core.set_answer_2_state(dialog.get_answer_2_state());
+    core.set_answer_3(dialog.get_answer_3());
+    core.set_answer_3_state(dialog.get_answer_3_state());
+    core.set_answer_4(dialog.get_answer_4());
+    core.set_answer_4_state(dialog.get_answer_4_state());
+    core.set_answer_5(dialog.get_answer_5());
+    core.set_answer_5_state(dialog.get_answer_5_state());
+    core.set_answer_6(dialog.get_answer_6());
+    core.set_answer_6_state(dialog.get_answer_6_state());
+    core.set_answer_7(dialog.get_answer_7());
+    core.set_answer_7_state(dialog.get_answer_7_state());
+    core.set_answer_8(dialog.get_answer_8());
+    core.set_answer_8_state(dialog.get_answer_8_state());
+    core.set_answer_9(dialog.get_answer_9());
+    core.set_answer_9_state(dialog.get_answer_9_state());
 }
 
 fn reset_learning_gate(
@@ -2499,6 +3528,7 @@ fn save_current_node_from_window(core: &StoryLockCoreApp, package_dir: &Path) ->
     write_current_node_to_draft(core, &mut draft);
     write_pending_author_draft(package_dir, &draft)?;
     core.set_node_overview(SharedString::from(format_node_overview(&draft)));
+    set_question_overview_titles(core, &draft);
     core.set_node_output(SharedString::from(format!(
         "temporary draft saved for node {}\nnodeId={}\ntitle={}\nelementId={}\nquestion={}\n\nSaved to .tmp/author-draft.pending.json. Export promotes it only after learning test passes.",
         core.get_node_position(),
@@ -2587,6 +3617,53 @@ fn load_node_into_window(core: &StoryLockCoreApp, package_dir: &Path, requested_
         core.get_node_id(),
         core.get_node_title()
     )));
+}
+
+fn set_question_overview_titles(core: &StoryLockCoreApp, draft: &Value) {
+    let nodes = draft.get("nodes").and_then(Value::as_array);
+    let title = |index: usize| -> SharedString {
+        let label = nodes
+            .and_then(|items| items.get(index))
+            .map(|node| {
+                let question = node
+                    .get("question")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default();
+                if question.is_empty() {
+                    json_string(node, &["title"]).to_string()
+                } else {
+                    question.to_string()
+                }
+            })
+            .filter(|value| !value.is_empty())
+            .unwrap_or_else(|| format!("Q{}", index + 1));
+        SharedString::from(format!("{}. {}", index + 1, label))
+    };
+
+    core.set_question_1(title(0));
+    core.set_question_2(title(1));
+    core.set_question_3(title(2));
+    core.set_question_4(title(3));
+    core.set_question_5(title(4));
+    core.set_question_6(title(5));
+    core.set_question_7(title(6));
+    core.set_question_8(title(7));
+    core.set_question_9(title(8));
+    core.set_question_10(title(9));
+    core.set_question_11(title(10));
+    core.set_question_12(title(11));
+    core.set_question_13(title(12));
+    core.set_question_14(title(13));
+    core.set_question_15(title(14));
+    core.set_question_16(title(15));
+    core.set_question_17(title(16));
+    core.set_question_18(title(17));
+    core.set_question_19(title(18));
+    core.set_question_20(title(19));
+    core.set_question_21(title(20));
+    core.set_question_22(title(21));
+    core.set_question_23(title(22));
+    core.set_question_24(title(23));
 }
 
 fn load_learning_node_into_window(core: &StoryLockCoreApp, package_dir: &Path, requested_index: i32) {
@@ -2929,55 +4006,218 @@ fn save_resource_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Res
 }
 
 fn save_template_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Result<()> {
-    let resource_id = core.get_resource_id().to_string();
-    let template_id = core.get_template_id().to_string();
-    let display_name = core.get_template_display_name().to_string();
-    let login_template = json!({
-        "version": "1",
-        "templateType": "login-sites",
-        "items": [{
-            "templateId": template_id,
-            "displayName": display_name,
-            "resourceId": resource_id,
-            "bindings": [
-                { "fieldName": "username", "role": "username" },
-                { "fieldName": "password", "role": "password" }
-            ]
-        }]
-    });
-    let signing_template = json!({
-        "version": "1",
-        "templateType": "signing-actions",
-        "items": [{
-            "templateId": format!("{}-sign", core.get_template_id()),
-            "displayName": format!("{} 签名", core.get_template_display_name()),
-            "resourceId": core.get_resource_id().to_string(),
-            "bindings": [
-                { "fieldName": "username", "role": "username" }
-            ]
-        }]
-    });
-    let agent_template = json!({
-        "version": "1",
-        "templateType": "agent-tasks",
-        "items": [{
-            "templateId": format!("{}-agent", core.get_template_id()),
-            "displayName": format!("{} Agent 任务", core.get_template_display_name()),
-            "resourceId": core.get_resource_id().to_string(),
-            "bindings": [
-                { "fieldName": "username", "role": "username" }
-            ]
-        }]
-    });
+    save_story_draft_template_from_window(core, package_dir)
+}
+
+fn save_story_draft_template_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Result<()> {
+    let mut draft = read_effective_author_draft(package_dir);
+    draft["version"] = json!("1");
+    draft["templateId"] = json!(core.get_template_id().to_string());
+    draft["storyTitle"] = json!(core.get_story_title().to_string());
+    draft["summary"] = json!(core.get_story_summary().to_string());
+    draft["storyPlot"] = json!(core.get_story_plot().to_string());
+    draft["memoryAnchors"] = json!(split_list(core.get_memory_anchors().as_str(), "/"));
+    draft["elementGroups"] = json!(split_list(core.get_element_group().as_str(), ","));
+    write_current_node_to_draft(core, &mut draft);
+    normalize_author_draft_schema(&mut draft);
+
     let mut vault = read_storylock_vault_payload(package_dir);
-    vault["templates"] = json!({
-        "loginSites": login_template,
-        "signingActions": signing_template,
-        "agentTasks": agent_template,
+    let mut templates = vault
+        .get("storyDraftTemplates")
+        .cloned()
+        .unwrap_or_else(default_story_draft_templates_json);
+    if !templates.is_object() {
+        templates = default_story_draft_templates_json();
+    }
+    let draft_template_id = draft
+        .get("templateId")
+        .and_then(Value::as_str)
+        .unwrap_or("current-author-draft")
+        .to_string();
+    let mut items = templates
+        .get("items")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    items.retain(|item| {
+        item.get("templateId").and_then(Value::as_str) != Some(draft_template_id.as_str())
     });
+    items.insert(0, draft.clone());
+    templates["schemaVersion"] = json!("storylock-story-draft-templates-v1");
+    templates["defaultTemplateId"] = json!(draft_template_id);
+    templates["items"] = Value::Array(items);
+    vault["storyDraftTemplates"] = templates;
+    vault["pendingAuthorDraft"] = draft;
     save_storylock_vault_payload(package_dir, vault)?;
-    core.set_template_bindings(SharedString::from(format_all_template_bundles(package_dir)));
+    core.set_template_display_name(json_string(&read_effective_author_draft(package_dir), &["storyTitle"]));
+    core.set_template_bindings(SharedString::from(format_story_draft_template_summary(package_dir)));
     Ok(())
+}
+
+fn apply_story_draft_template_to_window(core: &StoryLockCoreApp, package_dir: &Path) -> Result<()> {
+    let mut vault = read_storylock_vault_payload(package_dir);
+    let mut draft = vault
+        .get("storyDraftTemplates")
+        .and_then(|templates| templates.get("items"))
+        .and_then(Value::as_array)
+        .and_then(|items| items.first())
+        .cloned()
+        .unwrap_or_else(default_author_draft_json);
+    normalize_author_draft_schema(&mut draft);
+    vault["pendingAuthorDraft"] = draft;
+    save_storylock_vault_payload(package_dir, vault)?;
+    initialize_storylock_core_window(core, package_dir);
+    Ok(())
+}
+
+fn pull_story_template_candidates_into_vault(
+    _core: &StoryLockCoreApp,
+    package_dir: &Path,
+    host_port: u16,
+) -> Result<String> {
+    let url = format!("http://127.0.0.1:{host_port}/story-template/candidates?limit=10");
+    let response = Client::builder()
+        .timeout(Duration::from_secs(5))
+        .build()?
+        .get(url)
+        .send()?;
+    if !response.status().is_success() {
+        anyhow::bail!("Host returned HTTP {}", response.status());
+    }
+    let payload: Value = response.json()?;
+    let candidates = payload
+        .get("result")
+        .and_then(|result| result.get("candidates"))
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    if candidates.is_empty() {
+        return Ok("No queued story template candidates.".to_string());
+    }
+
+    let mut vault = read_storylock_vault_payload(package_dir);
+    merge_builtin_story_draft_templates(&mut vault);
+    let mut templates = vault
+        .get("storyDraftTemplates")
+        .cloned()
+        .unwrap_or_else(default_story_draft_templates_json);
+    let mut items = templates
+        .get("items")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let mut imported = 0usize;
+    for candidate in candidates {
+        let draft = story_draft_from_candidate(&candidate);
+        let template_id = draft
+            .get("templateId")
+            .and_then(Value::as_str)
+            .unwrap_or("host-candidate")
+            .to_string();
+        if items
+            .iter()
+            .any(|item| item.get("templateId").and_then(Value::as_str) == Some(template_id.as_str()))
+        {
+            continue;
+        }
+        items.push(draft);
+        imported += 1;
+    }
+    templates["schemaVersion"] = json!("storylock-story-draft-templates-v1");
+    templates["items"] = Value::Array(items);
+    vault["storyDraftTemplates"] = templates;
+    save_storylock_vault_payload(package_dir, vault)?;
+    Ok(format!("Pulled {imported} new candidate template(s)."))
+}
+
+fn story_draft_from_candidate(candidate: &Value) -> Value {
+    let framework = candidate.get("framework").unwrap_or(candidate);
+    let candidate_id = candidate
+        .get("candidateId")
+        .and_then(Value::as_str)
+        .unwrap_or("host-candidate");
+    let title = framework
+        .get("title")
+        .and_then(Value::as_str)
+        .unwrap_or("Host candidate story");
+    let summary = framework
+        .get("summary")
+        .and_then(Value::as_str)
+        .unwrap_or("A Host-generated candidate framework waiting for manual StoryLock editing.");
+    let plot = framework
+        .get("storyPlot")
+        .and_then(Value::as_str)
+        .unwrap_or("This candidate was queued by Host. StoryLock should manually edit it into a private 24-question story before export.");
+    let anchors = framework
+        .get("memoryAnchors")
+        .and_then(Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(Value::as_str)
+                .take(8)
+                .collect::<Vec<_>>()
+        })
+        .filter(|items| !items.is_empty())
+        .unwrap_or_else(|| vec!["host candidate", "private clue", "manual edit"]);
+    let mut draft = story_template_author_draft_json(
+        candidate_id,
+        title,
+        summary,
+        plot,
+        &anchors,
+    );
+    draft["source"] = json!({
+        "kind": "host-story-template-candidate",
+        "candidateId": candidate_id,
+        "hostInvokesStoryLock": false
+    });
+    draft
+}
+
+fn format_story_draft_template_summary(package_dir: &Path) -> String {
+    let vault = read_storylock_vault_payload(package_dir);
+    let templates = vault
+        .get("storyDraftTemplates")
+        .cloned()
+        .unwrap_or_else(default_story_draft_templates_json);
+    let items = templates
+        .get("items")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    if items.is_empty() {
+        return "No story draft template is stored.".to_string();
+    }
+    items
+        .iter()
+        .enumerate()
+        .map(|(index, draft)| {
+            let node_count = draft
+                .get("nodes")
+                .and_then(Value::as_array)
+                .map(Vec::len)
+                .unwrap_or(0);
+            format!(
+                "{}. templateId={}\nstoryTitle={}\nsummary={}\nnodes={}\nformat=authorDraft\n",
+                index + 1,
+                draft
+                    .get("templateId")
+                    .and_then(Value::as_str)
+                    .unwrap_or("current-author-draft"),
+                draft
+                    .get("storyTitle")
+                    .and_then(Value::as_str)
+                    .unwrap_or(""),
+                draft
+                    .get("summary")
+                    .and_then(Value::as_str)
+                    .unwrap_or(""),
+                node_count
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn build_export_preview(package_dir: &Path) -> String {
@@ -3086,7 +4326,35 @@ fn run_export_learning_test(package_dir: &Path) -> Result<String> {
     ))
 }
 
+fn default_storylock_export_dir(package_dir: &Path) -> std::path::PathBuf {
+    package_dir
+        .parent()
+        .map(|parent| parent.join("storylock-managed-key-package"))
+        .unwrap_or_else(|| std::path::PathBuf::from("storylock-managed-key-package"))
+}
+
+fn storylock_export_dir_from_window(
+    core: &StoryLockCoreApp,
+    package_dir: &Path,
+) -> std::path::PathBuf {
+    let configured = core.get_export_package_dir().trim().to_string();
+    if configured.is_empty() {
+        default_storylock_export_dir(package_dir)
+    } else {
+        std::path::PathBuf::from(configured)
+    }
+}
+
+#[cfg(test)]
 fn export_storylock_package(package_dir: &Path) -> Result<std::path::PathBuf> {
+    let export_dir = default_storylock_export_dir(package_dir);
+    export_storylock_package_to(package_dir, &export_dir)
+}
+
+fn export_storylock_package_to(
+    package_dir: &Path,
+    export_dir: &Path,
+) -> Result<std::path::PathBuf> {
     let preflight = preflight_storylock_core_package(package_dir);
     if !preflight.errors.is_empty() {
         anyhow::bail!(
@@ -3100,14 +4368,10 @@ fn export_storylock_package(package_dir: &Path) -> Result<std::path::PathBuf> {
         );
     }
     promote_pending_author_draft(package_dir)?;
-    let Some(parent) = package_dir.parent() else {
-        anyhow::bail!("StoryLock Core package directory has no parent");
-    };
-    let export_dir = parent.join("storylock-managed-key-package");
     if export_dir.exists() {
-        fs::remove_dir_all(&export_dir)?;
+        fs::remove_dir_all(export_dir)?;
     }
-    copy_dir_recursive(package_dir, &export_dir)?;
+    copy_dir_recursive(package_dir, export_dir)?;
     fs::write(
         export_dir.join("EXPORT_STATUS.txt"),
         format!(
@@ -3117,7 +4381,7 @@ fn export_storylock_package(package_dir: &Path) -> Result<std::path::PathBuf> {
         ),
     )?;
     remove_pending_author_draft(package_dir)?;
-    Ok(export_dir)
+    Ok(export_dir.to_path_buf())
 }
 
 fn promote_pending_author_draft(package_dir: &Path) -> Result<()> {
@@ -3234,6 +4498,8 @@ fn preflight_storylock_core_package(package_dir: &Path) -> PreflightResult {
         }),
     }
 
+    validate_story_draft_templates(&vault, &mut errors);
+
     let catalog = read_json_or_default(
         &storylock_core_catalog_path(package_dir),
         default_resource_catalog_json(),
@@ -3248,6 +4514,46 @@ fn preflight_storylock_core_package(package_dir: &Path) -> PreflightResult {
     }
 
     PreflightResult { errors }
+}
+
+fn validate_story_draft_templates(vault: &Value, errors: &mut Vec<PreflightIssue>) {
+    let Some(items) = vault
+        .get("storyDraftTemplates")
+        .and_then(|templates| templates.get("items"))
+        .and_then(Value::as_array)
+    else {
+        errors.push(PreflightIssue {
+            code: "SL_STORY_TEMPLATE_MISSING",
+            path: "$.storyDraftTemplates.items".to_string(),
+            message: "story draft templates must be stored as authorDraft-compatible items".to_string(),
+        });
+        return;
+    };
+
+    for (index, item) in items.iter().enumerate() {
+        for field in ["storyTitle", "summary", "storyPlot"] {
+            if item.get(field).and_then(Value::as_str).unwrap_or("").is_empty() {
+                errors.push(PreflightIssue {
+                    code: "SL_STORY_TEMPLATE_FIELD_MISSING",
+                    path: format!("$.storyDraftTemplates.items[{index}].{field}"),
+                    message: format!("story draft template must include {field}"),
+                });
+            }
+        }
+        match item.get("nodes").and_then(Value::as_array) {
+            Some(nodes) if nodes.len() == 24 => {}
+            Some(nodes) => errors.push(PreflightIssue {
+                code: "SL_STORY_TEMPLATE_NODE_COUNT",
+                path: format!("$.storyDraftTemplates.items[{index}].nodes"),
+                message: format!("story draft template must contain exactly 24 nodes, got {}", nodes.len()),
+            }),
+            None => errors.push(PreflightIssue {
+                code: "SL_STORY_TEMPLATE_NODE_COUNT",
+                path: format!("$.storyDraftTemplates.items[{index}].nodes"),
+                message: "story draft template nodes must be an array".to_string(),
+            }),
+        }
+    }
 }
 
 fn validate_learning_policy(policy: &Value, errors: &mut Vec<PreflightIssue>) {
@@ -3518,10 +4824,16 @@ fn is_four_segment_object_id(value: &str) -> bool {
 }
 
 fn default_author_draft_json() -> Value {
-    return default_shouzhudaitu_author_draft_json();
+    dongguo_wolf_author_draft_json()
 }
 
-fn default_shouzhudaitu_author_draft_json() -> Value {
+fn story_template_author_draft_json(
+    template_id: &str,
+    title: &str,
+    summary: &str,
+    plot: &str,
+    anchors: &[&str],
+) -> Value {
     const ELEMENTS: [&str; 8] = [
         "time", "place", "person", "object", "event", "reaction", "choice", "result",
     ];
@@ -3565,13 +4877,44 @@ fn default_shouzhudaitu_author_draft_json() -> Value {
         .collect::<Vec<_>>();
     json!({
         "version": "1",
-        "storyTitle": "Local Memory Story",
-        "summary": "A local-only StoryLock memory story used to prepare authorization questions.",
-        "storyPlot": "A complete local-only plot that connects all 24 StoryLock questions into one remembered story.",
-        "memoryAnchors": ["spring", "station", "blue cup", "recorder card", "departure bell", "locker"],
+        "templateId": template_id,
+        "storyTitle": title,
+        "summary": summary,
+        "storyPlot": plot,
+        "memoryAnchors": anchors,
         "elementGroups": ["time", "place", "person", "object", "event", "reaction", "choice", "result"],
         "nodes": nodes
     })
+}
+
+fn dongguo_wolf_author_draft_json() -> Value {
+    story_template_author_draft_json(
+        "dongguo-wolf",
+        "东郭先生和狼",
+        "东郭先生救了被追捕的狼，狼脱险后反要吃掉恩人；最后借助旁人判断，揭示善良必须有边界。",
+        "东郭先生在路上遇见一只被猎人追赶的狼。狼恳求他把自己藏进书袋，东郭先生一时心软救了它。猎人离开后，狼却露出凶相，说自己饥饿难忍，要吃掉东郭先生。双方争执不下，便请路边老人评理。老人让狼重新钻进袋子，确认事情经过后扎紧袋口，提醒东郭先生：善良需要判断对象，也需要边界。这个模板适合扩展恩情、伪装、风险判断、边界选择等 24 个记忆问题。",
+        &["路上", "猎人", "书袋", "狼", "老人", "边界"],
+    )
+}
+
+fn zhizi_yilin_author_draft_json() -> Value {
+    story_template_author_draft_json(
+        "zhizi-yilin",
+        "智子疑邻",
+        "同样的提醒，因为说话人身份不同而被截然不同地理解；故事适合扩展偏见、信任和证据判断。",
+        "宋国有一家人的墙被雨水冲坏了。儿子提醒父亲，墙坏了如果不修，夜里可能会有盗贼进来；邻居也说了同样的话。当天夜里果然丢了东西，主人却夸儿子聪明，怀疑邻居偷窃。这个故事把同一句话放在亲疏不同的位置上，展示人会被身份偏见影响判断。它适合扩展墙、雨夜、邻居、儿子、失窃、怀疑、证据等 24 个问题。",
+        &["雨夜", "破墙", "儿子", "邻居", "失窃", "偏见"],
+    )
+}
+
+fn shouzhudaitu_author_draft_json() -> Value {
+    story_template_author_draft_json(
+        "shouzhudaitu",
+        "守株待兔",
+        "农夫偶然捡到撞树而死的兔子，随后放弃耕作，等待偶然再次发生，最终田地荒芜。",
+        "宋国有个农夫正在田里劳作，一只兔子突然撞到树桩死了。农夫捡到兔子后，以为只要守着树桩就能再次得到兔子，于是放下农具，不再耕作。日子一天天过去，兔子没有再来，田地却荒芜了。这个模板可以扩展偶然、经验误判、等待、代价、结果等记忆元素。",
+        &["田地", "树桩", "兔子", "农夫", "等待", "荒芜"],
+    )
 }
 fn default_resource_catalog_json() -> Value {
     json!({
@@ -3740,7 +5083,7 @@ fn node_answer_options(node: &Value) -> Vec<Value> {
             .collect::<Vec<_>>();
         while normalized.len() < 9 {
             let index = normalized.len() + 1;
-            normalized.push(json!({ "text": format!("鍊欓€夌瓟妗?{index}"), "isCorrect": false }));
+            normalized.push(json!({ "text": format!("候选答案 {index}"), "isCorrect": false }));
         }
         return normalized;
     }
@@ -3762,7 +5105,7 @@ fn node_answer_options(node: &Value) -> Vec<Value> {
                 .into_iter()
                 .map(|item| json!({ "text": item.as_str().unwrap_or(""), "isCorrect": false })),
         )
-        .chain((1..=9).map(|index| json!({ "text": format!("鍊欓€夌瓟妗?{index}"), "isCorrect": false })))
+        .chain((1..=9).map(|index| json!({ "text": format!("候选答案 {index}"), "isCorrect": false })))
         .take(9)
         .collect()
 }
@@ -3870,6 +5213,7 @@ fn format_object_meta(resource: &Value) -> String {
         .unwrap_or_default()
 }
 
+#[allow(dead_code)]
 fn format_template_bindings(template: &Value) -> String {
     template
         .get("bindings")
@@ -3893,6 +5237,7 @@ fn format_template_bindings(template: &Value) -> String {
         .unwrap_or_default()
 }
 
+#[allow(dead_code)]
 fn format_all_template_bundles(package_dir: &Path) -> String {
     let templates = storylock_templates_from_vault(&read_storylock_vault(package_dir));
     [
@@ -3972,6 +5317,52 @@ mod tests {
     }
 
     #[test]
+    fn default_story_templates_include_useful_fables() {
+        let templates = default_story_draft_templates_json();
+        let items = templates
+            .get("items")
+            .and_then(Value::as_array)
+            .expect("default story draft templates");
+        assert!(items.len() >= 3);
+        for expected in ["dongguo-wolf", "zhizi-yilin", "shouzhudaitu"] {
+            assert!(items.iter().any(|item| {
+                item.get("templateId").and_then(Value::as_str) == Some(expected)
+                    && item
+                        .get("nodes")
+                        .and_then(Value::as_array)
+                        .map(Vec::len)
+                        == Some(24)
+            }));
+        }
+    }
+
+    #[test]
+    fn host_story_candidate_converts_to_author_draft_template() {
+        let candidate = json!({
+            "candidateId": "story-template-test",
+            "framework": {
+                "title": "Host Candidate",
+                "summary": "Candidate summary",
+                "storyPlot": "Candidate plot",
+                "memoryAnchors": ["anchor-one", "anchor-two"]
+            }
+        });
+        let draft = story_draft_from_candidate(&candidate);
+        assert_eq!(
+            draft.get("templateId").and_then(Value::as_str),
+            Some("story-template-test")
+        );
+        assert_eq!(
+            draft.get("storyTitle").and_then(Value::as_str),
+            Some("Host Candidate")
+        );
+        assert_eq!(
+            draft.get("nodes").and_then(Value::as_array).map(Vec::len),
+            Some(24)
+        );
+    }
+
+    #[test]
     fn export_preview_is_redacted() {
         let dir = temp_core_dir();
         ensure_storylock_core_package(&dir).expect("init package");
@@ -3997,6 +5388,74 @@ mod tests {
         assert_eq!(
             effective.get("storyTitle").and_then(Value::as_str),
             Some("pending temp title")
+        );
+    }
+
+    #[test]
+    fn story_draft_template_uses_author_draft_schema_and_restores_ui() {
+        let dir = temp_core_dir();
+        ensure_storylock_core_package(&dir).expect("init package");
+        let mut draft = read_effective_author_draft(&dir);
+        draft["templateId"] = json!("template-unified-title");
+        draft["storyTitle"] = json!("Template Unified Title");
+        draft["summary"] = json!("Template unified summary");
+        draft["storyPlot"] = json!("Template unified plot detail");
+        draft["nodes"][0]["question"] = json!("Unified question one?");
+        normalize_author_draft_schema(&mut draft);
+        let mut vault = read_storylock_vault_payload(&dir);
+        vault["storyDraftTemplates"] = story_draft_templates_from_draft(&draft);
+        save_storylock_vault_payload(&dir, vault).expect("save story draft template");
+
+        let vault = read_storylock_vault(&dir);
+        let template = vault
+            .get("storyDraftTemplates")
+            .and_then(|templates| templates.get("items"))
+            .and_then(Value::as_array)
+            .and_then(|items| items.first())
+            .expect("story draft template");
+        assert_eq!(
+            template.get("storyTitle").and_then(Value::as_str),
+            Some("Template Unified Title")
+        );
+        assert_eq!(
+            template.get("summary").and_then(Value::as_str),
+            Some("Template unified summary")
+        );
+        assert_eq!(
+            template.get("storyPlot").and_then(Value::as_str),
+            Some("Template unified plot detail")
+        );
+        assert_eq!(
+            template.get("nodes").and_then(Value::as_array).map(Vec::len),
+            Some(24)
+        );
+
+        let mut pending = read_effective_author_draft(&dir);
+        pending["storyTitle"] = json!("Different pending title");
+        write_pending_author_draft(&dir, &pending).expect("write different pending");
+        let mut vault = read_storylock_vault_payload(&dir);
+        let restored = vault
+            .get("storyDraftTemplates")
+            .and_then(|templates| templates.get("items"))
+            .and_then(Value::as_array)
+            .and_then(|items| items.first())
+            .cloned()
+            .expect("template draft");
+        vault["pendingAuthorDraft"] = restored;
+        save_storylock_vault_payload(&dir, vault).expect("restore template as pending");
+        let effective = read_effective_author_draft(&dir);
+        assert_eq!(
+            effective.get("storyTitle").and_then(Value::as_str),
+            Some("Template Unified Title")
+        );
+        assert_eq!(
+            effective
+                .get("nodes")
+                .and_then(Value::as_array)
+                .and_then(|nodes| nodes.first())
+                .and_then(|node| node.get("question"))
+                .and_then(Value::as_str),
+            Some("Unified question one?")
         );
     }
 

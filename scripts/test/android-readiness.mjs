@@ -21,6 +21,10 @@ const requiredFiles = [
   'src/host/android-host/app/src/main/AndroidManifest.xml',
   'src/host/android-host/app/src/main/assets/storylock-question-set.json',
   'src/host/android-host/app/src/main/assets/storylock-resource-catalog.json',
+  'src/host/android-host/app/src/main/assets/story-drafts/manifest.json',
+  'src/host/android-host/app/src/main/assets/story-drafts/shouzhudaitu-zh.json',
+  'src/host/android-host/app/src/main/assets/story-drafts/caochong-weighs-elephant-zh.json',
+  'src/host/android-host/app/src/main/assets/story-drafts/kongrong-shares-pears-en.json',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/StoryLockHostApplication.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/MainActivity.kt',
   'src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AndroidKeystoreSecretStore.kt',
@@ -74,6 +78,16 @@ for (const token of [
   assert.ok(manifest.includes(token), `Android manifest must include ${token}`);
 }
 
+const androidApplication = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/StoryLockHostApplication.kt');
+assert.match(androidApplication, /fun ensureHostRuntimeStarted\(\)/u, 'Android application must expose an explicit UI-triggered host startup entry');
+const applicationOnCreateBlock = androidApplication.match(/override fun onCreate\(\)\s*\{([\s\S]*?)\n  \}\n\n  @Synchronized/u)?.[1] ?? '';
+assert.equal(applicationOnCreateBlock.includes('server.start()'), false, 'Android application must not eagerly start the host runtime during Application.onCreate');
+assert.equal(applicationOnCreateBlock.includes('registrationManager.ensureStarted()'), false, 'Android application must not eagerly start registration during Application.onCreate');
+
+const mainActivity = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/MainActivity.kt');
+assert.match(mainActivity, /app\.ensureHostRuntimeStarted\(\)/u, 'Android launcher activity must start the host runtime from the foreground UI');
+assert.match(mainActivity, /UI priority: active/u, 'Android UI must surface that foreground UI is the primary entry path');
+
 const keystoreStore = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/security/AndroidKeystoreSecretStore.kt');
 assert.match(keystoreStore, /AndroidKeyStore/u, 'Android SecretStore must use AndroidKeyStore');
 assert.match(keystoreStore, /AES/u, 'Android SecretStore must use encrypted local storage');
@@ -104,6 +118,7 @@ for (const token of [
   'requestPasswordFill',
   'permissionSummary',
   'storyLockPackage',
+  'defaultTemplateId',
   'challenge_locked',
   'challenge_failed',
   'biometric_unavailable',
@@ -131,6 +146,26 @@ assert.doesNotMatch(androidPackageRepository, /canonicalAnswer|acceptedAnswers|p
 
 const androidServer = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/AndroidHostServer.kt');
 assert.match(androidServer, /\/permission-summary/u, 'Android local server must expose permission summary endpoint');
+
+const androidTemplateRepository = read('src/host/android-host/app/src/main/java/org/storylock/androidhost/host/AndroidStoryTemplateRepository.kt');
+for (const token of [
+  'story-drafts',
+  'manifest.json',
+  'defaultTemplateId',
+  'validateDraft',
+  'nodes.length() == 24',
+]) {
+  assert.ok(androidTemplateRepository.includes(token), `Android story template repository must include ${token}`);
+}
+
+const storyDraftManifest = JSON.parse(read('src/host/android-host/app/src/main/assets/story-drafts/manifest.json'));
+assert.equal(storyDraftManifest.defaultTemplateId, 'shouzhudaitu-zh', 'Android story draft manifest must expose defaultTemplateId');
+assert.equal(storyDraftManifest.items.length, 3, 'Android story draft manifest must list three templates');
+for (const item of storyDraftManifest.items) {
+  const storyDraft = JSON.parse(read(`src/host/android-host/app/src/main/assets/story-drafts/${item.fileName}`));
+  assert.equal(storyDraft.nodes.length, 24, `${item.fileName} must contain 24 nodes`);
+  assert.ok(storyDraft.storyTitle.length > 0, `${item.fileName} must contain storyTitle`);
+}
 
 const sharedPermissionSummary = read('src/shared/storylock-package/permission-summary.js');
 for (const token of [
@@ -214,5 +249,10 @@ console.log(JSON.stringify({
   permissionSummary: {
     file: relative(root, join(root, 'src/host/android-host/app/src/main/assets/storylock-resource-catalog.json')).replaceAll('\\', '/'),
     items: catalogSummary.items.length,
+  },
+  storyDrafts: {
+    file: relative(root, join(root, 'src/host/android-host/app/src/main/assets/story-drafts/manifest.json')).replaceAll('\\', '/'),
+    templates: storyDraftManifest.items.length,
+    defaultTemplateId: storyDraftManifest.defaultTemplateId,
   },
 }, null, 2));

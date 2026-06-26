@@ -17,6 +17,8 @@ class StoryLockAndroidHostService(
   private val localConfirmation: LocalUserConfirmation,
   private val runtime: LocalAuthorizationRuntime,
   private val storyLockPackageRepository: AndroidStoryLockPackageRepository,
+  private val questionSetRepository: AndroidQuestionSetRepository,
+  private val storyTemplateRepository: AndroidStoryTemplateRepository,
   private val connectivityProvider: (() -> JSONObject)? = null,
 ) : AndroidHostService {
   private val signer = AndroidKeystoreSigner()
@@ -27,6 +29,16 @@ class StoryLockAndroidHostService(
     return JSONObject()
       .put("status", "ok")
       .put("schemaVersion", "android-host-health-v1")
+      .put("product", "StoryLock Android Host")
+      .put("implementation", "kotlin-android")
+      .put("version", "0.1.0")
+      .put("deviceId", config.deviceId)
+      .put("appInstanceId", config.appInstanceId)
+      .put("identityId", runtime.identityId())
+      .put("hostPort", config.port)
+      .put("remoteEnabled", connectivityProvider != null)
+      .put("approvalMode", "local_challenge_and_biometric_prompt")
+      .put("capabilities", JSONArray().put("health").put("permission-summary").put("question-bank").put("story-template-status").put("story-templates").put("verify").put("authorize").put("execute").put("revoke"))
       .put(
         "layer1",
         JSONObject()
@@ -55,6 +67,22 @@ class StoryLockAndroidHostService(
           .put("permissionObjects", permissionSummary.permissionObjects),
       )
       .put(
+        "questionBank",
+        JSONObject()
+          .put("assetName", AndroidQuestionSetRepository.DEFAULT_ASSET_NAME)
+          .put("schemaVersion", questionSetRepository.loadActiveQuestionSet().schemaVersion)
+          .put("questionSetVersion", runtime.questionSetVersion())
+          .put("normalizationVersion", runtime.normalizationVersion())
+          .put("questionCount", runtime.activeQuestionCount()),
+      )
+      .put(
+        "storyTemplates",
+        JSONObject()
+          .put("assetName", AndroidStoryTemplateRepository.DEFAULT_ASSET_NAME)
+          .put("defaultTemplateId", storyTemplateRepository.defaultTemplateId() ?: JSONObject.NULL)
+          .put("templateCount", storyTemplateRepository.templateCount()),
+      )
+      .put(
         "executors",
         JSONObject()
           .put("signature", "android_keystore_secret_store")
@@ -81,6 +109,60 @@ class StoryLockAndroidHostService(
       )
       .put("redactionLevel", "audit_meta_only")
       .put("retentionGranted", "audit_meta_only")
+      .put("error", JSONObject.NULL)
+  }
+
+  override fun questionBankStatus(): JSONObject {
+    val questionSet = questionSetRepository.loadActiveQuestionSet()
+    return JSONObject()
+      .put("requestId", "req-${UUID.randomUUID()}")
+      .put("status", "success")
+      .put("capability", "questionBankStatus")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("identityId", questionSet.identityId)
+          .put("assetName", AndroidQuestionSetRepository.DEFAULT_ASSET_NAME)
+          .put("schemaVersion", questionSet.schemaVersion)
+          .put("questionSetVersion", questionSet.questionSetVersion)
+          .put("normalizationVersion", questionSet.normalizationVersion)
+          .put("questionCount", questionSet.questions.size),
+      )
+      .put("error", JSONObject.NULL)
+  }
+
+  override fun storyTemplateStatus(): JSONObject {
+    return JSONObject()
+      .put("requestId", "req-${UUID.randomUUID()}")
+      .put("status", "success")
+      .put("capability", "storyTemplateStatus")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("assetName", AndroidStoryTemplateRepository.DEFAULT_ASSET_NAME)
+          .put("defaultTemplateId", storyTemplateRepository.defaultTemplateId() ?: JSONObject.NULL)
+          .put("templateCount", storyTemplateRepository.templateCount()),
+      )
+      .put("error", JSONObject.NULL)
+  }
+
+  override fun storyTemplates(): JSONObject {
+    return JSONObject()
+      .put("requestId", "req-${UUID.randomUUID()}")
+      .put("status", "success")
+      .put("capability", "storyTemplates")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("assetName", AndroidStoryTemplateRepository.DEFAULT_ASSET_NAME)
+          .put("defaultTemplateId", storyTemplateRepository.defaultTemplateId() ?: JSONObject.NULL)
+          .put("templates", storyTemplateRepository.loadTemplates()),
+      )
+      .put("redactionLevel", "local_template_only")
+      .put("retentionGranted", "local_template_only")
       .put("error", JSONObject.NULL)
   }
 
@@ -250,6 +332,20 @@ class StoryLockAndroidHostService(
     val objectRef = payload.optString(
       if (capability == "requestSignature") "keyId" else "credentialRef",
     )
+    val existingSession = runtime.sessionStatus(
+      authorizationId = request.optString("authorizationId").ifBlank { null },
+      objectRef = objectRef,
+    )
+    if (request.has("authorizationId") && existingSession == null) {
+      return errorResponse(
+        requestId = requestId,
+        capability = capability,
+        code = "SLG-005",
+        type = "authorization_invalid",
+        message = "authorization session is invalid or expired",
+        suggestedAction = "Call /verify and /authorize again before executing the protected action.",
+      )
+    }
     val requiredStrength = runtime.resolveRequiredStrength(capability)
     val challenge = try {
       runtime.createChallenge(requiredStrength)
@@ -343,6 +439,46 @@ class StoryLockAndroidHostService(
         challenge = challenge,
       )
     }
+  }
+
+  override fun revoke(request: JSONObject): JSONObject {
+    val requestId = request.optString("requestId", "req-${UUID.randomUUID()}")
+    val authorizationId = request.optString("authorizationId")
+    if (authorizationId.isBlank()) {
+      return errorResponse(
+        requestId = requestId,
+        capability = "revokeLocalAction",
+        code = "SLG-001",
+        type = "validation_error",
+        message = "authorizationId is required",
+        suggestedAction = "Pass the authorizationId returned by /authorize or /execute.",
+      )
+    }
+    val session = runtime.revokeSession(authorizationId)
+      ?: return errorResponse(
+        requestId = requestId,
+        capability = "revokeLocalAction",
+        code = "SLG-005",
+        type = "authorization_invalid",
+        message = "authorization session is invalid or already expired",
+        suggestedAction = "Create a fresh authorization session before retrying the protected action.",
+      )
+    return JSONObject()
+      .put("requestId", requestId)
+      .put("status", "success")
+      .put("capability", "revokeLocalAction")
+      .put("executionLocation", "local")
+      .put(
+        "result",
+        JSONObject()
+          .put("authorizationId", session.authorizationId)
+          .put("objectRef", session.objectRef)
+          .put("allowedAction", session.allowedAction)
+          .put("revoked", true),
+      )
+      .put("redactionLevel", "audit_meta_only")
+      .put("retentionGranted", "audit_meta_only")
+      .put("error", JSONObject.NULL)
   }
 
   private fun signatureResponse(

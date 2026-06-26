@@ -1,63 +1,64 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="StoryLock 搴曞眰鏁呬簨閿侀厤缃伐浣滃彴锛岀敤浜庢晠浜嬭崏绋裤€侀棶棰樿妭鐐广€佷繚鎶ゅ璞″拰瀵煎嚭鍖呭師鍨嬫紨绀猴紱Host UI 杩愯鏃堕獙璇佸崟鐙垎鍖哄睍绀恒€?>
-    <title>StoryLock 搴曞眰鏁呬簨閿佸伐浣滃彴</title>
-    <link rel="stylesheet" href="/app-shell.css?v=20260624-10">
+    <meta name="description" content="StoryLock ??????????????????24 ???????????????? Host UI ????????">
+    <title>StoryLock ????????</title>
+    <link rel="stylesheet" href="/app-shell.css?v=20260626-02">
   </head>
   <body data-app="storylock">
     <header class="app-topbar">
       <div class="app-brand">
         <p class="app-kicker">StoryLock Local Core</p>
-        <h1>搴曞眰鏁呬簨閿佸伐浣滃彴</h1>
+        <h1>????????</h1>
       </div>
       <div class="app-top-actions">
-        <span class="chip good" data-region="story-status">鏈湴鑽夌</span>
-        <span class="chip warn" data-region="session-status">鏈巿鏉?/span>
-        <a class="app-link" href="/">杩斿洖鏄撳畨棣栭〉</a>
-        <a class="app-link primary" href="/local-agent-app.html">鎵撳紑 Agent 鎺у埗鍙?/a>
+        <span class="chip good" data-region="story-status">????</span>
+        <span class="chip warn" data-region="session-status">???</span>
+        <a class="app-link" href="/">??????</a>
+        <a class="app-link primary" href="/local-agent-app.html">?? Agent ???</a>
       </div>
     </header>
 
     <main class="app-shell">
-      <nav class="side-nav" aria-label="StoryLock 涓?Host UI 宸ヤ綔鍖?>
-        <div class="nav-section-label">StoryLock 閰嶇疆</div>
-        <button class="is-active" type="button" data-view-target="draft">鏁呬簨鑽夌</button>
-        <button type="button" data-view-target="nodes">24 个问题</button>
-        <button type="button" data-view-target="resources">淇濇姢瀵硅薄</button>
-        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="normal">普通授权对象</button>
-        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="private">私密对象</button>
-        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="secret">机密对象</button>
-        <button type="button" data-view-target="export">瀵煎嚭鍖呬笌瀹¤</button>
-        <div class="nav-section-label">Host UI 杩愯鏃?/div>
-        <button type="button" data-view-target="host-challenge">Host 涔濆鏍奸獙璇?/button>
-        <button type="button" data-view-target="host-session">Host 鎺堟潈浼氳瘽</button>
+      <nav class="side-nav" aria-label="StoryLock ? Host UI ???">
+        <div class="nav-section-label">StoryLock ??</div>
+        <button class="is-active" type="button" data-view-target="draft">????</button>
+        <button type="button" data-view-target="nodes">24 ???</button>
+        <button type="button" data-view-target="resources">????</button>
+        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="normal">??????</button>
+        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="private">????</button>
+        <button class="sub-nav" type="button" data-view-target="resources" data-resource-nav-group="secret">????</button>
+        <button type="button" data-view-target="export">??????</button>
+        <div class="nav-section-label">Host UI ???</div>
+        <button type="button" data-view-target="host-challenge">Host ?????</button>
+        <button type="button" data-view-target="host-session">Host ????</button>
       </nav>
 
       <section class="workspace">
-                <article id="draft" class="view is-active">
+        <article id="draft" class="view is-active">
           <section class="panel draft-panel">
             <div class="panel-head">
               <div>
-                <h2>故事草稿</h2>
+                <h2>????</h2>
+                <p>???????? 3 ???????????????????????????????????</p>
               </div>
             </div>
             <label class="field draft-field">
-              <span>故事标题</span>
-              <input data-field="story-title" value="旧书店里的蓝色票根">
+              <span>????</span>
+              <input data-field="story-title" value="??????????">
             </label>
             <label class="field draft-field">
-              <span>故事概要</span>
-              <textarea data-field="story-summary">你在大学城旧书店帮店主整理二楼库房，偶然把一张蓝色电影票根夹进《小王子》旧书。多年后，这张票根成为你与好友重逢时确认身份的私人线索。</textarea>
+              <span>????</span>
+              <textarea data-field="story-summary">??????????????????????????????????????</textarea>
             </label>
             <div class="story-plot-shell">
               <label class="field draft-field story-plot-field-wrap">
-                <span>故事内容</span>
-                <textarea class="story-plot-preview" data-field="story-plot" readonly>六月雨后的傍晚，你在大学城旧书店二楼库房帮店主整理旧书。因为担心手里的蓝色电影票根被雨水打湿，你顺手把它夹进一本《小王子》旧书的第 21 页。店里正播放老电影配乐，靠窗的木梯旁有些灰尘，票根背面还写着“星星落在票根背面”。多年后，你和好友重逢，对方提起旧书店，你用“票根夹在哪本书、哪一页、背面有什么暗号”这些问题确认彼此身份。</textarea>
+                <span>????</span>
+                <textarea class="story-plot-preview" data-field="story-plot" readonly>???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</textarea>
               </label>
-              <button class="app-button primary story-plot-edit" type="button" data-action="open-story-editor">编辑</button>
+              <button class="app-button primary story-plot-edit" type="button" data-action="open-story-editor">??</button>
             </div>
           </section>
         </article>
@@ -66,10 +67,10 @@
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>24 个问题</h2>
-                <p>杩欓噷灞曠ず鍏ㄩ儴 24 涓棶棰樼殑姒傝銆傜偣鍑绘煇涓棶棰樺悗锛屼細鎵撳紑鐙珛绛旀閰嶇疆椤碉紝闆嗕腑璁剧疆璇ラ棶棰樼殑 9 涓€欓€夌瓟妗堛€?/p>
+                <h2>24 ???</h2>
+                <p>??????? 24 ???????? 9 ???????????? StoryLock ?????????</p>
               </div>
-              <button class="app-button primary" type="button" data-action="shuffle-nodes">閲嶆帓鑺傜偣</button>
+              <button class="app-button primary" type="button" data-action="shuffle-nodes">??????????</button>
             </div>
             <div class="node-grid" data-region="node-grid"></div>
           </section>
@@ -79,10 +80,10 @@
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>淇濇姢瀵硅薄</h2>
-                <p>鍦ㄥ乏渚ц彍鍗曢€夋嫨瀵硅薄绾у埆锛屾湰椤典互鏅€氬垪琛ㄥ睍绀鸿绾у埆涓嬬殑鍙椾繚鎶ゅ璞°€傜偣鍑诲璞″悗鎵撳紑鐙珛绠＄悊淇℃伅椤点€?/p>
+                <h2>????</h2>
+                <p>????????????????????????????????????????????</p>
               </div>
-              <button class="app-button primary" type="button" data-action="add-resource">娣诲姞绀轰緥瀵硅薄</button>
+              <button class="app-button primary" type="button" data-action="add-resource">??????</button>
             </div>
             <div class="resource-groups" data-region="resource-grid"></div>
           </section>
@@ -93,25 +94,25 @@
             <section class="panel">
               <div class="panel-head">
                 <div>
-                  <h2>Host UI 涔濆鏍奸獙璇?/h2>
-                  <p>杩欓儴鍒嗗睘浜?Host UI 鐨勮繍琛屾椂楠岃瘉锛屼笉灞炰簬 StoryLock 閰嶇疆鍖呫€侶ost 璇诲彇宸插鍑虹殑棰橀泦涓庝繚鎶ゅ璞＄瓥鐣ュ悗锛屽洿缁曚竴涓叿浣撻棶棰樺睍绀?9 涓瓟妗堝€欓€夈€?/p>
+                  <h2>Host UI ?????</h2>
+                  <p>?????? Host UI ????????????????Host ?????????????????????????????</p>
                 </div>
-                <button class="app-button primary" type="button" data-action="new-challenge">鐢熸垚鎸戞垬</button>
+                <button class="app-button primary" type="button" data-action="new-challenge">????</button>
               </div>
               <div class="field-row">
                 <label class="field" style="flex: 1 1 220px;">
-                  <span>鎸戞垬闂</span>
+                  <span>????</span>
                   <select data-field="challenge-question"></select>
                 </label>
                 <label class="field" style="flex: 1 1 220px;">
-                  <span>淇濇姢瀵硅薄</span>
+                  <span>????</span>
                   <select data-field="challenge-resource"></select>
                 </label>
                 <label class="field" style="flex: 1 1 220px;">
-                  <span>鍔ㄤ綔</span>
+                  <span>??</span>
                   <select data-field="challenge-action">
-                    <option value="requestSignature">璇锋眰绛惧悕</option>
-                    <option value="requestPasswordFill">濉厖瀵嗙爜</option>
+                    <option value="requestSignature">????</option>
+                    <option value="requestPasswordFill">????</option>
                   </select>
                 </label>
               </div>
@@ -119,11 +120,11 @@
             </section>
 
             <aside class="panel">
-              <h3>鎸戞垬缁撴灉</h3>
-              <p data-region="challenge-note">鐢熸垚鎸戞垬鍚庯紝浠?9 涓瓟妗堥噷閫夋嫨 1 涓纭瓟妗堛€?/p>
+              <h3>????</h3>
+              <p data-region="challenge-note">???????? 9 ???????? 1 ??????</p>
               <div class="button-row" style="margin-top: 14px;">
-                <button class="app-button" type="button" data-action="demo-answer">濉叆婕旂ず绛旀</button>
-                <button class="app-button primary" type="button" data-action="verify-challenge">楠岃瘉</button>
+                <button class="app-button" type="button" data-action="demo-answer">??????</button>
+                <button class="app-button primary" type="button" data-action="verify-challenge">??</button>
               </div>
             </aside>
           </div>
@@ -134,24 +135,24 @@
             <section class="panel">
               <div class="panel-head">
                 <div>
-                  <h2>Host UI 鎺堟潈浼氳瘽</h2>
-                  <p>杩欐槸 Host UI 鐨勬巿鏉冪粨鏋滄紨绀恒€備節瀹牸楠岃瘉閫氳繃鍚庯紝Host 鎵嶅垱寤虹煭鏃舵湰鍦颁細璇濓紝骞堕檺瀹氳兘鍔涖€佸璞″拰鏈夋晥鏈熴€?/p>
+                  <h2>Host ????</h2>
+                  <p>?????????Host ????????????????????????</p>
                 </div>
-                <button class="app-button primary" type="button" data-action="issue-session">绛惧彂浼氳瘽</button>
+                <button class="app-button primary" type="button" data-action="issue-session">????</button>
               </div>
               <pre data-region="session-json"></pre>
             </section>
 
             <aside class="panel">
-              <h3>鑳藉姏杈圭晫</h3>
+              <h3>????</h3>
               <div class="capability-grid" style="grid-template-columns: 1fr; margin-top: 12px;">
                 <div class="capability-item">
                   <strong>requestSignature</strong>
-                  <span class="muted">鍙繑鍥炵鍚嶇粨鏋滐紝涓嶈繑鍥炵閽ャ€?/span>
+                  <span class="muted">??????????????</span>
                 </div>
                 <div class="capability-item">
                   <strong>requestPasswordFill</strong>
-                  <span class="muted">鍙湪鏈湴纭鍚庡～鍏呯洰鏍囧嚟鎹€?/span>
+                  <span class="muted">??????????????</span>
                 </div>
               </div>
             </aside>
@@ -162,43 +163,43 @@
           <section class="panel">
             <div class="panel-head">
               <div>
-                <h2>瀵煎嚭鍖呬笌瀹¤</h2>
-                <p>瀵煎嚭鐨勬槸閰嶇疆鎽樿鍜岄闆嗘ā鏉匡紝涓嶅寘鍚晠浜嬪師鏂囧拰鏁忔劅绉樺瘑銆?/p>
+                <h2>??????</h2>
+                <p>???????????????????????????????????????????</p>
               </div>
-              <button class="app-button primary" type="button" data-action="export-bundle">鐢熸垚瀵煎嚭鍖?/button>
+              <button class="app-button primary" type="button" data-action="export-bundle">?????</button>
             </div>
             <div class="policy-explain">
               <div>
-                <strong>瀛︿範淇濈暀绛栫暐</strong>
-                <p>杩欎簺鍙傛暟涓嶆槸鏅€氬鍑洪€夐」锛岃€屾槸涓轰簡闃叉鐢ㄦ埛浠ュ悗蹇樿闂绛旀銆傚鍑哄悗锛屾湰鍦?Host 浼氭寜璁″垝寮哄埗鐢ㄦ埛瀹氭湡澶嶄範銆?/p>
+                <strong>????????</strong>
+                <p>??? 3 ?????????????????????????????????????????????????</p>
+              </div>
+            </div>
+            <div class="policy-explain">
+              <div>
+                <strong>??????</strong>
+                <p>??????????????????????????????????????? Host ?????????</p>
               </div>
               <div class="policy-step-grid">
                 <div>
-                  <span class="chip good">22 涓棶棰?/span>
-                  <p>姣忔淇濈暀瀛︿範閮借姹傚浐瀹氬洖绛?22 涓棶棰橈紝鐢ㄦ潵纭鐢ㄦ埛浠嶇劧璁板緱鑷繁鐨勬晠浜嬮攣銆?/p>
+                  <span class="chip good">22 ???</span>
+                  <p>????????????? 22 ?????????????????????</p>
                 </div>
                 <div>
-                  <span class="chip warn">閫愭闄嶉</span>
-                  <p>鍒濇湡鎸夊ぉ澶嶄範锛屼箣鍚庤繘鍏ユ瘡鍛ㄣ€佹瘡鏈堛€佹瘡骞寸殑鍛ㄦ湡锛涙椂闂磋秺涔咃紝寮哄埗瀛︿範棰戠巼瓒婁綆銆?/p>
+                  <span class="chip warn">????</span>
+                  <p>?????????????????????????????????????</p>
                 </div>
                 <div>
-                  <span class="chip">鍙傛暟鐢ㄩ€?/span>
-                  <p>鈥滃ぉ鏁?鍛ㄦ暟/鏈堟暟/骞存暟鈥濆畾涔夐樁娈垫寔缁涔咃紝鈥滈鐜団€濆畾涔夎闃舵闅斿涔呰Е鍙戜竴娆″涔犮€?/p>
+                  <span class="chip">????</span>
+                  <p>??????????????????????????????????</p>
                 </div>
-              </div>
-            </div>
-            <div class="policy-explain">
-              <div>
-                <strong>瀛︿範绛栫暐鎽樿</strong>
-                <p>瀵煎嚭鍐呭浼氬啓鍏ユ湰鍦板涔犵瓥鐣ヤ俊鎭紝鐢ㄦ潵椹卞姩鍚庣画澶嶄範鑺傚銆傚墠鏈熼珮棰戯紝鍚庢湡閫愭闄嶉锛岄伩鍏嶉暱鏈熶笉鐢ㄦ椂绛旀鐢熺枏銆?/p>
               </div>
             </div>
             <pre data-region="export-json"></pre>
           </section>
           <section class="panel">
             <div class="panel-head">
-              <h3>瀹¤鏃ュ織</h3>
-              <button class="app-button" type="button" data-action="clear-log">娓呯┖</button>
+              <h3>????</h3>
+              <button class="app-button" type="button" data-action="clear-log">??</button>
             </div>
             <div class="log-box" data-region="audit-log"></div>
           </section>
@@ -210,15 +211,15 @@
       <section class="modal-page" role="dialog" aria-modal="true" aria-labelledby="answer-modal-title">
         <div class="panel-head">
           <div>
-            <h2 id="answer-modal-title" data-region="question-editor-title">闂绛旀閰嶇疆</h2>
-            <p data-region="question-editor-note">涓哄綋鍓嶉棶棰橀厤缃?9 涓€欓€夌瓟妗堬紝骞舵爣璁版纭垨閿欒銆?/p>
+            <h2 id="answer-modal-title" data-region="question-editor-title">??????</h2>
+            <p data-region="question-editor-note">??????? 9 ???????????????</p>
           </div>
-          <button class="app-button" type="button" data-action="close-answer-editor">鍏抽棴</button>
+          <button class="app-button" type="button" data-action="close-answer-editor">??</button>
         </div>
         <div class="answer-editor" data-region="answer-editor"></div>
         <div class="button-row modal-actions">
-          <button class="app-button primary" type="button" data-action="save-question-answers">淇濆瓨绛旀閰嶇疆</button>
-          <button class="app-button" type="button" data-action="use-question-challenge">鍙戦€佸埌 Host UI 楠岃瘉</button>
+          <button class="app-button primary" type="button" data-action="save-question-answers">??????</button>
+          <button class="app-button" type="button" data-action="use-question-challenge">??? Host UI ??</button>
         </div>
       </section>
     </div>
@@ -227,37 +228,36 @@
       <section class="modal-page" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
         <div class="panel-head">
           <div>
-            <h2 id="resource-modal-title">瀵硅薄缂栬緫</h2>
-            <p data-region="resource-editor-note">缂栬緫淇濇姢瀵硅薄鐨勬巿鏉冭兘鍔涘拰椋庨櫓璇存槑銆?/p>
+            <h2 id="resource-modal-title">????</h2>
+            <p data-region="resource-editor-note">?????????????????</p>
           </div>
-          <button class="app-button" type="button" data-action="close-resource-editor">鍏抽棴</button>
+          <button class="app-button" type="button" data-action="close-resource-editor">??</button>
         </div>
         <div data-region="resource-editor"></div>
         <div class="button-row modal-actions">
-          <button class="app-button primary" type="button" data-action="save-resource">淇濆瓨瀵硅薄</button>
+          <button class="app-button primary" type="button" data-action="save-resource">????</button>
         </div>
       </section>
     </div>
 
-        <div class="modal-backdrop" data-region="story-modal" hidden>
+    <div class="modal-backdrop" data-region="story-modal" hidden>
       <section class="modal-page story-modal-page" role="dialog" aria-modal="true" aria-labelledby="story-modal-title">
         <div class="panel-head">
           <div>
-            <h2 id="story-modal-title">故事内容编辑</h2>
+            <h2 id="story-modal-title">??????</h2>
           </div>
-          <button class="app-button" type="button" data-action="close-story-editor">关闭</button>
+          <button class="app-button" type="button" data-action="close-story-editor">??</button>
         </div>
         <label class="field story-modal-field">
-          <span>故事内容</span>
+          <span>????</span>
           <textarea data-region="story-modal-text"></textarea>
         </label>
         <div class="button-row modal-actions">
-          <button class="app-button primary" type="button" data-action="save-story-editor">保存</button>
+          <button class="app-button primary" type="button" data-action="save-story-editor">??</button>
         </div>
       </section>
     </div>
 
-    <script type="module" src="/storylock-app.js?v=20260624-10"></script>
+    <script type="module" src="/storylock-app.js?v=20260626-02"></script>
   </body>
 </html>
-

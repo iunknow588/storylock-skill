@@ -21,6 +21,7 @@ import {
 const hostRoot = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(hostRoot, '../../..');
 const defaultAssetPath = join(hostRoot, 'assets', 'question-bank.json');
+const defaultStoryTemplatePath = join(hostRoot, 'assets', 'story-drafts', 'manifest.json');
 
 function envFlag(name, fallback = false) {
   const value = process.env[name];
@@ -94,6 +95,70 @@ function readQuestionBankSync(path, fallbackIdentityId) {
   return normalizeQuestionBank(parseJsonWithBom(text), fallbackIdentityId);
 }
 
+async function readStoryTemplates(path) {
+  const manifestText = await readFile(path, 'utf8');
+  const manifest = parseJsonWithBom(manifestText);
+  if (!String(manifest.defaultTemplateId ?? '').trim()) {
+    throw new Error('story draft manifest defaultTemplateId must be non-empty');
+  }
+  const baseDir = dirname(path);
+  const items = Array.isArray(manifest.items) ? manifest.items : [];
+  if (items.length !== 3) {
+    throw new Error(`story draft manifest must contain exactly 3 items, got ${items.length}`);
+  }
+  const templates = [];
+  for (const item of items) {
+    const fileName = String(item?.fileName ?? '').trim();
+    if (!fileName) {
+      continue;
+    }
+    const templateText = await readFile(join(baseDir, fileName), 'utf8');
+    const draft = parseJsonWithBom(templateText);
+    validateStoryDraft(draft, fileName);
+    templates.push(draft);
+  }
+  return {
+    schemaVersion: manifest.schemaVersion ?? 'storylock-story-draft-manifest-v1',
+    defaultTemplateId: manifest.defaultTemplateId ?? null,
+    templates,
+  };
+}
+
+function validateStoryDraft(draft, fileName) {
+  if (!draft || typeof draft !== 'object') {
+    throw new Error(`story draft must be a JSON object: ${fileName}`);
+  }
+  if (!String(draft.templateId ?? '').trim()) {
+    throw new Error(`story draft templateId must be non-empty: ${fileName}`);
+  }
+  if (!String(draft.language ?? '').trim()) {
+    throw new Error(`story draft language must be non-empty: ${fileName}`);
+  }
+  if (!String(draft.storyTitle ?? '').trim()) {
+    throw new Error(`story draft storyTitle must be non-empty: ${fileName}`);
+  }
+  if (!String(draft.storyPlot ?? '').trim()) {
+    throw new Error(`story draft storyPlot must be non-empty: ${fileName}`);
+  }
+  if (!Array.isArray(draft.nodes) || draft.nodes.length !== 24) {
+    throw new Error(`story draft nodes must contain exactly 24 items: ${fileName}`);
+  }
+  draft.nodes.forEach((node, index) => {
+    if (!node || typeof node !== 'object') {
+      throw new Error(`story draft node must be an object at ${index + 1}: ${fileName}`);
+    }
+    if (!String(node.nodeId ?? '').trim()) {
+      throw new Error(`story draft nodeId must be non-empty at ${index + 1}: ${fileName}`);
+    }
+    if (!String(node.question ?? '').trim()) {
+      throw new Error(`story draft question must be non-empty at ${index + 1}: ${fileName}`);
+    }
+    if (!Array.isArray(node.answerOptionsLocalOnly) || node.answerOptionsLocalOnly.length < 2 || node.answerOptionsLocalOnly.length > 9) {
+      throw new Error(`story draft answerOptionsLocalOnly must contain 2 to 9 items at ${index + 1}: ${fileName}`);
+    }
+  });
+}
+
 function answersForCells(cells) {
   return cells.map((cell) => ({
     cellId: cell.cellId,
@@ -113,6 +178,7 @@ export async function createLinuxHostRuntime({
   developmentMode = envFlag('STORYLOCK_LINUX_DEVELOPMENT_MODE', true),
   resetDataDir = false,
   questionBankPath = defaultAssetPath,
+  storyTemplatePath = defaultStoryTemplatePath,
   storyLockPackageDir = envString('STORYLOCK_LINUX_STORYLOCK_PACKAGE_DIR', ''),
 } = {}) {
   const absoluteDataDir = resolve(dataDir);
@@ -132,6 +198,7 @@ export async function createLinuxHostRuntime({
     allowLegacyFallback: false,
   });
   const bank = await readQuestionBank(questionBankPath, identityId);
+  const storyTemplates = await readStoryTemplates(storyTemplatePath);
   host.enrollQuestionSet(bank.identityId, bank.questions, {
     questionSetVersion: bank.questionSetVersion,
     normalizationVersion: bank.normalizationVersion,
@@ -168,7 +235,9 @@ export async function createLinuxHostRuntime({
     dataDir: absoluteDataDir,
     dbPath,
     questionBankPath,
+    storyTemplatePath,
     questionBank: bank,
+    storyTemplates,
     storyLockPackageDir: resolvedStoryLockPackageDir,
     storyLockPackage,
     host,
@@ -248,9 +317,22 @@ async function handleLinuxHostRequest(runtime, req, res) {
       implementation: runtime.implementation,
       version: runtime.version,
       identityId: runtime.identityId,
+      remoteEnabled: false,
+      approvalMode: 'local_grid_session',
       hostPort: runtime.port,
       status: 'local_core_prototype',
-      capabilities: ['health', 'question-bank', 'verify', 'authorize', 'execute', 'revoke'],
+      capabilities: [
+        'health',
+        'permission-summary',
+        'question-bank',
+        'story-template-status',
+        'story-templates',
+        'authorization-policy',
+        'verify',
+        'authorize',
+        'execute',
+        'revoke',
+      ],
       storage: {
         provider: runtime.host.secretStore?.constructor?.name ?? 'unknown',
         dataDir: runtime.dataDir,
@@ -260,6 +342,12 @@ async function handleLinuxHostRequest(runtime, req, res) {
         path: runtime.questionBankPath,
         questionSetVersion: runtime.questionBank.questionSetVersion,
         questionCount: activeQuestionCount(runtime),
+      },
+      storyTemplates: {
+        path: runtime.storyTemplatePath,
+        assetLayout: 'story-drafts-manifest-v1',
+        defaultTemplateId: runtime.storyTemplates.defaultTemplateId ?? null,
+        templateCount: Array.isArray(runtime.storyTemplates.templates) ? runtime.storyTemplates.templates.length : 0,
       },
       storyLockPackage: {
         path: runtime.storyLockPackageDir,
@@ -309,6 +397,37 @@ async function handleLinuxHostRequest(runtime, req, res) {
         normalizationVersion: runtime.questionBank.normalizationVersion,
         questionCount: activeQuestionCount(runtime),
       },
+      error: null,
+    });
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/story-template/status') {
+    jsonResponse(res, 200, {
+      requestId: `req-${randomUUID()}`,
+      status: 'success',
+      capability: 'storyTemplateStatus',
+      executionLocation: 'local',
+      result: {
+        path: runtime.storyTemplatePath,
+        assetLayout: 'story-drafts-manifest-v1',
+        templateCount: Array.isArray(runtime.storyTemplates.templates) ? runtime.storyTemplates.templates.length : 0,
+        defaultTemplateId: runtime.storyTemplates.defaultTemplateId ?? null,
+      },
+      error: null,
+    });
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/story-templates') {
+    jsonResponse(res, 200, {
+      requestId: `req-${randomUUID()}`,
+      status: 'success',
+      capability: 'storyTemplates',
+      executionLocation: 'local',
+      result: runtime.storyTemplates,
+      redactionLevel: 'local_template_only',
+      retentionGranted: 'local_template_only',
       error: null,
     });
     return;

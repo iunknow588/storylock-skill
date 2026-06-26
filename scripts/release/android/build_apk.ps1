@@ -8,6 +8,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Android host release packaging now depends on unified story-draft assets under
+# app/src/main/assets/story-drafts/manifest.json and the referenced draft files.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 if ([string]::IsNullOrWhiteSpace($ProjectDir)) {
   $ProjectDir = Join-Path $repoRoot "src\host\android-host"

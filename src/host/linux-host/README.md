@@ -7,14 +7,18 @@ Current implemented scope:
 1. Node.js local HTTP host.
 2. `GET /health`.
 3. `GET /question-bank/status`.
-4. `POST /question-bank/import`.
-5. `POST /verify`.
-6. `POST /authorize`.
-7. `POST /execute`.
-8. `POST /revoke`.
-9. `GET /permission-summary`.
-10. StoryLock Layer 2 challenge/session logic reused from `src/skills/local-story-access`.
-11. Optional StoryLock package loading through `src/shared/storylock-package`.
+4. `GET /story-template/status`.
+5. `GET /story-templates`.
+6. `POST /question-bank/import`.
+7. `POST /verify`.
+8. `POST /authorize`.
+9. `POST /execute`.
+10. `POST /revoke`.
+11. `GET /permission-summary`.
+12. StoryLock Layer 2 challenge/session logic reused from `src/skills/local-story-access`.
+13. Optional StoryLock package loading through `src/shared/storylock-package`.
+14. asset-backed `assets/story-drafts/manifest.json` plus exactly three unified story-draft files for external initialization templates.
+15. the three built-in story drafts are examples only; users should rewrite them into more private and less guessable personal stories.
 
 Current security boundary:
 

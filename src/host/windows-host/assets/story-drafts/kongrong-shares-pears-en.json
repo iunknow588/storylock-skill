@@ -1,0 +1,1326 @@
+{
+  "version": "1",
+  "templateId": "kongrong-shares-pears-en",
+  "language": "en-US",
+  "storyTitle": "Kong Rong Shares the Pears",
+  "summary": "As a child, Kong Rong chose the smaller pear and yielded the bigger pears to his older brothers, showing courtesy and respect.",
+  "storyPlot": "When Kong Rong was a child, pears were being shared among the children at home. Some pears were big and some were small. Instead of reaching for the biggest one, Kong Rong willingly chose a small pear. When the adults asked why, he said that he was younger and should take the smaller one, while the bigger pears should go to his older brothers. The story is often used to teach courtesy, restraint, and the habit of thinking of others before oneself.",
+  "memoryAnchors": [
+    "Kong Rong",
+    "home",
+    "pears",
+    "smaller pear",
+    "older brothers",
+    "courtesy",
+    "respect",
+    "sharing"
+  ],
+  "elementGroups": [
+    "time",
+    "place",
+    "person",
+    "object",
+    "event",
+    "reaction",
+    "choice",
+    "result"
+  ],
+  "nodes": [
+    {
+      "nodeId": "question-01",
+      "title": "\u95ee\u9898 01",
+      "elementId": "time",
+      "question": "How old was Kong Rong when the pear-sharing story happened?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "He was a child",
+      "acceptedAnswersLocalOnly": [
+        "He was a child"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "He was a child",
+          "isCorrect": true
+        },
+        {
+          "text": "He was an adult",
+          "isCorrect": false
+        },
+        {
+          "text": "He was old",
+          "isCorrect": false
+        },
+        {
+          "text": "He was on campaign",
+          "isCorrect": false
+        },
+        {
+          "text": "He was already an official",
+          "isCorrect": false
+        },
+        {
+          "text": "He was at college",
+          "isCorrect": false
+        },
+        {
+          "text": "He was traveling",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 01-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 01-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-02",
+      "title": "\u95ee\u9898 02",
+      "elementId": "place",
+      "question": "Where were the pears being shared among the children?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "At home",
+      "acceptedAnswersLocalOnly": [
+        "At home"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "At home",
+          "isCorrect": true
+        },
+        {
+          "text": "On a battlefield",
+          "isCorrect": false
+        },
+        {
+          "text": "At a dock",
+          "isCorrect": false
+        },
+        {
+          "text": "In a cave",
+          "isCorrect": false
+        },
+        {
+          "text": "In a palace",
+          "isCorrect": false
+        },
+        {
+          "text": "At a temple",
+          "isCorrect": false
+        },
+        {
+          "text": "In a market",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 02-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 02-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-03",
+      "title": "\u95ee\u9898 03",
+      "elementId": "person",
+      "question": "Who chose the smaller pear?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Kong Rong",
+      "acceptedAnswersLocalOnly": [
+        "Kong Rong"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Kong Rong",
+          "isCorrect": true
+        },
+        {
+          "text": "His older brother",
+          "isCorrect": false
+        },
+        {
+          "text": "His father",
+          "isCorrect": false
+        },
+        {
+          "text": "A neighbor",
+          "isCorrect": false
+        },
+        {
+          "text": "A teacher",
+          "isCorrect": false
+        },
+        {
+          "text": "A guest",
+          "isCorrect": false
+        },
+        {
+          "text": "A servant",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 03-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 03-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-04",
+      "title": "\u95ee\u9898 04",
+      "elementId": "object",
+      "question": "What fruit was being shared in the story?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Pears",
+      "acceptedAnswersLocalOnly": [
+        "Pears"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Pears",
+          "isCorrect": true
+        },
+        {
+          "text": "Peaches",
+          "isCorrect": false
+        },
+        {
+          "text": "Dates",
+          "isCorrect": false
+        },
+        {
+          "text": "Apples",
+          "isCorrect": false
+        },
+        {
+          "text": "Oranges",
+          "isCorrect": false
+        },
+        {
+          "text": "Grapes",
+          "isCorrect": false
+        },
+        {
+          "text": "Pomegranates",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 04-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 04-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-05",
+      "title": "\u95ee\u9898 05",
+      "elementId": "event",
+      "question": "What did Kong Rong do when he saw pears of different sizes?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "He took the smaller pear",
+      "acceptedAnswersLocalOnly": [
+        "He took the smaller pear"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "He took the smaller pear",
+          "isCorrect": true
+        },
+        {
+          "text": "He grabbed the biggest pear",
+          "isCorrect": false
+        },
+        {
+          "text": "He threw the pears away",
+          "isCorrect": false
+        },
+        {
+          "text": "He hid all the pears",
+          "isCorrect": false
+        },
+        {
+          "text": "He refused to share",
+          "isCorrect": false
+        },
+        {
+          "text": "He cut the pears apart",
+          "isCorrect": false
+        },
+        {
+          "text": "He traded them for rice",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 05-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 05-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-06",
+      "title": "\u95ee\u9898 06",
+      "elementId": "reaction",
+      "question": "What reason did Kong Rong give for choosing the smaller pear?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "The bigger pears should go to his older brothers",
+      "acceptedAnswersLocalOnly": [
+        "The bigger pears should go to his older brothers"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "The bigger pears should go to his older brothers",
+          "isCorrect": true
+        },
+        {
+          "text": "The pears were not tasty",
+          "isCorrect": false
+        },
+        {
+          "text": "He wanted to eat them all alone",
+          "isCorrect": false
+        },
+        {
+          "text": "He was afraid of being blamed",
+          "isCorrect": false
+        },
+        {
+          "text": "He disliked his family",
+          "isCorrect": false
+        },
+        {
+          "text": "He wanted to sell the pears",
+          "isCorrect": false
+        },
+        {
+          "text": "He wanted to plant a pear tree",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 06-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 06-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-07",
+      "title": "\u95ee\u9898 07",
+      "elementId": "choice",
+      "question": "To whom did Kong Rong yield the bigger pears?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "His older brothers",
+      "acceptedAnswersLocalOnly": [
+        "His older brothers"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "His older brothers",
+          "isCorrect": true
+        },
+        {
+          "text": "Passersby",
+          "isCorrect": false
+        },
+        {
+          "text": "Merchants",
+          "isCorrect": false
+        },
+        {
+          "text": "Hunters",
+          "isCorrect": false
+        },
+        {
+          "text": "Boatmen",
+          "isCorrect": false
+        },
+        {
+          "text": "Officials",
+          "isCorrect": false
+        },
+        {
+          "text": "Soldiers",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 07-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 07-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-08",
+      "title": "\u95ee\u9898 08",
+      "elementId": "result",
+      "question": "What virtue does the story highlight?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Courtesy and modesty",
+      "acceptedAnswersLocalOnly": [
+        "Courtesy and modesty"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Courtesy and modesty",
+          "isCorrect": true
+        },
+        {
+          "text": "Greed",
+          "isCorrect": false
+        },
+        {
+          "text": "Laziness",
+          "isCorrect": false
+        },
+        {
+          "text": "Impatience",
+          "isCorrect": false
+        },
+        {
+          "text": "Carelessness",
+          "isCorrect": false
+        },
+        {
+          "text": "Arrogance",
+          "isCorrect": false
+        },
+        {
+          "text": "Forgetfulness",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 08-08",
+          "isCorrect": false
+        },
+        {
+          "text": "Kong Rong distractor 08-09",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-09",
+      "title": "?? 09",
+      "elementId": "time",
+      "question": "When did the adults ask Kong Rong why he chose that pear?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "After he chose the smaller pear",
+      "acceptedAnswersLocalOnly": [
+        "After he chose the smaller pear"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "After he chose the smaller pear",
+          "isCorrect": true
+        },
+        {
+          "text": "Before any pears were shared",
+          "isCorrect": false
+        },
+        {
+          "text": "After everyone went to sleep",
+          "isCorrect": false
+        },
+        {
+          "text": "When the pear tree blossomed",
+          "isCorrect": false
+        },
+        {
+          "text": "After the market closed",
+          "isCorrect": false
+        },
+        {
+          "text": "Before his brothers arrived home",
+          "isCorrect": false
+        },
+        {
+          "text": "While boats were leaving the dock",
+          "isCorrect": false
+        },
+        {
+          "text": "After dinner the next day",
+          "isCorrect": false
+        },
+        {
+          "text": "When the rain started",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-10",
+      "title": "?? 10",
+      "elementId": "place",
+      "question": "Where was Kong Rong standing when the family was sharing pears?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Among the children at home",
+      "acceptedAnswersLocalOnly": [
+        "Among the children at home"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Among the children at home",
+          "isCorrect": true
+        },
+        {
+          "text": "On a city wall",
+          "isCorrect": false
+        },
+        {
+          "text": "At a temple gate",
+          "isCorrect": false
+        },
+        {
+          "text": "On a riverboat",
+          "isCorrect": false
+        },
+        {
+          "text": "In a military camp",
+          "isCorrect": false
+        },
+        {
+          "text": "At a scholar exam hall",
+          "isCorrect": false
+        },
+        {
+          "text": "Inside a mountain cave",
+          "isCorrect": false
+        },
+        {
+          "text": "At a county office",
+          "isCorrect": false
+        },
+        {
+          "text": "On a roadside bridge",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-11",
+      "title": "?? 11",
+      "elementId": "person",
+      "question": "Who were supposed to receive the larger pears?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "His older brothers",
+      "acceptedAnswersLocalOnly": [
+        "His older brothers"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "His older brothers",
+          "isCorrect": true
+        },
+        {
+          "text": "Passing strangers",
+          "isCorrect": false
+        },
+        {
+          "text": "Traveling merchants",
+          "isCorrect": false
+        },
+        {
+          "text": "Local soldiers",
+          "isCorrect": false
+        },
+        {
+          "text": "A visiting judge",
+          "isCorrect": false
+        },
+        {
+          "text": "Street performers",
+          "isCorrect": false
+        },
+        {
+          "text": "Boatmen from the dock",
+          "isCorrect": false
+        },
+        {
+          "text": "Children from another village",
+          "isCorrect": false
+        },
+        {
+          "text": "His family servants",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-12",
+      "title": "?? 12",
+      "elementId": "object",
+      "question": "Which pear did Kong Rong keep for himself?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "The smaller pear",
+      "acceptedAnswersLocalOnly": [
+        "The smaller pear"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "The smaller pear",
+          "isCorrect": true
+        },
+        {
+          "text": "The largest pear",
+          "isCorrect": false
+        },
+        {
+          "text": "Two pears tied together",
+          "isCorrect": false
+        },
+        {
+          "text": "A pear cut in half",
+          "isCorrect": false
+        },
+        {
+          "text": "A pear hidden in a basket",
+          "isCorrect": false
+        },
+        {
+          "text": "An unripe green pear",
+          "isCorrect": false
+        },
+        {
+          "text": "The last pear on the tray",
+          "isCorrect": false
+        },
+        {
+          "text": "A pear wrapped in cloth",
+          "isCorrect": false
+        },
+        {
+          "text": "A pear left on the table",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-13",
+      "title": "?? 13",
+      "elementId": "event",
+      "question": "What question did the adults raise after seeing his choice?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Why he chose the smaller pear",
+      "acceptedAnswersLocalOnly": [
+        "Why he chose the smaller pear"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Why he chose the smaller pear",
+          "isCorrect": true
+        },
+        {
+          "text": "Why he refused to eat fruit",
+          "isCorrect": false
+        },
+        {
+          "text": "Why he hid the pear basket",
+          "isCorrect": false
+        },
+        {
+          "text": "Why he ran outside",
+          "isCorrect": false
+        },
+        {
+          "text": "Why he broke the plate",
+          "isCorrect": false
+        },
+        {
+          "text": "Why he wanted more pears later",
+          "isCorrect": false
+        },
+        {
+          "text": "Why he called for a servant",
+          "isCorrect": false
+        },
+        {
+          "text": "Why he would not sit down",
+          "isCorrect": false
+        },
+        {
+          "text": "Why he asked to leave",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-14",
+      "title": "?? 14",
+      "elementId": "reaction",
+      "question": "How did Kong Rong explain his decision?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "The larger pears should go to his older brothers",
+      "acceptedAnswersLocalOnly": [
+        "The larger pears should go to his older brothers"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "The larger pears should go to his older brothers",
+          "isCorrect": true
+        },
+        {
+          "text": "The smaller pear tasted sweeter",
+          "isCorrect": false
+        },
+        {
+          "text": "He wanted to save the large pear for later",
+          "isCorrect": false
+        },
+        {
+          "text": "He feared being punished",
+          "isCorrect": false
+        },
+        {
+          "text": "He disliked ripe fruit",
+          "isCorrect": false
+        },
+        {
+          "text": "He meant to trade it for sweets",
+          "isCorrect": false
+        },
+        {
+          "text": "He forgot which pear was which",
+          "isCorrect": false
+        },
+        {
+          "text": "He thought the large pears were fake",
+          "isCorrect": false
+        },
+        {
+          "text": "He was too shy to answer",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-15",
+      "title": "?? 15",
+      "elementId": "choice",
+      "question": "Instead of reaching for the best-looking fruit, what did he choose to do?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Take a small pear first",
+      "acceptedAnswersLocalOnly": [
+        "Take a small pear first"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Take a small pear first",
+          "isCorrect": true
+        },
+        {
+          "text": "Hide the whole tray",
+          "isCorrect": false
+        },
+        {
+          "text": "Refuse all fruit",
+          "isCorrect": false
+        },
+        {
+          "text": "Demand the largest pear",
+          "isCorrect": false
+        },
+        {
+          "text": "Split every pear equally",
+          "isCorrect": false
+        },
+        {
+          "text": "Throw the pears outside",
+          "isCorrect": false
+        },
+        {
+          "text": "Ask others to choose for him",
+          "isCorrect": false
+        },
+        {
+          "text": "Wait until everyone left",
+          "isCorrect": false
+        },
+        {
+          "text": "Trade his pear for money",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-16",
+      "title": "?? 16",
+      "elementId": "result",
+      "question": "What lesson is most often drawn from Kong Rong sharing pears?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Think of others before yourself",
+      "acceptedAnswersLocalOnly": [
+        "Think of others before yourself"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Think of others before yourself",
+          "isCorrect": true
+        },
+        {
+          "text": "Take the best thing before others do",
+          "isCorrect": false
+        },
+        {
+          "text": "Silence is better than explanation",
+          "isCorrect": false
+        },
+        {
+          "text": "Only children should share food",
+          "isCorrect": false
+        },
+        {
+          "text": "Fruit should be sorted by color",
+          "isCorrect": false
+        },
+        {
+          "text": "The smallest reward is always best",
+          "isCorrect": false
+        },
+        {
+          "text": "Family meals should be avoided",
+          "isCorrect": false
+        },
+        {
+          "text": "Rules matter more than kindness",
+          "isCorrect": false
+        },
+        {
+          "text": "Questions should never be answered",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-17",
+      "title": "?? 17",
+      "elementId": "time",
+      "question": "At what stage of life is Kong Rong remembered for this choice?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "In childhood",
+      "acceptedAnswersLocalOnly": [
+        "In childhood"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "In childhood",
+          "isCorrect": true
+        },
+        {
+          "text": "In old age",
+          "isCorrect": false
+        },
+        {
+          "text": "During military service",
+          "isCorrect": false
+        },
+        {
+          "text": "After becoming an official",
+          "isCorrect": false
+        },
+        {
+          "text": "While traveling abroad",
+          "isCorrect": false
+        },
+        {
+          "text": "In retirement",
+          "isCorrect": false
+        },
+        {
+          "text": "At a royal banquet",
+          "isCorrect": false
+        },
+        {
+          "text": "During a famine",
+          "isCorrect": false
+        },
+        {
+          "text": "Near the end of his life",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-18",
+      "title": "?? 18",
+      "elementId": "place",
+      "question": "In what kind of setting did this small decision take place?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "A family home",
+      "acceptedAnswersLocalOnly": [
+        "A family home"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "A family home",
+          "isCorrect": true
+        },
+        {
+          "text": "A battlefield camp",
+          "isCorrect": false
+        },
+        {
+          "text": "A magistrate court",
+          "isCorrect": false
+        },
+        {
+          "text": "A mountain shrine",
+          "isCorrect": false
+        },
+        {
+          "text": "A crowded harbor",
+          "isCorrect": false
+        },
+        {
+          "text": "A border checkpoint",
+          "isCorrect": false
+        },
+        {
+          "text": "A marketplace stall",
+          "isCorrect": false
+        },
+        {
+          "text": "A hunter cabin",
+          "isCorrect": false
+        },
+        {
+          "text": "A scholar academy",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-19",
+      "title": "?? 19",
+      "elementId": "person",
+      "question": "Toward whom did Kong Rong show courtesy in this moment?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "His elders in the family",
+      "acceptedAnswersLocalOnly": [
+        "His elders in the family"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "His elders in the family",
+          "isCorrect": true
+        },
+        {
+          "text": "His political rivals",
+          "isCorrect": false
+        },
+        {
+          "text": "A wandering monk",
+          "isCorrect": false
+        },
+        {
+          "text": "The local governor",
+          "isCorrect": false
+        },
+        {
+          "text": "A troupe of actors",
+          "isCorrect": false
+        },
+        {
+          "text": "A group of traders",
+          "isCorrect": false
+        },
+        {
+          "text": "His classmates",
+          "isCorrect": false
+        },
+        {
+          "text": "A traveling healer",
+          "isCorrect": false
+        },
+        {
+          "text": "Unknown strangers",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-20",
+      "title": "?? 20",
+      "elementId": "object",
+      "question": "What contrast in the fruit mattered most to the story?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Some pears were large and some were small",
+      "acceptedAnswersLocalOnly": [
+        "Some pears were large and some were small"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Some pears were large and some were small",
+          "isCorrect": true
+        },
+        {
+          "text": "Some pears were red and some were white",
+          "isCorrect": false
+        },
+        {
+          "text": "Some pears were cooked and some were raw",
+          "isCorrect": false
+        },
+        {
+          "text": "Some pears were hidden and some were missing",
+          "isCorrect": false
+        },
+        {
+          "text": "Some pears were carved and some were painted",
+          "isCorrect": false
+        },
+        {
+          "text": "Some pears were sour and some were salty",
+          "isCorrect": false
+        },
+        {
+          "text": "Some pears were frozen and some were warm",
+          "isCorrect": false
+        },
+        {
+          "text": "Some pears were bought and some were stolen",
+          "isCorrect": false
+        },
+        {
+          "text": "Some pears were round and some were square",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-21",
+      "title": "?? 21",
+      "elementId": "event",
+      "question": "What specific action showed Kong Rong?s restraint?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "He did not reach for the biggest pear",
+      "acceptedAnswersLocalOnly": [
+        "He did not reach for the biggest pear"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "He did not reach for the biggest pear",
+          "isCorrect": true
+        },
+        {
+          "text": "He ran away with the tray",
+          "isCorrect": false
+        },
+        {
+          "text": "He broke the pears apart",
+          "isCorrect": false
+        },
+        {
+          "text": "He tossed a pear into the yard",
+          "isCorrect": false
+        },
+        {
+          "text": "He ordered others to wait",
+          "isCorrect": false
+        },
+        {
+          "text": "He asked for a knife first",
+          "isCorrect": false
+        },
+        {
+          "text": "He hid behind a curtain",
+          "isCorrect": false
+        },
+        {
+          "text": "He traded pears with a servant",
+          "isCorrect": false
+        },
+        {
+          "text": "He counted every pear aloud",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-22",
+      "title": "?? 22",
+      "elementId": "reaction",
+      "question": "What quality does Kong Rong?s answer reveal most clearly?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Humility",
+      "acceptedAnswersLocalOnly": [
+        "Humility"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Humility",
+          "isCorrect": true
+        },
+        {
+          "text": "Jealousy",
+          "isCorrect": false
+        },
+        {
+          "text": "Fearfulness",
+          "isCorrect": false
+        },
+        {
+          "text": "Anger",
+          "isCorrect": false
+        },
+        {
+          "text": "Confusion",
+          "isCorrect": false
+        },
+        {
+          "text": "Impatience",
+          "isCorrect": false
+        },
+        {
+          "text": "Pride",
+          "isCorrect": false
+        },
+        {
+          "text": "Carelessness",
+          "isCorrect": false
+        },
+        {
+          "text": "Coldness",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-23",
+      "title": "?? 23",
+      "elementId": "choice",
+      "question": "What principle guided Kong Rong?s decision?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Younger ones should yield to elders",
+      "acceptedAnswersLocalOnly": [
+        "Younger ones should yield to elders"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Younger ones should yield to elders",
+          "isCorrect": true
+        },
+        {
+          "text": "Whoever is quickest should win",
+          "isCorrect": false
+        },
+        {
+          "text": "The hungriest person should take all",
+          "isCorrect": false
+        },
+        {
+          "text": "The rarest fruit should be hidden",
+          "isCorrect": false
+        },
+        {
+          "text": "Only guests may choose first",
+          "isCorrect": false
+        },
+        {
+          "text": "Children should never explain themselves",
+          "isCorrect": false
+        },
+        {
+          "text": "The largest item must be sold",
+          "isCorrect": false
+        },
+        {
+          "text": "Food should be chosen by lottery",
+          "isCorrect": false
+        },
+        {
+          "text": "Brothers should compete for the best piece",
+          "isCorrect": false
+        }
+      ]
+    },
+    {
+      "nodeId": "question-24",
+      "title": "?? 24",
+      "elementId": "result",
+      "question": "What lasting value does the story leave with readers?",
+      "recommendedSelectionMode": "single_select",
+      "recommendedCorrectCount": 1,
+      "candidatePoolSize": 9,
+      "recallPriority": "normal",
+      "verifyPolicy": "caseInsensitive + trim",
+      "editorNotes": "English demo template for Kong Rong Shares the Pears; each question keeps 9 answer options with 1 correct answer.",
+      "canonicalAnswerLocalOnly": "Courtesy, restraint, and respect",
+      "acceptedAnswersLocalOnly": [
+        "Courtesy, restraint, and respect"
+      ],
+      "answerOptionsLocalOnly": [
+        {
+          "text": "Courtesy, restraint, and respect",
+          "isCorrect": true
+        },
+        {
+          "text": "Secrecy, rivalry, and suspicion",
+          "isCorrect": false
+        },
+        {
+          "text": "Speed, force, and ambition",
+          "isCorrect": false
+        },
+        {
+          "text": "Luck, wealth, and display",
+          "isCorrect": false
+        },
+        {
+          "text": "Silence, distance, and pride",
+          "isCorrect": false
+        },
+        {
+          "text": "Adventure, risk, and noise",
+          "isCorrect": false
+        },
+        {
+          "text": "Strategy, trade, and profit",
+          "isCorrect": false
+        },
+        {
+          "text": "Authority, punishment, and fear",
+          "isCorrect": false
+        },
+        {
+          "text": "Display without kindness",
+          "isCorrect": false
+        }
+      ]
+    }
+  ]
+}

@@ -5,16 +5,24 @@ This directory contains the Android-host application skeleton for StoryLock Laye
 Current implemented scope:
 
 1. Android application project skeleton
-2. local HTTP host entry at `GET /health`, `GET /permission-summary`, and `POST /execute`
+2. local HTTP host entry at `GET /health`, `GET /permission-summary`, `GET /question-bank/status`, `GET /story-template/status`, `GET /story-templates`, and `POST /execute`
 3. Android Keystore-backed `SecretStore`
 4. local multi-cell challenge prompt and BiometricPrompt confirmation flow
 5. host registration store with stable `deviceId` and `appInstanceId`
 6. deep-link based first-bind flow
 7. relay polling client for server-side callback execution
 8. `execute` path backed by Android Keystore asymmetric signature keys and Android Keystore-encrypted credential objects
-9. asset-backed local question-set loading for Android challenge execution
-10. asset-backed `storylock-resource-catalog.json` loading for redacted permission summary
-11. shared StoryLock schema and permission summary alignment guarded by `scripts/test/android-readiness.mjs`
+9. asset-backed local question-set loading for Android challenge execution, now defaulting to a Chinese 24-question set
+10. asset-backed `story-drafts/manifest.json` plus exactly three unified story-draft files for Chinese and English initialization templates
+11. the three built-in story drafts are examples only; users should keep rewriting them into more private and less guessable personal stories
+12. asset-backed `storylock-resource-catalog.json` loading for redacted permission summary
+13. shared StoryLock schema and permission summary alignment guarded by `scripts/test/android-readiness.mjs`
+
+Android product rule:
+
+1. Android must always show the foreground host UI first
+2. local HTTP host and relay logic are background capabilities behind the foreground UI
+3. the app should not treat background host startup as the primary user-facing entry path
 
 Current network flow:
 
@@ -24,11 +32,17 @@ Current network flow:
 4. the app registers itself to the remote gateway
 5. the app keeps polling relay requests and executes them through the local host runtime
 
+Current UI-first runtime flow:
+
+1. launcher and deep-link entry both land in `MainActivity`
+2. the foreground activity attaches local confirmation and then starts the host runtime
+3. host status, template status, and permission summary are shown through the Android UI first
+
 Current non-goals:
 
 1. full production mobile release hardening, attestation, and platform Credential Manager integration
 2. full Layer 1 / Layer 2 runtime parity with the JS host
-3. packaged APK build verification inside this workspace session
+3. full production mobile release hardening, attestation, and platform Credential Manager integration
 4. editing StoryLock Core configuration from the Android Host UI or relay entry point
 
 Permission summary boundary:
@@ -78,3 +92,9 @@ Pop-Location
 ```
 
 The helper requires either a local `gradlew.bat` under `src/host/android-host/` or a system `gradle` command. It writes APK metadata to `.temp/vercel/android-package.env` and updates `.temp/vercel/output.json` for the Yian download entry.
+
+Current verified workspace result:
+
+1. debug APK build has been verified through `scripts/release/android/build_apk.ps1 -Variant debug`
+2. output APK path: `release/app/android/storylock-android-host-0.1.0-1-debug.apk`
+3. metadata env path: `.temp/vercel/android-package.env`

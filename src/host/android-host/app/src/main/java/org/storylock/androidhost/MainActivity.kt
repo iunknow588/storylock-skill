@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val app = application as StoryLockHostApplication
+    app.ensureHostRuntimeStarted()
     val confirmation = app.localConfirmation
     if (confirmation is AttachedActivityConfirmation) {
       confirmation.attach(this)
@@ -86,8 +87,13 @@ class MainActivity : AppCompatActivity() {
   private fun renderStatus(state: HostBindingState) {
     val app = application as StoryLockHostApplication
     val permissionSummary = app.storyLockPackageRepository.loadPermissionSummary()
+    val questionBank = app.hostService.questionBankStatus().optJSONObject("result")
+    val storyTemplates = app.hostService.storyTemplateStatus().optJSONObject("result")
     statusView.text = buildString {
       appendLine("StoryLock Android Host")
+      appendLine()
+      appendLine("UI priority: active")
+      appendLine("Host runtime start: attached to foreground UI")
       appendLine()
       appendLine("Status: ${statusLabel(state)}")
       appendLine()
@@ -97,6 +103,11 @@ class MainActivity : AppCompatActivity() {
       appendLine("Host port: ${app.hostConfig.port}")
       appendLine("Server running: ${app.server.isRunning()}")
       appendLine("Permission objects: ${permissionSummary.permissionObjects}")
+      appendLine("Question set: ${questionBank?.optString("questionSetVersion") ?: "(unknown)"}")
+      appendLine("Story templates: ${storyTemplates?.optInt("templateCount") ?: 0}")
+      appendLine("Default template: ${storyTemplates?.optString("defaultTemplateId") ?: "(unknown)"}")
+      appendLine("Template asset: ${storyTemplates?.optString("assetName") ?: "(unknown)"}")
+      appendLine("Template note: built-in stories are examples only; keep rewriting them by hand.")
       appendLine()
       appendLine("Gateway: ${state.gatewayBaseUrl.ifBlank { "(not bound yet)" }}")
       appendLine("Preferred mode: ${state.preferredMode}")

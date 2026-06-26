@@ -33,4 +33,7 @@ data class AuthorizationSession(
   val authorizationId: String,
   val allowedAction: String,
   val objectRef: String,
+  val createdAt: Long,
+  val expiresAt: Long,
+  val status: String = "active",
 )

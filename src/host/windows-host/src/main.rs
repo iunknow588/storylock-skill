@@ -6,7 +6,7 @@ use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -44,6 +44,14 @@ struct WindowsHostConfig {
     approval_mode: String,
     remote_enabled: bool,
     data_dir: PathBuf,
+}
+
+#[derive(Clone, Debug)]
+struct StoryLlmConfig {
+    provider: String,
+    api_key: String,
+    base_url: String,
+    model: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -522,6 +530,111 @@ fn env_or(name: &str, fallback: &str) -> String {
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| fallback.to_string())
+}
+
+fn read_env_file_map() -> HashMap<String, String> {
+    let mut candidates = Vec::new();
+    if let Ok(explicit) = std::env::var("STORYLOCK_EXTERNAL_ENV_FILE") {
+        let trimmed = explicit.trim();
+        if !trimmed.is_empty() {
+            candidates.push(PathBuf::from(trimmed));
+        }
+    }
+    if let Ok(explicit) = std::env::var("STORYLOCK_STORY_ENV_FILE") {
+        let trimmed = explicit.trim();
+        if !trimmed.is_empty() {
+            candidates.push(PathBuf::from(trimmed));
+        }
+    }
+    candidates.push(PathBuf::from(".env"));
+    candidates.push(PathBuf::from("..").join("..").join("..").join("..").join("龙虾流程").join(".env"));
+    candidates.push(PathBuf::from("..").join("..").join("..").join("..").join("龙虾流程").join(".env.example"));
+
+    for candidate in candidates {
+        if let Ok(content) = fs::read_to_string(&candidate) {
+            let mut values = HashMap::new();
+            for raw_line in content.lines() {
+                let line = raw_line.trim();
+                if line.is_empty() || line.starts_with('#') {
+                    continue;
+                }
+                let Some((key, value)) = line.split_once('=') else {
+                    continue;
+                };
+                let key = key.trim();
+                let value = value.trim().trim_matches('"').trim_matches('\'').to_string();
+                if !key.is_empty() {
+                    values.insert(key.to_string(), value);
+                }
+            }
+            if !values.is_empty() {
+                return values;
+            }
+        }
+    }
+    HashMap::new()
+}
+
+fn env_lookup(name: &str, file_env: &HashMap<String, String>) -> Option<String> {
+    std::env::var(name)
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .or_else(|| {
+            file_env
+                .get(name)
+                .map(|value| value.trim().to_string())
+                .filter(|value| !value.is_empty())
+        })
+}
+
+fn story_llm_config() -> Option<StoryLlmConfig> {
+    let file_env = read_env_file_map();
+    let api_key = [
+        "STORYLOCK_STORY_LLM_API_KEY",
+        "XFYUN_MAAS_API_KEY",
+        "OPENAI_API_KEY",
+        "ARK_API_KEY",
+        "SEEDANCE_API_KEY",
+    ]
+    .iter()
+    .find_map(|name| env_lookup(name, &file_env))?;
+    let base_url = [
+        "STORYLOCK_STORY_LLM_BASE_URL",
+        "XFYUN_MAAS_BASE_URL",
+        "OPENAI_BASE_URL",
+        "ARK_BASE_URL",
+        "SEEDANCE_BASE_URL",
+    ]
+    .iter()
+    .find_map(|name| env_lookup(name, &file_env))?;
+    let model = [
+        "STORYLOCK_STORY_LLM_MODEL",
+        "XFYUN_MAAS_MODEL",
+        "OPENAI_MODEL",
+        "ARK_MODEL",
+        "ARK_VIDEO_MODEL",
+        "SEEDANCE_MODEL",
+    ]
+    .iter()
+    .find_map(|name| env_lookup(name, &file_env))?;
+    let provider = if env_lookup("XFYUN_MAAS_API_KEY", &file_env).is_some() {
+        "xfyun-maas"
+    } else if env_lookup("SEEDANCE_API_KEY", &file_env).is_some() {
+        "seedance"
+    } else if env_lookup("ARK_API_KEY", &file_env).is_some() {
+        "ark"
+    } else if env_lookup("OPENAI_API_KEY", &file_env).is_some() {
+        "openai"
+    } else {
+        "story-llm"
+    };
+    Some(StoryLlmConfig {
+        provider: provider.to_string(),
+        api_key,
+        base_url,
+        model,
+    })
 }
 
 fn truthy_env(name: &str, fallback: bool) -> bool {
@@ -2093,20 +2206,14 @@ fn story_template_interface_manifest() -> Value {
 }
 
 fn story_template_generator_status(runtime: &WindowsHostRuntime) -> Value {
-    let key_configured = std::env::var("STORYLOCK_STORY_LLM_API_KEY")
-        .or_else(|_| std::env::var("OPENAI_API_KEY"))
-        .ok()
-        .map(|value| !value.trim().is_empty())
-        .unwrap_or(false);
-    let endpoint_configured = std::env::var("STORYLOCK_STORY_LLM_ENDPOINT")
-        .ok()
-        .map(|value| !value.trim().is_empty())
-        .unwrap_or(false);
+    let llm = story_llm_config();
     json!({
         "schemaVersion": "story-template-generator-status-v1",
-        "mode": if key_configured && endpoint_configured { "llm_ready" } else { "local_template_fallback" },
-        "llmKey": if key_configured { "configured_direct_access" } else { "missing" },
-        "llmEndpoint": if endpoint_configured { "configured" } else { "missing" },
+        "mode": if llm.is_some() { "llm_ready" } else { "local_template_fallback" },
+        "llmKey": if llm.is_some() { "configured_direct_access" } else { "missing" },
+        "llmEndpoint": llm.as_ref().map(|config| config.base_url.as_str()).unwrap_or("missing"),
+        "llmModel": llm.as_ref().map(|config| config.model.as_str()).unwrap_or("missing"),
+        "llmProvider": llm.as_ref().map(|config| config.provider.as_str()).unwrap_or("missing"),
         "candidateCount": runtime.secret_store.read_story_template_candidates(1000).len(),
         "interfaces": {
             "generate": format!("http://127.0.0.1:{}/story-template/generate", runtime.config.host_port),
@@ -2125,13 +2232,97 @@ fn safe_story_slug(value: &str) -> String {
     }
 }
 
+fn call_story_llm(config: &StoryLlmConfig, request: &Value) -> Result<Value> {
+    let client = Client::builder().timeout(Duration::from_secs(30)).build()?;
+    let url = format!("{}/chat/completions", config.base_url.trim_end_matches('/'));
+    let request_pairs = request
+        .get("questionAnswerPairs")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let user_prompt = format!(
+        "Return JSON only. Do not use markdown fences. Do not explain.\n\
+         Required top-level keys: title, summary, storyPlot, memoryAnchors, chapters, questionPlan.\n\
+         Requirements:\n\
+         1. Use Simplified Chinese for user-facing text.\n\
+         2. storyPlot must naturally connect the provided question and answer pairs.\n\
+         3. memoryAnchors must contain 6 to 8 short anchor phrases.\n\
+         4. chapters must contain exactly 3 items, each with id and purpose.\n\
+         5. questionPlan must include at least targetCount.\n\
+         6. The built-in three story templates are examples only, not final stories to copy.\n\
+         7. Explicitly encourage the user to rewrite and redesign the story manually instead of relying on AI polishing.\n\
+         8. For better security, the story should become more private, more strange, more counterintuitive, and less guessable by outsiders while still memorable.\n\
+         9. Avoid generic, polished, school-essay, or formulaic plots.\n\
+         10. The output should feel like a draft for further human rewriting, not a final answer.\n\
+         theme={theme}\n\
+         audience={audience}\n\
+         tone={tone}\n\
+         questionAnswerPairs={pairs}",
+        theme = request
+            .get("theme")
+            .and_then(Value::as_str)
+            .unwrap_or("StoryLock story"),
+        audience = request
+            .get("audience")
+            .and_then(Value::as_str)
+            .unwrap_or("StoryLock user"),
+        tone = request
+            .get("tone")
+            .and_then(Value::as_str)
+            .unwrap_or("clear and memorable"),
+        pairs = serde_json::to_string(&request_pairs).unwrap_or_else(|_| "[]".to_string())
+    );
+    let body = json!({
+        "model": config.model,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a strict JSON generator for a StoryLock story template."
+            },
+            {
+                "role": "user",
+                "content": user_prompt
+            }
+        ],
+        "temperature": 0.7
+    });
+    let response = client
+        .post(url)
+        .bearer_auth(&config.api_key)
+        .json(&body)
+        .send()
+        .context("failed to call external story LLM")?
+        .error_for_status()
+        .context("external story LLM returned an error status")?;
+    let value = response.json::<Value>()?;
+    let content = value
+        .get("choices")
+        .and_then(Value::as_array)
+        .and_then(|choices| choices.first())
+        .and_then(|choice| choice.get("message"))
+        .and_then(|message| message.get("content"))
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .trim();
+    let trimmed = content
+        .strip_prefix("```json")
+        .or_else(|| content.strip_prefix("```"))
+        .unwrap_or(content)
+        .trim()
+        .trim_end_matches("```")
+        .trim();
+    let parsed: Value = serde_json::from_str(trimmed)
+        .context("external story LLM did not return valid JSON")?;
+    Ok(parsed)
+}
+
 fn generate_local_story_framework(request: &Value) -> Value {
     let theme = request
         .get("theme")
         .and_then(Value::as_str)
         .map(str::trim)
         .filter(|value| !value.is_empty())
-        .unwrap_or("memory authorization story");
+        .unwrap_or("StoryLock story");
     let audience = request
         .get("audience")
         .and_then(Value::as_str)
@@ -2145,33 +2336,79 @@ fn generate_local_story_framework(request: &Value) -> Value {
         .filter(|value| !value.is_empty())
         .unwrap_or("clear and memorable");
     let slug = safe_story_slug(theme);
+    let story_plot = request
+        .get("questionAnswerPairs")
+        .and_then(Value::as_array)
+        .filter(|pairs| !pairs.is_empty())
+        .map(|pairs| {
+            let fragments = pairs
+                .iter()
+                .enumerate()
+                .map(|(index, item)| {
+                    let question = item
+                        .get("question")
+                        .and_then(Value::as_str)
+                        .unwrap_or("Unnamed question");
+                    let answer = item
+                        .get("answer")
+                        .and_then(Value::as_str)
+                        .unwrap_or("Missing answer");
+                    format!(
+                        "Question {} uses '{}' and its answer is '{}'. ",
+                        index + 1,
+                        question,
+                        answer
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("");
+            format!(
+                "This draft was assembled from StoryLock question-answer pairs. {}It is only a starting point and should be rewritten by the user into a more private, stranger, and less guessable memory story.",
+                fragments
+            )
+        });
     json!({
-        "title": format!("Story Framework: {theme}"),
-        "summary": format!("A {tone} story framework for {audience}, prepared as a candidate template for StoryLock to pull later."),
+        "title": format!("{theme} story draft"),
+        "summary": format!(
+            "A {tone} starter draft for {audience}. It is an example only and should be manually rewritten into something more private, strange, and difficult for outsiders to guess."
+        ),
+        "storyPlot": story_plot.unwrap_or_else(|| format!(
+            "This is a starter draft around '{theme}' for {audience} with a {tone} tone. It should be treated as an example only, then manually rewritten into a more private, stranger, less predictable story instead of relying on AI polishing."
+        )),
         "memoryAnchors": [
-            format!("{theme} origin"),
-            "trusted local device",
-            "nine-grid recall",
-            "agent request",
-            "remote interface check",
-            "safe completion"
+            format!("{theme} opening"),
+            "private clue",
+            "strange image",
+            "memory checkpoint",
+            "unexpected turn",
+            "final boundary"
         ],
         "chapters": [
-            { "id": format!("{slug}-setup"), "purpose": "Introduce the person, place, and object that make the memory easy to recall." },
-            { "id": format!("{slug}-challenge"), "purpose": "Connect the managed object request to a concrete event and choice." },
-            { "id": format!("{slug}-resolution"), "purpose": "Close with the correct authorization boundary and outcome." }
+            { "id": format!("{slug}-setup"), "purpose": "Introduce the private scene, the people, and the first unusual clue." },
+            { "id": format!("{slug}-challenge"), "purpose": "Connect the protected details to memorable events, reactions, and odd choices." },
+            { "id": format!("{slug}-resolution"), "purpose": "End with a result that is memorable to the user but difficult for outsiders to infer." }
         ],
         "questionPlan": {
             "targetCount": request.get("questionCount").and_then(Value::as_u64).unwrap_or(24),
-            "grid": "StoryLock decides final grid cells and answers after import.",
+            "grid": "StoryLock decides the final grid positions and answer layout after import.",
             "hostBoundary": "candidate_framework_only"
         }
     })
 }
 
+fn generate_story_framework(runtime: &WindowsHostRuntime, request: &Value) -> Value {
+    let _ = runtime;
+    if let Some(config) = story_llm_config() {
+        if let Ok(framework) = call_story_llm(&config, request) {
+            return framework;
+        }
+    }
+    generate_local_story_framework(request)
+}
+
 fn story_template_generate(runtime: &WindowsHostRuntime, request: &Value) -> Value {
     let request_id = request_id_from(request);
-    let framework = generate_local_story_framework(request);
+    let framework = generate_story_framework(runtime, request);
     let candidate_id = format!("story-template-{}", Uuid::new_v4());
     let candidate = json!({
         "schemaVersion": "story-template-candidate-v1",

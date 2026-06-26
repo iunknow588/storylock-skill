@@ -5,6 +5,7 @@ import org.storylock.androidhost.host.AndroidHostConfig
 import org.storylock.androidhost.host.AndroidHostServer
 import org.storylock.androidhost.host.AndroidQuestionSetRepository
 import org.storylock.androidhost.host.AndroidStoryLockPackageRepository
+import org.storylock.androidhost.host.AndroidStoryTemplateRepository
 import org.storylock.androidhost.host.HostBindingStore
 import org.storylock.androidhost.host.HostGatewayClient
 import org.storylock.androidhost.host.HostRegistrationManager
@@ -36,6 +37,9 @@ class StoryLockHostApplication : Application() {
   lateinit var server: AndroidHostServer
     private set
 
+  @Volatile
+  private var hostRuntimeStarted = false
+
   override fun onCreate() {
     super.onCreate()
 
@@ -62,8 +66,10 @@ class StoryLockHostApplication : Application() {
     )
 
     val secretStore = AndroidKeystoreSecretStore(this)
-    val questionSet = AndroidQuestionSetRepository(this).loadActiveQuestionSet()
+    val questionSetRepository = AndroidQuestionSetRepository(this)
+    val questionSet = questionSetRepository.loadActiveQuestionSet()
     storyLockPackageRepository = AndroidStoryLockPackageRepository(this)
+    val storyTemplateRepository = AndroidStoryTemplateRepository(this)
     require(questionSet.identityId == hostConfig.identityId) {
       "Android question set identityId (${questionSet.identityId}) does not match host identityId (${hostConfig.identityId})"
     }
@@ -80,6 +86,8 @@ class StoryLockHostApplication : Application() {
       localConfirmation = localConfirmation,
       runtime = runtime,
       storyLockPackageRepository = storyLockPackageRepository,
+      questionSetRepository = questionSetRepository,
+      storyTemplateRepository = storyTemplateRepository,
       connectivityProvider = {
         registrationManager.healthJson()
       },
@@ -94,7 +102,15 @@ class StoryLockHostApplication : Application() {
       config = hostConfig,
       hostService = hostService,
     )
+  }
+
+  @Synchronized
+  fun ensureHostRuntimeStarted() {
+    if (hostRuntimeStarted) {
+      return
+    }
     server.start()
     registrationManager.ensureStarted()
+    hostRuntimeStarted = true
   }
 }

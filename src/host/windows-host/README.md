@@ -51,6 +51,12 @@ cargo build --release
 
 Debug and release builds enable the Slint desktop UI by default. A plain `cargo build` creates `target\debug\yian-windows-host.exe` as a desktop entry: double-clicking it opens the native Slint window without a console window.
 
+Windows product rule:
+
+1. the Windows user-facing executable must always prefer the native Slint UI
+2. localhost HTTP and relay logic are background capabilities behind the UI, not a replacement front door
+3. internal loop tests that compile without default features must use an isolated target directory and must not overwrite the user-facing `target\debug\yian-windows-host.exe`
+
 Print config only:
 
 ```powershell
@@ -79,7 +85,7 @@ Slint is the only Windows UI path:
 cargo run
 ```
 
-Release packages are built with the Slint UI. Internal automation can still compile without default features to exercise the localhost HTTP loop, but the Windows user-facing build has a single UI path.
+Release packages are built with the Slint UI. Internal automation can still compile without default features to exercise the localhost HTTP loop, but the Windows user-facing build has a single UI path and always remains UI-first.
 
 Zip package desktop entry:
 
