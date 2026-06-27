@@ -61,7 +61,13 @@ pub(crate) fn storylock_core_story_drafts_dir(package_dir: &Path) -> std::path::
     package_dir.join("story-drafts")
 }
 
-pub(crate) fn required_storylock_package_files() -> [&'static str; 11] {
+pub(crate) fn storylock_core_story_template_directories_dir(
+    package_dir: &Path,
+) -> std::path::PathBuf {
+    storylock_core_templates_dir(package_dir).join("story-template-directories")
+}
+
+pub(crate) fn required_storylock_package_files() -> [&'static str; 20] {
     [
         "package-manifest.json",
         "resource-catalog.json",
@@ -74,6 +80,15 @@ pub(crate) fn required_storylock_package_files() -> [&'static str; 11] {
         "story-drafts/shouzhudaitu-zh.json",
         "story-drafts/zhizi-yilin-zh.json",
         "story-drafts/emperor-new-clothes-en.json",
+        "templates/story-template-directories/manifest.json",
+        "templates/story-template-directories/README.md",
+        "templates/story-template-directories/shouzhudaitu-zh/README.md",
+        "templates/story-template-directories/shouzhudaitu-zh/story-template.json",
+        "templates/story-template-directories/zhizi-yilin-zh/README.md",
+        "templates/story-template-directories/zhizi-yilin-zh/story-template.json",
+        "templates/story-template-directories/emperor-new-clothes-en/README.md",
+        "templates/story-template-directories/emperor-new-clothes-en/story-template.json",
+        "templates/story-draft-templates.json",
     ]
 }
 
@@ -95,6 +110,7 @@ pub(crate) fn cleanup_legacy_storylock_package_files(package_dir: &Path) -> Resu
 
 pub(crate) fn ensure_storylock_core_package(package_dir: &Path) -> Result<()> {
     fs::create_dir_all(package_dir)?;
+    let directory_story_template = read_directory_story_template(package_dir);
     write_json_if_missing(
         &storylock_core_manifest_path(package_dir),
         &json!({
@@ -114,9 +130,10 @@ pub(crate) fn ensure_storylock_core_package(package_dir: &Path) -> Result<()> {
         &storylock_core_learning_policy_path(package_dir),
         &default_learning_policy_json(),
     )?;
-    ensure_storylock_vault(package_dir)?;
+    ensure_storylock_vault_with_optional_author_draft(package_dir, directory_story_template)?;
     ensure_storylock_template_files(package_dir)?;
     ensure_story_draft_template_files(package_dir)?;
+    cleanup_legacy_nested_storylock_template_package_files(package_dir)?;
     cleanup_legacy_storylock_package_files(package_dir)?;
     Ok(())
 }
@@ -154,6 +171,8 @@ pub(crate) fn ensure_storylock_template_files(package_dir: &Path) -> Result<()> 
 pub(crate) fn ensure_story_draft_template_files(package_dir: &Path) -> Result<()> {
     let story_drafts_dir = storylock_core_story_drafts_dir(package_dir);
     fs::create_dir_all(&story_drafts_dir)?;
+    let story_template_directories_dir = storylock_core_story_template_directories_dir(package_dir);
+    fs::create_dir_all(&story_template_directories_dir)?;
     let drafts = [
         ("shouzhudaitu-zh.json", shouzhudaitu_author_draft_json()),
         ("zhizi-yilin-zh.json", zhizi_yilin_author_draft_json()),
@@ -163,16 +182,185 @@ pub(crate) fn ensure_story_draft_template_files(package_dir: &Path) -> Result<()
         ),
     ];
     for (file_name, draft) in drafts {
+        let template_id = draft
+            .get("templateId")
+            .and_then(Value::as_str)
+            .unwrap_or(file_name.trim_end_matches(".json"));
         fs::write(
             story_drafts_dir.join(file_name),
             serde_json::to_vec_pretty(&draft)?,
         )?;
+        let template_dir = story_template_directories_dir.join(template_id);
+        fs::create_dir_all(&template_dir)?;
+        fs::write(
+            template_dir.join("story-template.json"),
+            serde_json::to_vec_pretty(&draft)?,
+        )?;
+        fs::write(
+            template_dir.join("README.md"),
+            story_template_readme(&draft).as_bytes(),
+        )?;
+        write_story_template_package_dir(&template_dir, &draft)?;
     }
     fs::write(
         story_drafts_dir.join("manifest.json"),
         include_bytes!("../../../../assets/story-drafts/manifest.json"),
     )?;
+    fs::write(
+        story_template_directories_dir.join("manifest.json"),
+        include_bytes!("../../../../assets/story-drafts/manifest.json"),
+    )?;
+    fs::write(
+        story_template_directories_dir.join("README.md"),
+        "StoryLock story template directories. Each directory contains one story-template.json with 24 questions.\n",
+    )?;
+    fs::write(
+        storylock_core_templates_dir(package_dir).join("story-draft-templates.json"),
+        serde_json::to_vec_pretty(&default_story_draft_templates_json())?,
+    )?;
     ensure_manifest_lists_required_files(package_dir)
+}
+
+fn write_story_template_package_dir(template_dir: &Path, draft: &Value) -> Result<()> {
+    fs::create_dir_all(template_dir)?;
+    let package_files = [
+        "story-template.json",
+        "package-manifest.json",
+        "resource-catalog.json",
+        "learning-policy.json",
+        "vault.stlk",
+        "templates/login-sites.json",
+        "templates/signing-actions.json",
+        "templates/agent-tasks.json",
+        "story-drafts/manifest.json",
+        "story-drafts/current-story-template.json",
+    ];
+    fs::write(
+        template_dir.join("package-manifest.json"),
+        serde_json::to_vec_pretty(&json!({
+            "packageId": draft
+                .get("templateId")
+                .and_then(Value::as_str)
+                .map(|template_id| format!("windows-storylock-template-{template_id}"))
+                .unwrap_or_else(|| "windows-storylock-template-local".to_string()),
+            "version": "0.1.0",
+            "createdAt": ui_now_timestamp(),
+            "description": "Standalone StoryLock story template package.",
+            "files": package_files
+        }))?,
+    )?;
+    fs::write(
+        template_dir.join("resource-catalog.json"),
+        serde_json::to_vec_pretty(&default_resource_catalog_json())?,
+    )?;
+    fs::write(
+        template_dir.join("learning-policy.json"),
+        serde_json::to_vec_pretty(&default_learning_policy_json())?,
+    )?;
+    let nested_templates_dir = template_dir.join("templates");
+    fs::create_dir_all(&nested_templates_dir)?;
+    fs::write(
+        nested_templates_dir.join("login-sites.json"),
+        serde_json::to_vec_pretty(&default_login_templates_json())?,
+    )?;
+    fs::write(
+        nested_templates_dir.join("signing-actions.json"),
+        serde_json::to_vec_pretty(&default_signing_templates_json())?,
+    )?;
+    fs::write(
+        nested_templates_dir.join("agent-tasks.json"),
+        serde_json::to_vec_pretty(&default_agent_templates_json())?,
+    )?;
+    let nested_story_drafts_dir = template_dir.join("story-drafts");
+    fs::create_dir_all(&nested_story_drafts_dir)?;
+    fs::write(
+        nested_story_drafts_dir.join("manifest.json"),
+        serde_json::to_vec_pretty(&json!({
+            "schemaVersion": "storylock-story-draft-manifest-v1",
+            "defaultTemplateId": draft
+                .get("templateId")
+                .and_then(Value::as_str)
+                .unwrap_or("current-story-template"),
+            "items": [{
+                "templateId": draft
+                    .get("templateId")
+                    .and_then(Value::as_str)
+                    .unwrap_or("current-story-template"),
+                "language": draft
+                    .get("language")
+                    .and_then(Value::as_str)
+                    .unwrap_or("zh-CN"),
+                "storyTitle": draft
+                    .get("storyTitle")
+                    .and_then(Value::as_str)
+                    .unwrap_or("Story template"),
+                "fileName": "current-story-template.json"
+            }]
+        }))?,
+    )?;
+    fs::write(
+        nested_story_drafts_dir.join("current-story-template.json"),
+        serde_json::to_vec_pretty(draft)?,
+    )?;
+    let vault = json!({
+        "schemaVersion": "1",
+        "authorDraft": draft,
+        "pendingAuthorDraft": draft,
+        "storyDraftTemplates": {
+            "schemaVersion": "storylock-story-draft-templates-v1",
+            "defaultTemplateId": draft
+                .get("templateId")
+                .and_then(Value::as_str)
+                .unwrap_or("current-story-template"),
+            "items": [draft.clone()]
+        },
+        "templates": default_storylock_templates_json()
+    });
+    write_storylock_vault(template_dir, &vault)?;
+    Ok(())
+}
+
+pub(crate) fn cleanup_legacy_nested_storylock_template_package_files(
+    package_dir: &Path,
+) -> Result<()> {
+    let templates_dir = storylock_core_templates_dir(package_dir);
+    for path in [
+        templates_dir.join("package-manifest.json"),
+        templates_dir.join("resource-catalog.json"),
+        templates_dir.join("learning-policy.json"),
+        templates_dir.join("vault.stlk"),
+        templates_dir.join("story-drafts"),
+        templates_dir.join("templates"),
+    ] {
+        if path.is_dir() {
+            fs::remove_dir_all(path)?;
+        } else if path.exists() {
+            fs::remove_file(path)?;
+        }
+    }
+    Ok(())
+}
+
+fn story_template_readme(draft: &Value) -> String {
+    let title = draft
+        .get("storyTitle")
+        .and_then(Value::as_str)
+        .unwrap_or("Story template");
+    let nodes = draft
+        .get("nodes")
+        .and_then(Value::as_array)
+        .map(Vec::len)
+        .unwrap_or(0);
+    format!("# {title}\n\nStoryLock story template with {nodes} questions.\n")
+}
+
+pub(crate) fn read_directory_story_template(package_dir: &Path) -> Option<Value> {
+    let path = package_dir.join("story-template.json");
+    let mut draft = fs::read_to_string(path)
+        .ok()
+        .and_then(|content| serde_json::from_str::<Value>(&content).ok())?;
+    normalize_author_draft_schema(&mut draft);
+    Some(draft)
 }
 
 pub(crate) fn ensure_manifest_lists_required_files(package_dir: &Path) -> Result<()> {

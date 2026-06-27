@@ -30,10 +30,25 @@ pub(crate) fn default_storylock_templates_json() -> Value {
     })
 }
 
-pub(crate) fn ensure_storylock_vault(package_dir: &Path) -> Result<()> {
+pub(crate) fn ensure_storylock_vault_with_optional_author_draft(
+    package_dir: &Path,
+    author_draft: Option<Value>,
+) -> Result<()> {
     if storylock_core_vault_path(package_dir).exists() {
         let mut vault = read_storylock_vault_payload(package_dir);
         let before = vault.clone();
+        if let Some(author_draft) = author_draft {
+            let current = storylock_author_draft_from_vault(&vault);
+            let current_template_id = current.get("templateId").and_then(Value::as_str);
+            let directory_template_id = author_draft.get("templateId").and_then(Value::as_str);
+            if current_template_id != directory_template_id
+                || story_draft_contains_mojibake(&current)
+            {
+                vault["authorDraft"] = author_draft.clone();
+                vault["pendingAuthorDraft"] = author_draft.clone();
+                vault["storyDraftTemplates"] = story_draft_templates_from_draft(&author_draft);
+            }
+        }
         if vault.get("storyDraftTemplates").is_none() {
             let draft = storylock_author_draft_from_vault(&vault);
             vault["storyDraftTemplates"] = story_draft_templates_from_draft(&draft);
@@ -63,11 +78,12 @@ pub(crate) fn ensure_storylock_vault(package_dir: &Path) -> Result<()> {
             default_agent_templates_json(),
         )
     });
+    let author_draft = author_draft.unwrap_or(legacy_draft);
     let vault = json!({
         "schemaVersion": "1",
-        "authorDraft": legacy_draft,
+        "authorDraft": author_draft.clone(),
         "pendingAuthorDraft": Value::Null,
-        "storyDraftTemplates": default_story_draft_templates_json(),
+        "storyDraftTemplates": story_draft_templates_from_draft(&author_draft),
         "templates": legacy_templates,
     });
     write_storylock_vault(package_dir, &vault)
@@ -84,16 +100,18 @@ pub(crate) fn refresh_placeholder_author_draft_nodes(vault: &mut Value) {
         {
             let mut refreshed = default_author_draft_json();
             if let Some(existing) = vault.get(key) {
-                for field in [
-                    "templateId",
-                    "storyTitle",
-                    "summary",
-                    "storyPlot",
-                    "memoryAnchors",
-                    "elementGroups",
-                ] {
-                    if let Some(value) = existing.get(field) {
-                        refreshed[field] = value.clone();
+                if !story_draft_contains_mojibake(existing) {
+                    for field in [
+                        "templateId",
+                        "storyTitle",
+                        "summary",
+                        "storyPlot",
+                        "memoryAnchors",
+                        "elementGroups",
+                    ] {
+                        if let Some(value) = existing.get(field) {
+                            refreshed[field] = value.clone();
+                        }
                     }
                 }
             }
@@ -154,22 +172,42 @@ pub(crate) fn merge_builtin_story_draft_templates(vault: &mut Value) {
 }
 
 pub(crate) fn story_draft_template_needs_refresh(template: &Value) -> bool {
-    template
-        .get("nodes")
-        .and_then(Value::as_array)
-        .map(|nodes| {
-            nodes.len() != 24
-                || nodes.iter().any(|node| {
-                    let question = node
-                        .get("question")
-                        .and_then(Value::as_str)
-                        .unwrap_or_default()
-                        .trim();
-                    question.is_empty()
-                        || question.starts_with("Which three anchors belong to memory node")
-                })
-        })
-        .unwrap_or(true)
+    story_draft_contains_mojibake(template)
+        || template
+            .get("nodes")
+            .and_then(Value::as_array)
+            .map(|nodes| {
+                nodes.len() != 24
+                    || nodes.iter().any(|node| {
+                        let question = node
+                            .get("question")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .trim();
+                        question.is_empty()
+                            || question.starts_with("Which three anchors belong to memory node")
+                    })
+            })
+            .unwrap_or(true)
+}
+
+pub(crate) fn story_draft_contains_mojibake(value: &Value) -> bool {
+    match value {
+        Value::String(text) => looks_like_mojibake(text),
+        Value::Array(items) => items.iter().any(story_draft_contains_mojibake),
+        Value::Object(fields) => fields.values().any(story_draft_contains_mojibake),
+        _ => false,
+    }
+}
+
+pub(crate) fn looks_like_mojibake(text: &str) -> bool {
+    text.contains('\u{fffd}')
+        || text
+            .chars()
+            .any(|ch| ('\u{0080}'..='\u{009f}').contains(&ch))
+        || ["鍊欓", "夌瓟", "妗?", "瀹堟", "氓庐", "聢", "€"]
+            .iter()
+            .any(|marker| text.contains(marker))
 }
 
 pub(crate) fn read_storylock_vault(package_dir: &Path) -> Value {

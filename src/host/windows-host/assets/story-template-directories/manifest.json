@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "storylock-template-directory-manifest-v1",
+  "description": "Standalone StoryLock story template directories for user download.",
+  "items": [
+    {
+      "templateId": "shouzhudaitu-zh",
+      "language": "zh-CN",
+      "storyTitle": "守株待兔",
+      "fileName": "shouzhudaitu-zh.json",
+      "directoryName": "shouzhudaitu-zh",
+      "templateFileName": "story-template.json"
+    },
+    {
+      "templateId": "zhizi-yilin-zh",
+      "language": "zh-CN",
+      "storyTitle": "智子疑邻",
+      "fileName": "zhizi-yilin-zh.json",
+      "directoryName": "zhizi-yilin-zh",
+      "templateFileName": "story-template.json"
+    },
+    {
+      "templateId": "emperor-new-clothes-en",
+      "language": "en-US",
+      "storyTitle": "The Emperor's New Clothes",
+      "fileName": "emperor-new-clothes-en.json",
+      "directoryName": "emperor-new-clothes-en",
+      "templateFileName": "story-template.json"
+    }
+  ]
+}

@@ -26,6 +26,10 @@ fn initializes_storylock_core_package_files() {
         "story-drafts/shouzhudaitu-zh.json",
         "story-drafts/zhizi-yilin-zh.json",
         "story-drafts/emperor-new-clothes-en.json",
+        "templates/story-template-directories/shouzhudaitu-zh/story-template.json",
+        "templates/story-template-directories/zhizi-yilin-zh/story-template.json",
+        "templates/story-template-directories/emperor-new-clothes-en/story-template.json",
+        "templates/story-draft-templates.json",
     ] {
         assert!(manifest
             .get("files")
@@ -33,6 +37,90 @@ fn initializes_storylock_core_package_files() {
             .is_some_and(|files| files.iter().any(|item| item.as_str() == Some(required))));
         assert!(dir.join(required).exists(), "{required} should exist");
     }
+}
+
+#[test]
+fn package_templates_dir_contains_three_story_template_directories() {
+    let dir = temp_core_dir();
+    ensure_storylock_core_package(&dir).expect("init package");
+    for template_id in [
+        "shouzhudaitu-zh",
+        "zhizi-yilin-zh",
+        "emperor-new-clothes-en",
+    ] {
+        let template = read_json_or_default(
+            &dir.join("templates")
+                .join("story-template-directories")
+                .join(template_id)
+                .join("story-template.json"),
+            Value::Null,
+        );
+        assert_eq!(
+            template.get("templateId").and_then(Value::as_str),
+            Some(template_id)
+        );
+        assert_eq!(
+            template
+                .get("nodes")
+                .and_then(Value::as_array)
+                .map(Vec::len),
+            Some(24)
+        );
+        for required in [
+            "package-manifest.json",
+            "resource-catalog.json",
+            "learning-policy.json",
+            "vault.stlk",
+            "templates/login-sites.json",
+            "templates/signing-actions.json",
+            "templates/agent-tasks.json",
+            "story-drafts/manifest.json",
+            "story-drafts/current-story-template.json",
+        ] {
+            assert!(
+                dir.join("templates")
+                    .join("story-template-directories")
+                    .join(template_id)
+                    .join(required)
+                    .exists(),
+                "{template_id}/{required} should exist"
+            );
+        }
+    }
+}
+
+#[test]
+fn selected_story_template_directory_loads_as_full_workspace() {
+    let dir = temp_core_dir();
+    ensure_storylock_core_package(&dir).expect("init package");
+    let selected = dir
+        .join("templates")
+        .join("story-template-directories")
+        .join("zhizi-yilin-zh");
+    ensure_storylock_core_package(&selected).expect("load selected template directory");
+    let effective = read_effective_author_draft(&selected);
+    assert_eq!(
+        effective.get("templateId").and_then(Value::as_str),
+        Some("zhizi-yilin-zh")
+    );
+    assert_eq!(
+        effective
+            .get("nodes")
+            .and_then(Value::as_array)
+            .map(Vec::len),
+        Some(24)
+    );
+    assert_eq!(
+        effective
+            .get("nodes")
+            .and_then(Value::as_array)
+            .and_then(|nodes| nodes.first())
+            .and_then(|node| node.get("question"))
+            .and_then(Value::as_str),
+        Some("《智子疑邻》故事具体发生在什么时间？")
+    );
+    assert!(selected.join("learning-policy.json").exists());
+    assert!(selected.join("templates").join("login-sites.json").exists());
 }
 
 #[test]
@@ -53,6 +141,50 @@ fn default_story_templates_include_useful_fables() {
                 && item.get("nodes").and_then(Value::as_array).map(Vec::len) == Some(24)
         }));
     }
+}
+
+#[test]
+fn storylock_startup_refreshes_mojibake_builtin_templates() {
+    let dir = temp_core_dir();
+    ensure_storylock_core_package(&dir).expect("init package");
+    let mut vault = read_storylock_vault_payload(&dir);
+    let mut broken = shouzhudaitu_author_draft_json();
+    broken["summary"] = json!("é\u{009d}\u{0092}å¹´å\u{0086}\u{009c}å¤«");
+    broken["nodes"][0]["question"] = json!("?å®\u{0088}æ \u{00aa}å¾\u{0085}å\u{0085}\u{0094}?");
+    vault["storyDraftTemplates"] = json!({
+        "schemaVersion": "storylock-story-draft-templates-v1",
+        "defaultTemplateId": "shouzhudaitu-zh",
+        "items": [broken]
+    });
+    save_storylock_vault_payload(&dir, vault).expect("save broken templates");
+
+    ensure_storylock_core_package(&dir).expect("refresh package");
+    let vault = read_storylock_vault_payload(&dir);
+    let refreshed = vault
+        .get("storyDraftTemplates")
+        .and_then(|templates| templates.get("items"))
+        .and_then(Value::as_array)
+        .and_then(|items| {
+            items.iter().find(|item| {
+                item.get("templateId").and_then(Value::as_str) == Some("shouzhudaitu-zh")
+            })
+        })
+        .expect("refreshed template");
+    assert_eq!(
+        refreshed.get("summary").and_then(Value::as_str),
+        shouzhudaitu_author_draft_json()
+            .get("summary")
+            .and_then(Value::as_str)
+    );
+    assert_eq!(
+        refreshed
+            .get("nodes")
+            .and_then(Value::as_array)
+            .and_then(|nodes| nodes.first())
+            .and_then(|node| node.get("question"))
+            .and_then(Value::as_str),
+        Some("\u{300a}\u{5b88}\u{682a}\u{5f85}\u{5154}\u{300b}\u{6545}\u{4e8b}\u{5177}\u{4f53}\u{53d1}\u{751f}\u{5728}\u{4ec0}\u{4e48}\u{65f6}\u{95f4}\u{ff1f}")
+    );
 }
 
 #[test]
@@ -198,6 +330,49 @@ fn story_draft_template_uses_author_draft_schema_and_restores_ui() {
 }
 
 #[test]
+fn apply_template_uses_requested_template_id() {
+    let dir = temp_core_dir();
+    ensure_storylock_core_package(&dir).expect("init package");
+    let mut vault = read_storylock_vault_payload(&dir);
+    merge_builtin_story_draft_templates(&mut vault);
+    let effective = vault
+        .get("storyDraftTemplates")
+        .and_then(|templates| templates.get("items"))
+        .and_then(Value::as_array)
+        .and_then(|items| {
+            items.iter().find(|item| {
+                item.get("templateId").and_then(Value::as_str) == Some("zhizi-yilin-zh")
+            })
+        })
+        .cloned()
+        .expect("selected template");
+    assert_eq!(
+        effective.get("templateId").and_then(Value::as_str),
+        Some("zhizi-yilin-zh")
+    );
+    assert_eq!(
+        effective.get("storyTitle").and_then(Value::as_str),
+        Some("智子疑邻")
+    );
+    assert_eq!(
+        effective
+            .get("nodes")
+            .and_then(Value::as_array)
+            .map(Vec::len),
+        Some(24)
+    );
+    assert_eq!(
+        effective
+            .get("nodes")
+            .and_then(Value::as_array)
+            .and_then(|nodes| nodes.first())
+            .and_then(|node| node.get("question"))
+            .and_then(Value::as_str),
+        Some("《智子疑邻》故事具体发生在什么时间？")
+    );
+}
+
+#[test]
 fn export_promotes_and_clears_pending_temp_draft() {
     let dir = temp_core_dir();
     ensure_storylock_core_package(&dir).expect("init package");
@@ -290,6 +465,14 @@ fn preflight_reports_invalid_template_role() {
 fn writes_all_twenty_four_node_slots() {
     let mut draft = default_author_draft_json();
     let fake_core = StoryLockCoreApp::new().expect("core app");
+    let dir = temp_core_dir();
+    ensure_storylock_core_package(&dir).expect("init package");
+    fake_core.set_active_page(0);
+    fake_core.set_overview_selection_enabled(true);
+    initialize_storylock_core_window(&fake_core, &dir);
+    assert_eq!(fake_core.get_active_page(), 1);
+    assert!(!fake_core.get_overview_selection_enabled());
+
     fake_core.set_node_index(23);
     fake_core.set_node_id(SharedString::from("node-24-custom"));
     fake_core.set_node_title(SharedString::from("Custom Node 24"));

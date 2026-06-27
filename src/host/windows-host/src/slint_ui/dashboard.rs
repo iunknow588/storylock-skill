@@ -188,6 +188,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
             core.set_language(SharedString::from(
                 host_language_for_storylock.borrow().clone(),
             ));
+            set_storylock_start_page_to_questions(core);
             core.set_config_status(SharedString::from(
                 "StoryLock Core is already open. Existing local window was focused.",
             ));
@@ -205,6 +206,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                     host_language_for_storylock.borrow().clone(),
                 ));
                 initialize_storylock_core_window(&core, &core_package_dir_for_callback);
+                set_storylock_start_page_to_questions(&core);
                 let host_for_closed = host_for_storylock_close.clone();
                 let settings_window_for_closed = Rc::clone(&settings_window_for_storylock_close);
                 let shared_status_for_closed = Rc::clone(&shared_status_for_storylock_close);

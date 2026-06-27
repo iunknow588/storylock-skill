@@ -32,6 +32,14 @@ const requiredEntries = [
   'identity-package/story-drafts/shouzhudaitu-zh.json',
   'identity-package/story-drafts/zhizi-yilin-zh.json',
   'identity-package/story-drafts/emperor-new-clothes-en.json',
+  'story-template-directories/README.md',
+  'story-template-directories/manifest.json',
+  'story-template-directories/shouzhudaitu-zh/README.md',
+  'story-template-directories/shouzhudaitu-zh/story-template.json',
+  'story-template-directories/zhizi-yilin-zh/README.md',
+  'story-template-directories/zhizi-yilin-zh/story-template.json',
+  'story-template-directories/emperor-new-clothes-en/README.md',
+  'story-template-directories/emperor-new-clothes-en/story-template.json',
 ];
 
 for (const requiredEntry of requiredEntries) {

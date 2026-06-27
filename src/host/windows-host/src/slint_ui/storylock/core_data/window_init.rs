@@ -47,6 +47,8 @@ pub(crate) fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_
             })
             .unwrap_or_default(),
     ));
+    core.set_node_overview(SharedString::from(format_node_overview(&draft)));
+    set_question_overview_titles(core, &draft);
     load_node_into_window(core, package_dir, core.get_node_index());
     if let Some(resource) = catalog
         .get("resources")
@@ -85,6 +87,20 @@ pub(crate) fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_
         "StoryLock Core package ready at {}",
         package_dir.display()
     )));
+    set_storylock_start_page_to_questions(core);
+    schedule_storylock_start_page_to_questions(core);
+}
+
+pub(crate) fn set_storylock_start_page_to_questions(core: &StoryLockCoreApp) {
     core.set_overview_selection_enabled(false);
     core.set_active_page(1);
+}
+
+pub(crate) fn schedule_storylock_start_page_to_questions(core: &StoryLockCoreApp) {
+    let weak = core.as_weak();
+    slint::Timer::single_shot(Duration::from_millis(0), move || {
+        if let Some(core) = weak.upgrade() {
+            set_storylock_start_page_to_questions(&core);
+        }
+    });
 }

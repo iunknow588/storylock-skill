@@ -1,10 +1,10 @@
 {
-  "version": "1",
+  "version": "storylock-story-draft-v1",
   "templateId": "emperor-new-clothes-en",
   "language": "en-US",
   "storyTitle": "The Emperor's New Clothes",
-  "summary": "Emperor Lorenzo trusts two swindlers who promise invisible cloth, parades in nothing, and learns through a child's honesty that vanity can silence judgment.",
-  "storyPlot": "In the year 1710, on a bright summer morning in the kingdom of Fantasia, Emperor Lorenzo was obsessed with new clothes. The sun shone brightly, and the palace gardens were in full bloom. Two swindlers, Marco and Pietro, arrived, claiming they could weave a cloth invisible to fools. The emperor hired them with gold and silk. His trusted old minister Alberto was sent first to inspect; he saw nothing but feared being thought a fool, so he reported the cloth was magnificent. The second assistant, young officer Bruno, also saw nothing but praised its beauty. On the parade day through the city streets, the weather was sunny and warm, and the streets were lined with cheering crowds and colorful banners. The swindlers mimed dressing the emperor in a coat and trousers. Suddenly, a boy, Luca, shouted, \"The emperor has nothing on!\" The truth spread among the crowd. Emperor Lorenzo realized the child was right and felt deep shame. Later that evening, back in the palace, the emperor sat alone in his chamber, which was dimly lit and silent. He felt foolish and humiliated. He finally understood that vanity had made him blind and that only the innocent child had the courage to speak the truth.",
+  "summary": "Emperor Lorenzo is deceived by Marco and Pietro, two swindlers who promise magical cloth visible only to the wise. His vanity carries him into a public parade, where a child speaks plainly and exposes the lie.",
+  "storyPlot": "In 1710, on a bright summer morning in Fantasia, Emperor Lorenzo fills the palace with talk of splendid new clothes. Marco and Pietro claim they can weave invisible cloth that only worthy people can see. Alberto and Bruno inspect the empty looms and lie out of fear, so the emperor marches through the city streets in a parade wearing nothing. When a child calls out the truth, the crowd begins to whisper, and Lorenzo returns to the palace ashamed, having learned that vanity makes even rulers foolish.",
   "memoryAnchors": [
     "1710",
     "Fantasia",
@@ -13,7 +13,7 @@
     "Marco and Pietro",
     "Alberto",
     "Bruno",
-    "Luca",
+    "child",
     "parade",
     "vanity"
   ],
@@ -32,13 +32,13 @@
       "nodeId": "question-01",
       "title": "Question 01",
       "elementId": "time",
-      "question": "When did the story take place?",
+      "question": "When exactly does the story take place?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "1710",
       "acceptedAnswersLocalOnly": [
         "1710",
@@ -64,23 +64,23 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "宋国",
           "isCorrect": false
         }
       ]
@@ -89,13 +89,13 @@
       "nodeId": "question-02",
       "title": "Question 02",
       "elementId": "place",
-      "question": "Where did the story happen?",
+      "question": "Which places frame the main action?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Fantasia",
       "acceptedAnswersLocalOnly": [
         "Fantasia",
@@ -121,23 +121,23 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "青石村",
           "isCorrect": false
         }
       ]
@@ -146,13 +146,13 @@
       "nodeId": "question-03",
       "title": "Question 03",
       "elementId": "person",
-      "question": "What was the protagonist's name?",
+      "question": "What is the protagonist's name?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 1,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Lorenzo",
       "acceptedAnswersLocalOnly": [
         "Lorenzo"
@@ -163,35 +163,35 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "hidden sword",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -200,13 +200,13 @@
       "nodeId": "question-04",
       "title": "Question 04",
       "elementId": "object",
-      "question": "What was the protagonist's occupation?",
+      "question": "What role does the protagonist hold?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Ruler",
       "acceptedAnswersLocalOnly": [
         "Ruler",
@@ -222,31 +222,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -255,13 +255,13 @@
       "nodeId": "question-05",
       "title": "Question 05",
       "elementId": "event",
-      "question": "What was the protagonist's interest?",
+      "question": "What interest makes the protagonist vulnerable?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "New clothes",
       "acceptedAnswersLocalOnly": [
         "New clothes",
@@ -277,31 +277,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -310,13 +310,13 @@
       "nodeId": "question-06",
       "title": "Question 06",
       "elementId": "reaction",
-      "question": "Who were the protagonist's main assistants?",
+      "question": "Who are the protagonist's main assistants?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Alberto (old minister)",
       "acceptedAnswersLocalOnly": [
         "Alberto (old minister)",
@@ -332,31 +332,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -365,13 +365,13 @@
       "nodeId": "question-07",
       "title": "Question 07",
       "elementId": "choice",
-      "question": "What were the assistants' occupations?",
+      "question": "What official roles do the assistants hold?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Minister",
       "acceptedAnswersLocalOnly": [
         "Minister",
@@ -397,23 +397,23 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "青石村",
           "isCorrect": false
         }
       ]
@@ -422,13 +422,13 @@
       "nodeId": "question-08",
       "title": "Question 08",
       "elementId": "result",
-      "question": "Who were the villains?",
+      "question": "Who are the villains?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Marco and Pietro",
       "acceptedAnswersLocalOnly": [
         "Marco and Pietro",
@@ -444,31 +444,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -477,13 +477,13 @@
       "nodeId": "question-09",
       "title": "Question 09",
       "elementId": "time",
-      "question": "What was the villains' occupation?",
+      "question": "What kind of people are the villains?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Swindlers",
       "acceptedAnswersLocalOnly": [
         "Swindlers",
@@ -499,31 +499,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -532,13 +532,13 @@
       "nodeId": "question-10",
       "title": "Question 10",
       "elementId": "place",
-      "question": "What was the direct cause of the event?",
+      "question": "What directly causes the deception to begin?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The promise of invisible cloth",
       "acceptedAnswersLocalOnly": [
         "The promise of invisible cloth",
@@ -554,31 +554,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -587,13 +587,13 @@
       "nodeId": "question-11",
       "title": "Question 11",
       "elementId": "person",
-      "question": "What was the weather when the event began?",
+      "question": "What is the weather like when events begin?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Sunny",
       "acceptedAnswersLocalOnly": [
         "Sunny",
@@ -609,31 +609,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -642,13 +642,13 @@
       "nodeId": "question-12",
       "title": "Question 12",
       "elementId": "object",
-      "question": "What was the environment like when the event began?",
+      "question": "What is the palace environment like at the beginning?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Gardens in bloom",
       "acceptedAnswersLocalOnly": [
         "Gardens in bloom",
@@ -664,31 +664,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -697,13 +697,13 @@
       "nodeId": "question-13",
       "title": "Question 13",
       "elementId": "event",
-      "question": "How did the emperor feel when the event began?",
+      "question": "How does Emperor Lorenzo feel at the beginning?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Excited",
       "acceptedAnswersLocalOnly": [
         "Excited",
@@ -719,31 +719,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -752,13 +752,13 @@
       "nodeId": "question-14",
       "title": "Question 14",
       "elementId": "reaction",
-      "question": "How did the story develop?",
+      "question": "How does the deception develop before the parade?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Inspections",
       "acceptedAnswersLocalOnly": [
         "Inspections",
@@ -779,27 +779,27 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -808,13 +808,13 @@
       "nodeId": "question-15",
       "title": "Question 15",
       "elementId": "choice",
-      "question": "What was the climax of the story?",
+      "question": "What forms the climax of the story?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The child shouting the truth",
       "acceptedAnswersLocalOnly": [
         "The child shouting the truth",
@@ -830,31 +830,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -863,13 +863,13 @@
       "nodeId": "question-16",
       "title": "Question 16",
       "elementId": "result",
-      "question": "What was the turning point event?",
+      "question": "What event turns pride into shame?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The emperor realizing he was naked",
       "acceptedAnswersLocalOnly": [
         "The emperor realizing he was naked",
@@ -885,31 +885,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -918,13 +918,13 @@
       "nodeId": "question-17",
       "title": "Question 17",
       "elementId": "time",
-      "question": "When did the turning point happen?",
+      "question": "When does the turning point happen?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "During the parade",
       "acceptedAnswersLocalOnly": [
         "During the parade",
@@ -940,31 +940,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -973,13 +973,13 @@
       "nodeId": "question-18",
       "title": "Question 18",
       "elementId": "place",
-      "question": "Where did the turning point happen?",
+      "question": "Where does the turning point happen?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "City streets",
       "acceptedAnswersLocalOnly": [
         "City streets",
@@ -995,31 +995,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -1028,13 +1028,13 @@
       "nodeId": "question-19",
       "title": "Question 19",
       "elementId": "person",
-      "question": "What was the weather like at the turning point?",
+      "question": "What is the weather like at the turning point?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Sunny",
       "acceptedAnswersLocalOnly": [
         "Sunny",
@@ -1050,31 +1050,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -1083,13 +1083,13 @@
       "nodeId": "question-20",
       "title": "Question 20",
       "elementId": "object",
-      "question": "What was the environment like at the turning point?",
+      "question": "What is the public scene like at the turning point?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Cheering crowds",
       "acceptedAnswersLocalOnly": [
         "Cheering crowds",
@@ -1105,31 +1105,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -1138,13 +1138,13 @@
       "nodeId": "question-21",
       "title": "Question 21",
       "elementId": "event",
-      "question": "When did the story end?",
+      "question": "When does the story end?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Later that evening",
       "acceptedAnswersLocalOnly": [
         "Later that evening",
@@ -1160,31 +1160,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -1193,13 +1193,13 @@
       "nodeId": "question-22",
       "title": "Question 22",
       "elementId": "reaction",
-      "question": "Where did the story end?",
+      "question": "Where is the emperor when the story closes?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The palace",
       "acceptedAnswersLocalOnly": [
         "The palace",
@@ -1215,31 +1215,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -1248,13 +1248,13 @@
       "nodeId": "question-23",
       "title": "Question 23",
       "elementId": "choice",
-      "question": "How did the emperor feel after the story ended?",
+      "question": "How does the emperor feel after the truth is exposed?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Foolish",
       "acceptedAnswersLocalOnly": [
         "Foolish",
@@ -1275,27 +1275,27 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -1304,13 +1304,13 @@
       "nodeId": "question-24",
       "title": "Question 24",
       "elementId": "result",
-      "question": "What lesson did the emperor learn?",
+      "question": "What lesson does the emperor finally learn?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Vanity is foolish",
       "acceptedAnswersLocalOnly": [
         "Vanity is foolish",
@@ -1326,31 +1326,31 @@
           "isCorrect": true
         },
         {
-          "text": "Kong Rong",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "pear tray",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "farm field",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "broken wall",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "old tree root",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "stone boat mark",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "market well",
+          "text": "农夫",
           "isCorrect": false
         }
       ]

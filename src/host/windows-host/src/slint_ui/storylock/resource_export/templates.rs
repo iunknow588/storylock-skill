@@ -62,11 +62,22 @@ pub(crate) fn apply_story_draft_template_to_window(
     package_dir: &Path,
 ) -> Result<()> {
     let mut vault = read_storylock_vault_payload(package_dir);
+    merge_builtin_story_draft_templates(&mut vault);
+    let requested_template_id = core.get_template_id().to_string();
     let mut draft = vault
         .get("storyDraftTemplates")
         .and_then(|templates| templates.get("items"))
         .and_then(Value::as_array)
-        .and_then(|items| items.first())
+        .and_then(|items| {
+            items
+                .iter()
+                .find(|item| {
+                    !requested_template_id.trim().is_empty()
+                        && item.get("templateId").and_then(Value::as_str)
+                            == Some(requested_template_id.as_str())
+                })
+                .or_else(|| items.first())
+        })
         .cloned()
         .unwrap_or_else(default_author_draft_json);
     normalize_author_draft_schema(&mut draft);

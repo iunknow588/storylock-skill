@@ -18,7 +18,8 @@ use uuid::Uuid;
 
 use self::storylock::{
     ensure_storylock_core_package, host_learning_plan_status, initialize_storylock_core_window,
-    storylock_core_package_dir, wire_storylock_core_callbacks,
+    set_storylock_start_page_to_questions, storylock_core_package_dir,
+    wire_storylock_core_callbacks,
 };
 
 mod confirmation;

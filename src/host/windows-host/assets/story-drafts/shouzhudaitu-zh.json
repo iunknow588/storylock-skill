@@ -1,21 +1,21 @@
 {
-  "version": "1",
+  "version": "storylock-story-draft-v1",
   "templateId": "shouzhudaitu-zh",
   "language": "zh-CN",
   "storyTitle": "守株待兔",
-  "summary": "青年农夫阿福因一次偶然得到兔子，放弃耕作等待侥幸，最终田地荒芜，明白不可贪图侥幸的道理。",
-  "storyPlot": "公元前̲年4月5日，正值盛夏，宋国青石村的青年阿福带着他的老黄狗在田间耕作。阿福是个农夫，喜欢唱歌，尤其爱在劳作时哼唱小调。当时天气炎热，晴空万里，田野里蝉鸣阵阵，庄稼茂盛。突然，一只灰白色的野兔被一只饥饿的狐狸追赶，慌不择路，一头撞在田边的老梨树根上，折颈而死。阿福大喜，捡起兔子回家，与老黄狗一起饱餐一顿。此后，他放下农具，每天只守在梨树下，幻想再有兔子撞来。村里有个懒惰的痞子刘三，常来嘲笑他，还鼓动他继续等。阿福的母亲劝他，他不听。到了次年秋天，秋风萧瑟，落叶满地，阿福的田地彻底荒芜，颗粒无收。全村人都来围观他荒芜的田地，纷纷耻笑。阿福站在田边，满脸羞愧，终于明白不可贪图侥幸，决心以后勤劳耕作。",
+  "summary": "青年农夫阿福偶然得到一只撞树而死的兔子，便以为好运可以反复降临。他放下农具，日日守在老梨树下，最终田地荒芜，在母亲和村人的提醒中明白了勤劳才是真正的依靠。",
+  "storyPlot": "公元前332年的东周时期，宋国青石村的田间烈日明亮、蝉鸣阵阵。农夫阿福在老梨树下耕作时，一只被狐狸追赶的兔子撞树而死。阿福大喜，从此带着老黄狗守在树旁，不再认真耕作。一年后的秋天，落叶满地，田地荒芜，刘三的嘲笑和母亲的劝告让他羞愧醒悟，明白不能把生活寄托在侥幸上。",
   "memoryAnchors": [
-    "公元前̲年",
+    "公元前332年",
+    "宋国",
     "青石村",
     "阿福",
-    "农夫",
-    "老黄狗",
-    "野兔",
     "老梨树",
+    "兔子撞树",
+    "老黄狗",
     "刘三",
-    "次年秋天",
-    "勤劳耕作"
+    "田地荒芜",
+    "不可侥幸"
   ],
   "elementGroups": [
     "time",
@@ -32,23 +32,23 @@
       "nodeId": "question-01",
       "title": "问题 01",
       "elementId": "time",
-      "question": "故事发生在什么时间？",
+      "question": "《守株待兔》故事具体发生在什么时间？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "公元前̲年",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "canonicalAnswerLocalOnly": "公元前332年",
       "acceptedAnswersLocalOnly": [
-        "公元前̲年",
+        "公元前332年",
         "东周时期",
         "4月5日",
         "盛夏"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "公元前̲年",
+          "text": "公元前332年",
           "isCorrect": true
         },
         {
@@ -64,23 +64,23 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "公元前398年",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "宋国",
           "isCorrect": false
         }
       ]
@@ -89,13 +89,13 @@
       "nodeId": "question-02",
       "title": "问题 02",
       "elementId": "place",
-      "question": "故事发生在什么地方？",
+      "question": "故事主要发生在哪些地方？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "宋国",
       "acceptedAnswersLocalOnly": [
         "宋国",
@@ -121,23 +121,23 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷家",
           "isCorrect": false
         }
       ]
@@ -146,13 +146,13 @@
       "nodeId": "question-03",
       "title": "问题 03",
       "elementId": "person",
-      "question": "主人公的姓名是什么？",
+      "question": "故事中的主人公叫什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 1,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "阿福",
       "acceptedAnswersLocalOnly": [
         "阿福"
@@ -163,35 +163,35 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "孔融让梨",
+          "text": "商人",
           "isCorrect": false
         }
       ]
@@ -200,13 +200,13 @@
       "nodeId": "question-04",
       "title": "问题 04",
       "elementId": "object",
-      "question": "主人公的职业是什么？",
+      "question": "阿福的身份或职业是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "农夫",
       "acceptedAnswersLocalOnly": [
         "农夫",
@@ -222,31 +222,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "商人",
           "isCorrect": false
         }
       ]
@@ -255,13 +255,13 @@
       "nodeId": "question-05",
       "title": "问题 05",
       "elementId": "event",
-      "question": "主人公的兴趣爱好是什么？",
+      "question": "阿福平时喜欢做什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "唱歌",
       "acceptedAnswersLocalOnly": [
         "唱歌",
@@ -277,31 +277,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "商人",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "富户",
           "isCorrect": false
         }
       ]
@@ -310,13 +310,13 @@
       "nodeId": "question-06",
       "title": "问题 06",
       "elementId": "reaction",
-      "question": "主人公的主要助手是谁？",
+      "question": "谁是阿福身边的陪伴者？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "老黄狗",
       "acceptedAnswersLocalOnly": [
         "老黄狗",
@@ -332,31 +332,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "公元前398年",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷家",
           "isCorrect": false
         }
       ]
@@ -365,13 +365,13 @@
       "nodeId": "question-07",
       "title": "问题 07",
       "elementId": "choice",
-      "question": "助手的职业或身份是什么？",
+      "question": "老黄狗在故事中的身份是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "看门狗",
       "acceptedAnswersLocalOnly": [
         "看门狗",
@@ -387,31 +387,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "院墙边",
           "isCorrect": false
         }
       ]
@@ -420,13 +420,13 @@
       "nodeId": "question-08",
       "title": "问题 08",
       "elementId": "result",
-      "question": "故事中的反派是谁？",
+      "question": "故事中嘲笑阿福的人是谁？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "刘三",
       "acceptedAnswersLocalOnly": [
         "刘三",
@@ -442,31 +442,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷",
           "isCorrect": false
         }
       ]
@@ -475,13 +475,13 @@
       "nodeId": "question-09",
       "title": "问题 09",
       "elementId": "time",
-      "question": "反派的职业或行为是什么？",
+      "question": "刘三是怎样的人？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "游手好闲",
       "acceptedAnswersLocalOnly": [
         "游手好闲",
@@ -497,31 +497,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "商人",
           "isCorrect": false
         }
       ]
@@ -530,13 +530,13 @@
       "nodeId": "question-10",
       "title": "问题 10",
       "elementId": "place",
-      "question": "事件的起因是什么？",
+      "question": "阿福开始守株的直接原因是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "兔子撞树",
       "acceptedAnswersLocalOnly": [
         "兔子撞树",
@@ -552,31 +552,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "商人",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "富户",
           "isCorrect": false
         }
       ]
@@ -585,13 +585,13 @@
       "nodeId": "question-11",
       "title": "问题 11",
       "elementId": "person",
-      "question": "事件发生时的天气如何？",
+      "question": "故事开头的天气如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "炎热",
       "acceptedAnswersLocalOnly": [
         "炎热",
@@ -607,31 +607,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "公元前398年",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷家",
           "isCorrect": false
         }
       ]
@@ -640,13 +640,13 @@
       "nodeId": "question-12",
       "title": "问题 12",
       "elementId": "object",
-      "question": "事件发生时的环境是怎样的？",
+      "question": "故事开头的田间环境如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "蝉鸣阵阵",
       "acceptedAnswersLocalOnly": [
         "蝉鸣阵阵",
@@ -662,31 +662,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "院墙边",
           "isCorrect": false
         }
       ]
@@ -695,13 +695,13 @@
       "nodeId": "question-13",
       "title": "问题 13",
       "elementId": "event",
-      "question": "事件发生时主人公的心情如何？",
+      "question": "阿福捡到兔子后的心情是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "大喜",
       "acceptedAnswersLocalOnly": [
         "大喜",
@@ -717,31 +717,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷",
           "isCorrect": false
         }
       ]
@@ -750,13 +750,13 @@
       "nodeId": "question-14",
       "title": "问题 14",
       "elementId": "reaction",
-      "question": "故事的发展经过是怎样的？",
+      "question": "故事发展中阿福做了什么错误选择？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "放弃耕作",
       "acceptedAnswersLocalOnly": [
         "放弃耕作",
@@ -772,31 +772,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "商人",
           "isCorrect": false
         }
       ]
@@ -805,13 +805,13 @@
       "nodeId": "question-15",
       "title": "问题 15",
       "elementId": "choice",
-      "question": "故事的高潮是什么？",
+      "question": "故事高潮中出现了什么后果？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "遭到全村耻笑",
       "acceptedAnswersLocalOnly": [
         "遭到全村耻笑",
@@ -827,31 +827,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "商人",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "富户",
           "isCorrect": false
         }
       ]
@@ -860,13 +860,13 @@
       "nodeId": "question-16",
       "title": "问题 16",
       "elementId": "result",
-      "question": "故事的转折事件是什么？",
+      "question": "什么事情促使阿福反思？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "母亲劝告",
       "acceptedAnswersLocalOnly": [
         "母亲劝告",
@@ -882,31 +882,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "公元前398年",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷家",
           "isCorrect": false
         }
       ]
@@ -915,13 +915,13 @@
       "nodeId": "question-17",
       "title": "问题 17",
       "elementId": "time",
-      "question": "转折发生在什么时间？",
+      "question": "故事转折发生在什么时候？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "次年秋天",
       "acceptedAnswersLocalOnly": [
         "次年秋天",
@@ -937,31 +937,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "院墙边",
           "isCorrect": false
         }
       ]
@@ -970,13 +970,13 @@
       "nodeId": "question-18",
       "title": "问题 18",
       "elementId": "place",
-      "question": "转折发生在什么地点？",
+      "question": "故事转折发生在哪里？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "田边",
       "acceptedAnswersLocalOnly": [
         "田边",
@@ -992,31 +992,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷",
           "isCorrect": false
         }
       ]
@@ -1025,13 +1025,13 @@
       "nodeId": "question-19",
       "title": "问题 19",
       "elementId": "person",
-      "question": "转折时的天气如何？",
+      "question": "转折时的天气有什么特点？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "秋风",
       "acceptedAnswersLocalOnly": [
         "秋风",
@@ -1047,31 +1047,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "商人",
           "isCorrect": false
         }
       ]
@@ -1080,13 +1080,13 @@
       "nodeId": "question-20",
       "title": "问题 20",
       "elementId": "object",
-      "question": "转折时的环境是怎样的？",
+      "question": "转折时的环境如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "落叶满地",
       "acceptedAnswersLocalOnly": [
         "落叶满地",
@@ -1102,31 +1102,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "商人",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "富户",
           "isCorrect": false
         }
       ]
@@ -1135,13 +1135,13 @@
       "nodeId": "question-21",
       "title": "问题 21",
       "elementId": "event",
-      "question": "故事结束的时间是什么？",
+      "question": "故事结尾发生在什么时间？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "次年秋天",
       "acceptedAnswersLocalOnly": [
         "次年秋天",
@@ -1157,31 +1157,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "公元前398年",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷家",
           "isCorrect": false
         }
       ]
@@ -1190,13 +1190,13 @@
       "nodeId": "question-22",
       "title": "问题 22",
       "elementId": "reaction",
-      "question": "故事结束后的地点在哪里？",
+      "question": "故事结尾的地点在哪里？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "荒芜的田地",
       "acceptedAnswersLocalOnly": [
         "荒芜的田地",
@@ -1212,31 +1212,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "战国时期",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "院墙边",
           "isCorrect": false
         }
       ]
@@ -1245,13 +1245,13 @@
       "nodeId": "question-23",
       "title": "问题 23",
       "elementId": "choice",
-      "question": "故事结束后主人公的心情如何？",
+      "question": "故事结尾阿福的心情如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "羞愧",
       "acceptedAnswersLocalOnly": [
         "羞愧",
@@ -1267,31 +1267,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "9月初",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "周老爷",
           "isCorrect": false
         }
       ]
@@ -1300,13 +1300,13 @@
       "nodeId": "question-24",
       "title": "问题 24",
       "elementId": "result",
-      "question": "主人公得到的教训是什么？",
+      "question": "这个故事想让人记住什么道理？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "不可侥幸",
       "acceptedAnswersLocalOnly": [
         "不可侥幸",
@@ -1322,31 +1322,31 @@
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "初秋",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "都城郊外",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "周老爷家",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "院墙边",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "周老爷",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "商人",
           "isCorrect": false
         }
       ]

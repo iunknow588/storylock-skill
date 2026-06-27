@@ -1,18 +1,20 @@
 {
-  "version": "1",
+  "version": "storylock-story-draft-v1",
   "templateId": "zhizi-yilin-zh",
   "language": "zh-CN",
   "storyTitle": "智子疑邻",
-  "summary": "富商周老爷因亲疏偏见误疑邻居，三个月后真盗被捕，他才明白不可因人废言，不可因亲疏误判。",
-  "storyPlot": "公元前Θ年9月初，初秋，宋国都城郊外，大雨滂沱。富商周老爷家中的院墙被雨水冲坏了一大段。当时天空阴沉，雷声滚滚，院中积水遍地，泥泞不堪。周老爷是个商人，爱好收藏古玩、品茶。他的儿子周文是个读书人，着急地对父亲说：“墙不修好，恐有贼人。”邻居老人孙伯也来提醒，说同样的话。周老爷心情烦躁，没有理会。当夜，雨停月出，盗贼果真从墙缺潜入，偷走了金银细软。第二天，周老爷全家都夸周文聪慧，却怀疑孙伯偷了东西。此后周老爷一直对孙伯冷眼相待。三个月后的冬天，官府抓获了真盗赵麻子，周老爷才知错怪了孙伯。当时寒风凛冽，白雪覆盖大地，他羞愧难当，在孙伯家门口徘徊许久，终于登门道歉。孙伯原谅了他。周老爷告诉子孙：不可因亲疏而误判是非。",
+  "summary": "富户周老爷在大雨后忽视院墙损坏的隐患，家中失窃后却因亲疏不同，称赞儿子有见识，怀疑邻居别有用心。真盗被捕后，他才明白判断是非不能被关系远近左右。",
+  "storyPlot": "公元前398年的战国时期，宋国都城郊外的周老爷家遭遇大雨，院墙被冲坏。儿子周文和邻居孙伯都劝他及早修墙，周老爷却不以为意。不久家中失窃，他认为儿子聪明，却疑心邻居暗藏祸心。三个月后，官府抓到惯偷赵麻子，真相大白。周老爷冒雪向孙伯道歉，明白不可因人废言，也不可因亲疏误判。",
   "memoryAnchors": [
+    "公元前398年",
+    "宋国",
     "周老爷",
+    "院墙损坏",
     "周文",
     "孙伯",
-    "院墙",
     "赵麻子",
-    "金银细软",
-    "三个月后",
+    "官府破案",
+    "真相大白",
     "不可因人废言"
   ],
   "elementGroups": [
@@ -30,23 +32,23 @@
       "nodeId": "question-01",
       "title": "问题 01",
       "elementId": "time",
-      "question": "故事发生在什么时间？",
+      "question": "《智子疑邻》故事具体发生在什么时间？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "公元前Θ年",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
+      "canonicalAnswerLocalOnly": "公元前398年",
       "acceptedAnswersLocalOnly": [
-        "公元前Θ年",
+        "公元前398年",
         "战国时期",
         "9月初",
         "初秋"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "公元前Θ年",
+          "text": "公元前398年",
           "isCorrect": true
         },
         {
@@ -62,23 +64,23 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "宋国",
           "isCorrect": false
         }
       ]
@@ -87,13 +89,13 @@
       "nodeId": "question-02",
       "title": "问题 02",
       "elementId": "place",
-      "question": "故事发生在什么地方？",
+      "question": "故事主要发生在哪些地方？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "宋国",
       "acceptedAnswersLocalOnly": [
         "宋国",
@@ -119,23 +121,23 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -144,13 +146,13 @@
       "nodeId": "question-03",
       "title": "问题 03",
       "elementId": "person",
-      "question": "主人公的姓名是什么？",
+      "question": "故事中的主人公是谁？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 1,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "周老爷",
       "acceptedAnswersLocalOnly": [
         "周老爷"
@@ -161,35 +163,35 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "孔融让梨",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -198,13 +200,13 @@
       "nodeId": "question-04",
       "title": "问题 04",
       "elementId": "object",
-      "question": "主人公的职业是什么？",
+      "question": "周老爷的身份或职业是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "商人",
       "acceptedAnswersLocalOnly": [
         "商人",
@@ -220,31 +222,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -253,13 +255,13 @@
       "nodeId": "question-05",
       "title": "问题 05",
       "elementId": "event",
-      "question": "主人公的兴趣爱好是什么？",
+      "question": "周老爷平时喜欢什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "收藏古玩",
       "acceptedAnswersLocalOnly": [
         "收藏古玩",
@@ -275,31 +277,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -308,13 +310,13 @@
       "nodeId": "question-06",
       "title": "问题 06",
       "elementId": "reaction",
-      "question": "主人公的主要助手是谁？",
+      "question": "给周老爷提醒的亲近人是谁？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "周文",
       "acceptedAnswersLocalOnly": [
         "周文",
@@ -330,31 +332,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -363,13 +365,13 @@
       "nodeId": "question-07",
       "title": "问题 07",
       "elementId": "choice",
-      "question": "助手的职业或身份是什么？",
+      "question": "周文在故事中的身份是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "读书人",
       "acceptedAnswersLocalOnly": [
         "读书人",
@@ -385,31 +387,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -418,13 +420,13 @@
       "nodeId": "question-08",
       "title": "问题 08",
       "elementId": "result",
-      "question": "故事中的反派是谁？",
+      "question": "真正的作恶者是谁？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "赵麻子",
       "acceptedAnswersLocalOnly": [
         "赵麻子",
@@ -440,31 +442,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -473,13 +475,13 @@
       "nodeId": "question-09",
       "title": "问题 09",
       "elementId": "time",
-      "question": "反派的职业或行为是什么？",
+      "question": "赵麻子常做什么坏事？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "盗贼",
       "acceptedAnswersLocalOnly": [
         "盗贼",
@@ -495,31 +497,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -528,13 +530,13 @@
       "nodeId": "question-10",
       "title": "问题 10",
       "elementId": "place",
-      "question": "事件的起因是什么？",
+      "question": "周家可能失窃的起因是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "院墙损坏",
       "acceptedAnswersLocalOnly": [
         "院墙损坏",
@@ -550,31 +552,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -583,13 +585,13 @@
       "nodeId": "question-11",
       "title": "问题 11",
       "elementId": "person",
-      "question": "事件发生时的天气如何？",
+      "question": "故事开头的天气如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "大雨",
       "acceptedAnswersLocalOnly": [
         "大雨",
@@ -605,31 +607,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -638,13 +640,13 @@
       "nodeId": "question-12",
       "title": "问题 12",
       "elementId": "object",
-      "question": "事件发生时的环境是怎样的？",
+      "question": "故事开头的环境如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "积水遍地",
       "acceptedAnswersLocalOnly": [
         "积水遍地",
@@ -660,31 +662,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -693,13 +695,13 @@
       "nodeId": "question-13",
       "title": "问题 13",
       "elementId": "event",
-      "question": "事件发生时主人公的心情如何？",
+      "question": "听到院墙损坏后周老爷的心情如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "烦躁",
       "acceptedAnswersLocalOnly": [
         "烦躁",
@@ -715,31 +717,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -748,13 +750,13 @@
       "nodeId": "question-14",
       "title": "问题 14",
       "elementId": "reaction",
-      "question": "故事的发展经过是怎样的？",
+      "question": "故事发展中周老爷怎样判断别人？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "失窃",
       "acceptedAnswersLocalOnly": [
         "失窃",
@@ -775,27 +777,27 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -804,13 +806,13 @@
       "nodeId": "question-15",
       "title": "问题 15",
       "elementId": "choice",
-      "question": "故事的高潮是什么？",
+      "question": "故事高潮中出现了什么结果？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "真相大白",
       "acceptedAnswersLocalOnly": [
         "真相大白",
@@ -826,31 +828,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -859,13 +861,13 @@
       "nodeId": "question-16",
       "title": "问题 16",
       "elementId": "result",
-      "question": "故事的转折事件是什么？",
+      "question": "什么事情促使周老爷醒悟？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "官府破案",
       "acceptedAnswersLocalOnly": [
         "官府破案",
@@ -881,31 +883,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -914,13 +916,13 @@
       "nodeId": "question-17",
       "title": "问题 17",
       "elementId": "time",
-      "question": "转折发生在什么时间？",
+      "question": "故事转折发生在什么时候？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "三个月后",
       "acceptedAnswersLocalOnly": [
         "三个月后",
@@ -936,31 +938,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -969,13 +971,13 @@
       "nodeId": "question-18",
       "title": "问题 18",
       "elementId": "place",
-      "question": "转折发生在什么地点？",
+      "question": "故事转折发生在哪里？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "官府",
       "acceptedAnswersLocalOnly": [
         "官府",
@@ -991,31 +993,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -1024,13 +1026,13 @@
       "nodeId": "question-19",
       "title": "问题 19",
       "elementId": "person",
-      "question": "转折时的天气如何？",
+      "question": "转折时的天气有什么特点？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "寒风凛冽",
       "acceptedAnswersLocalOnly": [
         "寒风凛冽",
@@ -1046,31 +1048,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "农夫",
           "isCorrect": false
         }
       ]
@@ -1079,13 +1081,13 @@
       "nodeId": "question-20",
       "title": "问题 20",
       "elementId": "object",
-      "question": "转折时的环境是怎样的？",
+      "question": "转折时的环境如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "白雪覆盖",
       "acceptedAnswersLocalOnly": [
         "白雪覆盖",
@@ -1101,31 +1103,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "农夫",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "种田人",
           "isCorrect": false
         }
       ]
@@ -1134,13 +1136,13 @@
       "nodeId": "question-21",
       "title": "问题 21",
       "elementId": "event",
-      "question": "故事结束的时间是什么？",
+      "question": "故事结尾发生在什么时间？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "冬天",
       "acceptedAnswersLocalOnly": [
         "冬天",
@@ -1156,31 +1158,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "田间",
           "isCorrect": false
         }
       ]
@@ -1189,13 +1191,13 @@
       "nodeId": "question-22",
       "title": "问题 22",
       "elementId": "reaction",
-      "question": "故事结束后的地点在哪里？",
+      "question": "故事结尾的地点在哪里？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "孙伯家门口",
       "acceptedAnswersLocalOnly": [
         "孙伯家门口",
@@ -1211,31 +1213,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "东周时期",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "老梨树下",
           "isCorrect": false
         }
       ]
@@ -1244,13 +1246,13 @@
       "nodeId": "question-23",
       "title": "问题 23",
       "elementId": "choice",
-      "question": "故事结束后主人公的心情如何？",
+      "question": "故事结尾周老爷的心情如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "羞愧",
       "acceptedAnswersLocalOnly": [
         "羞愧",
@@ -1266,31 +1268,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "4月5日",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "阿福",
           "isCorrect": false
         }
       ]
@@ -1299,13 +1301,13 @@
       "nodeId": "question-24",
       "title": "问题 24",
       "elementId": "result",
-      "question": "主人公得到的教训是什么？",
+      "question": "这个故事想让人记住什么道理？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "high",
+      "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；题目已按故事模板文档润色，全部为多选。",
       "canonicalAnswerLocalOnly": "不可因人废言",
       "acceptedAnswersLocalOnly": [
         "不可因人废言",
@@ -1321,31 +1323,31 @@
           "isCorrect": true
         },
         {
-          "text": "富商",
+          "text": "盛夏",
           "isCorrect": false
         },
         {
-          "text": "院墙",
+          "text": "宋国",
           "isCorrect": false
         },
         {
-          "text": "雨夜",
+          "text": "青石村",
           "isCorrect": false
         },
         {
-          "text": "真盗",
+          "text": "田间",
           "isCorrect": false
         },
         {
-          "text": "邻居",
+          "text": "老梨树下",
           "isCorrect": false
         },
         {
-          "text": "证据",
+          "text": "阿福",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "农夫",
           "isCorrect": false
         }
       ]

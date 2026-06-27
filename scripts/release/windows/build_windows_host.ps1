@@ -156,6 +156,12 @@ foreach ($storyDraftFile in @(
   Copy-Item -LiteralPath (Join-Path $sourceStoryDraftsDir $storyDraftFile) -Destination (Join-Path $storyDraftsDir $storyDraftFile) -Force
 }
 
+$sourceStoryTemplateDirectoriesDir = Join-Path $project "assets\story-template-directories"
+if (-not (Test-Path -LiteralPath $sourceStoryTemplateDirectoriesDir)) {
+  throw "Story template directories were not found: $sourceStoryTemplateDirectoriesDir"
+}
+Copy-Item -LiteralPath $sourceStoryTemplateDirectoriesDir -Destination (Join-Path $stageDir "story-template-directories") -Recurse -Force
+
 Compress-Archive -Path (Join-Path $stageDir "*") -DestinationPath $zipPath
 $hash = Get-FileHash -LiteralPath $zipPath -Algorithm SHA256
 $item = Get-Item -LiteralPath $zipPath
