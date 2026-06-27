@@ -3,7 +3,6 @@ use super::*;
 pub(crate) fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_dir: &Path) {
     let vault = read_storylock_vault_payload(package_dir);
     let draft = storylock_author_draft_from_vault(&vault);
-    let templates = storylock_templates_from_vault(&vault);
     let catalog = read_json_or_default(
         &storylock_core_catalog_path(package_dir),
         default_resource_catalog_json(),
@@ -86,12 +85,6 @@ pub(crate) fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_
         "StoryLock Core package ready at {}",
         package_dir.display()
     )));
-    if templates
-        .get("agentTasks")
-        .and_then(|templates| templates.get("items"))
-        .and_then(Value::as_array)
-        .is_some_and(|items| !items.is_empty())
-    {
-        core.set_active_page(0);
-    }
+    core.set_overview_selection_enabled(false);
+    core.set_active_page(1);
 }

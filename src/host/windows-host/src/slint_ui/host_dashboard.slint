@@ -239,10 +239,9 @@ export component SettingsDialog inherits Window {
         in-out property <string> core-launch-status: "StoryLock: closed | launch: none | language: zh";
         property <bool> is-zh: language == "zh";
         callback close-requested();
-        callback open-storylock-core();
         callback language-changed(string);
 
-        title: is-zh ? "设置" : "Settings";
+        title: is-zh ? "\u{8bbe}\u{7f6e}" : "Settings";
         preferred-width: 640px;
         preferred-height: 360px;
         background: #eef3f5;
@@ -258,18 +257,18 @@ export component SettingsDialog inherits Window {
                     y: 4px;
                     width: 400px;
                     height: 28px;
-                    text: is-zh ? "设置" : "Settings";
+                    text: is-zh ? "\u{8bbe}\u{7f6e}" : "Settings";
                     font-size: 16px;
                     font-weight: 800;
                     color: #17252f;
                     overflow: elide;
                 }
             }
-                HorizontalBox {
-                    spacing: 14px;
-                    Text {
-                        text: is-zh ? "界面语言" : "UI Language";
-                        width: 140px;
+            HorizontalBox {
+                spacing: 14px;
+                Text {
+                    text: is-zh ? "\u{754c}\u{9762}\u{8bed}\u{8a00}" : "UI Language";
+                    width: 140px;
                     color: #62727d;
                     font-size: 13px;
                     vertical-alignment: center;
@@ -277,22 +276,16 @@ export component SettingsDialog inherits Window {
                 ComboBox {
                     width: 294px;
                     height: 32px;
-                    model: ["中文", "English"];
-                    current-value: is-zh ? "中文" : "English";
+                    model: ["\u{4e2d}\u{6587}", "English"];
+                    current-value: is-zh ? "\u{4e2d}\u{6587}" : "English";
                     selected(value) => {
-                        root.language = value == "中文" ? "zh" : "en";
-                        root.language-changed(value == "中文" ? "zh" : "en");
+                        root.language = value == "\u{4e2d}\u{6587}" ? "zh" : "en";
+                        root.language-changed(value == "\u{4e2d}\u{6587}" ? "zh" : "en");
                     }
                 }
-                    ActionButton {
-                        label: is-zh ? "打开" : "Open";
-                        primary: true;
-                        button-width: 112px;
-                        clicked => { root.open-storylock-core(); }
-                    }
-                }
-            StaticRow { name: is-zh ? "StoryLock 状态" : "StoryLock Status"; value: root.core-launch-status; }
-            StaticRow { name: is-zh ? "触发方式" : "Trigger"; value: is-zh ? "只能从设置弹窗手动打开" : "Manual launch from the Settings dialog only"; }
-            StaticRow { name: is-zh ? "说明" : "Note"; value: is-zh ? "语言切换会立即作用于主界面与 StoryLock Core。" : "Language changes apply to the Host UI and StoryLock Core immediately."; }
+            }
+            StaticRow { name: is-zh ? "StoryLock \u{72b6}\u{6001}" : "StoryLock Status"; value: root.core-launch-status; }
+            StaticRow { name: is-zh ? "\u{89e6}\u{53d1}\u{65b9}\u{5f0f}" : "Trigger"; value: is-zh ? "\u{8bf7}\u{4ece}\u{4e3b}\u{754c}\u{9762}\u{7684} StoryLock \u{6309}\u{94ae}\u{6253}\u{5f00}\u{3002}" : "Open StoryLock from the main Host page."; }
+            StaticRow { name: is-zh ? "\u{8bf4}\u{660e}" : "Note"; value: is-zh ? "\u{8bed}\u{8a00}\u{5207}\u{6362}\u{4f1a}\u{7acb}\u{5373}\u{4f5c}\u{7528}\u{4e8e}\u{4e3b}\u{754c}\u{9762}\u{4e0e} StoryLock Core\u{3002}" : "Language changes apply to the Host UI and StoryLock Core immediately."; }
         }
     }

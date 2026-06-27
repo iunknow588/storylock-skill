@@ -153,6 +153,7 @@ fn register_node_navigation_callbacks(
                 .ok()
                 .map(|number| number - 1)
                 .unwrap_or_else(|| core.get_node_index());
+            core.set_overview_selection_enabled(true);
             load_node_into_window(&core, &package_dir, selected_index);
             open_answer_editor_dialog(&core, &package_dir, Rc::clone(&answer_editor_for_select));
         }

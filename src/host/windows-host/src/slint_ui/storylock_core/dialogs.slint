@@ -95,8 +95,6 @@ export component AnswerEditorDialog inherits Window {
     in-out property <string> answer-8-state: "wrong";
     in-out property <string> answer-9: "";
     in-out property <string> answer-9-state: "wrong";
-    callback close-requested();
-    callback save-requested();
     callback previous-node();
     callback next-node();
     callback select-node(string);
@@ -119,29 +117,13 @@ export component AnswerEditorDialog inherits Window {
             Text {
                 x: 0px;
                 y: 4px;
-                width: 700px;
+                width: 900px;
                 height: 28px;
-                text: (root.is-zh ? "答案编辑 - " : "Answer Editor - ") + root.selected-question;
+                text: (root.is-zh ? "\u{7b54}\u{6848}\u{7f16}\u{8f91} - " : "Answer Editor - ") + root.selected-question;
                 color: #17252f;
                 font-size: 16px;
                 font-weight: 800;
                 overflow: elide;
-            }
-            ActionButton {
-                x: 740px;
-                y: 1px;
-                label: root.is-zh ? "保存" : "Save";
-                primary: true;
-                button-width: 96px;
-                clicked => { root.save-requested(); }
-            }
-            ActionButton {
-                x: 846px;
-                y: 1px;
-                label: root.is-zh ? "关闭" : "Close";
-                primary: false;
-                button-width: 96px;
-                clicked => { root.close-requested(); }
             }
         }
         QuestionConfigPanel {

@@ -1,7 +1,19 @@
 use super::*;
 
 pub(super) fn default_author_draft_json() -> Value {
-    dongguo_wolf_author_draft_json()
+    shouzhudaitu_author_draft_json()
+}
+
+fn story_draft_asset_json(raw: &str, fallback_template_id: &str, fallback_title: &str) -> Value {
+    serde_json::from_str::<Value>(raw).unwrap_or_else(|_| {
+        story_template_author_draft_json(
+            fallback_template_id,
+            fallback_title,
+            "Bundled StoryLock story draft template.",
+            "This fallback template is used only if the bundled JSON asset cannot be parsed.",
+            &["story", "memory", "question"],
+        )
+    })
 }
 
 pub(super) fn story_template_author_draft_json(
@@ -108,35 +120,30 @@ pub(super) fn story_template_author_draft_json(
     })
 }
 
-pub(super) fn dongguo_wolf_author_draft_json() -> Value {
-    story_template_author_draft_json(
-        "dongguo-wolf",
-        "东郭先生和狼",
-        "东郭先生救了被追捕的狼，狼脱险后反要吃掉恩人；最后借助旁人判断，揭示善良必须有边界。",
-        "东郭先生在路上遇见一只被猎人追赶的狼。狼恳求他把自己藏进书袋，东郭先生一时心软救了它。猎人离开后，狼却露出凶相，说自己饥饿难忍，要吃掉东郭先生。双方争执不下，便请路边老人评理。老人让狼重新钻进袋子，确认事情经过后扎紧袋口，提醒东郭先生：善良需要判断对象，也需要边界。这个模板适合扩展恩情、伪装、风险判断、边界选择等 24 个记忆问题。",
-        &["路上", "猎人", "书袋", "狼", "老人", "边界"],
-    )
-}
-
 pub(super) fn zhizi_yilin_author_draft_json() -> Value {
-    story_template_author_draft_json(
-        "zhizi-yilin",
-        "智子疑邻",
-        "同样的提醒，因为说话人身份不同而被截然不同地理解；故事适合扩展偏见、信任和证据判断。",
-        "宋国有一家人的墙被雨水冲坏了。儿子提醒父亲，墙坏了如果不修，夜里可能会有盗贼进来；邻居也说了同样的话。当天夜里果然丢了东西，主人却夸儿子聪明，怀疑邻居偷窃。这个故事把同一句话放在亲疏不同的位置上，展示人会被身份偏见影响判断。它适合扩展墙、雨夜、邻居、儿子、失窃、怀疑、证据等 24 个问题。",
-        &["雨夜", "破墙", "儿子", "邻居", "失窃", "偏见"],
+    story_draft_asset_json(
+        include_str!("../../../assets/story-drafts/zhizi-yilin-zh.json"),
+        "zhizi-yilin-zh",
+        "Zhizi Yilin",
     )
 }
 
 pub(super) fn shouzhudaitu_author_draft_json() -> Value {
-    story_template_author_draft_json(
-        "shouzhudaitu",
-        "守株待兔",
-        "农夫偶然捡到撞树而死的兔子，随后放弃耕作，等待偶然再次发生，最终田地荒芜。",
-        "宋国有个农夫正在田里劳作，一只兔子突然撞到树桩死了。农夫捡到兔子后，以为只要守着树桩就能再次得到兔子，于是放下农具，不再耕作。日子一天天过去，兔子没有再来，田地却荒芜了。这个模板可以扩展偶然、经验误判、等待、代价、结果等记忆元素。",
-        &["田地", "树桩", "兔子", "农夫", "等待", "荒芜"],
+    story_draft_asset_json(
+        include_str!("../../../assets/story-drafts/shouzhudaitu-zh.json"),
+        "shouzhudaitu-zh",
+        "Shou Zhu Dai Tu",
     )
 }
+
+pub(super) fn emperor_new_clothes_author_draft_json() -> Value {
+    story_draft_asset_json(
+        include_str!("../../../assets/story-drafts/emperor-new-clothes-en.json"),
+        "emperor-new-clothes-en",
+        "The Emperor's New Clothes",
+    )
+}
+
 pub(super) fn default_resource_catalog_json() -> Value {
     json!({
         "version": "1",

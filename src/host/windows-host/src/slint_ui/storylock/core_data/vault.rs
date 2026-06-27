@@ -13,11 +13,11 @@ pub(crate) fn default_storylock_vault_json() -> Value {
 pub(crate) fn default_story_draft_templates_json() -> Value {
     json!({
         "schemaVersion": "storylock-story-draft-templates-v1",
-        "defaultTemplateId": "dongguo-wolf",
+        "defaultTemplateId": "shouzhudaitu-zh",
         "items": [
-            dongguo_wolf_author_draft_json(),
+            shouzhudaitu_author_draft_json(),
             zhizi_yilin_author_draft_json(),
-            shouzhudaitu_author_draft_json()
+            emperor_new_clothes_author_draft_json()
         ]
     })
 }
@@ -128,9 +128,9 @@ pub(crate) fn merge_builtin_story_draft_templates(vault: &mut Value) {
         .cloned()
         .unwrap_or_default();
     for builtin in [
-        dongguo_wolf_author_draft_json(),
-        zhizi_yilin_author_draft_json(),
         shouzhudaitu_author_draft_json(),
+        zhizi_yilin_author_draft_json(),
+        emperor_new_clothes_author_draft_json(),
     ] {
         let template_id = builtin
             .get("templateId")
@@ -148,7 +148,7 @@ pub(crate) fn merge_builtin_story_draft_templates(vault: &mut Value) {
         }
     }
     templates["schemaVersion"] = json!("storylock-story-draft-templates-v1");
-    templates["defaultTemplateId"] = json!("dongguo-wolf");
+    templates["defaultTemplateId"] = json!("shouzhudaitu-zh");
     templates["items"] = Value::Array(items);
     vault["storyDraftTemplates"] = templates;
 }

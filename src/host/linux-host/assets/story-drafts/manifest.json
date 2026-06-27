@@ -5,20 +5,20 @@
     {
       "templateId": "shouzhudaitu-zh",
       "language": "zh-CN",
-      "storyTitle": "\u5b88\u682a\u5f85\u5154",
+      "storyTitle": "守株待兔",
       "fileName": "shouzhudaitu-zh.json"
     },
     {
-      "templateId": "caochong-weighs-elephant-zh",
+      "templateId": "zhizi-yilin-zh",
       "language": "zh-CN",
-      "storyTitle": "\u66f9\u51b2\u79f0\u8c61",
-      "fileName": "caochong-weighs-elephant-zh.json"
+      "storyTitle": "智子疑邻",
+      "fileName": "zhizi-yilin-zh.json"
     },
     {
-      "templateId": "kongrong-shares-pears-en",
+      "templateId": "emperor-new-clothes-en",
       "language": "en-US",
-      "storyTitle": "Kong Rong Shares the Pears",
-      "fileName": "kongrong-shares-pears-en.json"
+      "storyTitle": "The Emperor's New Clothes",
+      "fileName": "emperor-new-clothes-en.json"
     }
   ]
 }

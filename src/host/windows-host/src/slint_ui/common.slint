@@ -394,6 +394,7 @@ export component QuestionTile inherits Rectangle {
 
 export component QuestionOverviewGrid inherits Rectangle {
         in-out property <string> selected-question;
+        in property <bool> selection-enabled;
         in property <string> question-1;
         in property <string> question-2;
         in property <string> question-3;
@@ -430,40 +431,40 @@ export component QuestionOverviewGrid inherits Rectangle {
             height: parent.height;
             spacing: 8px;
             Row {
-                QuestionTile { label: root.question-1; selected: root.selected-question == "1"; clicked => { root.select-node("1"); } }
-                QuestionTile { label: root.question-2; selected: root.selected-question == "2"; clicked => { root.select-node("2"); } }
-                QuestionTile { label: root.question-3; selected: root.selected-question == "3"; clicked => { root.select-node("3"); } }
-                QuestionTile { label: root.question-4; selected: root.selected-question == "4"; clicked => { root.select-node("4"); } }
+                QuestionTile { label: root.question-1; selected: root.selection-enabled && root.selected-question == "1"; clicked => { root.select-node("1"); } }
+                QuestionTile { label: root.question-2; selected: root.selection-enabled && root.selected-question == "2"; clicked => { root.select-node("2"); } }
+                QuestionTile { label: root.question-3; selected: root.selection-enabled && root.selected-question == "3"; clicked => { root.select-node("3"); } }
+                QuestionTile { label: root.question-4; selected: root.selection-enabled && root.selected-question == "4"; clicked => { root.select-node("4"); } }
             }
             Row {
-                QuestionTile { label: root.question-5; selected: root.selected-question == "5"; clicked => { root.select-node("5"); } }
-                QuestionTile { label: root.question-6; selected: root.selected-question == "6"; clicked => { root.select-node("6"); } }
-                QuestionTile { label: root.question-7; selected: root.selected-question == "7"; clicked => { root.select-node("7"); } }
-                QuestionTile { label: root.question-8; selected: root.selected-question == "8"; clicked => { root.select-node("8"); } }
+                QuestionTile { label: root.question-5; selected: root.selection-enabled && root.selected-question == "5"; clicked => { root.select-node("5"); } }
+                QuestionTile { label: root.question-6; selected: root.selection-enabled && root.selected-question == "6"; clicked => { root.select-node("6"); } }
+                QuestionTile { label: root.question-7; selected: root.selection-enabled && root.selected-question == "7"; clicked => { root.select-node("7"); } }
+                QuestionTile { label: root.question-8; selected: root.selection-enabled && root.selected-question == "8"; clicked => { root.select-node("8"); } }
             }
             Row {
-                QuestionTile { label: root.question-9; selected: root.selected-question == "9"; clicked => { root.select-node("9"); } }
-                QuestionTile { label: root.question-10; selected: root.selected-question == "10"; clicked => { root.select-node("10"); } }
-                QuestionTile { label: root.question-11; selected: root.selected-question == "11"; clicked => { root.select-node("11"); } }
-                QuestionTile { label: root.question-12; selected: root.selected-question == "12"; clicked => { root.select-node("12"); } }
+                QuestionTile { label: root.question-9; selected: root.selection-enabled && root.selected-question == "9"; clicked => { root.select-node("9"); } }
+                QuestionTile { label: root.question-10; selected: root.selection-enabled && root.selected-question == "10"; clicked => { root.select-node("10"); } }
+                QuestionTile { label: root.question-11; selected: root.selection-enabled && root.selected-question == "11"; clicked => { root.select-node("11"); } }
+                QuestionTile { label: root.question-12; selected: root.selection-enabled && root.selected-question == "12"; clicked => { root.select-node("12"); } }
             }
             Row {
-                QuestionTile { label: root.question-13; selected: root.selected-question == "13"; clicked => { root.select-node("13"); } }
-                QuestionTile { label: root.question-14; selected: root.selected-question == "14"; clicked => { root.select-node("14"); } }
-                QuestionTile { label: root.question-15; selected: root.selected-question == "15"; clicked => { root.select-node("15"); } }
-                QuestionTile { label: root.question-16; selected: root.selected-question == "16"; clicked => { root.select-node("16"); } }
+                QuestionTile { label: root.question-13; selected: root.selection-enabled && root.selected-question == "13"; clicked => { root.select-node("13"); } }
+                QuestionTile { label: root.question-14; selected: root.selection-enabled && root.selected-question == "14"; clicked => { root.select-node("14"); } }
+                QuestionTile { label: root.question-15; selected: root.selection-enabled && root.selected-question == "15"; clicked => { root.select-node("15"); } }
+                QuestionTile { label: root.question-16; selected: root.selection-enabled && root.selected-question == "16"; clicked => { root.select-node("16"); } }
             }
             Row {
-                QuestionTile { label: root.question-17; selected: root.selected-question == "17"; clicked => { root.select-node("17"); } }
-                QuestionTile { label: root.question-18; selected: root.selected-question == "18"; clicked => { root.select-node("18"); } }
-                QuestionTile { label: root.question-19; selected: root.selected-question == "19"; clicked => { root.select-node("19"); } }
-                QuestionTile { label: root.question-20; selected: root.selected-question == "20"; clicked => { root.select-node("20"); } }
+                QuestionTile { label: root.question-17; selected: root.selection-enabled && root.selected-question == "17"; clicked => { root.select-node("17"); } }
+                QuestionTile { label: root.question-18; selected: root.selection-enabled && root.selected-question == "18"; clicked => { root.select-node("18"); } }
+                QuestionTile { label: root.question-19; selected: root.selection-enabled && root.selected-question == "19"; clicked => { root.select-node("19"); } }
+                QuestionTile { label: root.question-20; selected: root.selection-enabled && root.selected-question == "20"; clicked => { root.select-node("20"); } }
             }
             Row {
-                QuestionTile { label: root.question-21; selected: root.selected-question == "21"; clicked => { root.select-node("21"); } }
-                QuestionTile { label: root.question-22; selected: root.selected-question == "22"; clicked => { root.select-node("22"); } }
-                QuestionTile { label: root.question-23; selected: root.selected-question == "23"; clicked => { root.select-node("23"); } }
-                QuestionTile { label: root.question-24; selected: root.selected-question == "24"; clicked => { root.select-node("24"); } }
+                QuestionTile { label: root.question-21; selected: root.selection-enabled && root.selected-question == "21"; clicked => { root.select-node("21"); } }
+                QuestionTile { label: root.question-22; selected: root.selection-enabled && root.selected-question == "22"; clicked => { root.select-node("22"); } }
+                QuestionTile { label: root.question-23; selected: root.selection-enabled && root.selected-question == "23"; clicked => { root.select-node("23"); } }
+                QuestionTile { label: root.question-24; selected: root.selection-enabled && root.selected-question == "24"; clicked => { root.select-node("24"); } }
             }
         }
     }

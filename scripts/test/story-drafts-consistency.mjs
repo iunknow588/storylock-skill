@@ -48,6 +48,9 @@ function validateDraft(draft, fileName) {
     if (!String(node.canonicalAnswerLocalOnly ?? '').trim()) {
       throw new Error(`${fileName}: nodes[${index}].canonicalAnswerLocalOnly must be non-empty`);
     }
+    if (node.recommendedSelectionMode !== 'multi_select') {
+      throw new Error(`${fileName}: nodes[${index}].recommendedSelectionMode must be multi_select`);
+    }
     if (!Array.isArray(node.acceptedAnswersLocalOnly) || node.acceptedAnswersLocalOnly.length < 1) {
       throw new Error(`${fileName}: nodes[${index}].acceptedAnswersLocalOnly must contain at least 1 item`);
     }
@@ -57,6 +60,9 @@ function validateDraft(draft, fileName) {
     const correctCount = node.answerOptionsLocalOnly.filter((item) => item?.isCorrect === true).length;
     if (correctCount < 1) {
       throw new Error(`${fileName}: nodes[${index}].answerOptionsLocalOnly must contain at least 1 correct option`);
+    }
+    if (Number(node.recommendedCorrectCount) !== correctCount) {
+      throw new Error(`${fileName}: nodes[${index}].recommendedCorrectCount must match correct option count`);
     }
   });
   if (uniqueQuestions.size !== draft.nodes.length) {

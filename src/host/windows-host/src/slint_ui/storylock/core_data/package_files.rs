@@ -11,15 +11,12 @@ pub(crate) fn storylock_core_package_dir() -> std::path::PathBuf {
             return std::path::PathBuf::from(trimmed).join("identity-package");
         }
     }
-    if let Ok(appdata) = std::env::var("LOCALAPPDATA") {
-        return std::path::PathBuf::from(appdata)
-            .join("StoryLock")
-            .join("core")
-            .join("identity-package");
+    if let Ok(current_exe) = std::env::current_exe() {
+        if let Some(exe_dir) = current_exe.parent() {
+            return exe_dir.join("identity-package");
+        }
     }
-    std::path::PathBuf::from(".")
-        .join(".storylock-core-data")
-        .join("identity-package")
+    std::path::PathBuf::from(".").join("identity-package")
 }
 
 pub(crate) fn storylock_core_package_dir_from_window(
@@ -56,12 +53,27 @@ pub(crate) fn storylock_core_learning_policy_path(package_dir: &Path) -> std::pa
     package_dir.join("learning-policy.json")
 }
 
-pub(crate) fn required_storylock_package_files() -> [&'static str; 4] {
+pub(crate) fn storylock_core_templates_dir(package_dir: &Path) -> std::path::PathBuf {
+    package_dir.join("templates")
+}
+
+pub(crate) fn storylock_core_story_drafts_dir(package_dir: &Path) -> std::path::PathBuf {
+    package_dir.join("story-drafts")
+}
+
+pub(crate) fn required_storylock_package_files() -> [&'static str; 11] {
     [
         "package-manifest.json",
         "resource-catalog.json",
         "vault.stlk",
         "learning-policy.json",
+        "templates/login-sites.json",
+        "templates/signing-actions.json",
+        "templates/agent-tasks.json",
+        "story-drafts/manifest.json",
+        "story-drafts/shouzhudaitu-zh.json",
+        "story-drafts/zhizi-yilin-zh.json",
+        "story-drafts/emperor-new-clothes-en.json",
     ]
 }
 
@@ -69,20 +81,10 @@ pub(crate) fn cleanup_legacy_storylock_package_files(package_dir: &Path) -> Resu
     for path in [
         package_dir.join("author-draft.json"),
         package_dir.join(".tmp").join("author-draft.pending.json"),
-        package_dir.join("templates").join("login-sites.json"),
-        package_dir.join("templates").join("signing-actions.json"),
-        package_dir.join("templates").join("agent-tasks.json"),
     ] {
         if path.exists() {
             fs::remove_file(path)?;
         }
-    }
-    let templates_dir = package_dir.join("templates");
-    if templates_dir.exists()
-        && templates_dir.is_dir()
-        && fs::read_dir(&templates_dir)?.next().is_none()
-    {
-        fs::remove_dir(&templates_dir)?;
     }
     let tmp_dir = package_dir.join(".tmp");
     if tmp_dir.exists() && tmp_dir.is_dir() && fs::read_dir(&tmp_dir)?.next().is_none() {
@@ -113,8 +115,64 @@ pub(crate) fn ensure_storylock_core_package(package_dir: &Path) -> Result<()> {
         &default_learning_policy_json(),
     )?;
     ensure_storylock_vault(package_dir)?;
+    ensure_storylock_template_files(package_dir)?;
+    ensure_story_draft_template_files(package_dir)?;
     cleanup_legacy_storylock_package_files(package_dir)?;
     Ok(())
+}
+
+pub(crate) fn ensure_storylock_template_files(package_dir: &Path) -> Result<()> {
+    let templates_dir = storylock_core_templates_dir(package_dir);
+    fs::create_dir_all(&templates_dir)?;
+    let templates = storylock_templates_from_vault(&read_storylock_vault(package_dir));
+    for (file_name, key, fallback) in [
+        (
+            "login-sites.json",
+            "loginSites",
+            default_login_templates_json(),
+        ),
+        (
+            "signing-actions.json",
+            "signingActions",
+            default_signing_templates_json(),
+        ),
+        (
+            "agent-tasks.json",
+            "agentTasks",
+            default_agent_templates_json(),
+        ),
+    ] {
+        let value = templates.get(key).cloned().unwrap_or(fallback);
+        fs::write(
+            templates_dir.join(file_name),
+            serde_json::to_vec_pretty(&value)?,
+        )?;
+    }
+    ensure_manifest_lists_required_files(package_dir)
+}
+
+pub(crate) fn ensure_story_draft_template_files(package_dir: &Path) -> Result<()> {
+    let story_drafts_dir = storylock_core_story_drafts_dir(package_dir);
+    fs::create_dir_all(&story_drafts_dir)?;
+    let drafts = [
+        ("shouzhudaitu-zh.json", shouzhudaitu_author_draft_json()),
+        ("zhizi-yilin-zh.json", zhizi_yilin_author_draft_json()),
+        (
+            "emperor-new-clothes-en.json",
+            emperor_new_clothes_author_draft_json(),
+        ),
+    ];
+    for (file_name, draft) in drafts {
+        fs::write(
+            story_drafts_dir.join(file_name),
+            serde_json::to_vec_pretty(&draft)?,
+        )?;
+    }
+    fs::write(
+        story_drafts_dir.join("manifest.json"),
+        include_bytes!("../../../../assets/story-drafts/manifest.json"),
+    )?;
+    ensure_manifest_lists_required_files(package_dir)
 }
 
 pub(crate) fn ensure_manifest_lists_required_files(package_dir: &Path) -> Result<()> {

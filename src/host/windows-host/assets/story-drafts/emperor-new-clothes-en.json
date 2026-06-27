@@ -1,21 +1,21 @@
 {
   "version": "1",
-  "templateId": "shouzhudaitu-zh",
-  "language": "zh-CN",
-  "storyTitle": "守株待兔",
-  "summary": "青年农夫阿福因一次偶然得到兔子，放弃耕作等待侥幸，最终田地荒芜，明白不可贪图侥幸的道理。",
-  "storyPlot": "公元前̲年4月5日，正值盛夏，宋国青石村的青年阿福带着他的老黄狗在田间耕作。阿福是个农夫，喜欢唱歌，尤其爱在劳作时哼唱小调。当时天气炎热，晴空万里，田野里蝉鸣阵阵，庄稼茂盛。突然，一只灰白色的野兔被一只饥饿的狐狸追赶，慌不择路，一头撞在田边的老梨树根上，折颈而死。阿福大喜，捡起兔子回家，与老黄狗一起饱餐一顿。此后，他放下农具，每天只守在梨树下，幻想再有兔子撞来。村里有个懒惰的痞子刘三，常来嘲笑他，还鼓动他继续等。阿福的母亲劝他，他不听。到了次年秋天，秋风萧瑟，落叶满地，阿福的田地彻底荒芜，颗粒无收。全村人都来围观他荒芜的田地，纷纷耻笑。阿福站在田边，满脸羞愧，终于明白不可贪图侥幸，决心以后勤劳耕作。",
+  "templateId": "emperor-new-clothes-en",
+  "language": "en-US",
+  "storyTitle": "The Emperor's New Clothes",
+  "summary": "Emperor Lorenzo trusts two swindlers who promise invisible cloth, parades in nothing, and learns through a child's honesty that vanity can silence judgment.",
+  "storyPlot": "In the year 1710, on a bright summer morning in the kingdom of Fantasia, Emperor Lorenzo was obsessed with new clothes. The sun shone brightly, and the palace gardens were in full bloom. Two swindlers, Marco and Pietro, arrived, claiming they could weave a cloth invisible to fools. The emperor hired them with gold and silk. His trusted old minister Alberto was sent first to inspect; he saw nothing but feared being thought a fool, so he reported the cloth was magnificent. The second assistant, young officer Bruno, also saw nothing but praised its beauty. On the parade day through the city streets, the weather was sunny and warm, and the streets were lined with cheering crowds and colorful banners. The swindlers mimed dressing the emperor in a coat and trousers. Suddenly, a boy, Luca, shouted, \"The emperor has nothing on!\" The truth spread among the crowd. Emperor Lorenzo realized the child was right and felt deep shame. Later that evening, back in the palace, the emperor sat alone in his chamber, which was dimly lit and silent. He felt foolish and humiliated. He finally understood that vanity had made him blind and that only the innocent child had the courage to speak the truth.",
   "memoryAnchors": [
-    "公元前̲年",
-    "青石村",
-    "阿福",
-    "农夫",
-    "老黄狗",
-    "野兔",
-    "老梨树",
-    "刘三",
-    "次年秋天",
-    "勤劳耕作"
+    "1710",
+    "Fantasia",
+    "Emperor Lorenzo",
+    "new clothes",
+    "Marco and Pietro",
+    "Alberto",
+    "Bruno",
+    "Luca",
+    "parade",
+    "vanity"
   ],
   "elementGroups": [
     "time",
@@ -30,1323 +30,1327 @@
   "nodes": [
     {
       "nodeId": "question-01",
-      "title": "问题 01",
+      "title": "Question 01",
       "elementId": "time",
-      "question": "故事发生在什么时间？",
+      "question": "When did the story take place?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "公元前̲年",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "1710",
       "acceptedAnswersLocalOnly": [
-        "公元前̲年",
-        "东周时期",
-        "4月5日",
-        "盛夏"
+        "1710",
+        "early 18th century",
+        "summer morning",
+        "bright day"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "公元前̲年",
+          "text": "1710",
           "isCorrect": true
         },
         {
-          "text": "东周时期",
+          "text": "early 18th century",
           "isCorrect": true
         },
         {
-          "text": "4月5日",
+          "text": "summer morning",
           "isCorrect": true
         },
         {
-          "text": "盛夏",
+          "text": "bright day",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-02",
-      "title": "问题 02",
+      "title": "Question 02",
       "elementId": "place",
-      "question": "故事发生在什么地方？",
+      "question": "Where did the story happen?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "宋国",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Fantasia",
       "acceptedAnswersLocalOnly": [
-        "宋国",
-        "青石村",
-        "田间",
-        "老梨树下"
+        "Fantasia",
+        "city streets",
+        "the palace",
+        "the emperor's realm"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "宋国",
+          "text": "Fantasia",
           "isCorrect": true
         },
         {
-          "text": "青石村",
+          "text": "city streets",
           "isCorrect": true
         },
         {
-          "text": "田间",
+          "text": "the palace",
           "isCorrect": true
         },
         {
-          "text": "老梨树下",
+          "text": "the emperor's realm",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-03",
-      "title": "问题 03",
+      "title": "Question 03",
       "elementId": "person",
-      "question": "主人公的姓名是什么？",
+      "question": "What was the protagonist's name?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 1,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "阿福",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Lorenzo",
       "acceptedAnswersLocalOnly": [
-        "阿福"
+        "Lorenzo"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "阿福",
+          "text": "Lorenzo",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         },
         {
-          "text": "孔融让梨",
+          "text": "hidden sword",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-04",
-      "title": "问题 04",
+      "title": "Question 04",
       "elementId": "object",
-      "question": "主人公的职业是什么？",
+      "question": "What was the protagonist's occupation?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "农夫",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Ruler",
       "acceptedAnswersLocalOnly": [
-        "农夫",
-        "种田人"
+        "Ruler",
+        "monarch"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "农夫",
+          "text": "Ruler",
           "isCorrect": true
         },
         {
-          "text": "种田人",
+          "text": "monarch",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-05",
-      "title": "问题 05",
+      "title": "Question 05",
       "elementId": "event",
-      "question": "主人公的兴趣爱好是什么？",
+      "question": "What was the protagonist's interest?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "唱歌",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "New clothes",
       "acceptedAnswersLocalOnly": [
-        "唱歌",
-        "哼小调"
+        "New clothes",
+        "splendid attire"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "唱歌",
+          "text": "New clothes",
           "isCorrect": true
         },
         {
-          "text": "哼小调",
+          "text": "splendid attire",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-06",
-      "title": "问题 06",
+      "title": "Question 06",
       "elementId": "reaction",
-      "question": "主人公的主要助手是谁？",
+      "question": "Who were the protagonist's main assistants?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "老黄狗",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Alberto (old minister)",
       "acceptedAnswersLocalOnly": [
-        "老黄狗",
-        "黄狗"
+        "Alberto (old minister)",
+        "Bruno (young officer)"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "老黄狗",
+          "text": "Alberto (old minister)",
           "isCorrect": true
         },
         {
-          "text": "黄狗",
+          "text": "Bruno (young officer)",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-07",
-      "title": "问题 07",
+      "title": "Question 07",
       "elementId": "choice",
-      "question": "助手的职业或身份是什么？",
+      "question": "What were the assistants' occupations?",
       "recommendedSelectionMode": "multi_select",
-      "recommendedCorrectCount": 2,
+      "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "看门狗",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Minister",
       "acceptedAnswersLocalOnly": [
-        "看门狗",
-        "陪伴者"
+        "Minister",
+        "trusted advisor",
+        "officer",
+        "official"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "看门狗",
+          "text": "Minister",
           "isCorrect": true
         },
         {
-          "text": "陪伴者",
+          "text": "trusted advisor",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "officer",
+          "isCorrect": true
+        },
+        {
+          "text": "official",
+          "isCorrect": true
+        },
+        {
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
-          "isCorrect": false
-        },
-        {
-          "text": "天气",
-          "isCorrect": false
-        },
-        {
-          "text": "皇帝的新装",
+          "text": "old tree root",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-08",
-      "title": "问题 08",
+      "title": "Question 08",
       "elementId": "result",
-      "question": "故事中的反派是谁？",
+      "question": "Who were the villains?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "刘三",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Marco and Pietro",
       "acceptedAnswersLocalOnly": [
-        "刘三",
-        "痞子"
+        "Marco and Pietro",
+        "two swindlers"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "刘三",
+          "text": "Marco and Pietro",
           "isCorrect": true
         },
         {
-          "text": "痞子",
+          "text": "two swindlers",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-09",
-      "title": "问题 09",
+      "title": "Question 09",
       "elementId": "time",
-      "question": "反派的职业或行为是什么？",
+      "question": "What was the villains' occupation?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "游手好闲",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Swindlers",
       "acceptedAnswersLocalOnly": [
-        "游手好闲",
-        "嘲笑人"
+        "Swindlers",
+        "tricksters"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "游手好闲",
+          "text": "Swindlers",
           "isCorrect": true
         },
         {
-          "text": "嘲笑人",
+          "text": "tricksters",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-10",
-      "title": "问题 10",
+      "title": "Question 10",
       "elementId": "place",
-      "question": "事件的起因是什么？",
+      "question": "What was the direct cause of the event?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "兔子撞树",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "The promise of invisible cloth",
       "acceptedAnswersLocalOnly": [
-        "兔子撞树",
-        "狐狸追赶"
+        "The promise of invisible cloth",
+        "emperor's vanity"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "兔子撞树",
+          "text": "The promise of invisible cloth",
           "isCorrect": true
         },
         {
-          "text": "狐狸追赶",
+          "text": "emperor's vanity",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-11",
-      "title": "问题 11",
+      "title": "Question 11",
       "elementId": "person",
-      "question": "事件发生时的天气如何？",
+      "question": "What was the weather when the event began?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "炎热",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Sunny",
       "acceptedAnswersLocalOnly": [
-        "炎热",
-        "晴朗"
+        "Sunny",
+        "bright"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "炎热",
+          "text": "Sunny",
           "isCorrect": true
         },
         {
-          "text": "晴朗",
+          "text": "bright",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-12",
-      "title": "问题 12",
+      "title": "Question 12",
       "elementId": "object",
-      "question": "事件发生时的环境是怎样的？",
+      "question": "What was the environment like when the event began?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "蝉鸣阵阵",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Gardens in bloom",
       "acceptedAnswersLocalOnly": [
-        "蝉鸣阵阵",
-        "庄稼茂盛"
+        "Gardens in bloom",
+        "palace splendor"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "蝉鸣阵阵",
+          "text": "Gardens in bloom",
           "isCorrect": true
         },
         {
-          "text": "庄稼茂盛",
+          "text": "palace splendor",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-13",
-      "title": "问题 13",
+      "title": "Question 13",
       "elementId": "event",
-      "question": "事件发生时主人公的心情如何？",
+      "question": "How did the emperor feel when the event began?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "大喜",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Excited",
       "acceptedAnswersLocalOnly": [
-        "大喜",
-        "高兴"
+        "Excited",
+        "proud"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "大喜",
+          "text": "Excited",
           "isCorrect": true
         },
         {
-          "text": "高兴",
+          "text": "proud",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-14",
-      "title": "问题 14",
+      "title": "Question 14",
       "elementId": "reaction",
-      "question": "故事的发展经过是怎样的？",
+      "question": "How did the story develop?",
       "recommendedSelectionMode": "multi_select",
-      "recommendedCorrectCount": 2,
+      "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "放弃耕作",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Inspections",
       "acceptedAnswersLocalOnly": [
-        "放弃耕作",
-        "每日守株"
+        "Inspections",
+        "lying",
+        "preparation"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "放弃耕作",
+          "text": "Inspections",
           "isCorrect": true
         },
         {
-          "text": "每日守株",
+          "text": "lying",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "preparation",
+          "isCorrect": true
+        },
+        {
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
-          "isCorrect": false
-        },
-        {
-          "text": "皇帝的新装",
+          "text": "stone boat mark",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-15",
-      "title": "问题 15",
+      "title": "Question 15",
       "elementId": "choice",
-      "question": "故事的高潮是什么？",
+      "question": "What was the climax of the story?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "遭到全村耻笑",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "The child shouting the truth",
       "acceptedAnswersLocalOnly": [
-        "遭到全村耻笑",
-        "田地荒芜"
+        "The child shouting the truth",
+        "crowd's whisper"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "遭到全村耻笑",
+          "text": "The child shouting the truth",
           "isCorrect": true
         },
         {
-          "text": "田地荒芜",
+          "text": "crowd's whisper",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-16",
-      "title": "问题 16",
+      "title": "Question 16",
       "elementId": "result",
-      "question": "故事的转折事件是什么？",
+      "question": "What was the turning point event?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "母亲劝告",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "The emperor realizing he was naked",
       "acceptedAnswersLocalOnly": [
-        "母亲劝告",
-        "刘三嘲笑"
+        "The emperor realizing he was naked",
+        "shame"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "母亲劝告",
+          "text": "The emperor realizing he was naked",
           "isCorrect": true
         },
         {
-          "text": "刘三嘲笑",
+          "text": "shame",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-17",
-      "title": "问题 17",
+      "title": "Question 17",
       "elementId": "time",
-      "question": "转折发生在什么时间？",
+      "question": "When did the turning point happen?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "次年秋天",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "During the parade",
       "acceptedAnswersLocalOnly": [
-        "次年秋天",
-        "一年后"
+        "During the parade",
+        "later that day"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "次年秋天",
+          "text": "During the parade",
           "isCorrect": true
         },
         {
-          "text": "一年后",
+          "text": "later that day",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-18",
-      "title": "问题 18",
+      "title": "Question 18",
       "elementId": "place",
-      "question": "转折发生在什么地点？",
+      "question": "Where did the turning point happen?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "田边",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "City streets",
       "acceptedAnswersLocalOnly": [
-        "田边",
-        "老梨树下"
+        "City streets",
+        "among the crowd"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "田边",
+          "text": "City streets",
           "isCorrect": true
         },
         {
-          "text": "老梨树下",
+          "text": "among the crowd",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-19",
-      "title": "问题 19",
+      "title": "Question 19",
       "elementId": "person",
-      "question": "转折时的天气如何？",
+      "question": "What was the weather like at the turning point?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "秋风",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Sunny",
       "acceptedAnswersLocalOnly": [
-        "秋风",
-        "萧瑟"
+        "Sunny",
+        "warm"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "秋风",
+          "text": "Sunny",
           "isCorrect": true
         },
         {
-          "text": "萧瑟",
+          "text": "warm",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-20",
-      "title": "问题 20",
+      "title": "Question 20",
       "elementId": "object",
-      "question": "转折时的环境是怎样的？",
+      "question": "What was the environment like at the turning point?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "落叶满地",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Cheering crowds",
       "acceptedAnswersLocalOnly": [
-        "落叶满地",
-        "田地荒芜"
+        "Cheering crowds",
+        "colorful banners"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "落叶满地",
+          "text": "Cheering crowds",
           "isCorrect": true
         },
         {
-          "text": "田地荒芜",
+          "text": "colorful banners",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-21",
-      "title": "问题 21",
+      "title": "Question 21",
       "elementId": "event",
-      "question": "故事结束的时间是什么？",
+      "question": "When did the story end?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "次年秋天",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Later that evening",
       "acceptedAnswersLocalOnly": [
-        "次年秋天",
-        "收割季节"
+        "Later that evening",
+        "after the parade"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "次年秋天",
+          "text": "Later that evening",
           "isCorrect": true
         },
         {
-          "text": "收割季节",
+          "text": "after the parade",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-22",
-      "title": "问题 22",
+      "title": "Question 22",
       "elementId": "reaction",
-      "question": "故事结束后的地点在哪里？",
+      "question": "Where did the story end?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "荒芜的田地",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "The palace",
       "acceptedAnswersLocalOnly": [
-        "荒芜的田地",
-        "村口"
+        "The palace",
+        "the emperor's chamber"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "荒芜的田地",
+          "text": "The palace",
           "isCorrect": true
         },
         {
-          "text": "村口",
+          "text": "the emperor's chamber",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-23",
-      "title": "问题 23",
+      "title": "Question 23",
       "elementId": "choice",
-      "question": "故事结束后主人公的心情如何？",
+      "question": "How did the emperor feel after the story ended?",
       "recommendedSelectionMode": "multi_select",
-      "recommendedCorrectCount": 2,
+      "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "羞愧",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Foolish",
       "acceptedAnswersLocalOnly": [
-        "羞愧",
-        "决心勤劳"
+        "Foolish",
+        "humiliated",
+        "ashamed"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "羞愧",
+          "text": "Foolish",
           "isCorrect": true
         },
         {
-          "text": "决心勤劳",
+          "text": "humiliated",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "ashamed",
+          "isCorrect": true
+        },
+        {
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
-          "isCorrect": false
-        },
-        {
-          "text": "皇帝的新装",
+          "text": "stone boat mark",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-24",
-      "title": "问题 24",
+      "title": "Question 24",
       "elementId": "result",
-      "question": "主人公得到的教训是什么？",
+      "question": "What lesson did the emperor learn?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "不可侥幸",
+      "editorNotes": "English template for The Emperor's New Clothes; all nodes are multi-select and follow the design document.",
+      "canonicalAnswerLocalOnly": "Vanity is foolish",
       "acceptedAnswersLocalOnly": [
-        "不可侥幸",
-        "勤劳致富"
+        "Vanity is foolish",
+        "children speak truth"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "不可侥幸",
+          "text": "Vanity is foolish",
           "isCorrect": true
         },
         {
-          "text": "勤劳致富",
+          "text": "children speak truth",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "Kong Rong",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "pear tray",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "farm field",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "broken wall",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "old tree root",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "stone boat mark",
           "isCorrect": false
         },
         {
-          "text": "皇帝的新装",
+          "text": "market well",
           "isCorrect": false
         }
       ]

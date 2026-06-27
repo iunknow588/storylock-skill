@@ -21,6 +21,7 @@ export component StoryDraftPage inherits VerticalBox {
 export component QuestionOverviewPage inherits VerticalBox {
     in property <bool> is-zh;
     in-out property <string> selected-question;
+    in property <bool> selection-enabled;
     in property <string> question-1;
     in property <string> question-2;
     in property <string> question-3;
@@ -64,6 +65,7 @@ export component QuestionOverviewPage inherits VerticalBox {
     QuestionOverviewGrid {
         height: 338px;
         selected-question <=> root.selected-question;
+        selection-enabled: root.selection-enabled;
         question-1: root.question-1;
         question-2: root.question-2;
         question-3: root.question-3;

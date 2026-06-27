@@ -19,6 +19,7 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> node-title: "Question 01";
         in-out property <string> element-id: "time";
         in-out property <string> selected-question: "1";
+        in-out property <bool> overview-selection-enabled: false;
         in-out property <string> question-text: "Which season appears in the memory story?";
         in-out property <string> question-1: "Q1";
         in-out property <string> question-2: "Q2";
@@ -295,6 +296,7 @@ export component StoryLockCoreApp inherits Window {
                         if root.active-page == 1: QuestionOverviewPage {
                             is-zh: root.is-zh;
                             selected-question <=> root.selected-question;
+                            selection-enabled: root.overview-selection-enabled;
                             question-1: root.question-1;
                             question-2: root.question-2;
                             question-3: root.question-3;

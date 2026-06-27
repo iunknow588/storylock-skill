@@ -21,6 +21,18 @@ fn initializes_storylock_core_package_files() {
         .is_some_and(|files| files
             .iter()
             .any(|item| item.as_str() == Some("learning-policy.json"))));
+    for required in [
+        "story-drafts/manifest.json",
+        "story-drafts/shouzhudaitu-zh.json",
+        "story-drafts/zhizi-yilin-zh.json",
+        "story-drafts/emperor-new-clothes-en.json",
+    ] {
+        assert!(manifest
+            .get("files")
+            .and_then(Value::as_array)
+            .is_some_and(|files| files.iter().any(|item| item.as_str() == Some(required))));
+        assert!(dir.join(required).exists(), "{required} should exist");
+    }
 }
 
 #[test]
@@ -31,7 +43,11 @@ fn default_story_templates_include_useful_fables() {
         .and_then(Value::as_array)
         .expect("default story draft templates");
     assert!(items.len() >= 3);
-    for expected in ["dongguo-wolf", "zhizi-yilin", "shouzhudaitu"] {
+    for expected in [
+        "shouzhudaitu-zh",
+        "zhizi-yilin-zh",
+        "emperor-new-clothes-en",
+    ] {
         assert!(items.iter().any(|item| {
             item.get("templateId").and_then(Value::as_str) == Some(expected)
                 && item.get("nodes").and_then(Value::as_array).map(Vec::len) == Some(24)

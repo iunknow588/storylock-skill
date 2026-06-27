@@ -1,21 +1,19 @@
 {
   "version": "1",
-  "templateId": "shouzhudaitu-zh",
+  "templateId": "zhizi-yilin-zh",
   "language": "zh-CN",
-  "storyTitle": "守株待兔",
-  "summary": "青年农夫阿福因一次偶然得到兔子，放弃耕作等待侥幸，最终田地荒芜，明白不可贪图侥幸的道理。",
-  "storyPlot": "公元前̲年4月5日，正值盛夏，宋国青石村的青年阿福带着他的老黄狗在田间耕作。阿福是个农夫，喜欢唱歌，尤其爱在劳作时哼唱小调。当时天气炎热，晴空万里，田野里蝉鸣阵阵，庄稼茂盛。突然，一只灰白色的野兔被一只饥饿的狐狸追赶，慌不择路，一头撞在田边的老梨树根上，折颈而死。阿福大喜，捡起兔子回家，与老黄狗一起饱餐一顿。此后，他放下农具，每天只守在梨树下，幻想再有兔子撞来。村里有个懒惰的痞子刘三，常来嘲笑他，还鼓动他继续等。阿福的母亲劝他，他不听。到了次年秋天，秋风萧瑟，落叶满地，阿福的田地彻底荒芜，颗粒无收。全村人都来围观他荒芜的田地，纷纷耻笑。阿福站在田边，满脸羞愧，终于明白不可贪图侥幸，决心以后勤劳耕作。",
+  "storyTitle": "智子疑邻",
+  "summary": "富商周老爷因亲疏偏见误疑邻居，三个月后真盗被捕，他才明白不可因人废言，不可因亲疏误判。",
+  "storyPlot": "公元前Θ年9月初，初秋，宋国都城郊外，大雨滂沱。富商周老爷家中的院墙被雨水冲坏了一大段。当时天空阴沉，雷声滚滚，院中积水遍地，泥泞不堪。周老爷是个商人，爱好收藏古玩、品茶。他的儿子周文是个读书人，着急地对父亲说：“墙不修好，恐有贼人。”邻居老人孙伯也来提醒，说同样的话。周老爷心情烦躁，没有理会。当夜，雨停月出，盗贼果真从墙缺潜入，偷走了金银细软。第二天，周老爷全家都夸周文聪慧，却怀疑孙伯偷了东西。此后周老爷一直对孙伯冷眼相待。三个月后的冬天，官府抓获了真盗赵麻子，周老爷才知错怪了孙伯。当时寒风凛冽，白雪覆盖大地，他羞愧难当，在孙伯家门口徘徊许久，终于登门道歉。孙伯原谅了他。周老爷告诉子孙：不可因亲疏而误判是非。",
   "memoryAnchors": [
-    "公元前̲年",
-    "青石村",
-    "阿福",
-    "农夫",
-    "老黄狗",
-    "野兔",
-    "老梨树",
-    "刘三",
-    "次年秋天",
-    "勤劳耕作"
+    "周老爷",
+    "周文",
+    "孙伯",
+    "院墙",
+    "赵麻子",
+    "金银细软",
+    "三个月后",
+    "不可因人废言"
   ],
   "elementGroups": [
     "time",
@@ -38,49 +36,49 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "公元前̲年",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "公元前Θ年",
       "acceptedAnswersLocalOnly": [
-        "公元前̲年",
-        "东周时期",
-        "4月5日",
-        "盛夏"
+        "公元前Θ年",
+        "战国时期",
+        "9月初",
+        "初秋"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "公元前̲年",
+          "text": "公元前Θ年",
           "isCorrect": true
         },
         {
-          "text": "东周时期",
+          "text": "战国时期",
           "isCorrect": true
         },
         {
-          "text": "4月5日",
+          "text": "9月初",
           "isCorrect": true
         },
         {
-          "text": "盛夏",
+          "text": "初秋",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         }
       ]
@@ -95,13 +93,13 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
       "canonicalAnswerLocalOnly": "宋国",
       "acceptedAnswersLocalOnly": [
         "宋国",
-        "青石村",
-        "田间",
-        "老梨树下"
+        "都城郊外",
+        "周老爷家",
+        "院墙边"
       ],
       "answerOptionsLocalOnly": [
         {
@@ -109,35 +107,35 @@
           "isCorrect": true
         },
         {
-          "text": "青石村",
+          "text": "都城郊外",
           "isCorrect": true
         },
         {
-          "text": "田间",
+          "text": "周老爷家",
           "isCorrect": true
         },
         {
-          "text": "老梨树下",
+          "text": "院墙边",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         }
       ]
@@ -152,38 +150,38 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "阿福",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "周老爷",
       "acceptedAnswersLocalOnly": [
-        "阿福"
+        "周老爷"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "阿福",
+          "text": "周老爷",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -206,43 +204,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "农夫",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "商人",
       "acceptedAnswersLocalOnly": [
-        "农夫",
-        "种田人"
+        "商人",
+        "富户"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "农夫",
+          "text": "商人",
           "isCorrect": true
         },
         {
-          "text": "种田人",
+          "text": "富户",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -261,43 +259,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "唱歌",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "收藏古玩",
       "acceptedAnswersLocalOnly": [
-        "唱歌",
-        "哼小调"
+        "收藏古玩",
+        "品茶"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "唱歌",
+          "text": "收藏古玩",
           "isCorrect": true
         },
         {
-          "text": "哼小调",
+          "text": "品茶",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -316,43 +314,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "老黄狗",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "周文",
       "acceptedAnswersLocalOnly": [
-        "老黄狗",
-        "黄狗"
+        "周文",
+        "儿子"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "老黄狗",
+          "text": "周文",
           "isCorrect": true
         },
         {
-          "text": "黄狗",
+          "text": "儿子",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -371,43 +369,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "看门狗",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "读书人",
       "acceptedAnswersLocalOnly": [
-        "看门狗",
-        "陪伴者"
+        "读书人",
+        "建议者"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "看门狗",
+          "text": "读书人",
           "isCorrect": true
         },
         {
-          "text": "陪伴者",
+          "text": "建议者",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -426,43 +424,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "刘三",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "赵麻子",
       "acceptedAnswersLocalOnly": [
-        "刘三",
-        "痞子"
+        "赵麻子",
+        "惯偷"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "刘三",
+          "text": "赵麻子",
           "isCorrect": true
         },
         {
-          "text": "痞子",
+          "text": "惯偷",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -481,43 +479,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "游手好闲",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "盗贼",
       "acceptedAnswersLocalOnly": [
-        "游手好闲",
-        "嘲笑人"
+        "盗贼",
+        "专偷富户"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "游手好闲",
+          "text": "盗贼",
           "isCorrect": true
         },
         {
-          "text": "嘲笑人",
+          "text": "专偷富户",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -536,43 +534,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "兔子撞树",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "院墙损坏",
       "acceptedAnswersLocalOnly": [
-        "兔子撞树",
-        "狐狸追赶"
+        "院墙损坏",
+        "大雨冲坏"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "兔子撞树",
+          "text": "院墙损坏",
           "isCorrect": true
         },
         {
-          "text": "狐狸追赶",
+          "text": "大雨冲坏",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -591,43 +589,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "炎热",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "大雨",
       "acceptedAnswersLocalOnly": [
-        "炎热",
-        "晴朗"
+        "大雨",
+        "雨停月出"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "炎热",
+          "text": "大雨",
           "isCorrect": true
         },
         {
-          "text": "晴朗",
+          "text": "雨停月出",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -646,43 +644,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "蝉鸣阵阵",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "积水遍地",
       "acceptedAnswersLocalOnly": [
-        "蝉鸣阵阵",
-        "庄稼茂盛"
+        "积水遍地",
+        "泥泞不堪"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "蝉鸣阵阵",
+          "text": "积水遍地",
           "isCorrect": true
         },
         {
-          "text": "庄稼茂盛",
+          "text": "泥泞不堪",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -701,43 +699,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "大喜",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "烦躁",
       "acceptedAnswersLocalOnly": [
-        "大喜",
-        "高兴"
+        "烦躁",
+        "不以为意"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "大喜",
+          "text": "烦躁",
           "isCorrect": true
         },
         {
-          "text": "高兴",
+          "text": "不以为意",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -752,51 +750,52 @@
       "elementId": "reaction",
       "question": "故事的发展经过是怎样的？",
       "recommendedSelectionMode": "multi_select",
-      "recommendedCorrectCount": 2,
+      "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "放弃耕作",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "失窃",
       "acceptedAnswersLocalOnly": [
-        "放弃耕作",
-        "每日守株"
+        "失窃",
+        "称赞儿子",
+        "怀疑邻居"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "放弃耕作",
+          "text": "失窃",
           "isCorrect": true
         },
         {
-          "text": "每日守株",
+          "text": "称赞儿子",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "怀疑邻居",
+          "isCorrect": true
+        },
+        {
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
-          "isCorrect": false
-        },
-        {
-          "text": "皇帝的新装",
+          "text": "证据",
           "isCorrect": false
         }
       ]
@@ -811,43 +810,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "遭到全村耻笑",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "真相大白",
       "acceptedAnswersLocalOnly": [
-        "遭到全村耻笑",
-        "田地荒芜"
+        "真相大白",
+        "真盗被捕"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "遭到全村耻笑",
+          "text": "真相大白",
           "isCorrect": true
         },
         {
-          "text": "田地荒芜",
+          "text": "真盗被捕",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -866,43 +865,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "母亲劝告",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "官府破案",
       "acceptedAnswersLocalOnly": [
-        "母亲劝告",
-        "刘三嘲笑"
+        "官府破案",
+        "周老爷悔悟"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "母亲劝告",
+          "text": "官府破案",
           "isCorrect": true
         },
         {
-          "text": "刘三嘲笑",
+          "text": "周老爷悔悟",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -921,43 +920,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "次年秋天",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "三个月后",
       "acceptedAnswersLocalOnly": [
-        "次年秋天",
-        "一年后"
+        "三个月后",
+        "冬天"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "次年秋天",
+          "text": "三个月后",
           "isCorrect": true
         },
         {
-          "text": "一年后",
+          "text": "冬天",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -976,43 +975,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "田边",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "官府",
       "acceptedAnswersLocalOnly": [
-        "田边",
-        "老梨树下"
+        "官府",
+        "周老爷家"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "田边",
+          "text": "官府",
           "isCorrect": true
         },
         {
-          "text": "老梨树下",
+          "text": "周老爷家",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -1031,43 +1030,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "秋风",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "寒风凛冽",
       "acceptedAnswersLocalOnly": [
-        "秋风",
-        "萧瑟"
+        "寒风凛冽",
+        "大雪"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "秋风",
+          "text": "寒风凛冽",
           "isCorrect": true
         },
         {
-          "text": "萧瑟",
+          "text": "大雪",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -1086,43 +1085,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "落叶满地",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "白雪覆盖",
       "acceptedAnswersLocalOnly": [
-        "落叶满地",
-        "田地荒芜"
+        "白雪覆盖",
+        "寒冷"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "落叶满地",
+          "text": "白雪覆盖",
           "isCorrect": true
         },
         {
-          "text": "田地荒芜",
+          "text": "寒冷",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -1141,43 +1140,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "次年秋天",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "冬天",
       "acceptedAnswersLocalOnly": [
-        "次年秋天",
-        "收割季节"
+        "冬天",
+        "三个月后"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "次年秋天",
+          "text": "冬天",
           "isCorrect": true
         },
         {
-          "text": "收割季节",
+          "text": "三个月后",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -1196,43 +1195,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "荒芜的田地",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "孙伯家门口",
       "acceptedAnswersLocalOnly": [
-        "荒芜的田地",
-        "村口"
+        "孙伯家门口",
+        "周老爷家"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "荒芜的田地",
+          "text": "孙伯家门口",
           "isCorrect": true
         },
         {
-          "text": "村口",
+          "text": "周老爷家",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -1251,11 +1250,11 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
       "canonicalAnswerLocalOnly": "羞愧",
       "acceptedAnswersLocalOnly": [
         "羞愧",
-        "决心勤劳"
+        "悔悟"
       ],
       "answerOptionsLocalOnly": [
         {
@@ -1263,31 +1262,31 @@
           "isCorrect": true
         },
         {
-          "text": "决心勤劳",
+          "text": "悔悟",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {
@@ -1306,43 +1305,43 @@
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
-      "canonicalAnswerLocalOnly": "不可侥幸",
+      "editorNotes": "智子疑邻模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "不可因人废言",
       "acceptedAnswersLocalOnly": [
-        "不可侥幸",
-        "勤劳致富"
+        "不可因人废言",
+        "不可因亲疏误判"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "不可侥幸",
+          "text": "不可因人废言",
           "isCorrect": true
         },
         {
-          "text": "勤劳致富",
+          "text": "不可因亲疏误判",
           "isCorrect": true
         },
         {
-          "text": "姓名",
+          "text": "富商",
           "isCorrect": false
         },
         {
-          "text": "职业",
+          "text": "院墙",
           "isCorrect": false
         },
         {
-          "text": "爱好",
+          "text": "雨夜",
           "isCorrect": false
         },
         {
-          "text": "助手",
+          "text": "真盗",
           "isCorrect": false
         },
         {
-          "text": "反派",
+          "text": "邻居",
           "isCorrect": false
         },
         {
-          "text": "天气",
+          "text": "证据",
           "isCorrect": false
         },
         {

@@ -65,7 +65,6 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     let host_for_settings_lock = app.as_weak();
     let shared_status = Rc::new(RefCell::new(String::from("")));
     let shared_status_for_settings = Rc::clone(&shared_status);
-    let core_package_dir_for_settings = core_package_dir.clone();
 
     app.on_open_settings(move || {
         let existing_show_result = {
@@ -110,10 +109,6 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 let host_for_language = host_for_settings.clone();
                 let host_language_for_language = Rc::clone(&host_language_for_settings);
                 let core_window_for_language = Rc::clone(&core_window_for_settings);
-                let core_package_dir_for_open_storylock = core_package_dir_for_settings.clone();
-                let core_window_for_open_storylock = Rc::clone(&core_window_for_settings);
-                let host_language_for_storylock_core = Rc::clone(&host_language_for_settings);
-                let settings_weak_for_storylock_close = settings.as_weak();
 
                 settings.on_language_changed(move |language| {
                     let language_string = language.to_string();
@@ -133,8 +128,6 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                     }
                 });
 
-                let host_for_open_storylock = host_for_settings.clone();
-                let shared_status_for_storylock = Rc::clone(&shared_status_for_settings);
                 let host_for_settings_lock_close = host_for_settings_lock.clone();
                 let host_language_for_close = Rc::clone(&host_language_for_settings);
                 let settings_window_for_close = Rc::clone(&settings_window_for_open);
@@ -149,82 +142,6 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                             "Settings closed"
                         };
                         host.set_connection_test_status(SharedString::from(text));
-                    }
-                });
-
-                settings.on_open_storylock_core(move || {
-                    if let Some(host) = host_for_open_storylock.upgrade() {
-                        let status = "StoryLock will open from Settings".to_string();
-                        *shared_status_for_storylock.borrow_mut() = status.clone();
-                        host.set_connection_test_status(SharedString::from(status));
-                    }
-
-                    if let Err(error) =
-                        ensure_storylock_core_package(&core_package_dir_for_open_storylock)
-                    {
-                        eprintln!("failed to initialize StoryLock Core package: {error}");
-                    }
-
-                    if let Some(host) = host_for_open_storylock.upgrade() {
-                        host.set_connection_test_status(SharedString::from("StoryLock open"));
-                    }
-
-                    if let Some(core) = core_window_for_open_storylock.borrow().as_ref() {
-                        initialize_storylock_core_window(
-                            core,
-                            &core_package_dir_for_open_storylock,
-                        );
-                        core.set_language(SharedString::from(
-                            host_language_for_storylock_core.borrow().clone(),
-                        ));
-                        if let Err(error) = core.show() {
-                            eprintln!("failed to show existing StoryLock Core window: {error}");
-                        } else {
-                            return;
-                        }
-                    }
-
-                    *core_window_for_open_storylock.borrow_mut() = None;
-                    match StoryLockCoreApp::new() {
-                        Ok(core) => {
-                            core.set_language(SharedString::from(
-                                host_language_for_storylock_core.borrow().clone(),
-                            ));
-                            initialize_storylock_core_window(
-                                &core,
-                                &core_package_dir_for_open_storylock,
-                            );
-                            let host_for_storylock_close = host_for_open_storylock.clone();
-                            let settings_for_storylock_close =
-                                settings_weak_for_storylock_close.clone();
-                            let shared_status_for_storylock_close =
-                                Rc::clone(&shared_status_for_storylock);
-                            let notify_storylock_closed: Rc<dyn Fn()> = Rc::new(move || {
-                                let status = "StoryLock closed".to_string();
-                                *shared_status_for_storylock_close.borrow_mut() = status.clone();
-                                if let Some(host) = host_for_storylock_close.upgrade() {
-                                    host.set_connection_test_status(SharedString::from(
-                                        status.clone(),
-                                    ));
-                                }
-                                if let Some(settings) = settings_for_storylock_close.upgrade() {
-                                    settings.set_core_launch_status(SharedString::from(status));
-                                }
-                            });
-                            wire_storylock_core_callbacks(
-                                &core,
-                                core_package_dir_for_open_storylock.clone(),
-                                Rc::clone(&core_window_for_open_storylock),
-                                notify_storylock_closed,
-                                config.host_port,
-                            );
-                            if let Err(error) = core.show() {
-                                eprintln!("failed to show StoryLock Core window: {error}");
-                                return;
-                            }
-                            *core_window_for_open_storylock.borrow_mut() = Some(core);
-                        }
-                        Err(error) => eprintln!("failed to create StoryLock Core window: {error}"),
                     }
                 });
 

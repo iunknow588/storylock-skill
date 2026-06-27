@@ -138,26 +138,21 @@ pub(crate) fn wire_answer_editor_callbacks(
     package_dir: std::path::PathBuf,
 ) {
     let weak = dialog.as_weak();
-    dialog.on_close_requested(move || {
-        if let Some(dialog) = weak.upgrade() {
-            let _ = dialog.hide();
-        }
-    });
-
-    let weak = dialog.as_weak();
-    let core_for_save = core_weak.clone();
-    let save_dir = package_dir.clone();
-    dialog.on_save_requested(move || {
-        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_save.upgrade()) {
+    let core_for_window_close = core_weak.clone();
+    let close_dir = package_dir.clone();
+    dialog.window().on_close_requested(move || {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_window_close.upgrade()) {
             copy_answer_editor_to_core(&dialog, &core);
-            match save_current_node_from_window(&core, &save_dir) {
+            match save_current_node_from_window(&core, &close_dir) {
                 Ok(()) => core
                     .set_config_status(SharedString::from("Answer editor saved current question.")),
                 Err(error) => core.set_config_status(SharedString::from(format!(
                     "Answer editor save failed: {error}"
                 ))),
             }
+            let _ = dialog.hide();
         }
+        slint::CloseRequestResponse::HideWindow
     });
 
     let weak = dialog.as_weak();

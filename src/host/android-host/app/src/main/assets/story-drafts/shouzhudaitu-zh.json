@@ -2,18 +2,20 @@
   "version": "1",
   "templateId": "shouzhudaitu-zh",
   "language": "zh-CN",
-  "storyTitle": "\u5b88\u682a\u5f85\u5154",
-  "summary": "\u4e00\u540d\u519c\u592b\u5728\u7530\u91cc\u5076\u7136\u770b\u89c1\u5154\u5b50\u649e\u6811\u800c\u6b7b\uff0c\u4ece\u6b64\u653e\u5f03\u8015\u4f5c\uff0c\u5929\u5929\u5b88\u5728\u6811\u6869\u65c1\u7b49\u5f85\u4e0b\u4e00\u53ea\u5154\u5b50\u3002",
-  "storyPlot": "\u5b8b\u56fd\u6709\u4e2a\u519c\u592b\uff0c\u6b63\u5728\u7530\u91cc\u52b3\u4f5c\u3002\u5ffd\u7136\u4e00\u53ea\u5154\u5b50\u614c\u614c\u5f20\u5f20\u5730\u5954\u8dd1\uff0c\u649e\u4e0a\u7530\u8fb9\u7684\u6811\u6869\u6b7b\u4e86\u3002\u519c\u592b\u6361\u5230\u5154\u5b50\u540e\uff0c\u89c9\u5f97\u4e0d\u5fc5\u518d\u8f9b\u82e6\u8015\u4f5c\uff0c\u53ea\u8981\u5b88\u7740\u6811\u6869\u5c31\u80fd\u518d\u6b21\u5f97\u5230\u5154\u5b50\u3002\u4e8e\u662f\u4ed6\u628a\u9504\u5934\u4e22\u5728\u4e00\u8fb9\uff0c\u5929\u5929\u5750\u5728\u6811\u6869\u65c1\u7b49\u5f85\u3002\u65e5\u5b50\u4e00\u5929\u5929\u8fc7\u53bb\uff0c\u5154\u5b50\u6ca1\u6709\u518d\u649e\u4e0a\u6811\u6869\uff0c\u7530\u5730\u5374\u56e0\u4e3a\u65e0\u4eba\u8015\u4f5c\u800c\u8352\u829c\u3002\u8fd9\u4e2a\u6545\u4e8b\u63d0\u9192\u4eba\u4eec\uff0c\u5076\u7136\u5f97\u5230\u7684\u6536\u83b7\u4e0d\u80fd\u5f53\u4f5c\u957f\u671f\u53ef\u9760\u7684\u65b9\u6cd5\uff0c\u66f4\u4e0d\u80fd\u56e0\u4e3a\u4e00\u6b21\u4fa5\u5e78\u5c31\u653e\u5f03\u771f\u6b63\u9700\u8981\u6301\u7eed\u52aa\u529b\u7684\u4e8b\u60c5\u3002",
+  "storyTitle": "守株待兔",
+  "summary": "青年农夫阿福因一次偶然得到兔子，放弃耕作等待侥幸，最终田地荒芜，明白不可贪图侥幸的道理。",
+  "storyPlot": "公元前̲年4月5日，正值盛夏，宋国青石村的青年阿福带着他的老黄狗在田间耕作。阿福是个农夫，喜欢唱歌，尤其爱在劳作时哼唱小调。当时天气炎热，晴空万里，田野里蝉鸣阵阵，庄稼茂盛。突然，一只灰白色的野兔被一只饥饿的狐狸追赶，慌不择路，一头撞在田边的老梨树根上，折颈而死。阿福大喜，捡起兔子回家，与老黄狗一起饱餐一顿。此后，他放下农具，每天只守在梨树下，幻想再有兔子撞来。村里有个懒惰的痞子刘三，常来嘲笑他，还鼓动他继续等。阿福的母亲劝他，他不听。到了次年秋天，秋风萧瑟，落叶满地，阿福的田地彻底荒芜，颗粒无收。全村人都来围观他荒芜的田地，纷纷耻笑。阿福站在田边，满脸羞愧，终于明白不可贪图侥幸，决心以后勤劳耕作。",
   "memoryAnchors": [
-    "\u5b8b\u56fd",
-    "\u7530\u91cc",
-    "\u519c\u592b",
-    "\u5154\u5b50",
-    "\u6811\u6869",
-    "\u9504\u5934",
-    "\u8015\u4f5c",
-    "\u8352\u829c"
+    "公元前̲年",
+    "青石村",
+    "阿福",
+    "农夫",
+    "老黄狗",
+    "野兔",
+    "老梨树",
+    "刘三",
+    "次年秋天",
+    "勤劳耕作"
   ],
   "elementGroups": [
     "time",
@@ -28,1296 +30,1323 @@
   "nodes": [
     {
       "nodeId": "question-01",
-      "title": "\u95ee\u9898 01",
+      "title": "问题 01",
       "elementId": "time",
-      "question": "\u6545\u4e8b\u53d1\u751f\u5728\u4ec0\u4e48\u65f6\u4ee3\u80cc\u666f\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事发生在什么时间？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u5b8b\u56fd",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "公元前̲年",
       "acceptedAnswersLocalOnly": [
-        "\u5b8b\u56fd"
+        "公元前̲年",
+        "东周时期",
+        "4月5日",
+        "盛夏"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u5b8b\u56fd",
+          "text": "公元前̲年",
           "isCorrect": true
         },
         {
-          "text": "\u5510\u671d",
+          "text": "东周时期",
+          "isCorrect": true
+        },
+        {
+          "text": "4月5日",
+          "isCorrect": true
+        },
+        {
+          "text": "盛夏",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u660e\u671d",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6e05\u671d",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u73b0\u4ee3\u57ce\u5e02",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u6625\u79cb\u695a\u56fd",
-          "isCorrect": false
-        },
-        {
-          "text": "\u79e6\u671d",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 01-08",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 01-09",
+          "text": "反派",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-02",
-      "title": "\u95ee\u9898 02",
+      "title": "问题 02",
       "elementId": "place",
-      "question": "\u519c\u592b\u6700\u521d\u5728\u54ea\u91cc\u52b3\u4f5c\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事发生在什么地方？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u7530\u91cc",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "宋国",
       "acceptedAnswersLocalOnly": [
-        "\u7530\u91cc"
+        "宋国",
+        "青石村",
+        "田间",
+        "老梨树下"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u7530\u91cc",
+          "text": "宋国",
           "isCorrect": true
         },
         {
-          "text": "\u96c6\u5e02",
+          "text": "青石村",
+          "isCorrect": true
+        },
+        {
+          "text": "田间",
+          "isCorrect": true
+        },
+        {
+          "text": "老梨树下",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u6cb3\u8fb9",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u5c71\u8def",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u4e66\u623f",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u5ba2\u6808",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5ead\u9662",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 02-08",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 02-09",
+          "text": "反派",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-03",
-      "title": "\u95ee\u9898 03",
+      "title": "问题 03",
       "elementId": "person",
-      "question": "\u6545\u4e8b\u91cc\u7684\u4e3b\u8981\u4eba\u7269\u662f\u8c01\uff1f",
-      "recommendedSelectionMode": "single_select",
+      "question": "主人公的姓名是什么？",
+      "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 1,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u519c\u592b",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "阿福",
       "acceptedAnswersLocalOnly": [
-        "\u519c\u592b"
+        "阿福"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u519c\u592b",
+          "text": "阿福",
           "isCorrect": true
         },
         {
-          "text": "\u730e\u4eba",
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u6e14\u592b",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u5546\u4eba",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u4e66\u751f",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u5c06\u519b",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u7267\u7ae5",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 03-08",
+          "text": "皇帝的新装",
           "isCorrect": false
         },
         {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 03-09",
+          "text": "孔融让梨",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-04",
-      "title": "\u95ee\u9898 04",
+      "title": "问题 04",
       "elementId": "object",
-      "question": "\u5154\u5b50\u649e\u5230\u7684\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "主人公的职业是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u6811\u6869",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "农夫",
       "acceptedAnswersLocalOnly": [
-        "\u6811\u6869"
+        "农夫",
+        "种田人"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u6811\u6869",
+          "text": "农夫",
           "isCorrect": true
         },
         {
-          "text": "\u77f3\u5934",
+          "text": "种田人",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u7bf1\u7b06",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6728\u95e8",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u6c34\u8f66",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u8349\u579b",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u4e95\u6cbf",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 04-08",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 04-09",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-05",
-      "title": "\u95ee\u9898 05",
+      "title": "问题 05",
       "elementId": "event",
-      "question": "\u519c\u592b\u7b2c\u4e00\u6b21\u5f97\u5230\u5154\u5b50\u7684\u539f\u56e0\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "主人公的兴趣爱好是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u5154\u5b50\u5954\u8dd1\u65f6\u649e\u6811\u800c\u6b7b",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "唱歌",
       "acceptedAnswersLocalOnly": [
-        "\u5154\u5b50\u5954\u8dd1\u65f6\u649e\u6811\u800c\u6b7b"
+        "唱歌",
+        "哼小调"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u5154\u5b50\u5954\u8dd1\u65f6\u649e\u6811\u800c\u6b7b",
+          "text": "唱歌",
           "isCorrect": true
         },
         {
-          "text": "\u4ed6\u8bbe\u4e0b\u9677\u9631",
+          "text": "哼小调",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u4ed6\u7528\u5f13\u7bad\u5c04\u4e2d",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u522b\u4eba\u9001\u7ed9\u4ed6",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u5154\u5b50\u6389\u8fdb\u6c34\u91cc",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u72d7\u8ffd\u5230\u4e86\u5154\u5b50",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u5154\u5b50\u88ab\u7f51\u56f0\u4f4f",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 05-08",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 05-09",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-06",
-      "title": "\u95ee\u9898 06",
+      "title": "问题 06",
       "elementId": "reaction",
-      "question": "\u519c\u592b\u6361\u5230\u5154\u5b50\u540e\u7684\u60f3\u6cd5\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "主人公的主要助手是谁？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u5b88\u7740\u6811\u6869\u8fd8\u80fd\u518d\u7b49\u5230\u5154\u5b50",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "老黄狗",
       "acceptedAnswersLocalOnly": [
-        "\u5b88\u7740\u6811\u6869\u8fd8\u80fd\u518d\u7b49\u5230\u5154\u5b50"
+        "老黄狗",
+        "黄狗"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u5b88\u7740\u6811\u6869\u8fd8\u80fd\u518d\u7b49\u5230\u5154\u5b50",
+          "text": "老黄狗",
           "isCorrect": true
         },
         {
-          "text": "\u5e94\u8be5\u7acb\u523b\u5356\u6389\u7530\u5730",
+          "text": "黄狗",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u8981\u53bb\u62dc\u5e08\u5b66\u730e",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6811\u6869\u5fc5\u987b\u780d\u6389",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u5154\u5b50\u6bcf\u5929\u90fd\u4f1a\u4ece\u6cb3\u91cc\u6765",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u5e94\u8be5\u642c\u5230\u57ce\u91cc",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u8981\u628a\u5154\u5b50\u653e\u56de\u53bb",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 06-08",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 06-09",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-07",
-      "title": "\u95ee\u9898 07",
+      "title": "问题 07",
       "elementId": "choice",
-      "question": "\u519c\u592b\u540e\u6765\u653e\u5f03\u4e86\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "助手的职业或身份是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u8015\u4f5c",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "看门狗",
       "acceptedAnswersLocalOnly": [
-        "\u8015\u4f5c"
+        "看门狗",
+        "陪伴者"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u8015\u4f5c",
+          "text": "看门狗",
           "isCorrect": true
         },
         {
-          "text": "\u7761\u89c9",
+          "text": "陪伴者",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u5403\u996d",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u8d76\u96c6",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u8bfb\u4e66",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u4fee\u5c4b",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u517b\u725b",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 07-08",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 07-09",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-08",
-      "title": "\u95ee\u9898 08",
+      "title": "问题 08",
       "elementId": "result",
-      "question": "\u519c\u592b\u5929\u5929\u7b49\u5f85\u540e\u7684\u7ed3\u679c\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事中的反派是谁？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u7530\u5730\u8352\u829c\u4e14\u6ca1\u6709\u518d\u7b49\u5230\u5154\u5b50",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "刘三",
       "acceptedAnswersLocalOnly": [
-        "\u7530\u5730\u8352\u829c\u4e14\u6ca1\u6709\u518d\u7b49\u5230\u5154\u5b50"
+        "刘三",
+        "痞子"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u7530\u5730\u8352\u829c\u4e14\u6ca1\u6709\u518d\u7b49\u5230\u5154\u5b50",
+          "text": "刘三",
           "isCorrect": true
         },
         {
-          "text": "\u6536\u83b7\u66f4\u591a\u7cae\u98df",
+          "text": "痞子",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u6293\u5230\u5f88\u591a\u5154\u5b50",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6210\u4e86\u5bcc\u4eba",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u6811\u6869\u5f00\u82b1",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u90bb\u5c45\u90fd\u6548\u4eff\u4ed6",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u5154\u5b50\u4e3b\u52a8\u8fdb\u5c4b",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 08-08",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5b88\u682a\u5f85\u5154\u5e72\u6270\u9879 08-09",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-09",
-      "title": "\u95ee\u9898 09",
+      "title": "问题 09",
       "elementId": "time",
-      "question": "\u519c\u592b\u662f\u5728\u4ec0\u4e48\u65f6\u5019\u5f00\u59cb\u4e0d\u518d\u4e13\u5fc3\u8015\u7530\u7684\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "反派的职业或行为是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u6361\u5230\u5154\u5b50\u4ee5\u540e",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "游手好闲",
       "acceptedAnswersLocalOnly": [
-        "\u6361\u5230\u5154\u5b50\u4ee5\u540e"
+        "游手好闲",
+        "嘲笑人"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u6361\u5230\u5154\u5b50\u4ee5\u540e",
+          "text": "游手好闲",
           "isCorrect": true
         },
         {
-          "text": "\u6625\u8015\u524d\u4e00\u5929",
+          "text": "嘲笑人",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u79cb\u6536\u4ee5\u540e",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u642c\u5bb6\u90a3\u5929",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u96c6\u5e02\u6563\u540e",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u4e0b\u96e8\u4e4b\u524d",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u90bb\u5c45\u529d\u544a\u540e",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u79cb\u98ce\u8d77\u65f6",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5929\u4eae\u4ee5\u524d",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-10",
-      "title": "\u95ee\u9898 10",
+      "title": "问题 10",
       "elementId": "place",
-      "question": "\u519c\u592b\u540e\u6765\u5929\u5929\u5b88\u5728\u4ec0\u4e48\u5730\u65b9\u7b49\u5f85\u5154\u5b50\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "事件的起因是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u6811\u6869\u65c1",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "兔子撞树",
       "acceptedAnswersLocalOnly": [
-        "\u6811\u6869\u65c1"
+        "兔子撞树",
+        "狐狸追赶"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u6811\u6869\u65c1",
+          "text": "兔子撞树",
           "isCorrect": true
         },
         {
-          "text": "\u6cb3\u5cb8\u8fb9",
+          "text": "狐狸追赶",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u8c37\u4ed3\u91cc",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6751\u53e3\u6865\u8fb9",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u5c71\u811a\u4e0b",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u96c6\u5e02\u65c1",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u5c4b\u6a90\u4e0b",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u83dc\u5703\u8fb9",
-          "isCorrect": false
-        },
-        {
-          "text": "\u4e95\u53f0\u8fb9",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-11",
-      "title": "\u95ee\u9898 11",
+      "title": "问题 11",
       "elementId": "person",
-      "question": "\u662f\u8c01\u56e0\u4e3a\u4e00\u6b21\u5076\u7136\u6536\u83b7\u5c31\u6539\u53d8\u4e86\u505a\u6cd5\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "事件发生时的天气如何？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u519c\u592b",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "炎热",
       "acceptedAnswersLocalOnly": [
-        "\u519c\u592b"
+        "炎热",
+        "晴朗"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u519c\u592b",
+          "text": "炎热",
           "isCorrect": true
         },
         {
-          "text": "\u6a35\u592b",
+          "text": "晴朗",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u5546\u4eba",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u730e\u4eba",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u4e66\u751f",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u6e14\u592b",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u90bb\u5c45",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u7267\u7ae5",
-          "isCorrect": false
-        },
-        {
-          "text": "\u53bf\u540f",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-12",
-      "title": "\u95ee\u9898 12",
+      "title": "问题 12",
       "elementId": "object",
-      "question": "\u519c\u592b\u628a\u4ec0\u4e48\u519c\u5177\u4e22\u5728\u4e86\u4e00\u8fb9\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "事件发生时的环境是怎样的？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u9504\u5934",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "蝉鸣阵阵",
       "acceptedAnswersLocalOnly": [
-        "\u9504\u5934"
+        "蝉鸣阵阵",
+        "庄稼茂盛"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u9504\u5934",
+          "text": "蝉鸣阵阵",
           "isCorrect": true
         },
         {
-          "text": "\u9570\u5200",
+          "text": "庄稼茂盛",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u94c1\u9539",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6241\u62c5",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u6c34\u6876",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u7af9\u7b50",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u7281\u8019",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u8349\u5e3d",
-          "isCorrect": false
-        },
-        {
-          "text": "\u7ef3\u7d22",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-13",
-      "title": "\u95ee\u9898 13",
+      "title": "问题 13",
       "elementId": "event",
-      "question": "\u5728\u4ed6\u5b88\u7740\u6811\u6869\u4e4b\u540e\uff0c\u5154\u5b50\u6709\u6ca1\u6709\u518d\u6b21\u649e\u4e0a\u53bb\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "事件发生时主人公的心情如何？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u6ca1\u6709\u518d\u649e\u4e0a",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "大喜",
       "acceptedAnswersLocalOnly": [
-        "\u6ca1\u6709\u518d\u649e\u4e0a"
+        "大喜",
+        "高兴"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u6ca1\u6709\u518d\u649e\u4e0a",
+          "text": "大喜",
           "isCorrect": true
         },
         {
-          "text": "\u8fde\u7eed\u4e09\u5929\u90fd\u649e\u4e0a",
+          "text": "高兴",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u7acb\u523b\u53c8\u6765\u4e00\u53ea",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6bcf\u6708\u90fd\u4f1a\u6765\u4e00\u53ea",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u53ea\u5728\u96e8\u5929\u649e\u4e0a",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u88ab\u519c\u592b\u8d76\u8dd1\u4e86",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u6539\u53bb\u6cb3\u8fb9\u649e\u77f3\u5934",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u665a\u4e0a\u53c8\u6765\u4e24\u53ea",
-          "isCorrect": false
-        },
-        {
-          "text": "\u88ab\u90bb\u5c45\u5148\u6361\u8d70",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-14",
-      "title": "\u95ee\u9898 14",
+      "title": "问题 14",
       "elementId": "reaction",
-      "question": "\u519c\u592b\u5b88\u5728\u6811\u6869\u65c1\u65f6\u62b1\u7740\u4ec0\u4e48\u4fa5\u5e78\u60f3\u6cd5\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事的发展经过是怎样的？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u4ee5\u4e3a\u8fd8\u4f1a\u767d\u6361\u5154\u5b50",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "放弃耕作",
       "acceptedAnswersLocalOnly": [
-        "\u4ee5\u4e3a\u8fd8\u4f1a\u767d\u6361\u5154\u5b50"
+        "放弃耕作",
+        "每日守株"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u4ee5\u4e3a\u8fd8\u4f1a\u767d\u6361\u5154\u5b50",
+          "text": "放弃耕作",
           "isCorrect": true
         },
         {
-          "text": "\u4ee5\u4e3a\u6811\u4f1a\u7ed3\u679c\u5b50",
+          "text": "每日守株",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u4ee5\u4e3a\u5e84\u7a3c\u4f1a\u81ea\u5df1\u6210\u719f",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u4ee5\u4e3a\u90bb\u5c45\u4f1a\u5e2e\u4ed6\u8015\u7530",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u4ee5\u4e3a\u5154\u5b50\u4f1a\u9001\u7cae\u98df",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u4ee5\u4e3a\u56fd\u541b\u4f1a\u8d4f\u8d50",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u4ee5\u4e3a\u6811\u6869\u4f1a\u79fb\u52a8",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u4ee5\u4e3a\u7530\u5730\u4e0d\u7528\u7167\u770b",
-          "isCorrect": false
-        },
-        {
-          "text": "\u4ee5\u4e3a\u9504\u5934\u4f1a\u81ea\u5df1\u5e72\u6d3b",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-15",
-      "title": "\u95ee\u9898 15",
+      "title": "问题 15",
       "elementId": "choice",
-      "question": "\u9762\u5bf9\u5076\u7136\u5f97\u5230\u7684\u5154\u5b50\uff0c\u519c\u592b\u6700\u7ec8\u9009\u62e9\u4e86\u4ec0\u4e48\u505a\u6cd5\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事的高潮是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u5b88\u7740\u6811\u6869\u7b49\u5f85",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "遭到全村耻笑",
       "acceptedAnswersLocalOnly": [
-        "\u5b88\u7740\u6811\u6869\u7b49\u5f85"
+        "遭到全村耻笑",
+        "田地荒芜"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u5b88\u7740\u6811\u6869\u7b49\u5f85",
+          "text": "遭到全村耻笑",
           "isCorrect": true
         },
         {
-          "text": "\u7ee7\u7eed\u8ffd\u5154\u5b50",
+          "text": "田地荒芜",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u7acb\u523b\u53bb\u5356\u7530\u5730",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u4e0a\u5c71\u780d\u67f4",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u8bf7\u4eba\u6765\u5360\u535c",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u6539\u884c\u7ecf\u5546",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u4fee\u4e00\u9053\u7bef\u7b06",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u6316\u5751\u6349\u9c7c",
-          "isCorrect": false
-        },
-        {
-          "text": "\u53bb\u5b66\u5c04\u7bad",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-16",
-      "title": "\u95ee\u9898 16",
+      "title": "问题 16",
       "elementId": "result",
-      "question": "\u519c\u592b\u4e0d\u518d\u8015\u4f5c\u540e\uff0c\u7530\u5730\u6700\u7ec8\u53d8\u6210\u4e86\u4ec0\u4e48\u6837\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事的转折事件是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u8352\u829c",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "母亲劝告",
       "acceptedAnswersLocalOnly": [
-        "\u8352\u829c"
+        "母亲劝告",
+        "刘三嘲笑"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u8352\u829c",
+          "text": "母亲劝告",
           "isCorrect": true
         },
         {
-          "text": "\u4e30\u6536\u6ee1\u4ed3",
+          "text": "刘三嘲笑",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u957f\u6ee1\u679c\u6811",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u53d8\u6210\u9c7c\u5858",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u6210\u4e86\u96c6\u5e02",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u94fa\u6210\u5927\u9053",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u76d6\u8d77\u65b0\u5c4b",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5316\u4f5c\u82b1\u56ed",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5f15\u6765\u98de\u9e1f\u6210\u7fa4",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-17",
-      "title": "\u95ee\u9898 17",
+      "title": "问题 17",
       "elementId": "time",
-      "question": "\u6545\u4e8b\u91cc\u519c\u592b\u5b88\u7740\u6811\u6869\u65f6\uff0c\u65e5\u5b50\u662f\u600e\u6837\u6162\u6162\u8fc7\u53bb\u7684\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "转折发生在什么时间？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u4e00\u5929\u5929\u8fc7\u53bb",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "次年秋天",
       "acceptedAnswersLocalOnly": [
-        "\u4e00\u5929\u5929\u8fc7\u53bb"
+        "次年秋天",
+        "一年后"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u4e00\u5929\u5929\u8fc7\u53bb",
+          "text": "次年秋天",
           "isCorrect": true
         },
         {
-          "text": "\u4e00\u591c\u4e4b\u95f4\u7ed3\u675f",
+          "text": "一年后",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u53ea\u8fc7\u4e86\u534a\u4e2a\u65f6\u8fb0",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u53ea\u7b49\u5230\u4e2d\u5348",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u4e0d\u8fc7\u4e09\u58f0\u9f13",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u7247\u523b\u4e4b\u540e",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u8f6c\u773c\u5230\u9664\u5915",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5728\u68a6\u91cc\u8fc7\u53bb",
-          "isCorrect": false
-        },
-        {
-          "text": "\u968f\u7740\u96c6\u5e02\u6563\u53bb",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-18",
-      "title": "\u95ee\u9898 18",
+      "title": "问题 18",
       "elementId": "place",
-      "question": "\u5154\u5b50\u6700\u521d\u649e\u6b7b\u7684\u4f4d\u7f6e\u66f4\u51c6\u786e\u5730\u8bf4\u662f\u5728\u7530\u91cc\u7684\u54ea\u91cc\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "转折发生在什么地点？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u7530\u8fb9\u7684\u6811\u6869\u65c1",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "田边",
       "acceptedAnswersLocalOnly": [
-        "\u7530\u8fb9\u7684\u6811\u6869\u65c1"
+        "田边",
+        "老梨树下"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u7530\u8fb9\u7684\u6811\u6869\u65c1",
+          "text": "田边",
           "isCorrect": true
         },
         {
-          "text": "\u9662\u95e8\u7684\u77f3\u9636\u8fb9",
+          "text": "老梨树下",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u6cb3\u4e2d\u592e\u7684\u5c0f\u821f\u8fb9",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u5c71\u6d1e\u53e3\u7684\u7bef\u7b06\u8fb9",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u6751\u53e3\u53e4\u4e95\u8fb9",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u9ea6\u4ed3\u540e\u7684\u67f4\u5806\u8fb9",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u5b98\u9053\u65c1\u7684\u9a7f\u7ad9\u8fb9",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5c4b\u540e\u7684\u7af9\u6797\u8fb9",
-          "isCorrect": false
-        },
-        {
-          "text": "\u6865\u5934\u7684\u680f\u6746\u8fb9",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-19",
-      "title": "\u95ee\u9898 19",
+      "title": "问题 19",
       "elementId": "person",
-      "question": "\u8fd9\u4e2a\u6545\u4e8b\u4e3b\u8981\u662f\u5728\u63d0\u9192\u54ea\u4e00\u7c7b\u505a\u4e8b\u7684\u4eba\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "转折时的天气如何？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u60f3\u9760\u4fa5\u5e78\u6210\u529f\u7684\u4eba",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "秋风",
       "acceptedAnswersLocalOnly": [
-        "\u60f3\u9760\u4fa5\u5e78\u6210\u529f\u7684\u4eba"
+        "秋风",
+        "萧瑟"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u60f3\u9760\u4fa5\u5e78\u6210\u529f\u7684\u4eba",
+          "text": "秋风",
           "isCorrect": true
         },
         {
-          "text": "\u53ea\u4f1a\u5199\u5b57\u7684\u4eba",
+          "text": "萧瑟",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u7ecf\u5e38\u8fdc\u6e38\u7684\u4eba",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u559c\u6b22\u517b\u82b1\u7684\u4eba",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u64c5\u957f\u6355\u9c7c\u7684\u4eba",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u603b\u7231\u6536\u85cf\u7684\u4eba",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u4e13\u95e8\u4fee\u6865\u7684\u4eba",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5584\u4e8e\u7b97\u8d26\u7684\u4eba",
-          "isCorrect": false
-        },
-        {
-          "text": "\u53ea\u4f1a\u5531\u6b4c\u7684\u4eba",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-20",
-      "title": "\u95ee\u9898 20",
+      "title": "问题 20",
       "elementId": "object",
-      "question": "\u6545\u4e8b\u91cc\u65e2\u89c1\u8bc1\u5076\u7136\u6536\u83b7\u53c8\u8bf1\u53d1\u8bef\u5224\u7684\u5173\u952e\u7269\u4ef6\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "转折时的环境是怎样的？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u6811\u6869",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "落叶满地",
       "acceptedAnswersLocalOnly": [
-        "\u6811\u6869"
+        "落叶满地",
+        "田地荒芜"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u6811\u6869",
+          "text": "落叶满地",
           "isCorrect": true
         },
         {
-          "text": "\u8c37\u4ed3",
+          "text": "田地荒芜",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u6728\u95e8",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u77f3\u78e8",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u6e14\u7f51",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u957f\u51f3",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u6cb9\u706f",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u7bef\u7b06",
-          "isCorrect": false
-        },
-        {
-          "text": "\u7af9\u7bee",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-21",
-      "title": "\u95ee\u9898 21",
+      "title": "问题 21",
       "elementId": "event",
-      "question": "\u519c\u592b\u5728\u8fd9\u4ef6\u4e8b\u91cc\u72af\u4e0b\u7684\u6838\u5fc3\u5224\u65ad\u9519\u8bef\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事结束的时间是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u628a\u5076\u7136\u5f53\u6210\u5e38\u6cd5",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "次年秋天",
       "acceptedAnswersLocalOnly": [
-        "\u628a\u5076\u7136\u5f53\u6210\u5e38\u6cd5"
+        "次年秋天",
+        "收割季节"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u628a\u5076\u7136\u5f53\u6210\u5e38\u6cd5",
+          "text": "次年秋天",
           "isCorrect": true
         },
         {
-          "text": "\u628a\u52b3\u52a8\u5f53\u6210\u60e9\u7f5a",
+          "text": "收割季节",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u90bb\u5c45\u5f53\u6210\u5bf9\u624b",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u5b63\u8282\u5f53\u6210\u8ff7\u4fe1",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u9504\u5934\u5f53\u6210\u6446\u8bbe",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u5e84\u7a3c\u5f53\u6210\u91ce\u8349",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u5154\u5b50\u5f53\u6210\u5bb6\u755c",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u6811\u6869\u5f53\u6210\u795e\u7075",
-          "isCorrect": false
-        },
-        {
-          "text": "\u628a\u8352\u5730\u5f53\u6210\u798f\u6c14",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-22",
-      "title": "\u95ee\u9898 22",
+      "title": "问题 22",
       "elementId": "reaction",
-      "question": "\u542c\u5b8c\u5b88\u682a\u5f85\u5154\u540e\uff0c\u4eba\u4eec\u6700\u5e94\u8be5\u5f62\u6210\u4ec0\u4e48\u8ba4\u8bc6\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事结束后的地点在哪里？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u4e0d\u80fd\u5fc3\u5b58\u4fa5\u5e78",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "荒芜的田地",
       "acceptedAnswersLocalOnly": [
-        "\u4e0d\u80fd\u5fc3\u5b58\u4fa5\u5e78"
+        "荒芜的田地",
+        "村口"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u4e0d\u80fd\u5fc3\u5b58\u4fa5\u5e78",
+          "text": "荒芜的田地",
           "isCorrect": true
         },
         {
-          "text": "\u5e94\u8be5\u8d76\u5feb\u5356\u5154\u5b50",
+          "text": "村口",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u5e94\u8be5\u6a21\u4eff\u519c\u592b",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u5e94\u8be5\u56f4\u7740\u6811\u8df3\u821e",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u5e94\u8be5\u780d\u6389\u6240\u6709\u6811\u6869",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u5e94\u8be5\u6c38\u8fdc\u4e0d\u79cd\u5730",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u5e94\u8be5\u5929\u5929\u76ef\u7740\u5154\u5b50\u8dd1",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5e94\u8be5\u53ea\u76f8\u4fe1\u8fd0\u6c14",
-          "isCorrect": false
-        },
-        {
-          "text": "\u5e94\u8be5\u628a\u7530\u6539\u6210\u9053\u8def",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-23",
-      "title": "\u95ee\u9898 23",
+      "title": "问题 23",
       "elementId": "choice",
-      "question": "\u5982\u679c\u518d\u6b21\u9047\u5230\u5076\u7136\u6536\u83b7\uff0c\u66f4\u5408\u7406\u7684\u9009\u62e9\u5e94\u5f53\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "故事结束后主人公的心情如何？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u7ee7\u7eed\u8e0f\u5b9e\u8015\u4f5c",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "羞愧",
       "acceptedAnswersLocalOnly": [
-        "\u7ee7\u7eed\u8e0f\u5b9e\u8015\u4f5c"
+        "羞愧",
+        "决心勤劳"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u7ee7\u7eed\u8e0f\u5b9e\u8015\u4f5c",
+          "text": "羞愧",
           "isCorrect": true
         },
         {
-          "text": "\u505c\u4e0b\u6240\u6709\u52b3\u4f5c",
+          "text": "决心勤劳",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u5de5\u5177\u5168\u90e8\u6254\u6389",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u53ea\u5b88\u5728\u6811\u65c1\u7b49\u8fd0\u6c14",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u642c\u53bb\u6df1\u5c71\u8eb2\u8d77\u6765",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u628a\u5e84\u7a3c\u5168\u62d4\u6389",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u96c7\u4eba\u66ff\u81ea\u5df1\u5e7b\u60f3",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u6539\u7528\u5360\u535c\u79cd\u7530",
-          "isCorrect": false
-        },
-        {
-          "text": "\u56db\u5904\u5ba3\u626c\u6377\u5f84",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
     },
     {
       "nodeId": "question-24",
-      "title": "\u95ee\u9898 24",
+      "title": "问题 24",
       "elementId": "result",
-      "question": "\u5b88\u682a\u5f85\u5154\u6700\u540e\u7559\u4e0b\u7684\u6838\u5fc3\u5bd3\u610f\u7a76\u7adf\u662f\u4ec0\u4e48\uff1f",
-      "recommendedSelectionMode": "single_select",
-      "recommendedCorrectCount": 1,
+      "question": "主人公得到的教训是什么？",
+      "recommendedSelectionMode": "multi_select",
+      "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
-      "recallPriority": "normal",
+      "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "\u5b88\u682a\u5f85\u5154\u6f14\u793a\u6a21\u677f\uff1b\u6bcf\u9898 9 \u4e2a\u5019\u9009\u7b54\u6848\uff0c1 \u4e2a\u6b63\u786e\u7b54\u6848\u3002",
-      "canonicalAnswerLocalOnly": "\u4e0d\u80fd\u628a\u5076\u7136\u6536\u83b7\u5f53\u4f5c\u957f\u671f\u65b9\u6cd5",
+      "editorNotes": "守株待兔模板；全部题目为多选，依据故事模板文档配置。",
+      "canonicalAnswerLocalOnly": "不可侥幸",
       "acceptedAnswersLocalOnly": [
-        "\u4e0d\u80fd\u628a\u5076\u7136\u6536\u83b7\u5f53\u4f5c\u957f\u671f\u65b9\u6cd5"
+        "不可侥幸",
+        "勤劳致富"
       ],
       "answerOptionsLocalOnly": [
         {
-          "text": "\u4e0d\u80fd\u628a\u5076\u7136\u6536\u83b7\u5f53\u4f5c\u957f\u671f\u65b9\u6cd5",
+          "text": "不可侥幸",
           "isCorrect": true
         },
         {
-          "text": "\u8fd0\u6c14\u6bd4\u52b3\u52a8\u66f4\u53ef\u9760",
+          "text": "勤劳致富",
+          "isCorrect": true
+        },
+        {
+          "text": "姓名",
           "isCorrect": false
         },
         {
-          "text": "\u53ea\u8981\u7b49\u5f85\u5c31\u4f1a\u4e30\u6536",
+          "text": "职业",
           "isCorrect": false
         },
         {
-          "text": "\u6811\u6869\u80fd\u5e26\u6765\u98df\u7269",
+          "text": "爱好",
           "isCorrect": false
         },
         {
-          "text": "\u653e\u5f03\u8015\u79cd\u624d\u66f4\u8f7b\u677e",
+          "text": "助手",
           "isCorrect": false
         },
         {
-          "text": "\u4eba\u4eba\u90fd\u5e94\u6a21\u4eff\u519c\u592b",
+          "text": "反派",
           "isCorrect": false
         },
         {
-          "text": "\u8352\u5730\u81ea\u7136\u4f1a\u957f\u7cae\u98df",
+          "text": "天气",
           "isCorrect": false
         },
         {
-          "text": "\u5154\u5b50\u4f1a\u53cd\u590d\u9001\u4e0a\u95e8",
-          "isCorrect": false
-        },
-        {
-          "text": "\u4fa5\u5e78\u6700\u9002\u5408\u8fc7\u65e5\u5b50",
+          "text": "皇帝的新装",
           "isCorrect": false
         }
       ]
