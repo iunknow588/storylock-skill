@@ -1,4 +1,4 @@
-#![cfg_attr(all(windows, feature = "ui-slint"), windows_subsystem = "windows")]
+#![cfg_attr(windows, windows_subsystem = "windows")]
 
 use anyhow::{anyhow, Context, Result};
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
@@ -22,26 +22,24 @@ use windows_sys::Win32::Security::Cryptography::{
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{MessageBoxW, IDYES, MB_ICONQUESTION, MB_YESNO};
 
+mod host_runtime;
 #[cfg(feature = "ui-slint")]
 mod slint_ui;
-mod host_runtime;
-pub(crate) use host_runtime::state::{ProtectedEnvelope, WindowsHostConfig};
-use host_runtime::ui::{
-    dpapi_protect_to_base64 as runtime_dpapi_protect_to_base64,
-    dpapi_unprotect_from_base64 as runtime_dpapi_unprotect_from_base64,
-    main as host_runtime_main,
-};
 #[cfg(test)]
 use host_runtime::io::{question_bank_import, ui_status};
 #[cfg(test)]
 use host_runtime::local_core::{
-    authorize_local_action, create_grid_verification, execute_request,
-    revoke_local_authorization,
+    authorize_local_action, create_grid_verification, execute_request, revoke_local_authorization,
 };
 #[cfg(test)]
 use host_runtime::state::{load_or_init_question_bank, WindowsHostRuntime};
+pub(crate) use host_runtime::state::{ProtectedEnvelope, WindowsHostConfig};
 #[cfg(test)]
 use host_runtime::story_templates::{story_template_candidates, story_template_generate};
+use host_runtime::ui::{
+    dpapi_protect_to_base64 as runtime_dpapi_protect_to_base64,
+    dpapi_unprotect_from_base64 as runtime_dpapi_unprotect_from_base64, main as host_runtime_main,
+};
 
 fn main() -> Result<()> {
     host_runtime_main()

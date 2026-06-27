@@ -40,7 +40,10 @@ pub(crate) fn story_template_generate(runtime: &WindowsHostRuntime, request: &Va
     let framework = generate_story_framework(runtime, request);
     let generator_status = story_template_generator_status(runtime);
     let candidate = template_candidate_payload(&request_id, framework, &generator_status);
-    match runtime.secret_store.append_story_template_candidate(&candidate) {
+    match runtime
+        .secret_store
+        .append_story_template_candidate(&candidate)
+    {
         Ok(()) => json!({
             "requestId": request_id,
             "status": "success",

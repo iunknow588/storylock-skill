@@ -138,7 +138,10 @@ pub(crate) fn ensure_manifest_lists_required_files(package_dir: &Path) -> Result
         .cloned()
         .unwrap_or_default();
     for required_file in required_storylock_package_files() {
-        if !files.iter().any(|item| item.as_str() == Some(required_file)) {
+        if !files
+            .iter()
+            .any(|item| item.as_str() == Some(required_file))
+        {
             files.push(json!(required_file));
         }
     }

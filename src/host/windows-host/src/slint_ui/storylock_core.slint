@@ -1,12 +1,16 @@
-import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
-import { MenuButton, SubMenuButton, InfoRow, FormRow, EditableRow, PathBrowseRow, LargeEditableText, QuestionTableRow, QuestionIdTableRow, QuestionOverviewGrid, QuestionConfigPanel, ActionButton, SettingsIconButton, StaticRow, LogPanel } from "common.slint";
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { MenuButton, SubMenuButton, SettingsIconButton } from "common.slint";
+import { StoryDraftPage, QuestionOverviewPage, QuestionEditorPage } from "storylock_core/pages_story.slint";
+import { ProtectedObjectsPage, ObjectEditorPage } from "storylock_core/pages_objects.slint";
+import { LearningPage, ExportPage } from "storylock_core/pages_learning_export.slint";
+import { StoryLockCoreSettingsDialog, AnswerEditorDialog } from "storylock_core/dialogs.slint";
 export component StoryLockCoreApp inherits Window {
         in-out property <int> active-page: 1;
         in-out property <string> language: "zh";
         property <bool> is-zh: language == "zh";
-        in-out property <string> story-title: "守株待兔";
-        in-out property <string> story-summary: "一名农夫在田里偶然撞见兔子撞树而死，从此放弃耕作，天天守在树桩旁等待下一只兔子。";
-        in-out property <string> story-plot: "宋国有个农夫，正在田里劳作。忽然一只兔子慌慌张张地奔跑，撞上田边的树桩死了。农夫捡到兔子后，觉得不必再辛苦耕作，只要守着树桩就能得到兔子。于是他把锄头丢在一边，天天坐在树桩旁等待，结果田地荒芜，始终没有再等到兔子。这个故事用来演示如何把 24 个问题串成一个可以反复回忆的本地故事模板。";
+        in-out property <string> story-title: "Guarding the Tree Stump";
+        in-out property <string> story-summary: "A farmer sees a rabbit crash into a tree stump and waits there instead of working.";
+        in-out property <string> story-plot: "A farmer was working in the field when a rabbit ran into a tree stump and died. He then waited by the stump every day instead of farming, but no second rabbit ever came. This sample story links 24 questions into one repeatable memory draft.";
         in-out property <string> memory-anchors: "spring / station / blue cup / recorder card / departure bell";
         in-out property <string> element-group: "time,place,person,object,event,reaction,choice,result";
         in-out property <int> node-index: 0;
@@ -136,9 +140,9 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> resource-catalog-path: "resource-catalog.json";
         in-out property <string> learning-policy-path: "learning-policy.json";
         in-out property <string> export-package-dir: "";
-        in-out property <string> temp-draft-label: is-zh ? "暂存草稿" : "Save Draft";
+        in-out property <string> temp-draft-label: "Save Draft";
         in-out property <bool> temp-draft-cooling: false;
-        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "保护对象" : "Protected Objects") : active-page == 3 ? (is-zh ? "学习设置" : "Learning Settings") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案配置" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
+        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "受保护对象" : "Protected Objects") : active-page == 3 ? (is-zh ? "学习设置" : "Learning Settings") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案编辑" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
         callback close-requested();
         callback save-temp-draft();
         callback previous-node();
@@ -194,12 +198,12 @@ export component StoryLockCoreApp inherits Window {
                         clicked => { root.active-page = 0; }
                     }
                     MenuButton {
-                        label: root.is-zh ? "保护对象" : "Protected Objects";
+                        label: root.is-zh ? "受保护对象" : "Protected Objects";
                         selected: root.active-page == 2;
                         clicked => { root.active-page = 2; }
                     }
                     SubMenuButton {
-                        label: root.is-zh ? "普通授权对象" : "Normal Objects";
+                        label: root.is-zh ? "普通对象" : "Normal Objects";
                         selected: root.active-page == 2 && root.resource-group == "normal";
                         clicked => {
                             root.select-resource-group("normal");
@@ -226,7 +230,7 @@ export component StoryLockCoreApp inherits Window {
                         clicked => { root.save-temp-draft(); }
                     }
                     MenuButton {
-                        label: root.is-zh ? "学习设置" : "Learning";
+                        label: root.is-zh ? "学习" : "Learning";
                         selected: root.active-page == 3;
                         clicked => { root.active-page = 3; }
                     }
@@ -281,461 +285,160 @@ export component StoryLockCoreApp inherits Window {
                         height: 374px;
                         background: #eef3f5;
 
-                        if root.active-page == 0: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 12px;
-                            EditableRow { name: root.is-zh ? "故事标题" : "Story Title"; value <=> root.story-title; }
-                            EditableRow { name: root.is-zh ? "故事摘要" : "Summary"; value <=> root.story-summary; }
-                            LargeEditableText { name: root.is-zh ? "完整故事情节" : "Full Story Plot"; value <=> root.story-plot; }
+                        if root.active-page == 0: StoryDraftPage {
+                            is-zh: root.is-zh;
+                            story-title <=> root.story-title;
+                            story-summary <=> root.story-summary;
+                            story-plot <=> root.story-plot;
                         }
 
-                        if root.active-page == 1: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 12px;
-                            QuestionOverviewGrid {
-                                selected-question <=> root.selected-question;
-                                question-1: root.question-1;
-                                question-2: root.question-2;
-                                question-3: root.question-3;
-                                question-4: root.question-4;
-                                question-5: root.question-5;
-                                question-6: root.question-6;
-                                question-7: root.question-7;
-                                question-8: root.question-8;
-                                question-9: root.question-9;
-                                question-10: root.question-10;
-                                question-11: root.question-11;
-                                question-12: root.question-12;
-                                question-13: root.question-13;
-                                question-14: root.question-14;
-                                question-15: root.question-15;
-                                question-16: root.question-16;
-                                question-17: root.question-17;
-                                question-18: root.question-18;
-                                question-19: root.question-19;
-                                question-20: root.question-20;
-                                question-21: root.question-21;
-                                question-22: root.question-22;
-                                question-23: root.question-23;
-                                question-24: root.question-24;
-                                select-node(value) => {
-                                    root.select-node(value);
-                                }
+                        if root.active-page == 1: QuestionOverviewPage {
+                            is-zh: root.is-zh;
+                            selected-question <=> root.selected-question;
+                            question-1: root.question-1;
+                            question-2: root.question-2;
+                            question-3: root.question-3;
+                            question-4: root.question-4;
+                            question-5: root.question-5;
+                            question-6: root.question-6;
+                            question-7: root.question-7;
+                            question-8: root.question-8;
+                            question-9: root.question-9;
+                            question-10: root.question-10;
+                            question-11: root.question-11;
+                            question-12: root.question-12;
+                            question-13: root.question-13;
+                            question-14: root.question-14;
+                            question-15: root.question-15;
+                            question-16: root.question-16;
+                            question-17: root.question-17;
+                            question-18: root.question-18;
+                            question-19: root.question-19;
+                            question-20: root.question-20;
+                            question-21: root.question-21;
+                            question-22: root.question-22;
+                            question-23: root.question-23;
+                            question-24: root.question-24;
+                            select-node(value) => {
+                                root.select-node(value);
                             }
                         }
 
-                        if root.active-page == 6: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 8px;
-                            QuestionConfigPanel {
-                                panel-height: 330px;
-                                selected-question <=> root.selected-question;
-                                question-text <=> root.question-text;
-                                answer-1 <=> root.answer-1;
-                                answer-1-state <=> root.answer-1-state;
-                                answer-2 <=> root.answer-2;
-                                answer-2-state <=> root.answer-2-state;
-                                answer-3 <=> root.answer-3;
-                                answer-3-state <=> root.answer-3-state;
-                                answer-4 <=> root.answer-4;
-                                answer-4-state <=> root.answer-4-state;
-                                answer-5 <=> root.answer-5;
-                                answer-5-state <=> root.answer-5-state;
-                                answer-6 <=> root.answer-6;
-                                answer-6-state <=> root.answer-6-state;
-                                answer-7 <=> root.answer-7;
-                                answer-7-state <=> root.answer-7-state;
-                                answer-8 <=> root.answer-8;
-                                answer-8-state <=> root.answer-8-state;
-                                answer-9 <=> root.answer-9;
-                                answer-9-state <=> root.answer-9-state;
-                                previous-node => { root.previous-node(); }
-                                next-node => { root.next-node(); }
-                                select-node(value) => { root.select-node(value); }
-                            }
-                            HorizontalBox {
-                                spacing: 10px;
-                                Rectangle { width: 164px; height: 1px; background: transparent; }
-                                ActionButton {
-                                    label: root.is-zh ? "返回问题概览" : "Back to Overview";
-                                    primary: false;
-                                    button-width: 150px;
-                                    clicked => { root.active-page = 1; }
-                                }
+                        if root.active-page == 6: QuestionEditorPage {
+                            is-zh: root.is-zh;
+                            selected-question <=> root.selected-question;
+                            question-text <=> root.question-text;
+                            answer-1 <=> root.answer-1;
+                            answer-1-state <=> root.answer-1-state;
+                            answer-2 <=> root.answer-2;
+                            answer-2-state <=> root.answer-2-state;
+                            answer-3 <=> root.answer-3;
+                            answer-3-state <=> root.answer-3-state;
+                            answer-4 <=> root.answer-4;
+                            answer-4-state <=> root.answer-4-state;
+                            answer-5 <=> root.answer-5;
+                            answer-5-state <=> root.answer-5-state;
+                            answer-6 <=> root.answer-6;
+                            answer-6-state <=> root.answer-6-state;
+                            answer-7 <=> root.answer-7;
+                            answer-7-state <=> root.answer-7-state;
+                            answer-8 <=> root.answer-8;
+                            answer-8-state <=> root.answer-8-state;
+                            answer-9 <=> root.answer-9;
+                            answer-9-state <=> root.answer-9-state;
+                            previous-node => { root.previous-node(); }
+                            next-node => { root.next-node(); }
+                            select-node(value) => { root.select-node(value); }
+                            back-to-overview => { root.active-page = 1; }
+                        }
+
+                        if root.active-page == 2: ProtectedObjectsPage {
+                            is-zh: root.is-zh;
+                            resource-group: root.resource-group;
+                            display-name: root.display-name;
+                            resource-id: root.resource-id;
+                            object-id: root.object-id;
+                            object-kind: root.object-kind;
+                            authorization-frequency: root.authorization-frequency;
+                            protected-object-list: root.protected-object-list;
+                            manage-object => { root.active-page = 7; }
+                        }
+
+                        if root.active-page == 7: ObjectEditorPage {
+                            is-zh: root.is-zh;
+                            resource-id <=> root.resource-id;
+                            object-id <=> root.object-id;
+                            object-kind <=> root.object-kind;
+                            display-name <=> root.display-name;
+                            resource-group <=> root.resource-group;
+                            required-correct-count <=> root.required-correct-count;
+                            secret-reference <=> root.secret-reference;
+                            authorization-frequency <=> root.authorization-frequency;
+                            config-status: root.config-status;
+                            save-resource => {
+                                root.save-resource();
+                                root.active-page = 2;
                             }
                         }
 
-                        if root.active-page == 2: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 12px;
-                            StaticRow { name: root.is-zh ? "页面目的" : "Purpose"; value: root.is-zh ? "在左侧菜单选择对象级别，本页以普通列表展示当前级别下的受保护对象。" : "Choose an object level from the left menu; this page shows a plain list for that level."; }
-                            StaticRow { name: root.is-zh ? "当前级别" : "Current Level"; value: root.resource-group == "normal" ? (root.is-zh ? "普通授权对象" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "私密对象" : "Private Objects") : (root.is-zh ? "机密对象" : "Secret Objects"); }
-                            StaticRow { name: root.is-zh ? "对象名称" : "Object Name"; value: root.display-name; }
-                            StaticRow { name: root.is-zh ? "资源 ID" : "Resource ID"; value: root.resource-id; }
-                            StaticRow { name: root.is-zh ? "对象 ID" : "Object ID"; value: root.object-id; }
-                            StaticRow { name: root.is-zh ? "对象类型" : "Object Kind"; value: root.object-kind; }
-                            StaticRow { name: root.is-zh ? "授权边界" : "Authorization Boundary"; value: root.authorization-frequency; }
-                            HorizontalBox {
-                                spacing: 10px;
-                                Rectangle { width: 164px; height: 1px; background: transparent; }
-                                ActionButton {
-                                    label: root.is-zh ? "管理对象" : "Manage Object";
-                                    primary: true;
-                                    clicked => { root.active-page = 7; }
-                                }
-                            }
-                            LogPanel { value: root.protected-object-list; panel-height: 120px; }
+                        if root.active-page == 3: LearningPage {
+                            is-zh: root.is-zh;
+                            pre-learning-error-tolerance <=> root.pre-learning-error-tolerance;
+                            weak-item-limit <=> root.weak-item-limit;
+                            initial-days <=> root.initial-days;
+                            initial-frequency-days <=> root.initial-frequency-days;
+                            consolidation-days <=> root.consolidation-days;
+                            consolidation-frequency-days <=> root.consolidation-frequency-days;
+                            adaptation-weeks <=> root.adaptation-weeks;
+                            adaptation-frequency-weeks <=> root.adaptation-frequency-weeks;
+                            stable-months <=> root.stable-months;
+                            stable-frequency-months <=> root.stable-frequency-months;
+                            long-term-years <=> root.long-term-years;
+                            long-term-frequency-years <=> root.long-term-frequency-years;
+                            learning-plan-summary: root.learning-plan-summary;
+                            learning-status: root.learning-status;
+                            learning-position: root.learning-position;
+                            learning-question: root.learning-question;
+                            learning-answer-1 <=> root.learning-answer-1;
+                            learning-answer-1-state <=> root.learning-answer-1-state;
+                            learning-answer-2 <=> root.learning-answer-2;
+                            learning-answer-2-state <=> root.learning-answer-2-state;
+                            learning-answer-3 <=> root.learning-answer-3;
+                            learning-answer-3-state <=> root.learning-answer-3-state;
+                            learning-answer-4 <=> root.learning-answer-4;
+                            learning-answer-4-state <=> root.learning-answer-4-state;
+                            learning-answer-5 <=> root.learning-answer-5;
+                            learning-answer-5-state <=> root.learning-answer-5-state;
+                            learning-answer-6 <=> root.learning-answer-6;
+                            learning-answer-6-state <=> root.learning-answer-6-state;
+                            learning-answer-7 <=> root.learning-answer-7;
+                            learning-answer-7-state <=> root.learning-answer-7-state;
+                            learning-answer-8 <=> root.learning-answer-8;
+                            learning-answer-8-state <=> root.learning-answer-8-state;
+                            learning-answer-9 <=> root.learning-answer-9;
+                            learning-answer-9-state <=> root.learning-answer-9-state;
+                            learning-result: root.learning-result;
+                            save-learning-policy => { root.save-learning-policy(); }
+                            run-learning => { root.run-learning(); }
+                            learning-previous => { root.learning-previous(); }
+                            learning-next => { root.learning-next(); }
+                            check-learning-current => { root.check-learning-current(); }
                         }
 
-                        if root.active-page == 7: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 12px;
-                            EditableRow { name: root.is-zh ? "资源 ID" : "Resource ID"; value <=> root.resource-id; }
-                            EditableRow { name: root.is-zh ? "对象 ID" : "Object ID"; value <=> root.object-id; }
-                            EditableRow { name: root.is-zh ? "对象类型" : "Object Kind"; value <=> root.object-kind; }
-                            EditableRow { name: root.is-zh ? "显示名称" : "Display Name"; value <=> root.display-name; }
-                            EditableRow { name: root.is-zh ? "保护级别" : "Protection Level"; value <=> root.resource-group; }
-                            EditableRow { name: root.is-zh ? "正确数" : "Need Correct"; value <=> root.required-correct-count; }
-                            EditableRow { name: root.is-zh ? "密钥引用" : "Secret Ref"; value <=> root.secret-reference; }
-                            EditableRow { name: root.is-zh ? "授权频率" : "Auth Freq"; value <=> root.authorization-frequency; }
-                            HorizontalBox {
-                                spacing: 10px;
-                                Rectangle { width: 164px; height: 1px; background: transparent; }
-                                ActionButton {
-                                    label: root.is-zh ? "保存对象" : "Save Object";
-                                    primary: true;
-                                    clicked => {
-                                        root.save-resource();
-                                        root.active-page = 2;
-                                    }
-                                }
-                            }
-                            LogPanel { value: root.config-status; panel-height: 120px; }
-                        }
-
-                        if root.active-page == 3: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 12px;
-                            ScrollView {
-                                width: 720px;
-                                height: 374px;
-                                vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
-                                viewport-width: 700px;
-                                viewport-height: 900px;
-                                VerticalBox {
-                                    x: 0px;
-                                    y: 0px;
-                                    width: 690px;
-                                    height: 900px;
-                                    spacing: 10px;
-                                    StaticRow { name: root.is-zh ? "计划文件" : "Plan File"; value: "learning-policy.json"; }
-                                    StaticRow { name: root.is-zh ? "设计目的" : "Design Goal"; value: root.is-zh ? "防止用户长期不用后忘记问题答案；导出后由本地 Host 按计划强制复习。" : "Prevent forgotten answers after long gaps; after export, the local Host schedules mandatory review."; }
-                                    StaticRow { name: root.is-zh ? "强制内容" : "Required Review"; value: root.is-zh ? "每次保留学习固定回答 22 个问题，用来确认用户仍然记得自己的故事锁。" : "Each retention review requires 22 fixed questions to confirm the user still remembers the StoryLock."; }
-                                    StaticRow { name: root.is-zh ? "频率变化" : "Frequency Shape"; value: root.is-zh ? "先按天复习，再逐步降到每周、每月、每年；时间越久，强制学习频率越低。" : "Review starts by day, then lowers to weekly, monthly, and yearly cycles over time."; }
-                                    StaticRow { name: root.is-zh ? "参数含义" : "Parameter Meaning"; value: root.is-zh ? "天数/周数/月数/年数表示阶段持续多久，频率表示该阶段隔多久触发一次复习。" : "Days/weeks/months/years set phase length; frequency sets how often that phase triggers review."; }
-                                    EditableRow { name: root.is-zh ? "预学习错数" : "Pre Error Max"; value <=> root.pre-learning-error-tolerance; }
-                                    EditableRow { name: root.is-zh ? "薄弱项上限" : "Weak Item Max"; value <=> root.weak-item-limit; }
-                                    EditableRow { name: root.is-zh ? "初始期天数" : "Initial Days"; value <=> root.initial-days; }
-                                    EditableRow { name: root.is-zh ? "初始期频率" : "Initial Freq"; value <=> root.initial-frequency-days; }
-                                    EditableRow { name: root.is-zh ? "巩固期天数" : "Consolid. Days"; value <=> root.consolidation-days; }
-                                    EditableRow { name: root.is-zh ? "巩固期频率" : "Consolid. Freq"; value <=> root.consolidation-frequency-days; }
-                                    EditableRow { name: root.is-zh ? "适应期周数" : "Adapt Weeks"; value <=> root.adaptation-weeks; }
-                                    EditableRow { name: root.is-zh ? "适应期频率" : "Adapt Freq"; value <=> root.adaptation-frequency-weeks; }
-                                    EditableRow { name: root.is-zh ? "稳定期月数" : "Stable Months"; value <=> root.stable-months; }
-                                    EditableRow { name: root.is-zh ? "稳定期频率" : "Stable Freq"; value <=> root.stable-frequency-months; }
-                                    EditableRow { name: root.is-zh ? "长期期年数" : "Long Years"; value <=> root.long-term-years; }
-                                    EditableRow { name: root.is-zh ? "长期期频率" : "Long Freq"; value <=> root.long-term-frequency-years; }
-                                    StaticRow { name: root.is-zh ? "执行计划" : "Plan Summary"; value: root.learning-plan-summary; }
-                                    StaticRow { name: root.is-zh ? "学习状态" : "Learning Status"; value: root.learning-status; }
-                                    StaticRow { name: root.is-zh ? "当前题目" : "Current Question"; value: root.learning-position + "  " + root.learning-question; }
-                                    QuestionTableRow { label: "Answer 1"; value <=> root.learning-answer-1; state <=> root.learning-answer-1-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 2"; value <=> root.learning-answer-2; state <=> root.learning-answer-2-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 3"; value <=> root.learning-answer-3; state <=> root.learning-answer-3-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 4"; value <=> root.learning-answer-4; state <=> root.learning-answer-4-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 5"; value <=> root.learning-answer-5; state <=> root.learning-answer-5-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 6"; value <=> root.learning-answer-6; state <=> root.learning-answer-6-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 7"; value <=> root.learning-answer-7; state <=> root.learning-answer-7-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 8"; value <=> root.learning-answer-8; state <=> root.learning-answer-8-state; show-state: true; }
-                                    QuestionTableRow { label: "Answer 9"; value <=> root.learning-answer-9; state <=> root.learning-answer-9-state; show-state: true; }
-                                    HorizontalBox {
-                                        spacing: 10px;
-                                        Rectangle { width: 164px; height: 1px; background: transparent; }
-                                        ActionButton {
-                                            label: root.is-zh ? "保存计划" : "Save Plan";
-                                            primary: false;
-                                            clicked => { root.save-learning-policy(); }
-                                        }
-                                        ActionButton {
-                                            label: root.is-zh ? "开始测试" : "Start Test";
-                                            primary: true;
-                                            clicked => { root.run-learning(); }
-                                        }
-                                        ActionButton {
-                                            label: root.is-zh ? "上一题" : "Previous";
-                                            primary: false;
-                                            button-width: 110px;
-                                            clicked => { root.learning-previous(); }
-                                        }
-                                        ActionButton {
-                                            label: root.is-zh ? "下一题" : "Next";
-                                            primary: false;
-                                            button-width: 110px;
-                                            clicked => { root.learning-next(); }
-                                        }
-                                        ActionButton {
-                                            label: root.is-zh ? "检查本题" : "Check";
-                                            primary: true;
-                                            button-width: 110px;
-                                            clicked => { root.check-learning-current(); }
-                                        }
-                                    }
-                                    LogPanel { value: root.learning-result; panel-height: 90px; }
-                                }
-                            }
-                        }
-
-                        if root.active-page == 4: VerticalBox {
-                            x: 0px;
-                            y: 0px;
-                            width: 720px;
-                            height: 374px;
-                            spacing: 12px;
-                            ScrollView {
-                                width: 720px;
-                                height: 374px;
-                                vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
-                                viewport-width: 700px;
-                                viewport-height: 760px;
-                                VerticalBox {
-                                    x: 0px;
-                                    y: 0px;
-                                    width: 690px;
-                                    height: 760px;
-                                    spacing: 10px;
-                                    PathBrowseRow {
-                                        name: root.is-zh ? "导出目录" : "Export Dir";
-                                        value <=> root.export-package-dir;
-                                        is-zh: root.is-zh;
-                                        browse => { root.browse-export-package-dir(); }
-                                    }
-                                    StaticRow { name: root.is-zh ? "学习状态" : "Learning Status"; value: root.learning-status; }
-                                    StaticRow { name: root.is-zh ? "测试结果" : "Test Result"; value: root.learning-result; }
-                                    StaticRow { name: root.is-zh ? "加密数据" : "Encrypted Data"; value: root.is-zh ? "通过测试后导出加密 Vault 与相关包数据。" : "After the test passes, export the encrypted vault and package data."; }
-                                    HorizontalBox {
-                                        spacing: 10px;
-                                        Rectangle { width: 164px; height: 1px; background: transparent; }
-                                        ActionButton {
-                                            label: root.is-zh ? "学习设置" : "Learning";
-                                            primary: false;
-                                            clicked => {
-                                                root.active-page = 3;
-                                            }
-                                        }
-                                        ActionButton {
-                                            label: root.is-zh ? "导出" : "Export";
-                                            primary: root.export-ready;
-                                            clicked => {
-                                                root.export-package();
-                                            }
-                                        }
-                                    }
-                                    LogPanel { value: root.export-preview + "\n\nExport writes the encrypted StoryLock vault and related package data only after the pre-export test passes. Host reads learning-policy.json and schedules retention checks from it."; panel-height: 150px; }
-                                }
-                            }
+                        if root.active-page == 4: ExportPage {
+                            is-zh: root.is-zh;
+                            export-package-dir <=> root.export-package-dir;
+                            learning-status: root.learning-status;
+                            learning-result: root.learning-result;
+                            export-ready: root.export-ready;
+                            export-preview: root.export-preview;
+                            browse-export-package-dir => { root.browse-export-package-dir(); }
+                            open-learning => { root.active-page = 3; }
+                            export-package => { root.export-package(); }
                         }
 
                     }
                 }
-            }
-        }
-    }
-
-export component StoryLockCoreSettingsDialog inherits Window {
-        in-out property <string> language: "zh";
-        property <bool> is-zh: language == "zh";
-        in-out property <string> core-data-dir: "";
-        callback close-requested();
-        callback language-changed(string);
-        callback browse-core-data-dir();
-
-        title: is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
-        preferred-width: 800px;
-        preferred-height: 450px;
-        min-width: 800px;
-        max-width: 800px;
-        min-height: 450px;
-        max-height: 450px;
-        background: #eef3f5;
-
-        VerticalBox {
-            padding: 20px;
-            spacing: 12px;
-            Rectangle {
-                height: 36px;
-                background: transparent;
-                Text {
-                    x: 0px;
-                    y: 4px;
-                    width: 720px;
-                    height: 28px;
-                    text: root.is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
-                    color: #17252f;
-                    font-size: 16px;
-                    font-weight: 800;
-                    overflow: elide;
-                }
-            }
-            VerticalBox {
-                spacing: 14px;
-                HorizontalBox {
-                    spacing: 14px;
-                    Text {
-                        text: root.is-zh ? "界面语言" : "UI Language";
-                        width: 150px;
-                        color: #62727d;
-                        font-size: 13px;
-                        vertical-alignment: center;
-                    }
-                    ComboBox {
-                        width: 420px;
-                        height: 32px;
-                        model: ["中文", "English"];
-                        current-value: root.is-zh ? "中文" : "English";
-                        selected(value) => {
-                            root.language = value == "中文" ? "zh" : "en";
-                            root.language-changed(root.language);
-                        }
-                    }
-                }
-                PathBrowseRow {
-                    name: root.is-zh ? "工作目录" : "Workspace Dir";
-                    value <=> root.core-data-dir;
-                    is-zh: root.is-zh;
-                    browse => { root.browse-core-data-dir(); }
-                }
-                StaticRow { name: root.is-zh ? "Vault 文件" : "Vault File"; value: "vault.stlk"; }
-                StaticRow { name: root.is-zh ? "学习策略" : "Learning Policy"; value: "learning-policy.json"; }
-                StaticRow { name: root.is-zh ? "导出清单" : "Package Manifest"; value: "package-manifest.json"; }
-                StaticRow { name: root.is-zh ? "资源目录" : "Resource Catalog"; value: "resource-catalog.json"; }
-            }
-        }
-    }
-
-export component AnswerEditorDialog inherits Window {
-        in-out property <string> language: "zh";
-        property <bool> is-zh: language == "zh";
-        in-out property <string> selected-question: "1";
-        in-out property <string> question-text: "";
-        in-out property <string> answer-1: "";
-        in-out property <string> answer-1-state: "wrong";
-        in-out property <string> answer-2: "";
-        in-out property <string> answer-2-state: "wrong";
-        in-out property <string> answer-3: "";
-        in-out property <string> answer-3-state: "wrong";
-        in-out property <string> answer-4: "";
-        in-out property <string> answer-4-state: "wrong";
-        in-out property <string> answer-5: "";
-        in-out property <string> answer-5-state: "wrong";
-        in-out property <string> answer-6: "";
-        in-out property <string> answer-6-state: "wrong";
-        in-out property <string> answer-7: "";
-        in-out property <string> answer-7-state: "wrong";
-        in-out property <string> answer-8: "";
-        in-out property <string> answer-8-state: "wrong";
-        in-out property <string> answer-9: "";
-        in-out property <string> answer-9-state: "wrong";
-        callback close-requested();
-        callback save-requested();
-        callback previous-node();
-        callback next-node();
-        callback select-node(string);
-
-        title: is-zh ? "答案配置" : "Answer Editor";
-        preferred-width: 960px;
-        preferred-height: 540px;
-        min-width: 960px;
-        max-width: 960px;
-        min-height: 540px;
-        max-height: 540px;
-        background: #eef3f5;
-
-        VerticalBox {
-            padding: 20px;
-            spacing: 12px;
-            Rectangle {
-                height: 36px;
-                background: transparent;
-                Text {
-                    x: 0px;
-                    y: 4px;
-                    width: 700px;
-                    height: 28px;
-                    text: is-zh ? "答案配置 - " + root.selected-question : "Answer Editor - " + root.selected-question;
-                    color: #17252f;
-                    font-size: 16px;
-                    font-weight: 800;
-                    overflow: elide;
-                }
-                ActionButton {
-                    x: 740px;
-                    y: 1px;
-                    label: is-zh ? "保存" : "Save";
-                    primary: true;
-                    button-width: 96px;
-                    clicked => { root.save-requested(); }
-                }
-                ActionButton {
-                    x: 846px;
-                    y: 1px;
-                    label: is-zh ? "关闭" : "Close";
-                    primary: false;
-                    button-width: 96px;
-                    clicked => { root.close-requested(); }
-                }
-            }
-            QuestionConfigPanel {
-                panel-height: 422px;
-                selected-question <=> root.selected-question;
-                question-text <=> root.question-text;
-                answer-1 <=> root.answer-1;
-                answer-1-state <=> root.answer-1-state;
-                answer-2 <=> root.answer-2;
-                answer-2-state <=> root.answer-2-state;
-                answer-3 <=> root.answer-3;
-                answer-3-state <=> root.answer-3-state;
-                answer-4 <=> root.answer-4;
-                answer-4-state <=> root.answer-4-state;
-                answer-5 <=> root.answer-5;
-                answer-5-state <=> root.answer-5-state;
-                answer-6 <=> root.answer-6;
-                answer-6-state <=> root.answer-6-state;
-                answer-7 <=> root.answer-7;
-                answer-7-state <=> root.answer-7-state;
-                answer-8 <=> root.answer-8;
-                answer-8-state <=> root.answer-8-state;
-                answer-9 <=> root.answer-9;
-                answer-9-state <=> root.answer-9-state;
-                previous-node => { root.previous-node(); }
-                next-node => { root.next-node(); }
-                select-node(value) => { root.select-node(value); }
             }
         }
     }

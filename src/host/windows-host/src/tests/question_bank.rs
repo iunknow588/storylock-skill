@@ -41,7 +41,9 @@ fn question_bank_import_replaces_runtime_state() {
         response.get("status").and_then(Value::as_str),
         Some("success")
     );
-    let current = runtime.current_question_bank().expect("current question bank");
+    let current = runtime
+        .current_question_bank()
+        .expect("current question bank");
     assert_eq!(current.question_set_version, "windows-local-v2");
     assert_eq!(current.questions.len(), 1);
     assert_eq!(current.questions[0].answer, "HORIZON");

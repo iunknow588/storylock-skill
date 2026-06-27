@@ -25,7 +25,10 @@ pub(crate) fn save_story_from_window(core: &StoryLockCoreApp, package_dir: &Path
     Ok(())
 }
 
-pub(crate) fn save_temp_draft_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Result<()> {
+pub(crate) fn save_temp_draft_from_window(
+    core: &StoryLockCoreApp,
+    package_dir: &Path,
+) -> Result<()> {
     save_story_from_window(core, package_dir)?;
     save_resource_from_window(core, package_dir)?;
     save_template_from_window(core, package_dir)?;
@@ -33,7 +36,10 @@ pub(crate) fn save_temp_draft_from_window(core: &StoryLockCoreApp, package_dir: 
     Ok(())
 }
 
-pub(crate) fn save_current_node_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Result<()> {
+pub(crate) fn save_current_node_from_window(
+    core: &StoryLockCoreApp,
+    package_dir: &Path,
+) -> Result<()> {
     let mut draft = read_effective_author_draft(package_dir);
     write_current_node_to_draft(core, &mut draft);
     write_pending_author_draft(package_dir, &draft)?;
@@ -217,14 +223,23 @@ pub(crate) fn format_node_overview(draft: &Value) -> String {
                 .iter()
                 .enumerate()
                 .map(|(index, node)| {
-                    let title = node.get("title").and_then(Value::as_str).unwrap_or("Question");
+                    let title = node
+                        .get("title")
+                        .and_then(Value::as_str)
+                        .unwrap_or("Question");
                     let question = node.get("question").and_then(Value::as_str).unwrap_or("");
                     let answer_count = node
                         .get("answerOptionsLocalOnly")
                         .and_then(Value::as_array)
                         .map(Vec::len)
                         .unwrap_or(0);
-                    format!("{:02}. {} | {} | {} answers", index + 1, title, question, answer_count)
+                    format!(
+                        "{:02}. {} | {} | {} answers",
+                        index + 1,
+                        title,
+                        question,
+                        answer_count
+                    )
                 })
                 .collect::<Vec<_>>()
                 .join("\n")

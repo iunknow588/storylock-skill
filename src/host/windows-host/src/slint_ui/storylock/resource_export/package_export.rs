@@ -63,7 +63,10 @@ pub(crate) fn validate_learning_test_inputs(package_dir: &Path) -> Result<String
         .and_then(Value::as_array)
         .ok_or_else(|| anyhow::anyhow!("author draft nodes must be an array"))?;
     if nodes.len() != 24 {
-        anyhow::bail!("author draft must contain exactly 24 questions, got {}", nodes.len());
+        anyhow::bail!(
+            "author draft must contain exactly 24 questions, got {}",
+            nodes.len()
+        );
     }
     let mut total_correct = 0usize;
     for (index, node) in nodes.iter().enumerate() {
@@ -85,7 +88,10 @@ pub(crate) fn validate_learning_test_inputs(package_dir: &Path) -> Result<String
             })
             .count();
         if correct_count == 0 {
-            anyhow::bail!("question {} must contain at least one correct answer", index + 1);
+            anyhow::bail!(
+                "question {} must contain at least one correct answer",
+                index + 1
+            );
         }
         total_correct += correct_count;
     }

@@ -34,11 +34,7 @@ fn default_story_templates_include_useful_fables() {
     for expected in ["dongguo-wolf", "zhizi-yilin", "shouzhudaitu"] {
         assert!(items.iter().any(|item| {
             item.get("templateId").and_then(Value::as_str) == Some(expected)
-                && item
-                    .get("nodes")
-                    .and_then(Value::as_array)
-                    .map(Vec::len)
-                    == Some(24)
+                && item.get("nodes").and_then(Value::as_array).map(Vec::len) == Some(24)
         }));
     }
 }
@@ -149,7 +145,10 @@ fn story_draft_template_uses_author_draft_schema_and_restores_ui() {
         Some("Template unified plot detail")
     );
     assert_eq!(
-        template.get("nodes").and_then(Value::as_array).map(Vec::len),
+        template
+            .get("nodes")
+            .and_then(Value::as_array)
+            .map(Vec::len),
         Some(24)
     );
 

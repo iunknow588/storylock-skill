@@ -25,8 +25,7 @@ fn test_config() -> WindowsHostConfig {
         relay_respond_path: "/local-host/relay/respond".to_string(),
         approval_mode: "auto_approve".to_string(),
         remote_enabled: false,
-        data_dir: std::env::temp_dir()
-            .join(format!("yian_windows_host_test_{}", Uuid::new_v4())),
+        data_dir: std::env::temp_dir().join(format!("yian_windows_host_test_{}", Uuid::new_v4())),
     }
 }
 

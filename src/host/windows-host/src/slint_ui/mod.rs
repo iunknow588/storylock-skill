@@ -1,7 +1,7 @@
-use crate::ProtectedEnvelope;
-use crate::WindowsHostConfig;
 use crate::dpapi_protect_to_base64;
 use crate::dpapi_unprotect_from_base64;
+use crate::ProtectedEnvelope;
+use crate::WindowsHostConfig;
 use anyhow::Result;
 use reqwest::blocking::Client;
 use serde_json::json;
@@ -17,9 +17,8 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use self::storylock::{
-    ensure_storylock_core_package, host_learning_plan_status,
-    initialize_storylock_core_window, storylock_core_package_dir,
-    wire_storylock_core_callbacks,
+    ensure_storylock_core_package, host_learning_plan_status, initialize_storylock_core_window,
+    storylock_core_package_dir, wire_storylock_core_callbacks,
 };
 
 mod confirmation;
@@ -31,7 +30,8 @@ pub use dashboard::run;
 
 slint::slint! {
     import { HostDashboard, SettingsDialog } from "host_dashboard.slint";
-    import { StoryLockCoreApp, StoryLockCoreSettingsDialog, AnswerEditorDialog } from "storylock_core.slint";
+    import { StoryLockCoreApp } from "storylock_core.slint";
+    import { StoryLockCoreSettingsDialog, AnswerEditorDialog } from "storylock_core/dialogs.slint";
     import { RequestConfirmation } from "request_confirmation.slint";
 
     export {

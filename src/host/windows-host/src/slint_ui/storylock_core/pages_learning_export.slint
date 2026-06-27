@@ -1,0 +1,155 @@
+import { VerticalBox, HorizontalBox, ScrollView } from "std-widgets.slint";
+import { StaticRow, EditableRow, PathBrowseRow, QuestionTableRow, ActionButton, LogPanel } from "../common.slint";
+
+export component LearningPage inherits VerticalBox {
+    in property <bool> is-zh;
+    in-out property <string> pre-learning-error-tolerance;
+    in-out property <string> weak-item-limit;
+    in-out property <string> initial-days;
+    in-out property <string> initial-frequency-days;
+    in-out property <string> consolidation-days;
+    in-out property <string> consolidation-frequency-days;
+    in-out property <string> adaptation-weeks;
+    in-out property <string> adaptation-frequency-weeks;
+    in-out property <string> stable-months;
+    in-out property <string> stable-frequency-months;
+    in-out property <string> long-term-years;
+    in-out property <string> long-term-frequency-years;
+    in property <string> learning-plan-summary;
+    in property <string> learning-status;
+    in property <string> learning-position;
+    in property <string> learning-question;
+    in-out property <string> learning-answer-1;
+    in-out property <string> learning-answer-1-state;
+    in-out property <string> learning-answer-2;
+    in-out property <string> learning-answer-2-state;
+    in-out property <string> learning-answer-3;
+    in-out property <string> learning-answer-3-state;
+    in-out property <string> learning-answer-4;
+    in-out property <string> learning-answer-4-state;
+    in-out property <string> learning-answer-5;
+    in-out property <string> learning-answer-5-state;
+    in-out property <string> learning-answer-6;
+    in-out property <string> learning-answer-6-state;
+    in-out property <string> learning-answer-7;
+    in-out property <string> learning-answer-7-state;
+    in-out property <string> learning-answer-8;
+    in-out property <string> learning-answer-8-state;
+    in-out property <string> learning-answer-9;
+    in-out property <string> learning-answer-9-state;
+    in property <string> learning-result;
+    callback save-learning-policy();
+    callback run-learning();
+    callback learning-previous();
+    callback learning-next();
+    callback check-learning-current();
+
+    x: 0px;
+    y: 0px;
+    width: 720px;
+    height: 374px;
+    spacing: 12px;
+
+    ScrollView {
+        width: 720px;
+        height: 374px;
+        vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+        viewport-width: 700px;
+        viewport-height: 900px;
+        VerticalBox {
+            x: 0px;
+            y: 0px;
+            width: 690px;
+            height: 900px;
+            spacing: 10px;
+            StaticRow { name: root.is-zh ? "计划文件" : "Plan File"; value: "learning-policy.json"; }
+            StaticRow { name: root.is-zh ? "设计目标" : "Design Goal"; value: root.is-zh ? "防止长时间间隔后忘记答案；导出后由本地主机安排强制复习。" : "Prevent forgotten answers after long gaps; after export, the local Host schedules mandatory review."; }
+            StaticRow { name: root.is-zh ? "复习要求" : "Required Review"; value: root.is-zh ? "每次保持性复习需要回答 22 个固定问题。" : "Each retention review requires 22 fixed questions to confirm the user still remembers the StoryLock."; }
+            StaticRow { name: root.is-zh ? "频率形态" : "Frequency Shape"; value: root.is-zh ? "复习从按天开始，随后逐步降低到每周、每月、每年。" : "Review starts by day, then lowers to weekly, monthly, and yearly cycles over time."; }
+            StaticRow { name: root.is-zh ? "参数含义" : "Parameter Meaning"; value: root.is-zh ? "天/周/月/年设置阶段长度；频率设置该阶段多久触发一次复习。" : "Days/weeks/months/years set phase length; frequency sets how often that phase triggers review."; }
+            EditableRow { name: root.is-zh ? "预学习错误上限" : "Pre Error Max"; value <=> root.pre-learning-error-tolerance; }
+            EditableRow { name: root.is-zh ? "薄弱项上限" : "Weak Item Max"; value <=> root.weak-item-limit; }
+            EditableRow { name: root.is-zh ? "初始天数" : "Initial Days"; value <=> root.initial-days; }
+            EditableRow { name: root.is-zh ? "初始频率" : "Initial Freq"; value <=> root.initial-frequency-days; }
+            EditableRow { name: root.is-zh ? "巩固天数" : "Consolid. Days"; value <=> root.consolidation-days; }
+            EditableRow { name: root.is-zh ? "巩固频率" : "Consolid. Freq"; value <=> root.consolidation-frequency-days; }
+            EditableRow { name: root.is-zh ? "适应周数" : "Adapt Weeks"; value <=> root.adaptation-weeks; }
+            EditableRow { name: root.is-zh ? "适应频率" : "Adapt Freq"; value <=> root.adaptation-frequency-weeks; }
+            EditableRow { name: root.is-zh ? "稳定月数" : "Stable Months"; value <=> root.stable-months; }
+            EditableRow { name: root.is-zh ? "稳定频率" : "Stable Freq"; value <=> root.stable-frequency-months; }
+            EditableRow { name: root.is-zh ? "长期年数" : "Long Years"; value <=> root.long-term-years; }
+            EditableRow { name: root.is-zh ? "长期频率" : "Long Freq"; value <=> root.long-term-frequency-years; }
+            StaticRow { name: root.is-zh ? "计划摘要" : "Plan Summary"; value: root.learning-plan-summary; }
+            StaticRow { name: root.is-zh ? "学习状态" : "Learning Status"; value: root.learning-status; }
+            StaticRow { name: root.is-zh ? "当前问题" : "Current Question"; value: root.learning-position + "  " + root.learning-question; }
+            QuestionTableRow { label: root.is-zh ? "答案 1" : "Answer 1"; value <=> root.learning-answer-1; state <=> root.learning-answer-1-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 2" : "Answer 2"; value <=> root.learning-answer-2; state <=> root.learning-answer-2-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 3" : "Answer 3"; value <=> root.learning-answer-3; state <=> root.learning-answer-3-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 4" : "Answer 4"; value <=> root.learning-answer-4; state <=> root.learning-answer-4-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 5" : "Answer 5"; value <=> root.learning-answer-5; state <=> root.learning-answer-5-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 6" : "Answer 6"; value <=> root.learning-answer-6; state <=> root.learning-answer-6-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 7" : "Answer 7"; value <=> root.learning-answer-7; state <=> root.learning-answer-7-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 8" : "Answer 8"; value <=> root.learning-answer-8; state <=> root.learning-answer-8-state; show-state: true; }
+            QuestionTableRow { label: root.is-zh ? "答案 9" : "Answer 9"; value <=> root.learning-answer-9; state <=> root.learning-answer-9-state; show-state: true; }
+            HorizontalBox {
+                spacing: 10px;
+                Rectangle { width: 164px; height: 1px; background: transparent; }
+                ActionButton { label: root.is-zh ? "保存计划" : "Save Plan"; primary: false; clicked => { root.save-learning-policy(); } }
+                ActionButton { label: root.is-zh ? "开始测试" : "Start Test"; primary: true; clicked => { root.run-learning(); } }
+                ActionButton { label: root.is-zh ? "上一题" : "Previous"; primary: false; button-width: 110px; clicked => { root.learning-previous(); } }
+                ActionButton { label: root.is-zh ? "下一题" : "Next"; primary: false; button-width: 110px; clicked => { root.learning-next(); } }
+                ActionButton { label: root.is-zh ? "检查" : "Check"; primary: true; button-width: 110px; clicked => { root.check-learning-current(); } }
+            }
+            LogPanel { value: root.learning-result; panel-height: 90px; }
+        }
+    }
+}
+
+export component ExportPage inherits VerticalBox {
+    in property <bool> is-zh;
+    in-out property <string> export-package-dir;
+    in property <string> learning-status;
+    in property <string> learning-result;
+    in property <bool> export-ready;
+    in property <string> export-preview;
+    callback browse-export-package-dir();
+    callback open-learning();
+    callback export-package();
+
+    x: 0px;
+    y: 0px;
+    width: 720px;
+    height: 374px;
+    spacing: 12px;
+
+    ScrollView {
+        width: 720px;
+        height: 374px;
+        vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+        viewport-width: 700px;
+        viewport-height: 760px;
+        VerticalBox {
+            x: 0px;
+            y: 0px;
+            width: 690px;
+            height: 760px;
+            spacing: 10px;
+            PathBrowseRow {
+                name: root.is-zh ? "导出目录" : "Export Dir";
+                value <=> root.export-package-dir;
+                is-zh: root.is-zh;
+                browse => { root.browse-export-package-dir(); }
+            }
+            StaticRow { name: root.is-zh ? "学习状态" : "Learning Status"; value: root.learning-status; }
+            StaticRow { name: root.is-zh ? "测试结果" : "Test Result"; value: root.learning-result; }
+            StaticRow { name: root.is-zh ? "加密数据" : "Encrypted Data"; value: root.is-zh ? "测试通过后，导出加密 vault 和包数据。" : "After the test passes, export the encrypted vault and package data."; }
+            HorizontalBox {
+                spacing: 10px;
+                Rectangle { width: 164px; height: 1px; background: transparent; }
+                ActionButton { label: root.is-zh ? "学习" : "Learning"; primary: false; clicked => { root.open-learning(); } }
+                ActionButton { label: root.is-zh ? "导出" : "Export"; primary: root.export-ready; clicked => { root.export-package(); } }
+            }
+            LogPanel { value: root.export-preview + "\n\nExport writes the encrypted StoryLock vault and related package data only after the pre-export test passes. Host reads learning-policy.json and schedules retention checks from it."; panel-height: 150px; }
+        }
+    }
+}

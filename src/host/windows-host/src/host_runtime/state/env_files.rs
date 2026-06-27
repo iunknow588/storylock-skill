@@ -4,10 +4,7 @@ const STORY_ENV_DIR: &str = "姒瑨娅ㄥù浣衡柤";
 
 fn explicit_env_file_candidates() -> Vec<PathBuf> {
     let mut candidates = Vec::new();
-    for name in [
-        "STORYLOCK_EXTERNAL_ENV_FILE",
-        "STORYLOCK_STORY_ENV_FILE",
-    ] {
+    for name in ["STORYLOCK_EXTERNAL_ENV_FILE", "STORYLOCK_STORY_ENV_FILE"] {
         if let Ok(explicit) = std::env::var(name) {
             let trimmed = explicit.trim();
             if !trimmed.is_empty() {
@@ -42,7 +39,11 @@ fn parse_env_file(content: &str) -> HashMap<String, String> {
             continue;
         };
         let key = key.trim();
-        let value = value.trim().trim_matches('"').trim_matches('\'').to_string();
+        let value = value
+            .trim()
+            .trim_matches('"')
+            .trim_matches('\'')
+            .to_string();
         if !key.is_empty() {
             values.insert(key.to_string(), value);
         }

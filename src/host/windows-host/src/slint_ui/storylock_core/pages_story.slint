@@ -1,0 +1,166 @@
+import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { EditableRow, LargeEditableText, QuestionOverviewGrid, QuestionConfigPanel, ActionButton } from "../common.slint";
+
+export component StoryDraftPage inherits VerticalBox {
+    in property <bool> is-zh;
+    in-out property <string> story-title;
+    in-out property <string> story-summary;
+    in-out property <string> story-plot;
+
+    x: 0px;
+    y: 0px;
+    width: 720px;
+    height: 374px;
+    spacing: 12px;
+
+    EditableRow { name: root.is-zh ? "故事标题" : "Story Title"; value <=> root.story-title; }
+    EditableRow { name: root.is-zh ? "摘要" : "Summary"; value <=> root.story-summary; }
+    LargeEditableText { name: root.is-zh ? "完整故事情节" : "Full Story Plot"; value <=> root.story-plot; }
+}
+
+export component QuestionOverviewPage inherits VerticalBox {
+    in property <bool> is-zh;
+    in-out property <string> selected-question;
+    in property <string> question-1;
+    in property <string> question-2;
+    in property <string> question-3;
+    in property <string> question-4;
+    in property <string> question-5;
+    in property <string> question-6;
+    in property <string> question-7;
+    in property <string> question-8;
+    in property <string> question-9;
+    in property <string> question-10;
+    in property <string> question-11;
+    in property <string> question-12;
+    in property <string> question-13;
+    in property <string> question-14;
+    in property <string> question-15;
+    in property <string> question-16;
+    in property <string> question-17;
+    in property <string> question-18;
+    in property <string> question-19;
+    in property <string> question-20;
+    in property <string> question-21;
+    in property <string> question-22;
+    in property <string> question-23;
+    in property <string> question-24;
+    callback select-node(string);
+
+    x: 0px;
+    y: 0px;
+    width: 720px;
+    height: 374px;
+    spacing: 12px;
+
+    Text {
+        height: 24px;
+        text: root.is-zh ? "点击任一问题进入答案编辑。每个卡片显示实际问题文本。" : "Click a question to edit its answers. Each tile shows the actual question text.";
+        color: #62727d;
+        font-size: 12px;
+        overflow: elide;
+    }
+
+    QuestionOverviewGrid {
+        height: 338px;
+        selected-question <=> root.selected-question;
+        question-1: root.question-1;
+        question-2: root.question-2;
+        question-3: root.question-3;
+        question-4: root.question-4;
+        question-5: root.question-5;
+        question-6: root.question-6;
+        question-7: root.question-7;
+        question-8: root.question-8;
+        question-9: root.question-9;
+        question-10: root.question-10;
+        question-11: root.question-11;
+        question-12: root.question-12;
+        question-13: root.question-13;
+        question-14: root.question-14;
+        question-15: root.question-15;
+        question-16: root.question-16;
+        question-17: root.question-17;
+        question-18: root.question-18;
+        question-19: root.question-19;
+        question-20: root.question-20;
+        question-21: root.question-21;
+        question-22: root.question-22;
+        question-23: root.question-23;
+        question-24: root.question-24;
+        select-node(value) => {
+            root.select-node(value);
+        }
+    }
+}
+
+export component QuestionEditorPage inherits VerticalBox {
+    in property <bool> is-zh;
+    in-out property <string> selected-question;
+    in-out property <string> question-text;
+    in-out property <string> answer-1;
+    in-out property <string> answer-1-state;
+    in-out property <string> answer-2;
+    in-out property <string> answer-2-state;
+    in-out property <string> answer-3;
+    in-out property <string> answer-3-state;
+    in-out property <string> answer-4;
+    in-out property <string> answer-4-state;
+    in-out property <string> answer-5;
+    in-out property <string> answer-5-state;
+    in-out property <string> answer-6;
+    in-out property <string> answer-6-state;
+    in-out property <string> answer-7;
+    in-out property <string> answer-7-state;
+    in-out property <string> answer-8;
+    in-out property <string> answer-8-state;
+    in-out property <string> answer-9;
+    in-out property <string> answer-9-state;
+    callback previous-node();
+    callback next-node();
+    callback select-node(string);
+    callback back-to-overview();
+
+    x: 0px;
+    y: 0px;
+    width: 720px;
+    height: 374px;
+    spacing: 8px;
+
+    QuestionConfigPanel {
+        panel-height: 330px;
+        selected-question <=> root.selected-question;
+        question-text <=> root.question-text;
+        answer-1 <=> root.answer-1;
+        answer-1-state <=> root.answer-1-state;
+        answer-2 <=> root.answer-2;
+        answer-2-state <=> root.answer-2-state;
+        answer-3 <=> root.answer-3;
+        answer-3-state <=> root.answer-3-state;
+        answer-4 <=> root.answer-4;
+        answer-4-state <=> root.answer-4-state;
+        answer-5 <=> root.answer-5;
+        answer-5-state <=> root.answer-5-state;
+        answer-6 <=> root.answer-6;
+        answer-6-state <=> root.answer-6-state;
+        answer-7 <=> root.answer-7;
+        answer-7-state <=> root.answer-7-state;
+        answer-8 <=> root.answer-8;
+        answer-8-state <=> root.answer-8-state;
+        answer-9 <=> root.answer-9;
+        answer-9-state <=> root.answer-9-state;
+        previous-node => { root.previous-node(); }
+        next-node => { root.next-node(); }
+        select-node(value) => { root.select-node(value); }
+    }
+    HorizontalBox {
+        spacing: 10px;
+        Rectangle { width: 164px; height: 1px; background: transparent; }
+        ActionButton {
+            label: root.is-zh ? "返回概览" : "Back to Overview";
+            primary: false;
+            button-width: 150px;
+            clicked => { root.back-to-overview(); }
+        }
+    }
+}

@@ -73,7 +73,10 @@ pub(crate) fn validate_question_bank(question_bank: &QuestionBankFile) -> Result
     Ok(())
 }
 
-pub(crate) fn import_question_bank(data_dir: &Path, source_path: &Path) -> Result<QuestionBankFile> {
+pub(crate) fn import_question_bank(
+    data_dir: &Path,
+    source_path: &Path,
+) -> Result<QuestionBankFile> {
     let imported = read_and_validate_question_bank(source_path)?;
     fs::create_dir_all(data_dir)?;
     fs::copy(source_path, question_bank_path(data_dir)).with_context(|| {

@@ -61,8 +61,13 @@ pub(crate) fn format_protected_object_list(catalog: &Value, selected_group: &str
                     items.len() + 1,
                     display_name,
                     resource_id,
-                    binding.get("objectId").and_then(Value::as_str).unwrap_or(""),
-                    meta.get("objectKind").and_then(Value::as_str).unwrap_or("secret"),
+                    binding
+                        .get("objectId")
+                        .and_then(Value::as_str)
+                        .unwrap_or(""),
+                    meta.get("objectKind")
+                        .and_then(Value::as_str)
+                        .unwrap_or("secret"),
                     group
                 ));
             }

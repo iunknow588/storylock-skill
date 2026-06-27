@@ -15,7 +15,10 @@ fn ui_status_reports_redacted_management_stats() {
             "remoteInterface": "relay_gateway"
         }),
     );
-    assert_eq!(success.get("status").and_then(Value::as_str), Some("success"));
+    assert_eq!(
+        success.get("status").and_then(Value::as_str),
+        Some("success")
+    );
 
     let denied = execute_request(
         &runtime,

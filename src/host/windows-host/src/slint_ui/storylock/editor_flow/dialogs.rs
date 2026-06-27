@@ -151,9 +151,8 @@ pub(crate) fn wire_answer_editor_callbacks(
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_save.upgrade()) {
             copy_answer_editor_to_core(&dialog, &core);
             match save_current_node_from_window(&core, &save_dir) {
-                Ok(()) => core.set_config_status(SharedString::from(
-                    "Answer editor saved current question.",
-                )),
+                Ok(()) => core
+                    .set_config_status(SharedString::from("Answer editor saved current question.")),
                 Err(error) => core.set_config_status(SharedString::from(format!(
                     "Answer editor save failed: {error}"
                 ))),

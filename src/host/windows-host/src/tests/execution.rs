@@ -52,7 +52,10 @@ fn approves_signature_and_persists_key() {
         .and_then(|value| value.get("authorizationId"))
         .and_then(Value::as_str)
         .expect("authorization id");
-    assert!(runtime.secret_store.signature_key_path("wallet-main").exists());
+    assert!(runtime
+        .secret_store
+        .signature_key_path("wallet-main")
+        .exists());
     assert!(runtime
         .secret_store
         .authorization_path(authorization_id)
@@ -91,7 +94,10 @@ fn password_fill_uses_dpapi_backed_credential_store() {
         .and_then(Value::as_str)
         .expect("second password");
     assert_eq!(first_password, second_password);
-    assert!(runtime.secret_store.credential_path("mailbox-primary").exists());
+    assert!(runtime
+        .secret_store
+        .credential_path("mailbox-primary")
+        .exists());
     assert!(second
         .get("result")
         .and_then(|value| value.get("authorizationId"))
@@ -208,9 +214,7 @@ fn revoked_authorization_cannot_execute() {
     let rejected = events
         .iter()
         .rev()
-        .find(|event| {
-            event.get("event_type").and_then(Value::as_str) == Some("execution_rejected")
-        })
+        .find(|event| event.get("event_type").and_then(Value::as_str) == Some("execution_rejected"))
         .expect("execution rejection audit");
     assert_eq!(
         rejected.get("request_id").and_then(Value::as_str),

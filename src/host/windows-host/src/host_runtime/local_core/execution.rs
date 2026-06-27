@@ -77,7 +77,9 @@ pub(crate) fn execute_with_local_core(
             "localCore": core_call
         }))
     } else if capability == "requestSignature" {
-        let key_material = runtime.secret_store.get_or_create_signature_key(object_ref)?;
+        let key_material = runtime
+            .secret_store
+            .get_or_create_signature_key(object_ref)?;
         let signature = signature_of_request(&key_material, request)?;
         Ok(json!({
             "approved": true,
@@ -148,7 +150,10 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
         .map(str::trim)
         .filter(|value| !value.is_empty())
     {
-        match runtime.secret_store.read_authorization_record(authorization_id) {
+        match runtime
+            .secret_store
+            .read_authorization_record(authorization_id)
+        {
             Ok(record) => {
                 if let Err(error) =
                     validate_authorization_for_core(&record, &capability, &object_ref)
@@ -162,12 +167,15 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
                         "error",
                         Some("SLG-003"),
                         Some("authorization_failed"),
-                        merge_audit_meta(json!({
-                            "reason": error.to_string(),
-                            "authorizationId": authorization_id,
-                            "authorizationStatus": record.status,
-                            "allowedAction": record.allowed_action
-                        }), audit_context.clone()),
+                        merge_audit_meta(
+                            json!({
+                                "reason": error.to_string(),
+                                "authorizationId": authorization_id,
+                                "authorizationStatus": record.status,
+                                "allowedAction": record.allowed_action
+                            }),
+                            audit_context.clone(),
+                        ),
                     );
                     return error_response(
                         config,
@@ -191,10 +199,13 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
                     "error",
                     Some("SLG-003"),
                     Some("authorization_failed"),
-                    merge_audit_meta(json!({
-                        "reason": format!("authorizationId could not be resolved: {error}"),
-                        "authorizationId": authorization_id
-                    }), audit_context.clone()),
+                    merge_audit_meta(
+                        json!({
+                            "reason": format!("authorizationId could not be resolved: {error}"),
+                            "authorizationId": authorization_id
+                        }),
+                        audit_context.clone(),
+                    ),
                 );
                 return error_response(
                     config,
@@ -220,10 +231,13 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
                     "denied",
                     Some("SLG-002"),
                     Some("policy_denied"),
-                    merge_audit_meta(json!({
-                        "reason": error.to_string(),
-                        "authorizationChannel": authorization_channel_for_request(&capability, &request)
-                    }), audit_context.clone()),
+                    merge_audit_meta(
+                        json!({
+                            "reason": error.to_string(),
+                            "authorizationChannel": authorization_channel_for_request(&capability, &request)
+                        }),
+                        audit_context.clone(),
+                    ),
                 );
                 return error_response(
                     config,
@@ -246,10 +260,13 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
                 "denied",
                 Some("SLG-003"),
                 Some("authorization_failed"),
-                merge_audit_meta(json!({
-                    "reason": "local_confirmation_denied",
-                    "approvalMode": config.approval_mode
-                }), audit_context.clone()),
+                merge_audit_meta(
+                    json!({
+                        "reason": "local_confirmation_denied",
+                        "approvalMode": config.approval_mode
+                    }),
+                    audit_context.clone(),
+                ),
             );
             return error_response(
                 config,
@@ -275,7 +292,10 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
             expires_at: expires_at_after(300),
             status: "approved".to_string(),
         };
-        if let Err(error) = runtime.secret_store.write_authorization_record(&authorization_record) {
+        if let Err(error) = runtime
+            .secret_store
+            .write_authorization_record(&authorization_record)
+        {
             return error_response(
                 config,
                 &request_id,
@@ -315,14 +335,17 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
                 "success",
                 None,
                 None,
-                merge_audit_meta(json!({
-                    "verificationId": verification_id,
-                    "authorizationId": authorization_id,
-                    "allowedAction": allowed_action,
-                    "requiredStrength": required_strength,
-                    "authorizationChannel": authorization_channel_for_request(&capability, &request),
-                    "confirmationMethod": confirmation_method
-                }), audit_context.clone()),
+                merge_audit_meta(
+                    json!({
+                        "verificationId": verification_id,
+                        "authorizationId": authorization_id,
+                        "allowedAction": allowed_action,
+                        "requiredStrength": required_strength,
+                        "authorizationChannel": authorization_channel_for_request(&capability, &request),
+                        "confirmationMethod": confirmation_method
+                    }),
+                    audit_context.clone(),
+                ),
             );
             json!({
                 "requestId": request_id,
@@ -370,13 +393,16 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
                 "error",
                 Some(code),
                 Some(error_type),
-                merge_audit_meta(json!({
-                    "reason": error.to_string(),
-                    "verificationId": verification_id,
-                    "authorizationId": authorization_id,
-                    "allowedAction": allowed_action,
-                    "authorizationChannel": authorization_channel_for_request(&capability, &request)
-                }), audit_context.clone()),
+                merge_audit_meta(
+                    json!({
+                        "reason": error.to_string(),
+                        "verificationId": verification_id,
+                        "authorizationId": authorization_id,
+                        "allowedAction": allowed_action,
+                        "authorizationChannel": authorization_channel_for_request(&capability, &request)
+                    }),
+                    audit_context.clone(),
+                ),
             );
             error_response(
                 config,

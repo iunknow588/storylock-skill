@@ -147,7 +147,12 @@ pub(crate) fn host_management_stats(runtime: &WindowsHostRuntime) -> Value {
             failed_calls += 1;
         }
 
-        if let Some(object_ref) = event.object_ref.as_deref().map(str::trim).filter(|v| !v.is_empty()) {
+        if let Some(object_ref) = event
+            .object_ref
+            .as_deref()
+            .map(str::trim)
+            .filter(|v| !v.is_empty())
+        {
             increment_counter(&mut object_calls, object_ref);
             object_last_seen.insert(object_ref.to_string(), event.timestamp.clone());
             increment_counter(
@@ -178,11 +183,18 @@ pub(crate) fn host_management_stats(runtime: &WindowsHostRuntime) -> Value {
 
         let remote_interface = audit_meta_str(event, "remoteInterface")
             .or_else(|| audit_meta_str(event, "origin"))
-            .unwrap_or(if event.meta.get("remoteRequest").and_then(Value::as_bool).unwrap_or(false) {
-                "remote_gateway"
-            } else {
-                "local_api"
-            });
+            .unwrap_or(
+                if event
+                    .meta
+                    .get("remoteRequest")
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false)
+                {
+                    "remote_gateway"
+                } else {
+                    "local_api"
+                },
+            );
         increment_counter(&mut remote_interfaces, remote_interface);
         if remote_interface != "local_api"
             || event

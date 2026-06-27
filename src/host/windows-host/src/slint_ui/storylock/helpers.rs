@@ -14,32 +14,76 @@ pub(super) fn story_template_author_draft_json(
     const ELEMENTS: [&str; 8] = [
         "time", "place", "person", "object", "event", "reaction", "choice", "result",
     ];
+    const QUESTION_PATTERNS: [&str; 24] = [
+        "In {title}, which memory anchor marks the starting scene?",
+        "Which place or setting should be linked to {title}?",
+        "Who is the central character the user must remember?",
+        "Which object should be treated as the concrete memory cue?",
+        "What event changes the direction of the story?",
+        "What reaction should the user recall after the event?",
+        "Which choice creates the story's main consequence?",
+        "What final result should be remembered?",
+        "Which anchor helps distinguish this story from similar stories?",
+        "Which detail should be recalled before any protected action?",
+        "Which character or role tests the user's judgment?",
+        "Which object or scene proves the memory belongs to this story?",
+        "What warning does this story preserve?",
+        "Which answer best represents the safe boundary in the story?",
+        "Which cue should appear when reviewing the story after a delay?",
+        "Which detail should not be confused with a distractor?",
+        "What cause comes before the final consequence?",
+        "Which remembered detail confirms the user still knows the plot?",
+        "Which anchor can be used as a quick recall key?",
+        "Which choice would change the outcome if remembered incorrectly?",
+        "What should the user recall about the ending?",
+        "Which memory element connects the story to authorization?",
+        "Which detail should be checked during retention review?",
+        "Which three anchors together identify this StoryLock draft?",
+    ];
     let nodes = (1..=24)
         .map(|index| {
             let element_id = ELEMENTS[(index - 1) % ELEMENTS.len()];
+            let anchor_count = anchors.len().max(1);
+            let anchor_a = anchors
+                .get((index - 1) % anchor_count)
+                .copied()
+                .unwrap_or("main anchor");
+            let anchor_b = anchors
+                .get(index % anchor_count)
+                .copied()
+                .unwrap_or("support anchor");
+            let anchor_c = anchors
+                .get((index + 1) % anchor_count)
+                .copied()
+                .unwrap_or("final anchor");
             let correct = [
-                format!("node {index:02} anchor one"),
-                format!("node {index:02} anchor two"),
-                format!("node {index:02} anchor three"),
+                anchor_a.to_string(),
+                anchor_b.to_string(),
+                anchor_c.to_string(),
             ];
             let wrong = [
-                format!("node {index:02} distractor four"),
-                format!("node {index:02} distractor five"),
-                format!("node {index:02} distractor six"),
-                format!("node {index:02} distractor seven"),
-                format!("node {index:02} distractor eight"),
-                format!("node {index:02} distractor nine"),
+                format!("unrelated cue {index:02}"),
+                format!("wrong scene {index:02}"),
+                format!("false character {index:02}"),
+                format!("unused object {index:02}"),
+                format!("later distractor {index:02}"),
+                format!("generic memory {index:02}"),
             ];
+            let question = QUESTION_PATTERNS[index - 1].replace("{title}", title);
             let answer_options = correct
                 .iter()
                 .map(|text| json!({ "text": text, "isCorrect": true }))
-                .chain(wrong.iter().map(|text| json!({ "text": text, "isCorrect": false })))
+                .chain(
+                    wrong
+                        .iter()
+                        .map(|text| json!({ "text": text, "isCorrect": false })),
+                )
                 .collect::<Vec<_>>();
             json!({
                 "nodeId": format!("node-{index:02}"),
-                "title": format!("Question {index:02}"),
+                "title": format!("{title} Q{index:02}"),
                 "elementId": element_id,
-                "question": format!("Which three anchors belong to memory node {index:02}?"),
+                "question": question,
                 "recommendedSelectionMode": "multi_select",
                 "recommendedCorrectCount": 3,
                 "candidatePoolSize": 9,
@@ -282,7 +326,9 @@ pub(super) fn node_answer_options(node: &Value) -> Vec<Value> {
                 .into_iter()
                 .map(|item| json!({ "text": item.as_str().unwrap_or(""), "isCorrect": false })),
         )
-        .chain((1..=9).map(|index| json!({ "text": format!("候选答案 {index}"), "isCorrect": false })))
+        .chain(
+            (1..=9).map(|index| json!({ "text": format!("候选答案 {index}"), "isCorrect": false })),
+        )
         .take(9)
         .collect()
 }

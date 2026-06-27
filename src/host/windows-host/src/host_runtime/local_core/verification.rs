@@ -142,7 +142,10 @@ pub(crate) fn create_grid_verification(runtime: &WindowsHostRuntime, request: &V
             );
         }
     };
-    if let Err(error) = runtime.secret_store.write_verification_record(&verification) {
+    if let Err(error) = runtime
+        .secret_store
+        .write_verification_record(&verification)
+    {
         return error_response(
             config,
             &request_id,

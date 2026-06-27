@@ -38,6 +38,7 @@ pub(crate) fn ensure_storylock_vault(package_dir: &Path) -> Result<()> {
             let draft = storylock_author_draft_from_vault(&vault);
             vault["storyDraftTemplates"] = story_draft_templates_from_draft(&draft);
         }
+        refresh_placeholder_author_draft_nodes(&mut vault);
         merge_builtin_story_draft_templates(&mut vault);
         if vault != before {
             save_storylock_vault_payload(package_dir, vault)?;
@@ -70,6 +71,35 @@ pub(crate) fn ensure_storylock_vault(package_dir: &Path) -> Result<()> {
         "templates": legacy_templates,
     });
     write_storylock_vault(package_dir, &vault)
+}
+
+pub(crate) fn refresh_placeholder_author_draft_nodes(vault: &mut Value) {
+    for key in ["authorDraft", "pendingAuthorDraft"] {
+        if vault.get(key).is_some_and(Value::is_null) {
+            continue;
+        }
+        if vault
+            .get(key)
+            .is_some_and(story_draft_template_needs_refresh)
+        {
+            let mut refreshed = default_author_draft_json();
+            if let Some(existing) = vault.get(key) {
+                for field in [
+                    "templateId",
+                    "storyTitle",
+                    "summary",
+                    "storyPlot",
+                    "memoryAnchors",
+                    "elementGroups",
+                ] {
+                    if let Some(value) = existing.get(field) {
+                        refreshed[field] = value.clone();
+                    }
+                }
+            }
+            vault[key] = refreshed;
+        }
+    }
 }
 
 pub(crate) fn story_draft_templates_from_draft(draft: &Value) -> Value {
@@ -106,17 +136,40 @@ pub(crate) fn merge_builtin_story_draft_templates(vault: &mut Value) {
             .get("templateId")
             .and_then(Value::as_str)
             .unwrap_or_default();
-        if !items
+        match items
             .iter()
-            .any(|item| item.get("templateId").and_then(Value::as_str) == Some(template_id))
+            .position(|item| item.get("templateId").and_then(Value::as_str) == Some(template_id))
         {
-            items.push(builtin);
+            Some(index) if story_draft_template_needs_refresh(&items[index]) => {
+                items[index] = builtin;
+            }
+            Some(_) => {}
+            None => items.push(builtin),
         }
     }
     templates["schemaVersion"] = json!("storylock-story-draft-templates-v1");
     templates["defaultTemplateId"] = json!("dongguo-wolf");
     templates["items"] = Value::Array(items);
     vault["storyDraftTemplates"] = templates;
+}
+
+pub(crate) fn story_draft_template_needs_refresh(template: &Value) -> bool {
+    template
+        .get("nodes")
+        .and_then(Value::as_array)
+        .map(|nodes| {
+            nodes.len() != 24
+                || nodes.iter().any(|node| {
+                    let question = node
+                        .get("question")
+                        .and_then(Value::as_str)
+                        .unwrap_or_default()
+                        .trim();
+                    question.is_empty()
+                        || question.starts_with("Which three anchors belong to memory node")
+                })
+        })
+        .unwrap_or(true)
 }
 
 pub(crate) fn read_storylock_vault(package_dir: &Path) -> Value {
@@ -201,10 +254,18 @@ pub(crate) fn normalize_author_draft_schema(draft: &mut Value) {
             draft[key] = json!("");
         }
     }
-    if draft.get("memoryAnchors").and_then(Value::as_array).is_none() {
+    if draft
+        .get("memoryAnchors")
+        .and_then(Value::as_array)
+        .is_none()
+    {
         draft["memoryAnchors"] = json!([]);
     }
-    if draft.get("elementGroups").and_then(Value::as_array).is_none() {
+    if draft
+        .get("elementGroups")
+        .and_then(Value::as_array)
+        .is_none()
+    {
         draft["elementGroups"] = json!([]);
     }
     ensure_draft_nodes(draft);

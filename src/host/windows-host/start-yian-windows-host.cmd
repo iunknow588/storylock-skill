@@ -13,7 +13,7 @@ if not exist "%HOST_EXE%" (
 
 if "%STORYLOCK_GATEWAY_URL%"=="" set "STORYLOCK_GATEWAY_URL=https://yian.cdao.online"
 
-echo Starting Yian Windows Host debug console...
+echo Starting Yian Windows Host desktop UI...
 echo.
 echo Gateway: %STORYLOCK_GATEWAY_URL%
 echo Local health: http://127.0.0.1:4510/health

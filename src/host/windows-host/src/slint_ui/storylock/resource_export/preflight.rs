@@ -27,7 +27,10 @@ pub(crate) fn preflight_storylock_core_package(package_dir: &Path) -> PreflightR
     let manifest = read_json_or_default(&storylock_core_manifest_path(package_dir), Value::Null);
     if let Some(files) = manifest.get("files").and_then(Value::as_array) {
         for required_file in required_storylock_package_files() {
-            if !files.iter().any(|item| item.as_str() == Some(required_file)) {
+            if !files
+                .iter()
+                .any(|item| item.as_str() == Some(required_file))
+            {
                 errors.push(PreflightIssue {
                     code: "SL_PKG_REQUIRED_FILE_MISSING",
                     path: "$.files".to_string(),
@@ -53,7 +56,10 @@ pub(crate) fn preflight_storylock_core_package(package_dir: &Path) -> PreflightR
         Some(nodes) => errors.push(PreflightIssue {
             code: "SL_PKG_AUTHOR_DRAFT_NODE_COUNT",
             path: "$.nodes".to_string(),
-            message: format!("author draft must contain exactly 24 nodes, got {}", nodes.len()),
+            message: format!(
+                "author draft must contain exactly 24 nodes, got {}",
+                nodes.len()
+            ),
         }),
         None => errors.push(PreflightIssue {
             code: "SL_PKG_AUTHOR_DRAFT_NODE_COUNT",
@@ -97,7 +103,12 @@ pub(crate) fn validate_story_draft_templates(vault: &Value, errors: &mut Vec<Pre
 
     for (index, item) in items.iter().enumerate() {
         for field in ["storyTitle", "summary", "storyPlot"] {
-            if item.get(field).and_then(Value::as_str).unwrap_or("").is_empty() {
+            if item
+                .get(field)
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .is_empty()
+            {
                 errors.push(PreflightIssue {
                     code: "SL_STORY_TEMPLATE_FIELD_MISSING",
                     path: format!("$.storyDraftTemplates.items[{index}].{field}"),
@@ -399,7 +410,10 @@ pub(crate) fn build_catalog_role_index(
             .unwrap_or_default()
         {
             let role = binding.get("role").and_then(Value::as_str).unwrap_or("");
-            let object_id = binding.get("objectId").and_then(Value::as_str).unwrap_or("");
+            let object_id = binding
+                .get("objectId")
+                .and_then(Value::as_str)
+                .unwrap_or("");
             if role.is_empty() {
                 errors.push(PreflightIssue {
                     code: "SL_CATALOG_BINDING_ROLE_MISSING",

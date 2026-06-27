@@ -146,7 +146,10 @@ pub(crate) fn check_learning_current(
     if expected.len() != actual.len() {
         anyhow::bail!("question {} answer count mismatch", node_index + 1);
     }
-    let matched = expected.iter().zip(actual.iter()).all(|(expected, actual)| expected == actual);
+    let matched = expected
+        .iter()
+        .zip(actual.iter())
+        .all(|(expected, actual)| expected == actual);
     let mut passed = learning_passed.borrow_mut();
     let expected_node = passed.current_node_index();
     if node_index != expected_node {

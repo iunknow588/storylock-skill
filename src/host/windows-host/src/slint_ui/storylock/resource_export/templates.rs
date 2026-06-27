@@ -120,10 +120,9 @@ pub(crate) fn pull_story_template_candidates_into_vault(
             .and_then(Value::as_str)
             .unwrap_or("host-candidate")
             .to_string();
-        if items
-            .iter()
-            .any(|item| item.get("templateId").and_then(Value::as_str) == Some(template_id.as_str()))
-        {
+        if items.iter().any(|item| {
+            item.get("templateId").and_then(Value::as_str) == Some(template_id.as_str())
+        }) {
             continue;
         }
         items.push(draft);
@@ -205,7 +204,10 @@ pub(crate) fn format_story_draft_template_summary(package_dir: &Path) -> String 
                     .get("templateId")
                     .and_then(Value::as_str)
                     .unwrap_or("current-author-draft"),
-                draft.get("storyTitle").and_then(Value::as_str).unwrap_or(""),
+                draft
+                    .get("storyTitle")
+                    .and_then(Value::as_str)
+                    .unwrap_or(""),
                 draft.get("summary").and_then(Value::as_str).unwrap_or(""),
                 node_count
             )

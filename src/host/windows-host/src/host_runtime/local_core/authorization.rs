@@ -37,7 +37,10 @@ pub(crate) fn authorize_local_action(runtime: &WindowsHostRuntime, request: &Val
             )
         }
     };
-    let verification = match runtime.secret_store.read_verification_record(verification_id) {
+    let verification = match runtime
+        .secret_store
+        .read_verification_record(verification_id)
+    {
         Ok(record) => record,
         Err(error) => {
             return error_response(
@@ -138,7 +141,10 @@ pub(crate) fn authorize_local_action(runtime: &WindowsHostRuntime, request: &Val
         expires_at: expires_at_after(300),
         status: "approved".to_string(),
     };
-    if let Err(error) = runtime.secret_store.write_authorization_record(&authorization) {
+    if let Err(error) = runtime
+        .secret_store
+        .write_authorization_record(&authorization)
+    {
         return error_response(
             config,
             &request_id,
@@ -209,7 +215,10 @@ pub(crate) fn revoke_local_authorization(runtime: &WindowsHostRuntime, request: 
             "Provide the authorizationId that should be revoked.",
         );
     }
-    let mut record = match runtime.secret_store.read_authorization_record(&authorization_id) {
+    let mut record = match runtime
+        .secret_store
+        .read_authorization_record(&authorization_id)
+    {
         Ok(record) => record,
         Err(error) => {
             record_local_audit(

@@ -15,7 +15,9 @@ pub(crate) fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_
     core.set_resource_catalog_path(SharedString::from("resource-catalog.json"));
     core.set_learning_policy_path(SharedString::from("learning-policy.json"));
     core.set_export_package_dir(SharedString::from(
-        default_storylock_export_dir(package_dir).display().to_string(),
+        default_storylock_export_dir(package_dir)
+            .display()
+            .to_string(),
     ));
     core.set_story_title(json_string(&draft, &["storyTitle"]));
     core.set_story_summary(json_string(&draft, &["summary"]));

@@ -32,10 +32,8 @@ pub(crate) fn start_local_server(runtime: WindowsHostRuntime) -> Result<thread::
                     .to_string(),
                 )
                 .with_header(content_type_json()),
-                (&Method::Get, "/ui") => {
-                    Response::from_string(windows_host_management_ui_html())
-                        .with_header(content_type_html())
-                }
+                (&Method::Get, "/ui") => Response::from_string(windows_host_management_ui_html())
+                    .with_header(content_type_html()),
                 (&Method::Get, "/ui/status") => {
                     Response::from_string(ui_status(&runtime).to_string())
                         .with_header(content_type_json())

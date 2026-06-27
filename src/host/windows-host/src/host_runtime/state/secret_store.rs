@@ -121,15 +121,24 @@ impl SecretStore {
         Ok(serde_json::from_slice(&decrypted)?)
     }
 
-    pub(crate) fn write_authorization_record(&self, record: &StoredAuthorizationRecord) -> Result<()> {
+    pub(crate) fn write_authorization_record(
+        &self,
+        record: &StoredAuthorizationRecord,
+    ) -> Result<()> {
         self.write_secret_json(&self.authorization_path(&record.authorization_id), record)
     }
 
-    pub(crate) fn write_verification_record(&self, record: &StoredVerificationRecord) -> Result<()> {
+    pub(crate) fn write_verification_record(
+        &self,
+        record: &StoredVerificationRecord,
+    ) -> Result<()> {
         self.write_secret_json(&self.verification_path(&record.verification_id), record)
     }
 
-    pub(crate) fn read_verification_record(&self, verification_id: &str) -> Result<StoredVerificationRecord> {
+    pub(crate) fn read_verification_record(
+        &self,
+        verification_id: &str,
+    ) -> Result<StoredVerificationRecord> {
         self.read_secret_json(&self.verification_path(verification_id))
     }
 

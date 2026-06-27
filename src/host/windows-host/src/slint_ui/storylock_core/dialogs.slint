@@ -1,0 +1,174 @@
+import { VerticalBox, HorizontalBox, ComboBox } from "std-widgets.slint";
+import { PathBrowseRow, StaticRow, ActionButton, QuestionConfigPanel } from "../common.slint";
+
+export component StoryLockCoreSettingsDialog inherits Window {
+    in-out property <string> language: "zh";
+    property <bool> is-zh: language == "zh";
+    in-out property <string> core-data-dir: "";
+    callback close-requested();
+    callback language-changed(string);
+    callback browse-core-data-dir();
+
+    title: root.is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
+    preferred-width: 800px;
+    preferred-height: 450px;
+    min-width: 800px;
+    max-width: 800px;
+    min-height: 450px;
+    max-height: 450px;
+    background: #eef3f5;
+
+    VerticalBox {
+        padding: 20px;
+        spacing: 12px;
+        Rectangle {
+            height: 36px;
+            background: transparent;
+            Text {
+                x: 0px;
+                y: 4px;
+                width: 720px;
+                height: 28px;
+                text: root.is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
+                color: #17252f;
+                font-size: 16px;
+                font-weight: 800;
+                overflow: elide;
+            }
+        }
+        VerticalBox {
+            spacing: 14px;
+            HorizontalBox {
+                spacing: 14px;
+                Text {
+                    text: root.is-zh ? "界面语言" : "UI Language";
+                    width: 150px;
+                    color: #62727d;
+                    font-size: 13px;
+                    vertical-alignment: center;
+                }
+                ComboBox {
+                    width: 420px;
+                    height: 32px;
+                    model: root.is-zh ? ["中文", "英文"] : ["Chinese", "English"];
+                    current-value: root.is-zh ? "中文" : "English";
+                    selected(value) => {
+                        root.language = (value == "Chinese" || value == "中文") ? "zh" : "en";
+                        root.language-changed(root.language);
+                    }
+                }
+            }
+            PathBrowseRow {
+                name: root.is-zh ? "工作目录" : "Workspace Dir";
+                value <=> root.core-data-dir;
+                is-zh: root.is-zh;
+                browse => { root.browse-core-data-dir(); }
+            }
+            StaticRow { name: root.is-zh ? "Vault 文件" : "Vault File"; value: "vault.stlk"; }
+            StaticRow { name: root.is-zh ? "学习策略" : "Learning Policy"; value: "learning-policy.json"; }
+            StaticRow { name: root.is-zh ? "包清单" : "Package Manifest"; value: "package-manifest.json"; }
+            StaticRow { name: root.is-zh ? "资源目录" : "Resource Catalog"; value: "resource-catalog.json"; }
+        }
+    }
+}
+
+export component AnswerEditorDialog inherits Window {
+    in-out property <string> language: "zh";
+    property <bool> is-zh: language == "zh";
+    in-out property <string> selected-question: "1";
+    in-out property <string> question-text: "";
+    in-out property <string> answer-1: "";
+    in-out property <string> answer-1-state: "wrong";
+    in-out property <string> answer-2: "";
+    in-out property <string> answer-2-state: "wrong";
+    in-out property <string> answer-3: "";
+    in-out property <string> answer-3-state: "wrong";
+    in-out property <string> answer-4: "";
+    in-out property <string> answer-4-state: "wrong";
+    in-out property <string> answer-5: "";
+    in-out property <string> answer-5-state: "wrong";
+    in-out property <string> answer-6: "";
+    in-out property <string> answer-6-state: "wrong";
+    in-out property <string> answer-7: "";
+    in-out property <string> answer-7-state: "wrong";
+    in-out property <string> answer-8: "";
+    in-out property <string> answer-8-state: "wrong";
+    in-out property <string> answer-9: "";
+    in-out property <string> answer-9-state: "wrong";
+    callback close-requested();
+    callback save-requested();
+    callback previous-node();
+    callback next-node();
+    callback select-node(string);
+
+    title: root.is-zh ? "答案编辑" : "Answer Editor";
+    preferred-width: 960px;
+    preferred-height: 540px;
+    min-width: 960px;
+    max-width: 960px;
+    min-height: 540px;
+    max-height: 540px;
+    background: #eef3f5;
+
+    VerticalBox {
+        padding: 20px;
+        spacing: 12px;
+        Rectangle {
+            height: 36px;
+            background: transparent;
+            Text {
+                x: 0px;
+                y: 4px;
+                width: 700px;
+                height: 28px;
+                text: (root.is-zh ? "答案编辑 - " : "Answer Editor - ") + root.selected-question;
+                color: #17252f;
+                font-size: 16px;
+                font-weight: 800;
+                overflow: elide;
+            }
+            ActionButton {
+                x: 740px;
+                y: 1px;
+                label: root.is-zh ? "保存" : "Save";
+                primary: true;
+                button-width: 96px;
+                clicked => { root.save-requested(); }
+            }
+            ActionButton {
+                x: 846px;
+                y: 1px;
+                label: root.is-zh ? "关闭" : "Close";
+                primary: false;
+                button-width: 96px;
+                clicked => { root.close-requested(); }
+            }
+        }
+        QuestionConfigPanel {
+            panel-height: 422px;
+            selected-question <=> root.selected-question;
+            question-text <=> root.question-text;
+            answer-1 <=> root.answer-1;
+            answer-1-state <=> root.answer-1-state;
+            answer-2 <=> root.answer-2;
+            answer-2-state <=> root.answer-2-state;
+            answer-3 <=> root.answer-3;
+            answer-3-state <=> root.answer-3-state;
+            answer-4 <=> root.answer-4;
+            answer-4-state <=> root.answer-4-state;
+            answer-5 <=> root.answer-5;
+            answer-5-state <=> root.answer-5-state;
+            answer-6 <=> root.answer-6;
+            answer-6-state <=> root.answer-6-state;
+            answer-7 <=> root.answer-7;
+            answer-7-state <=> root.answer-7-state;
+            answer-8 <=> root.answer-8;
+            answer-8-state <=> root.answer-8-state;
+            answer-9 <=> root.answer-9;
+            answer-9-state <=> root.answer-9-state;
+            previous-node => { root.previous-node(); }
+            next-node => { root.next-node(); }
+            select-node(value) => { root.select-node(value); }
+        }
+    }
+}

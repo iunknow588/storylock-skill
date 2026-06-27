@@ -68,19 +68,34 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     let core_package_dir_for_settings = core_package_dir.clone();
 
     app.on_open_settings(move || {
-        if let Some(existing) = settings_window_for_open.borrow().as_ref() {
-            if let Err(error) = existing.show() {
+        let existing_show_result = {
+            settings_window_for_open
+                .borrow()
+                .as_ref()
+                .map(|existing| existing.show())
+        };
+        if let Some(show_result) = existing_show_result {
+            if let Err(error) = show_result {
                 eprintln!("failed to show settings window: {error}");
-            }
-            if let Some(host) = host_for_settings.upgrade() {
+                *settings_window_for_open.borrow_mut() = None;
+                if let Some(host) = host_for_settings.upgrade() {
+                    host.set_settings_open(false);
+                    host.set_connection_test_status(SharedString::from(format!(
+                        "Settings reopen failed: {error}"
+                    )));
+                }
+            } else if let Some(host) = host_for_settings.upgrade() {
                 host.set_settings_open(true);
+                host.set_connection_test_status(SharedString::from("Settings opened"));
             }
             return;
         }
 
         match SettingsDialog::new() {
             Ok(settings) => {
-                settings.set_language(SharedString::from(host_language_for_settings.borrow().clone()));
+                settings.set_language(SharedString::from(
+                    host_language_for_settings.borrow().clone(),
+                ));
                 settings.set_core_launch_status(SharedString::from(
                     shared_status_for_settings.borrow().clone(),
                 ));
@@ -122,6 +137,20 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 let shared_status_for_storylock = Rc::clone(&shared_status_for_settings);
                 let host_for_settings_lock_close = host_for_settings_lock.clone();
                 let host_language_for_close = Rc::clone(&host_language_for_settings);
+                let settings_window_for_close = Rc::clone(&settings_window_for_open);
+                let close_settings = Rc::new(move |settings: &SettingsDialog| {
+                    let _ = settings.hide();
+                    *settings_window_for_close.borrow_mut() = None;
+                    if let Some(host) = host_for_settings_lock_close.upgrade() {
+                        host.set_settings_open(false);
+                        let text = if host_language_for_close.borrow().as_str() == "zh" {
+                            "设置已关闭"
+                        } else {
+                            "Settings closed"
+                        };
+                        host.set_connection_test_status(SharedString::from(text));
+                    }
+                });
 
                 settings.on_open_storylock_core(move || {
                     if let Some(host) = host_for_open_storylock.upgrade() {
@@ -199,19 +228,20 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                     }
                 });
 
+                let close_settings_for_button = Rc::clone(&close_settings);
                 settings.on_close_requested(move || {
                     if let Some(settings) = settings_weak_for_close.upgrade() {
-                        let _ = settings.hide();
+                        close_settings_for_button(&settings);
                     }
-                    if let Some(host) = host_for_settings_lock_close.upgrade() {
-                        host.set_settings_open(false);
-                        let text = if host_language_for_close.borrow().as_str() == "zh" {
-                            "Settings closed"
-                        } else {
-                            "Settings closed"
-                        };
-                        host.set_connection_test_status(SharedString::from(text));
+                });
+
+                let settings_weak_for_window_close = settings.as_weak();
+                let close_settings_for_window = Rc::clone(&close_settings);
+                settings.window().on_close_requested(move || {
+                    if let Some(settings) = settings_weak_for_window_close.upgrade() {
+                        close_settings_for_window(&settings);
                     }
+                    slint::CloseRequestResponse::HideWindow
                 });
 
                 if let Err(error) = settings.show() {
@@ -229,6 +259,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     let host_for_storylock_close = app.as_weak();
     let settings_window_for_storylock_close = Rc::clone(&settings_window);
     let shared_status_for_storylock_close = Rc::clone(&shared_status);
+    let host_language_for_storylock = Rc::clone(&host_language);
 
     app.on_open_storylock_core(move || {
         if let Err(error) = ensure_storylock_core_package(&core_package_dir_for_callback) {
@@ -237,6 +268,9 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
 
         if let Some(core) = core_window_for_callback.borrow().as_ref() {
             initialize_storylock_core_window(core, &core_package_dir_for_callback);
+            core.set_language(SharedString::from(
+                host_language_for_storylock.borrow().clone(),
+            ));
             core.set_config_status(SharedString::from(
                 "StoryLock Core is already open. Existing local window was focused.",
             ));
@@ -250,6 +284,9 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
         *core_window_for_callback.borrow_mut() = None;
         match StoryLockCoreApp::new() {
             Ok(core) => {
+                core.set_language(SharedString::from(
+                    host_language_for_storylock.borrow().clone(),
+                ));
                 initialize_storylock_core_window(&core, &core_package_dir_for_callback);
                 let host_for_closed = host_for_storylock_close.clone();
                 let settings_window_for_closed = Rc::clone(&settings_window_for_storylock_close);
@@ -387,7 +424,10 @@ fn test_managed_object_nine_grid(host_port: u16, tier: String) -> String {
         .and_then(Value::as_str)
         .unwrap_or("unknown");
     let grid = result.get("grid").cloned().unwrap_or(Value::Null);
-    let required_cells = grid.get("requiredCells").and_then(Value::as_u64).unwrap_or(0);
+    let required_cells = grid
+        .get("requiredCells")
+        .and_then(Value::as_u64)
+        .unwrap_or(0);
     let grid_size = grid.get("gridSize").and_then(Value::as_u64).unwrap_or(0);
     format!(
         "Nine-grid ready: {label}, object={object_ref}, verificationId={verification_id}, {required_cells}/{grid_size} cells"

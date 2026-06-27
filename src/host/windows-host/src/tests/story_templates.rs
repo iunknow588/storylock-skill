@@ -38,15 +38,11 @@ fn story_template_generation_queues_candidates_for_storylock_pull() {
     );
     let result = candidates.get("result").expect("candidate result");
     assert_eq!(
-        result
-            .get("hostInvokesStoryLock")
-            .and_then(Value::as_bool),
+        result.get("hostInvokesStoryLock").and_then(Value::as_bool),
         Some(false)
     );
     assert_eq!(
-        result
-            .get("pullModel")
-            .and_then(Value::as_str),
+        result.get("pullModel").and_then(Value::as_str),
         Some("storylock_explicit_pull_only")
     );
     assert!(result

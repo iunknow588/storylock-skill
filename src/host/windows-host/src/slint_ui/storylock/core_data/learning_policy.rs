@@ -198,16 +198,60 @@ pub(crate) fn load_learning_policy_into_window(core: &StoryLockCoreApp, package_
         &["preLearning", "weakItemLimit"],
         3,
     )));
-    core.set_initial_days(SharedString::from(phase_number(&policy, "initial", "duration", 3)));
-    core.set_initial_frequency_days(SharedString::from(phase_number(&policy, "initial", "frequency", 1)));
-    core.set_consolidation_days(SharedString::from(phase_number(&policy, "consolidation", "duration", 4)));
-    core.set_consolidation_frequency_days(SharedString::from(phase_number(&policy, "consolidation", "frequency", 2)));
-    core.set_adaptation_weeks(SharedString::from(phase_number(&policy, "adaptation", "duration", 3)));
-    core.set_adaptation_frequency_weeks(SharedString::from(phase_number(&policy, "adaptation", "frequency", 1)));
-    core.set_stable_months(SharedString::from(phase_number(&policy, "stable", "duration", 4)));
-    core.set_stable_frequency_months(SharedString::from(phase_number(&policy, "stable", "frequency", 1)));
-    core.set_long_term_years(SharedString::from(phase_number(&policy, "long_term", "duration", 1)));
-    core.set_long_term_frequency_years(SharedString::from(phase_number(&policy, "long_term", "frequency", 1)));
+    core.set_initial_days(SharedString::from(phase_number(
+        &policy, "initial", "duration", 3,
+    )));
+    core.set_initial_frequency_days(SharedString::from(phase_number(
+        &policy,
+        "initial",
+        "frequency",
+        1,
+    )));
+    core.set_consolidation_days(SharedString::from(phase_number(
+        &policy,
+        "consolidation",
+        "duration",
+        4,
+    )));
+    core.set_consolidation_frequency_days(SharedString::from(phase_number(
+        &policy,
+        "consolidation",
+        "frequency",
+        2,
+    )));
+    core.set_adaptation_weeks(SharedString::from(phase_number(
+        &policy,
+        "adaptation",
+        "duration",
+        3,
+    )));
+    core.set_adaptation_frequency_weeks(SharedString::from(phase_number(
+        &policy,
+        "adaptation",
+        "frequency",
+        1,
+    )));
+    core.set_stable_months(SharedString::from(phase_number(
+        &policy, "stable", "duration", 4,
+    )));
+    core.set_stable_frequency_months(SharedString::from(phase_number(
+        &policy,
+        "stable",
+        "frequency",
+        1,
+    )));
+    core.set_long_term_years(SharedString::from(phase_number(
+        &policy,
+        "long_term",
+        "duration",
+        1,
+    )));
+    core.set_long_term_frequency_years(SharedString::from(phase_number(
+        &policy,
+        "long_term",
+        "frequency",
+        1,
+    )));
     core.set_learning_plan_summary(SharedString::from(learning_policy_summary(&policy)));
 }
 
