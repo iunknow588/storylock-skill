@@ -1,0 +1,41 @@
+import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { ActionButton, InfoRow, StaticRow } from "common.slint";
+export component RequestConfirmation inherits Window {
+        in property <string> request-id;
+        in property <string> capability;
+        in property <string> object-ref;
+        in property <string> requester;
+        in property <string> origin;
+        in property <string> required-strength;
+        in property <string> allowed-action;
+        in property <string> expiry;
+        in property <string> risk;
+        callback approve-requested();
+        callback deny-requested();
+
+        title: "Yian Request Confirmation";
+        preferred-width: 640px;
+        preferred-height: 360px;
+        background: #eef3f5;
+
+        VerticalBox {
+            padding: 22px;
+            spacing: 14px;
+            Text { text: "Confirm Local Request"; font-size: 22px; font-weight: 800; color: #17252f; }
+            InfoRow { name: "Request"; value: root.request-id; }
+            InfoRow { name: "Capability"; value: root.capability; }
+            InfoRow { name: "Object"; value: root.object-ref; }
+            InfoRow { name: "Requester"; value: root.requester; }
+            InfoRow { name: "Origin"; value: root.origin; }
+            InfoRow { name: "Strength"; value: root.required-strength; }
+            InfoRow { name: "Action"; value: root.allowed-action; }
+            InfoRow { name: "Expiry"; value: root.expiry; }
+            Text { text: root.risk; color: #17252f; wrap: word-wrap; }
+            HorizontalBox {
+                alignment: end;
+                spacing: 10px;
+                Button { text: "Deny"; clicked => { root.deny-requested(); } }
+                Button { text: "Approve"; clicked => { root.approve-requested(); } }
+            }
+        }
+    }

@@ -1,0 +1,298 @@
+import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { MenuButton, SubMenuButton, InfoRow, FormRow, EditableRow, PathBrowseRow, LargeEditableText, QuestionTableRow, QuestionIdTableRow, QuestionOverviewGrid, QuestionConfigPanel, ActionButton, SettingsIconButton, StaticRow, LogPanel } from "common.slint";
+export component HostDashboard inherits Window {
+        in-out property <int> active-page: 1;
+        in-out property <string> language: "zh";
+        property <bool> is-zh: language == "zh";
+        in-out property <bool> settings-open: false;
+        in-out property <string> nine-grid-status: "九宫格测试尚未开始";
+        in-out property <string> nine-grid-summary: "对象: 未选择";
+        in property <string> product;
+        in property <string> version;
+        in property <string> mode;
+        in property <string> identity-id;
+        in property <string> device-id;
+        in property <string> local-api;
+        in property <string> capabilities;
+        in property <string> call-chain;
+        in property <string> management-stats;
+        in property <string> diagnostics;
+        in-out property <string> connection-test-status: "No connection test has run yet.";
+        property <string> core-launch-status: "StoryLock: closed | launch: none | language: zh";
+        property <string> current-title: active-page == 0 ? (is-zh ? "状态" : "Status") : active-page == 1 ? (is-zh ? "本地主机" : "Local Host") : active-page == 2 ? (is-zh ? "管理" : "Management") : (is-zh ? "诊断" : "Diagnostics");
+        callback close-requested();
+        callback open-storylock-core();
+        callback open-settings();
+        callback test-local-host() -> string;
+        callback test-remote-connection() -> string;
+        callback test-managed-object-nine-grid(string) -> string;
+
+        title: "Yian Windows Host";
+        preferred-width: 960px;
+        preferred-height: 540px;
+        background: #eef3f5;
+
+        HorizontalBox {
+            padding: 0px;
+            spacing: 0px;
+
+            Rectangle {
+                min-width: 180px;
+                max-width: 180px;
+                background: #eef3f5;
+
+                VerticalBox {
+                    x: 18px;
+                    y: 48px;
+                    width: 144px;
+                    height: 330px;
+                    spacing: 14px;
+
+                    MenuButton {
+                        label: root.is-zh ? "状态" : "Status";
+                        selected: root.active-page == 0;
+                        clicked => { root.active-page = 0; }
+                    }
+                    MenuButton {
+                        label: root.is-zh ? "本地主机" : "Local Host";
+                        selected: root.active-page == 1;
+                        clicked => { root.active-page = 1; }
+                    }
+                    MenuButton {
+                        label: root.is-zh ? "管理" : "Management";
+                        selected: root.active-page == 2;
+                        clicked => { root.active-page = 2; }
+                    }
+                    MenuButton {
+                        label: root.is-zh ? "诊断" : "Diagnostics";
+                        selected: root.active-page == 3;
+                        clicked => { root.active-page = 3; }
+                    }
+                    MenuButton {
+                        label: root.is-zh ? "打开 StoryLock 配置" : "Open StoryLock";
+                        selected: false;
+                        clicked => { root.open-storylock-core(); }
+                    }
+                }
+            }
+
+            Rectangle {
+                min-width: 640px;
+                background: #eef3f5;
+                Rectangle {
+                    width: 640px;
+                    height: 540px;
+                    background: transparent;
+                    VerticalBox {
+                        padding: 38px;
+                        spacing: 16px;
+
+                        Rectangle {
+                            height: 48px;
+                            background: transparent;
+                            Image {
+                                x: 0px;
+                                y: 12px;
+                                source: @image-url("../assets/lock.png");
+                                width: 28px;
+                                height: 28px;
+                            }
+                            Text {
+                                x: 38px;
+                                y: 12px;
+                                width: 480px;
+                                height: 28px;
+                                text: "Yian: StoryLock - " + root.current-title;
+                                font-size: 16px;
+                                font-weight: 800;
+                                color: #17252f;
+                                overflow: elide;
+                            }
+                            SettingsIconButton {
+                                x: 556px;
+                                y: 2px;
+                                selected: false;
+                                clicked => { root.open-settings(); }
+                            }
+                        }
+
+                        Rectangle {
+                            height: 1px;
+                            background: #d7e1e6;
+                        }
+
+                        Rectangle {
+                            width: 600px;
+                            height: 360px;
+                            background: transparent;
+
+                            if root.active-page == 0: VerticalBox {
+                                x: 0px;
+                                y: 0px;
+                                width: 600px;
+                                height: 360px;
+                                spacing: 12px;
+                                FormRow { name: root.is-zh ? "身份" : "Identity"; value: root.identity-id; }
+                                FormRow { name: root.is-zh ? "设备" : "Device"; value: root.device-id; }
+                                FormRow { name: root.is-zh ? "本地 API" : "Local API"; value: root.local-api; }
+                                StaticRow { name: root.is-zh ? "模式" : "Mode"; value: root.mode; }
+                                StaticRow { name: root.is-zh ? "连接测试" : "Connection Test"; value: root.connection-test-status; }
+                                HorizontalBox {
+                                    spacing: 12px;
+                                    ActionButton {
+                                        label: root.is-zh ? "测试本地主机" : "Test Local Host";
+                                        primary: true;
+                                        clicked => {
+                                            root.connection-test-status = root.test-local-host();
+                                        }
+                                    }
+                                    ActionButton {
+                                        label: root.is-zh ? "测试远程连接" : "Test Remote";
+                                        primary: false;
+                                        clicked => {
+                                            root.connection-test-status = root.test-remote-connection();
+                                        }
+                                    }
+                                }
+                            }
+
+                            if root.active-page == 1: VerticalBox {
+                                x: 0px;
+                                y: 0px;
+                                width: 600px;
+                                height: 360px;
+                                spacing: 12px;
+                                FormRow { name: root.is-zh ? "能力" : "Capabilities"; value: root.capabilities; }
+                                FormRow { name: root.is-zh ? "调用链" : "Call Chain"; value: root.call-chain; }
+                                StaticRow { name: root.is-zh ? "边界" : "Boundary"; value: root.is-zh ? "仅 Relay、本地 API 与授权代理" : "Relay, localhost API, and approval broker only"; }
+                                StaticRow { name: root.is-zh ? "远程访问" : "Remote Access"; value: root.is-zh ? "默认关闭" : "Disabled by default"; }
+                                StaticRow { name: root.is-zh ? "StoryLock 数据" : "StoryLock Data"; value: root.is-zh ? "Yian Host 不可读取" : "Not readable from Yian Host"; }
+                            }
+
+                            if root.active-page == 2: VerticalBox {
+                                x: 0px;
+                                y: 0px;
+                                width: 600px;
+                                height: 360px;
+                                spacing: 12px;
+                                StaticRow { name: root.is-zh ? "单项读取" : "Single Read"; value: root.is-zh ? "解锁 9 格中的 6 格，中等强度，允许远程" : "6 of 9 cells, medium strength, remote allowed"; }
+                                StaticRow { name: root.is-zh ? "批量读取" : "Batch Read"; value: root.is-zh ? "解锁 12 格中的 12 格，高强度，允许远程" : "12 of 12 cells, high strength, remote allowed"; }
+                                StaticRow { name: root.is-zh ? "故事编辑" : "Story Edit"; value: root.is-zh ? "解锁 24 格中的 22 格，仅本地 StoryLock UI" : "22 of 24 cells, local StoryLock UI only"; }
+                                StaticRow { name: root.is-zh ? "九宫格测试" : "Nine-Grid Test"; value: root.nine-grid-status; }
+                                StaticRow { name: root.is-zh ? "测试对象" : "Test Object"; value: root.nine-grid-summary; }
+                                HorizontalBox {
+                                    spacing: 8px;
+                                    ActionButton {
+                                        label: root.is-zh ? "6格普通对象" : "6-cell Normal";
+                                        primary: true;
+                                        button-width: 128px;
+                                        clicked => {
+                                            root.nine-grid-status = root.test-managed-object-nine-grid("normal");
+                                            root.nine-grid-summary = root.nine-grid-status;
+                                        }
+                                    }
+                                    ActionButton {
+                                        label: root.is-zh ? "12格保密对象" : "12-cell Confidential";
+                                        primary: false;
+                                        button-width: 136px;
+                                        clicked => {
+                                            root.nine-grid-status = root.test-managed-object-nine-grid("confidential");
+                                            root.nine-grid-summary = root.nine-grid-status;
+                                        }
+                                    }
+                                    ActionButton {
+                                        label: root.is-zh ? "22格高机密对象" : "22-cell Top Secret";
+                                        primary: false;
+                                        button-width: 136px;
+                                        clicked => {
+                                            root.nine-grid-status = root.test-managed-object-nine-grid("top-secret");
+                                            root.nine-grid-summary = root.nine-grid-status;
+                                        }
+                                    }
+                                }
+                                LogPanel { value: root.management-stats; panel-height: 150px; }
+                            }
+
+                            if root.active-page == 3: VerticalBox {
+                                x: 0px;
+                                y: 0px;
+                                width: 600px;
+                                height: 360px;
+                                spacing: 12px;
+                                LogPanel { value: root.diagnostics; }
+                            }
+                        }
+                    }
+                    if root.settings-open: Rectangle {
+                        width: 640px;
+                        height: 540px;
+                        background: #00000022;
+                        TouchArea { }
+                    }
+                }
+            }
+        }
+    }
+
+export component SettingsDialog inherits Window {
+        in-out property <string> language: "zh";
+        in-out property <string> core-launch-status: "StoryLock: closed | launch: none | language: zh";
+        property <bool> is-zh: language == "zh";
+        callback close-requested();
+        callback open-storylock-core();
+        callback language-changed(string);
+
+        title: is-zh ? "设置" : "Settings";
+        preferred-width: 640px;
+        preferred-height: 360px;
+        background: #eef3f5;
+
+        VerticalBox {
+            padding: 24px;
+            spacing: 16px;
+            Rectangle {
+                height: 36px;
+                background: transparent;
+                Text {
+                    x: 0px;
+                    y: 4px;
+                    width: 400px;
+                    height: 28px;
+                    text: is-zh ? "设置" : "Settings";
+                    font-size: 16px;
+                    font-weight: 800;
+                    color: #17252f;
+                    overflow: elide;
+                }
+            }
+                HorizontalBox {
+                    spacing: 14px;
+                    Text {
+                        text: is-zh ? "界面语言" : "UI Language";
+                        width: 140px;
+                    color: #62727d;
+                    font-size: 13px;
+                    vertical-alignment: center;
+                }
+                ComboBox {
+                    width: 294px;
+                    height: 32px;
+                    model: ["中文", "English"];
+                    current-value: is-zh ? "中文" : "English";
+                    selected(value) => {
+                        root.language = value == "中文" ? "zh" : "en";
+                        root.language-changed(value == "中文" ? "zh" : "en");
+                    }
+                }
+                    ActionButton {
+                        label: is-zh ? "打开" : "Open";
+                        primary: true;
+                        button-width: 112px;
+                        clicked => { root.open-storylock-core(); }
+                    }
+                }
+            StaticRow { name: is-zh ? "StoryLock 状态" : "StoryLock Status"; value: root.core-launch-status; }
+            StaticRow { name: is-zh ? "触发方式" : "Trigger"; value: is-zh ? "只能从设置弹窗手动打开" : "Manual launch from the Settings dialog only"; }
+            StaticRow { name: is-zh ? "说明" : "Note"; value: is-zh ? "语言切换会立即作用于主界面与 StoryLock Core。" : "Language changes apply to the Host UI and StoryLock Core immediately."; }
+        }
+    }
