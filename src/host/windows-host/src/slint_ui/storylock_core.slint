@@ -1,9 +1,9 @@
-import { VerticalBox, HorizontalBox } from "std-widgets.slint";
+﻿import { VerticalBox, HorizontalBox } from "std-widgets.slint";
 import { MenuButton, SubMenuButton, SettingsIconButton } from "common.slint";
 import { StoryDraftPage, QuestionOverviewPage, QuestionEditorPage } from "storylock_core/pages_story.slint";
-import { ProtectedObjectsPage, ObjectEditorPage } from "storylock_core/pages_objects.slint";
+import { ProtectedObjectsPage } from "storylock_core/pages_objects.slint";
 import { LearningPage, ExportPage } from "storylock_core/pages_learning_export.slint";
-import { StoryLockCoreSettingsDialog, AnswerEditorDialog } from "storylock_core/dialogs.slint";
+import { StoryLockCoreSettingsDialog, AnswerEditorDialog, LearningTestDialog } from "storylock_core/dialogs.slint";
 export component StoryLockCoreApp inherits Window {
         in-out property <int> active-page: 1;
         in-out property <string> language: "zh";
@@ -80,13 +80,14 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> resource-id: "github-main";
         in-out property <string> resource-kind: "website_account";
         in-out property <string> provider-id: "github";
-        in-out property <string> display-name: "GitHub main account";
-        in-out property <string> object-id: "wallet/evm/main/signing_key";
-        in-out property <string> object-kind: "private_key";
+        in-out property <string> display-name: "GitHub main login";
+        in-out property <string> object-id: "credential/github/main";
+        in-out property <string> object-kind: "password_fill";
         in-out property <string> required-correct-count: "12";
         in-out property <string> authorization-frequency: "Every high-risk request";
-        in-out property <string> secret-reference: "StoryLock local secret reference";
+        in-out property <string> secret-reference: "credential/github/main";
         in-out property <string> training-policy: "Complete local learning review before saving.";
+        in-out property <string> pre-learning-prompts-per-question: "2";
         in-out property <string> pre-learning-error-tolerance: "2";
         in-out property <string> weak-item-limit: "3";
         in-out property <string> initial-days: "3";
@@ -99,8 +100,48 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> stable-frequency-months: "1";
         in-out property <string> long-term-years: "1";
         in-out property <string> long-term-frequency-years: "1";
-        in-out property <string> learning-plan-summary: "Pre-learning: 48 prompts, 24 questions x 2. Retention: 22 questions by phase.";
+        in-out property <string> learning-plan-summary: "Pre-learning: 24 questions, 2 prompts each, total 48. Retention: 22 questions by phase.";
         in-out property <string> protected-object-list: "Protected objects are loaded from resource-catalog.json.";
+        in-out property <string> object-1-id: "";
+        in-out property <string> object-1-name: "";
+        in-out property <string> object-1-secret: "";
+        in-out property <string> object-1-usage: "";
+        in-out property <string> object-1-level: "";
+        in-out property <string> object-2-id: "";
+        in-out property <string> object-2-name: "";
+        in-out property <string> object-2-secret: "";
+        in-out property <string> object-2-usage: "";
+        in-out property <string> object-2-level: "";
+        in-out property <string> object-3-id: "";
+        in-out property <string> object-3-name: "";
+        in-out property <string> object-3-secret: "";
+        in-out property <string> object-3-usage: "";
+        in-out property <string> object-3-level: "";
+        in-out property <string> object-4-id: "";
+        in-out property <string> object-4-name: "";
+        in-out property <string> object-4-secret: "";
+        in-out property <string> object-4-usage: "";
+        in-out property <string> object-4-level: "";
+        in-out property <string> object-5-id: "";
+        in-out property <string> object-5-name: "";
+        in-out property <string> object-5-secret: "";
+        in-out property <string> object-5-usage: "";
+        in-out property <string> object-5-level: "";
+        in-out property <string> object-6-id: "";
+        in-out property <string> object-6-name: "";
+        in-out property <string> object-6-secret: "";
+        in-out property <string> object-6-usage: "";
+        in-out property <string> object-6-level: "";
+        in-out property <string> object-7-id: "";
+        in-out property <string> object-7-name: "";
+        in-out property <string> object-7-secret: "";
+        in-out property <string> object-7-usage: "";
+        in-out property <string> object-7-level: "";
+        in-out property <string> object-8-id: "";
+        in-out property <string> object-8-name: "";
+        in-out property <string> object-8-secret: "";
+        in-out property <string> object-8-usage: "";
+        in-out property <string> object-8-level: "";
         in-out property <string> resource-bindings: "username -> credential/github/main/username\npassword -> credential/github/main/password\ntotp_secret -> credential/github/main/totp_secret";
         in-out property <string> object-meta: "username: reference utf8\npassword: secret utf8\ntotp_secret: secret utf8";
         in-out property <string> template-kind: "vault.stlk";
@@ -111,6 +152,8 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> export-preview: "identity-package/\n  vault.stlk\n  package-manifest.json\n  resource-catalog.json";
         in-out property <string> config-status: "All edits stay inside StoryLock UI. Yian Host receives no draft, vault, catalog, template, or package path.";
         in-out property <string> learning-status: "Pre-export test is required before export.";
+        in-out property <string> learning-progress-summary: "0 / 0 prompts completed, errors recorded: 0";
+        in-out property <string> learning-action-hint: "Start training from the current draft, then complete the full 3x3 test.";
         in-out property <bool> export-ready: false;
         in-out property <int> learning-index: 0;
         in-out property <string> learning-position: "1 / 24";
@@ -150,6 +193,7 @@ export component StoryLockCoreApp inherits Window {
         callback next-node();
         callback select-node(string);
         callback select-resource-group(string);
+        callback select-object(string);
         callback save-resource();
         callback save-template();
         callback apply-template();
@@ -157,6 +201,7 @@ export component StoryLockCoreApp inherits Window {
         callback refresh-export();
         callback save-learning-policy();
         callback run-learning();
+        callback reveal-learning-answer();
         callback learning-previous();
         callback learning-next();
         callback check-learning-current();
@@ -359,32 +404,58 @@ export component StoryLockCoreApp inherits Window {
                             resource-group: root.resource-group;
                             display-name: root.display-name;
                             resource-id: root.resource-id;
+                            resource-kind: root.resource-kind;
+                            provider-id: root.provider-id;
                             object-id: root.object-id;
                             object-kind: root.object-kind;
                             authorization-frequency: root.authorization-frequency;
                             protected-object-list: root.protected-object-list;
-                            manage-object => { root.active-page = 7; }
-                        }
-
-                        if root.active-page == 7: ObjectEditorPage {
-                            is-zh: root.is-zh;
-                            resource-id <=> root.resource-id;
-                            object-id <=> root.object-id;
-                            object-kind <=> root.object-kind;
-                            display-name <=> root.display-name;
-                            resource-group <=> root.resource-group;
-                            required-correct-count <=> root.required-correct-count;
-                            secret-reference <=> root.secret-reference;
-                            authorization-frequency <=> root.authorization-frequency;
-                            config-status: root.config-status;
-                            save-resource => {
-                                root.save-resource();
-                                root.active-page = 2;
-                            }
+                            object-1-id: root.object-1-id;
+                            object-1-name: root.object-1-name;
+                            object-1-secret: root.object-1-secret;
+                            object-1-usage: root.object-1-usage;
+                            object-1-level: root.object-1-level;
+                            object-2-id: root.object-2-id;
+                            object-2-name: root.object-2-name;
+                            object-2-secret: root.object-2-secret;
+                            object-2-usage: root.object-2-usage;
+                            object-2-level: root.object-2-level;
+                            object-3-id: root.object-3-id;
+                            object-3-name: root.object-3-name;
+                            object-3-secret: root.object-3-secret;
+                            object-3-usage: root.object-3-usage;
+                            object-3-level: root.object-3-level;
+                            object-4-id: root.object-4-id;
+                            object-4-name: root.object-4-name;
+                            object-4-secret: root.object-4-secret;
+                            object-4-usage: root.object-4-usage;
+                            object-4-level: root.object-4-level;
+                            object-5-id: root.object-5-id;
+                            object-5-name: root.object-5-name;
+                            object-5-secret: root.object-5-secret;
+                            object-5-usage: root.object-5-usage;
+                            object-5-level: root.object-5-level;
+                            object-6-id: root.object-6-id;
+                            object-6-name: root.object-6-name;
+                            object-6-secret: root.object-6-secret;
+                            object-6-usage: root.object-6-usage;
+                            object-6-level: root.object-6-level;
+                            object-7-id: root.object-7-id;
+                            object-7-name: root.object-7-name;
+                            object-7-secret: root.object-7-secret;
+                            object-7-usage: root.object-7-usage;
+                            object-7-level: root.object-7-level;
+                            object-8-id: root.object-8-id;
+                            object-8-name: root.object-8-name;
+                            object-8-secret: root.object-8-secret;
+                            object-8-usage: root.object-8-usage;
+                            object-8-level: root.object-8-level;
+                            select-object(value) => { root.select-object(value); }
                         }
 
                         if root.active-page == 3: LearningPage {
                             is-zh: root.is-zh;
+                            pre-learning-prompts-per-question <=> root.pre-learning-prompts-per-question;
                             pre-learning-error-tolerance <=> root.pre-learning-error-tolerance;
                             weak-item-limit <=> root.weak-item-limit;
                             initial-days <=> root.initial-days;
@@ -399,43 +470,18 @@ export component StoryLockCoreApp inherits Window {
                             long-term-frequency-years <=> root.long-term-frequency-years;
                             learning-plan-summary: root.learning-plan-summary;
                             learning-status: root.learning-status;
-                            learning-position: root.learning-position;
-                            learning-question: root.learning-question;
-                            learning-answer-1 <=> root.learning-answer-1;
-                            learning-answer-1-state <=> root.learning-answer-1-state;
-                            learning-answer-2 <=> root.learning-answer-2;
-                            learning-answer-2-state <=> root.learning-answer-2-state;
-                            learning-answer-3 <=> root.learning-answer-3;
-                            learning-answer-3-state <=> root.learning-answer-3-state;
-                            learning-answer-4 <=> root.learning-answer-4;
-                            learning-answer-4-state <=> root.learning-answer-4-state;
-                            learning-answer-5 <=> root.learning-answer-5;
-                            learning-answer-5-state <=> root.learning-answer-5-state;
-                            learning-answer-6 <=> root.learning-answer-6;
-                            learning-answer-6-state <=> root.learning-answer-6-state;
-                            learning-answer-7 <=> root.learning-answer-7;
-                            learning-answer-7-state <=> root.learning-answer-7-state;
-                            learning-answer-8 <=> root.learning-answer-8;
-                            learning-answer-8-state <=> root.learning-answer-8-state;
-                            learning-answer-9 <=> root.learning-answer-9;
-                            learning-answer-9-state <=> root.learning-answer-9-state;
-                            learning-result: root.learning-result;
                             save-learning-policy => { root.save-learning-policy(); }
-                            run-learning => { root.run-learning(); }
-                            learning-previous => { root.learning-previous(); }
-                            learning-next => { root.learning-next(); }
-                            check-learning-current => { root.check-learning-current(); }
                         }
 
                         if root.active-page == 4: ExportPage {
                             is-zh: root.is-zh;
-                            export-package-dir <=> root.export-package-dir;
+                            learning-plan-summary: root.learning-plan-summary;
                             learning-status: root.learning-status;
+                            learning-progress-summary: root.learning-progress-summary;
+                            learning-action-hint: root.learning-action-hint;
                             learning-result: root.learning-result;
                             export-ready: root.export-ready;
-                            export-preview: root.export-preview;
-                            browse-export-package-dir => { root.browse-export-package-dir(); }
-                            open-learning => { root.active-page = 3; }
+                            run-learning => { root.run-learning(); }
                             export-package => { root.export-package(); }
                         }
 
@@ -444,3 +490,5 @@ export component StoryLockCoreApp inherits Window {
             }
         }
     }
+
+

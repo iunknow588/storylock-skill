@@ -186,6 +186,8 @@ pub(crate) fn story_draft_template_needs_refresh(template: &Value) -> bool {
                             .trim();
                         question.is_empty()
                             || question.starts_with("Which three anchors belong to memory node")
+                            || question.contains("记忆点")
+                            || question.contains("memory point")
                     })
             })
             .unwrap_or(true)
@@ -279,8 +281,27 @@ pub(crate) fn write_pending_author_draft(package_dir: &Path, draft: &Value) -> R
     let mut vault = read_storylock_vault_payload(package_dir);
     let mut normalized = draft.clone();
     normalize_author_draft_schema(&mut normalized);
-    vault["pendingAuthorDraft"] = normalized;
-    save_storylock_vault_payload(package_dir, vault)
+    vault["pendingAuthorDraft"] = normalized.clone();
+    save_storylock_vault_payload(package_dir, vault)?;
+    persist_plain_story_template_if_present(package_dir, &normalized)?;
+    Ok(())
+}
+
+fn persist_plain_story_template_if_present(package_dir: &Path, draft: &Value) -> Result<()> {
+    let story_template_path = package_dir.join("story-template.json");
+    if story_template_path.exists() {
+        fs::write(&story_template_path, serde_json::to_vec_pretty(draft)?)?;
+    }
+    let current_story_template_path = package_dir
+        .join("story-drafts")
+        .join("current-story-template.json");
+    if current_story_template_path.exists() {
+        fs::write(
+            current_story_template_path,
+            serde_json::to_vec_pretty(draft)?,
+        )?;
+    }
+    Ok(())
 }
 
 pub(crate) fn normalize_author_draft_schema(draft: &mut Value) {

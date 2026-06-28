@@ -64,29 +64,40 @@ function Read-EnvEntries {
 
 function Get-LocalVercelProjectName {
   param([string]$RootDir)
-  $projectJsonPath = Join-Path $RootDir ".vercel\project.json"
-  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
-    return ""
-  }
-  try {
-    $project = Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
-    return [string]$project.projectName
-  } catch {
-    throw "Unable to parse local Vercel project link: $projectJsonPath"
-  }
+  $project = Get-LocalVercelProjectLink -RootDir $RootDir
+  if ($null -eq $project) { return "" }
+  return [string]$project.projectName
 }
 
 function Get-LocalVercelProjectLink {
   param([string]$RootDir)
+  $repoJsonPath = Join-Path $RootDir ".vercel\repo.json"
+  if (Test-Path -LiteralPath $repoJsonPath) {
+    try {
+      $repo = Get-Content -Raw -LiteralPath $repoJsonPath | ConvertFrom-Json
+      $project = @($repo.projects)[0]
+      if ($null -ne $project) {
+        return [PSCustomObject]@{
+          projectId = [string]$project.id
+          orgId = [string]$project.orgId
+          projectName = [string]$project.name
+        }
+      }
+    } catch {
+      throw "Unable to parse local Vercel repo link: $repoJsonPath"
+    }
+  }
+
   $projectJsonPath = Join-Path $RootDir ".vercel\project.json"
-  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
-    return $null
+  if (Test-Path -LiteralPath $projectJsonPath) {
+    try {
+      return Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
+    } catch {
+      throw "Unable to parse local Vercel project link: $projectJsonPath"
+    }
   }
-  try {
-    return Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
-  } catch {
-    throw "Unable to parse local Vercel project link: $projectJsonPath"
-  }
+
+  return $null
 }
 
 function Assert-VercelProjectLink {
@@ -105,11 +116,7 @@ function Assert-VercelProjectLink {
     throw "Local Vercel project link was not found. Run scripts\vercel\link_project.cmd from the skill/ directory before syncing env."
   }
   if (-not [string]::IsNullOrWhiteSpace($ExpectedProjectName) -and $localProjectName -ne $ExpectedProjectName) {
-    throw "Local Vercel project link mismatch. VERCEL_PROJECT_NAME='$ExpectedProjectName' but .vercel/project.json is linked to '$localProjectName'. Re-run scripts\vercel\link_project.cmd after confirming which Vercel project owns yian.cdao.online."
-  }
-  $localOrgId = [string]$project.orgId
-  if ($ExpectedScope -eq "iunknow588" -and $localOrgId.StartsWith("team_")) {
-    throw "Local Vercel project link is bound to a team org ($localOrgId), but storylock-gateway env sync must use personal scope '$ExpectedScope'. Delete .vercel/project.json and re-run scripts\vercel\link_project.cmd."
+    throw "Local Vercel project link mismatch. VERCEL_PROJECT_NAME='$ExpectedProjectName' but local link is '$localProjectName'. Re-run scripts\vercel\link_project.cmd after confirming which Vercel project owns yian.cdao.online."
   }
   return $localProjectName
 }

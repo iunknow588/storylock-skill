@@ -13,18 +13,7 @@ pub(crate) fn build_export_preview(package_dir: &Path) -> String {
     let permission_objects = catalog
         .get("resources")
         .and_then(Value::as_array)
-        .map(|items| {
-            items
-                .iter()
-                .map(|resource| {
-                    resource
-                        .get("bindings")
-                        .and_then(Value::as_array)
-                        .map(Vec::len)
-                        .unwrap_or(0)
-                })
-                .sum::<usize>()
-        })
+        .map(Vec::len)
         .unwrap_or(0);
     let preflight = preflight_storylock_core_package(package_dir);
     let status = if preflight.errors.is_empty() {

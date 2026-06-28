@@ -37,12 +37,35 @@ function validateDraft(draft, fileName) {
     throw new Error(`${fileName}: nodes must contain exactly 24 items`);
   }
   const uniqueQuestions = new Set();
+  const sensitiveQuestionTokens = [
+    '守株待兔',
+    '智子疑邻',
+    '阿福',
+    '周老爷',
+    '周文',
+    '孙伯',
+    '刘三',
+    '赵麻子',
+    'Lorenzo',
+    'Fantasia',
+    'Marco',
+    'Pietro',
+    'Alberto',
+    'Bruno',
+    "Emperor's New Clothes",
+    'Emperor Lorenzo',
+  ];
   draft.nodes.forEach((node, index) => {
     if (!String(node.nodeId ?? '').trim()) {
       throw new Error(`${fileName}: nodes[${index}].nodeId must be non-empty`);
     }
     if (!String(node.question ?? '').trim()) {
       throw new Error(`${fileName}: nodes[${index}].question must be non-empty`);
+    }
+    for (const token of sensitiveQuestionTokens) {
+      if (String(node.question).includes(token)) {
+        throw new Error(`${fileName}: nodes[${index}].question leaks sensitive token ${token}`);
+      }
     }
     uniqueQuestions.add(String(node.question));
     if (!String(node.canonicalAnswerLocalOnly ?? '').trim()) {
@@ -85,6 +108,17 @@ async function loadRoot(root) {
       validateDraft(json, `${basename(root)}/${file}`);
     }
     payloads.set(file, json);
+  }
+  const chineseQuestionSets = manifest.items
+    .filter((item) => item.language === 'zh-CN')
+    .map((item) => payloads.get(item.fileName)?.nodes?.map((node) => node.question));
+  if (chineseQuestionSets.length > 1) {
+    const baselineQuestions = normalizeJson(chineseQuestionSets[0]);
+    for (const questions of chineseQuestionSets.slice(1)) {
+      if (normalizeJson(questions) !== baselineQuestions) {
+        throw new Error(`${manifestPath}: zh-CN story templates must share the same 24 generic questions`);
+      }
+    }
   }
   return payloads;
 }

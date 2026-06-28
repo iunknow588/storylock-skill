@@ -13,6 +13,8 @@ pub(crate) fn wire_storylock_core_callbacks(
 ) {
     let learning_passed = Rc::new(RefCell::new(LearningProgress::new()));
     let answer_editor: Rc<RefCell<Option<AnswerEditorDialog>>> = Rc::new(RefCell::new(None));
+    let object_editor: Rc<RefCell<Option<ObjectEditorDialog>>> = Rc::new(RefCell::new(None));
+    let learning_dialog: Rc<RefCell<Option<LearningTestDialog>>> = Rc::new(RefCell::new(None));
     let settings_dialog: Rc<RefCell<Option<StoryLockCoreSettingsDialog>>> =
         Rc::new(RefCell::new(None));
 
@@ -28,11 +30,13 @@ pub(crate) fn wire_storylock_core_callbacks(
         &package_dir,
         Rc::clone(&learning_passed),
         Rc::clone(&answer_editor),
+        Rc::clone(&object_editor),
     );
     learning_export::register_learning_export_callbacks(
         core,
         &package_dir,
         Rc::clone(&learning_passed),
+        Rc::clone(&learning_dialog),
         host_port,
     );
 }

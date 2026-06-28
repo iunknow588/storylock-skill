@@ -76,10 +76,11 @@ foreach ($file in $packageFiles) {
   Copy-Item -LiteralPath $file -Destination (Join-Path $stageDir (Split-Path -Leaf $file)) -Force
 }
 $identityPackageDir = Join-Path $stageDir "identity-package"
-$templatesDir = Join-Path $identityPackageDir "templates"
-$storyDraftsDir = Join-Path $identityPackageDir "story-drafts"
+$configDir = Join-Path $stageDir "config"
+$templatesDir = Join-Path $stageDir "templates"
+New-Item -ItemType Directory -Force -Path $identityPackageDir | Out-Null
+New-Item -ItemType Directory -Force -Path $configDir | Out-Null
 New-Item -ItemType Directory -Force -Path $templatesDir | Out-Null
-New-Item -ItemType Directory -Force -Path $storyDraftsDir | Out-Null
 
 $createdAt = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds().ToString()
 Set-Utf8NoBomContent -LiteralPath (Join-Path $identityPackageDir "package-manifest.json") -Value @(
@@ -93,13 +94,9 @@ Set-Utf8NoBomContent -LiteralPath (Join-Path $identityPackageDir "package-manife
   '    "resource-catalog.json",'
   '    "vault.stlk",'
   '    "learning-policy.json",'
-  '    "templates/login-sites.json",'
-  '    "templates/signing-actions.json",'
-  '    "templates/agent-tasks.json",'
-  '    "story-drafts/manifest.json",'
-  '    "story-drafts/shouzhudaitu-zh.json",'
-  '    "story-drafts/zhizi-yilin-zh.json",'
-  '    "story-drafts/emperor-new-clothes-en.json"'
+  '    "../config/login-sites.json",'
+  '    "../config/signing-actions.json",'
+  '    "../config/agent-tasks.json"'
   '  ]'
   "}"
 )
@@ -124,21 +121,21 @@ Set-Utf8NoBomContent -LiteralPath (Join-Path $identityPackageDir "learning-polic
   '  "execution": { "status": "pending_export", "currentPhase": "initial", "lastResult": "not_started" }'
   "}"
 )
-Set-Utf8NoBomContent -LiteralPath (Join-Path $templatesDir "login-sites.json") -Value @(
+Set-Utf8NoBomContent -LiteralPath (Join-Path $configDir "login-sites.json") -Value @(
   "{"
   '  "version": "1",'
   '  "templateType": "login-sites",'
   '  "items": []'
   "}"
 )
-Set-Utf8NoBomContent -LiteralPath (Join-Path $templatesDir "signing-actions.json") -Value @(
+Set-Utf8NoBomContent -LiteralPath (Join-Path $configDir "signing-actions.json") -Value @(
   "{"
   '  "version": "1",'
   '  "templateType": "signing-actions",'
   '  "items": []'
   "}"
 )
-Set-Utf8NoBomContent -LiteralPath (Join-Path $templatesDir "agent-tasks.json") -Value @(
+Set-Utf8NoBomContent -LiteralPath (Join-Path $configDir "agent-tasks.json") -Value @(
   "{"
   '  "version": "1",'
   '  "templateType": "agent-tasks",'
@@ -146,21 +143,13 @@ Set-Utf8NoBomContent -LiteralPath (Join-Path $templatesDir "agent-tasks.json") -
   "}"
 )
 
-$sourceStoryDraftsDir = Join-Path $project "assets\story-drafts"
-foreach ($storyDraftFile in @(
-  "manifest.json",
-  "shouzhudaitu-zh.json",
-  "zhizi-yilin-zh.json",
-  "emperor-new-clothes-en.json"
-)) {
-  Copy-Item -LiteralPath (Join-Path $sourceStoryDraftsDir $storyDraftFile) -Destination (Join-Path $storyDraftsDir $storyDraftFile) -Force
-}
-
 $sourceStoryTemplateDirectoriesDir = Join-Path $project "assets\story-template-directories"
 if (-not (Test-Path -LiteralPath $sourceStoryTemplateDirectoriesDir)) {
   throw "Story template directories were not found: $sourceStoryTemplateDirectoriesDir"
 }
-Copy-Item -LiteralPath $sourceStoryTemplateDirectoriesDir -Destination (Join-Path $stageDir "story-template-directories") -Recurse -Force
+foreach ($storyTemplateDir in @("shouzhudaitu-zh", "zhizi-yilin-zh", "emperor-new-clothes-en")) {
+  Copy-Item -LiteralPath (Join-Path $sourceStoryTemplateDirectoriesDir $storyTemplateDir) -Destination (Join-Path $templatesDir $storyTemplateDir) -Recurse -Force
+}
 
 Compress-Archive -Path (Join-Path $stageDir "*") -DestinationPath $zipPath
 $hash = Get-FileHash -LiteralPath $zipPath -Algorithm SHA256

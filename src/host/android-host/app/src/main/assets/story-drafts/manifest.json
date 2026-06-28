@@ -6,19 +6,22 @@
       "templateId": "shouzhudaitu-zh",
       "language": "zh-CN",
       "storyTitle": "守株待兔",
-      "fileName": "shouzhudaitu-zh.json"
+      "fileName": "shouzhudaitu-zh.json",
+      "nodeCount": 24
     },
     {
       "templateId": "zhizi-yilin-zh",
       "language": "zh-CN",
       "storyTitle": "智子疑邻",
-      "fileName": "zhizi-yilin-zh.json"
+      "fileName": "zhizi-yilin-zh.json",
+      "nodeCount": 24
     },
     {
       "templateId": "emperor-new-clothes-en",
       "language": "en-US",
       "storyTitle": "The Emperor's New Clothes",
-      "fileName": "emperor-new-clothes-en.json"
+      "fileName": "emperor-new-clothes-en.json",
+      "nodeCount": 24
     }
   ]
 }

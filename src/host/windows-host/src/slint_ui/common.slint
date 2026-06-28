@@ -1,4 +1,4 @@
-import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
+﻿import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
 export component MenuButton inherits Rectangle {
         in property <string> label;
         in property <bool> selected;
@@ -132,6 +132,7 @@ export component FormRow inherits HorizontalLayout {
 export component EditableRow inherits HorizontalLayout {
         in property <string> name;
         in-out property <string> value;
+        in property <length> editor-width: 556px;
         spacing: 14px;
         Text {
             text: root.name;
@@ -142,7 +143,7 @@ export component EditableRow inherits HorizontalLayout {
         }
         LineEdit {
             text <=> root.value;
-            width: 612px;
+            width: root.editor-width;
             height: 32px;
         }
     }
@@ -190,9 +191,11 @@ export component PathBrowseRow inherits HorizontalLayout {
 export component LargeEditableText inherits Rectangle {
         in property <string> name;
         in-out property <string> value;
+        in property <length> editor-height: 250px;
+        in property <length> content-height: 520px;
 
         width: 720px;
-        height: 250px;
+        height: root.editor-height;
         background: #eef3f5;
         Text {
             x: 0px;
@@ -208,15 +211,23 @@ export component LargeEditableText inherits Rectangle {
             x: 164px;
             y: 0px;
             width: 556px;
-            height: 250px;
+            height: root.editor-height;
             border-radius: 6px;
             background: #eef3f5;
-            TextEdit {
+            ScrollView {
                 x: 0px;
                 y: 0px;
                 width: parent.width;
                 height: parent.height;
-                text <=> root.value;
+                vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+                horizontal-scrollbar-policy: ScrollBarPolicy.as-needed;
+                viewport-width: parent.width;
+                viewport-height: root.content-height;
+                TextEdit {
+                    width: parent.viewport-width;
+                    height: root.content-height;
+                    text <=> root.value;
+                }
             }
         }
     }
@@ -469,6 +480,123 @@ export component QuestionOverviewGrid inherits Rectangle {
         }
     }
 
+export component LearningAnswerTile inherits Rectangle {
+        in property <string> label;
+        in property <string> value;
+        in-out property <string> state;
+
+        width: 216px;
+        height: 108px;
+        border-width: 1px;
+        border-color: state == "correct" ? #7fb38d : #d7e1e6;
+        border-radius: 6px;
+        background: state == "correct" ? #edf7f0 : #f7fafb;
+
+        TouchArea {
+            clicked => {
+                root.state = root.state == "correct" ? "wrong" : "correct";
+            }
+        }
+
+        Rectangle {
+            x: 10px;
+            y: 10px;
+            width: parent.width - 20px;
+            height: 18px;
+            background: transparent;
+            Text {
+                text: root.label;
+                width: parent.width;
+                height: parent.height;
+                color: #62727d;
+                font-size: 12px;
+                font-weight: 600;
+                vertical-alignment: center;
+                overflow: elide;
+            }
+        }
+
+        Text {
+            x: 10px;
+            y: 34px;
+            width: parent.width - 20px;
+            height: 44px;
+            text: root.value;
+            color: #17252f;
+            font-size: 13px;
+            wrap: word-wrap;
+            overflow: elide;
+        }
+
+        Rectangle {
+            x: 10px;
+            y: 80px;
+            width: 84px;
+            height: 18px;
+            border-radius: 4px;
+            background: state == "correct" ? #d9ecdf : #f1dede;
+            Text {
+                text: root.state == "correct" ? "正确" : "错误";
+                width: parent.width;
+                height: parent.height;
+                color: state == "correct" ? #246b3d : #8d3333;
+                font-size: 12px;
+                font-weight: 700;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+    }
+
+export component LearningAnswerGrid inherits Rectangle {
+        in property <string> answer-1;
+        in-out property <string> answer-1-state;
+        in property <string> answer-2;
+        in-out property <string> answer-2-state;
+        in property <string> answer-3;
+        in-out property <string> answer-3-state;
+        in property <string> answer-4;
+        in-out property <string> answer-4-state;
+        in property <string> answer-5;
+        in-out property <string> answer-5-state;
+        in property <string> answer-6;
+        in-out property <string> answer-6-state;
+        in property <string> answer-7;
+        in-out property <string> answer-7-state;
+        in property <string> answer-8;
+        in-out property <string> answer-8-state;
+        in property <string> answer-9;
+        in-out property <string> answer-9-state;
+
+        width: 690px;
+        height: 340px;
+        background: transparent;
+
+        GridLayout {
+            x: 0px;
+            y: 0px;
+            width: parent.width;
+            height: parent.height;
+            spacing: 10px;
+
+            Row {
+                LearningAnswerTile { label: "答案 1"; value: root.answer-1; state <=> root.answer-1-state; }
+                LearningAnswerTile { label: "答案 2"; value: root.answer-2; state <=> root.answer-2-state; }
+                LearningAnswerTile { label: "答案 3"; value: root.answer-3; state <=> root.answer-3-state; }
+            }
+            Row {
+                LearningAnswerTile { label: "答案 4"; value: root.answer-4; state <=> root.answer-4-state; }
+                LearningAnswerTile { label: "答案 5"; value: root.answer-5; state <=> root.answer-5-state; }
+                LearningAnswerTile { label: "答案 6"; value: root.answer-6; state <=> root.answer-6-state; }
+            }
+            Row {
+                LearningAnswerTile { label: "答案 7"; value: root.answer-7; state <=> root.answer-7-state; }
+                LearningAnswerTile { label: "答案 8"; value: root.answer-8; state <=> root.answer-8-state; }
+                LearningAnswerTile { label: "答案 9"; value: root.answer-9; state <=> root.answer-9-state; }
+            }
+        }
+    }
+
 export component QuestionConfigPanel inherits Rectangle {
         in property <length> panel-height: 374px;
         in-out property <string> selected-question;
@@ -632,3 +760,4 @@ export component LogPanel inherits Rectangle {
             wrap: word-wrap;
         }
     }
+

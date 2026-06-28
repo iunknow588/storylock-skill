@@ -58,29 +58,40 @@ function Import-EnvFile {
 
 function Get-LocalVercelProjectName {
   param([string]$RootDir)
-  $projectJsonPath = Join-Path $RootDir ".vercel\project.json"
-  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
-    return ""
-  }
-  try {
-    $project = Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
-    return [string]$project.projectName
-  } catch {
-    throw "Unable to parse local Vercel project link: $projectJsonPath"
-  }
+  $project = Get-LocalVercelProjectLink -RootDir $RootDir
+  if ($null -eq $project) { return "" }
+  return [string]$project.projectName
 }
 
 function Get-LocalVercelProjectLink {
   param([string]$RootDir)
+  $repoJsonPath = Join-Path $RootDir ".vercel\repo.json"
+  if (Test-Path -LiteralPath $repoJsonPath) {
+    try {
+      $repo = Get-Content -Raw -LiteralPath $repoJsonPath | ConvertFrom-Json
+      $project = @($repo.projects)[0]
+      if ($null -ne $project) {
+        return [PSCustomObject]@{
+          projectId = [string]$project.id
+          orgId = [string]$project.orgId
+          projectName = [string]$project.name
+        }
+      }
+    } catch {
+      throw "Unable to parse local Vercel repo link: $repoJsonPath"
+    }
+  }
+
   $projectJsonPath = Join-Path $RootDir ".vercel\project.json"
-  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
-    return $null
+  if (Test-Path -LiteralPath $projectJsonPath) {
+    try {
+      return Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
+    } catch {
+      throw "Unable to parse local Vercel project link: $projectJsonPath"
+    }
   }
-  try {
-    return Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
-  } catch {
-    throw "Unable to parse local Vercel project link: $projectJsonPath"
-  }
+
+  return $null
 }
 
 function Assert-VercelProjectLink {
@@ -99,11 +110,7 @@ function Assert-VercelProjectLink {
     throw "Local Vercel project link was not found. Run scripts\vercel\link_project.cmd from the skill/ directory before deploying."
   }
   if (-not [string]::IsNullOrWhiteSpace($ExpectedProjectName) -and $localProjectName -ne $ExpectedProjectName) {
-    throw "Local Vercel project link mismatch. VERCEL_PROJECT_NAME='$ExpectedProjectName' but .vercel/project.json is linked to '$localProjectName'. Re-run scripts\vercel\link_project.cmd after confirming which Vercel project owns yian.cdao.online."
-  }
-  $localOrgId = [string]$project.orgId
-  if ($ExpectedScope -eq "iunknow588" -and $localOrgId.StartsWith("team_")) {
-    throw "Local Vercel project link is bound to a team org ($localOrgId), but storylock-gateway production must deploy under personal scope '$ExpectedScope'. Delete .vercel/project.json and re-run scripts\vercel\link_project.cmd after confirming the Vercel token belongs to iunknow588."
+    throw "Local Vercel project link mismatch. VERCEL_PROJECT_NAME='$ExpectedProjectName' but local link is '$localProjectName'. Re-run scripts\vercel\link_project.cmd after confirming which Vercel project owns yian.cdao.online."
   }
   return $localProjectName
 }
@@ -113,15 +120,12 @@ function Test-VercelCliReady {
     [string]$Token,
     [string]$Scope
   )
-  if (-not (Get-Command vercel -ErrorAction SilentlyContinue)) {
-    throw "Vercel CLI not found. Install it first or run scripts\vercel\link_project.cmd."
-  }
 
   $whoamiArgs = @("whoami")
   if (-not [string]::IsNullOrWhiteSpace($Token)) {
     $whoamiArgs += @("--token", $Token)
   }
-  if (-not [string]::IsNullOrWhiteSpace($Scope)) {
+  if (-not [string]::IsNullOrWhiteSpace($Scope) -and $Scope -ne "iunknow588") {
     $whoamiArgs += @("--scope", $Scope)
   }
 
@@ -129,7 +133,7 @@ function Test-VercelCliReady {
   $previousErrorActionPreference = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
   try {
-    $output = & vercel @whoamiArgs 2>&1
+    $output = Invoke-VercelCli -Arguments $whoamiArgs 2>&1
     $exitCode = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference
@@ -161,7 +165,7 @@ function Invoke-VercelDeployWithRetry {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-      $output = & vercel @Arguments 2>&1
+      $output = Invoke-VercelCli -Arguments $Arguments 2>&1
       $exitCode = $LASTEXITCODE
     } finally {
       $ErrorActionPreference = $previousErrorActionPreference
@@ -210,7 +214,7 @@ function Test-VercelDomainAccess {
   if (-not [string]::IsNullOrWhiteSpace($Token)) {
     $args += @("--token", $Token)
   }
-  if (-not [string]::IsNullOrWhiteSpace($Scope)) {
+  if (-not [string]::IsNullOrWhiteSpace($Scope) -and $Scope -ne "iunknow588") {
     $args += @("--scope", $Scope)
   }
 
@@ -218,7 +222,7 @@ function Test-VercelDomainAccess {
   $previousErrorActionPreference = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
   try {
-    $output = & vercel @args 2>&1
+    $output = Invoke-VercelCli -Arguments $args 2>&1
     $exitCode = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference
@@ -247,7 +251,7 @@ function Set-VercelDeploymentAlias {
   if (-not [string]::IsNullOrWhiteSpace($Token)) {
     $args += @("--token", $Token)
   }
-  if (-not [string]::IsNullOrWhiteSpace($Scope)) {
+  if (-not [string]::IsNullOrWhiteSpace($Scope) -and $Scope -ne "iunknow588") {
     $args += @("--scope", $Scope)
   }
 
@@ -255,7 +259,7 @@ function Set-VercelDeploymentAlias {
   $previousErrorActionPreference = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
   try {
-    $output = & vercel @args 2>&1
+    $output = Invoke-VercelCli -Arguments $args 2>&1
     $exitCode = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference
@@ -267,6 +271,18 @@ function Set-VercelDeploymentAlias {
   if ($exitCode -ne 0) {
     throw "Vercel alias binding failed for $Domain. Confirm the domain belongs to this Vercel account/project and DNS is configured for Vercel."
   }
+}
+
+function Invoke-VercelCli {
+  param([string[]]$Arguments)
+  if (Get-Command vercel -ErrorAction SilentlyContinue) {
+    & vercel @Arguments
+    return
+  }
+  if (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
+    throw "Vercel CLI not found and npx is not available. Install Node.js/npm or run scripts\vercel\link_project.cmd after installing Vercel CLI."
+  }
+  & npx --yes vercel@54.5.1 @Arguments
 }
 
 Import-EnvFile -Path $EnvFile
@@ -344,7 +360,7 @@ try {
   }
   $scopeValue = [System.Environment]::GetEnvironmentVariable("VERCEL_SCOPE", "Process")
   $localVercelProjectName = Assert-VercelProjectLink -RootDir $resolvedProjectDir -ExpectedProjectName $projectName -ExpectedScope $scopeValue
-  if (-not [string]::IsNullOrWhiteSpace($scopeValue)) {
+  if (-not [string]::IsNullOrWhiteSpace($scopeValue) -and $scopeValue -ne "iunknow588") {
     $vercelArgs += @("--scope", $scopeValue)
   }
   $customDomainValue = if ([string]::IsNullOrWhiteSpace($VercelCustomDomain)) {

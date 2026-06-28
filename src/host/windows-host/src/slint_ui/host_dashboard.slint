@@ -223,12 +223,6 @@ export component HostDashboard inherits Window {
                             }
                         }
                     }
-                    if root.settings-open: Rectangle {
-                        width: 640px;
-                        height: 540px;
-                        background: #00000022;
-                        TouchArea { }
-                    }
                 }
             }
         }
@@ -268,7 +262,7 @@ export component SettingsDialog inherits Window {
                 spacing: 14px;
                 Text {
                     text: is-zh ? "\u{754c}\u{9762}\u{8bed}\u{8a00}" : "UI Language";
-                    width: 140px;
+                    width: 150px;
                     color: #62727d;
                     font-size: 13px;
                     vertical-alignment: center;

@@ -10,7 +10,18 @@ pub(crate) fn save_story_draft_template_from_window(
 ) -> Result<()> {
     let mut draft = read_effective_author_draft(package_dir);
     draft["version"] = json!("1");
-    draft["templateId"] = json!(core.get_template_id().to_string());
+    let window_template_id = core.get_template_id().to_string();
+    let template_id = if window_template_id.trim().is_empty() || window_template_id == "github.com"
+    {
+        draft
+            .get("templateId")
+            .and_then(Value::as_str)
+            .unwrap_or("current-author-draft")
+            .to_string()
+    } else {
+        window_template_id
+    };
+    draft["templateId"] = json!(template_id);
     draft["storyTitle"] = json!(core.get_story_title().to_string());
     draft["summary"] = json!(core.get_story_summary().to_string());
     draft["storyPlot"] = json!(core.get_story_plot().to_string());
@@ -64,27 +75,79 @@ pub(crate) fn apply_story_draft_template_to_window(
     let mut vault = read_storylock_vault_payload(package_dir);
     merge_builtin_story_draft_templates(&mut vault);
     let requested_template_id = core.get_template_id().to_string();
-    let mut draft = vault
-        .get("storyDraftTemplates")
-        .and_then(|templates| templates.get("items"))
-        .and_then(Value::as_array)
-        .and_then(|items| {
-            items
-                .iter()
-                .find(|item| {
-                    !requested_template_id.trim().is_empty()
-                        && item.get("templateId").and_then(Value::as_str)
-                            == Some(requested_template_id.as_str())
-                })
-                .or_else(|| items.first())
-        })
-        .cloned()
-        .unwrap_or_else(default_author_draft_json);
+    let mut draft =
+        story_template_from_runtime_directory(package_dir, requested_template_id.trim())
+            .or_else(|| {
+                vault
+                    .get("storyDraftTemplates")
+                    .and_then(|templates| templates.get("items"))
+                    .and_then(Value::as_array)
+                    .and_then(|items| {
+                        items
+                            .iter()
+                            .find(|item| {
+                                !requested_template_id.trim().is_empty()
+                                    && item.get("templateId").and_then(Value::as_str)
+                                        == Some(requested_template_id.as_str())
+                            })
+                            .or_else(|| items.first())
+                    })
+                    .cloned()
+            })
+            .unwrap_or_else(default_author_draft_json);
     normalize_author_draft_schema(&mut draft);
     vault["pendingAuthorDraft"] = draft;
     save_storylock_vault_payload(package_dir, vault)?;
     initialize_storylock_core_window(core, package_dir);
     Ok(())
+}
+
+fn story_template_from_runtime_directory(
+    package_dir: &Path,
+    requested_template_id: &str,
+) -> Option<Value> {
+    if requested_template_id.is_empty() {
+        return None;
+    }
+    list_runtime_story_templates(package_dir)
+        .into_iter()
+        .find(|draft| {
+            draft.get("templateId").and_then(Value::as_str) == Some(requested_template_id)
+        })
+}
+
+fn list_runtime_story_templates(package_dir: &Path) -> Vec<Value> {
+    let templates_dir = storylock_runtime_templates_dir(package_dir);
+    let Ok(entries) = fs::read_dir(templates_dir) else {
+        return Vec::new();
+    };
+    let mut drafts = entries
+        .filter_map(Result::ok)
+        .filter_map(|entry| {
+            let path = entry.path().join("story-template.json");
+            if !path.exists() {
+                return None;
+            }
+            let mut draft = read_json_or_default(&path, Value::Null);
+            if !draft.is_object() {
+                return None;
+            }
+            normalize_author_draft_schema(&mut draft);
+            Some(draft)
+        })
+        .collect::<Vec<_>>();
+    drafts.sort_by(|left, right| {
+        left.get("templateId")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .cmp(
+                right
+                    .get("templateId")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+            )
+    });
+    drafts
 }
 
 pub(crate) fn pull_story_template_candidates_into_vault(
@@ -186,6 +249,10 @@ pub(crate) fn story_draft_from_candidate(candidate: &Value) -> Value {
 }
 
 pub(crate) fn format_story_draft_template_summary(package_dir: &Path) -> String {
+    let runtime_templates = list_runtime_story_templates(package_dir);
+    if !runtime_templates.is_empty() {
+        return format_story_template_items(&runtime_templates);
+    }
     let vault = read_storylock_vault_payload(package_dir);
     let templates = vault
         .get("storyDraftTemplates")
@@ -199,6 +266,10 @@ pub(crate) fn format_story_draft_template_summary(package_dir: &Path) -> String 
     if items.is_empty() {
         return "No story draft template is stored.".to_string();
     }
+    format_story_template_items(&items)
+}
+
+fn format_story_template_items(items: &[Value]) -> String {
     items
         .iter()
         .enumerate()

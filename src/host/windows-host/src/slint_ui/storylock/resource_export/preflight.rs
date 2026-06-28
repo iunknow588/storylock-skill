@@ -163,24 +163,29 @@ pub(crate) fn validate_learning_policy(policy: &Value, errors: &mut Vec<Prefligh
         "$.preLearning.questionCount",
         errors,
     );
-    validate_fixed_policy_number(
+    validate_range_policy_number(
         policy,
         &["preLearning", "promptsPerQuestion"],
-        2,
+        1,
+        9,
         "$.preLearning.promptsPerQuestion",
         errors,
     );
+    let prompts_per_question =
+        policy_number_i64(policy, &["preLearning", "promptsPerQuestion"], 2);
+    let total_prompts = 24 * prompts_per_question;
     validate_fixed_policy_number(
         policy,
         &["preLearning", "totalPrompts"],
-        48,
+        total_prompts,
         "$.preLearning.totalPrompts",
         errors,
     );
+    let min_repeat_gap = (24 / prompts_per_question.max(1)).max(1);
     validate_fixed_policy_number(
         policy,
         &["preLearning", "minRepeatGap"],
-        12,
+        min_repeat_gap,
         "$.preLearning.minRepeatGap",
         errors,
     );

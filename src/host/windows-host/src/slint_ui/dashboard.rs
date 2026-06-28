@@ -27,7 +27,14 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     app.set_diagnostics(SharedString::from(
         "Yian Host is storage-blind. It does not read or display StoryLock drafts, vault files, manifests, catalogs, templates, package paths, question answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.",
     ));
-    app.set_language(SharedString::from("zh"));
+    let saved_settings = Rc::new(RefCell::new(load_storylock_ui_settings()));
+    let initial_language = saved_settings
+        .borrow()
+        .language
+        .clone()
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| String::from("zh"));
+    app.set_language(SharedString::from(initial_language.clone()));
 
     let local_health_url = config.health_url.clone();
     app.on_test_local_host(move || {
@@ -47,8 +54,8 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
         ))
     });
 
-    let host_language = Rc::new(RefCell::new(String::from("zh")));
-    let core_package_dir = storylock_core_package_dir();
+    let host_language = Rc::new(RefCell::new(initial_language));
+    let core_package_dir = initial_storylock_core_package_dir(&saved_settings.borrow());
     let _ = ensure_storylock_core_package(&core_package_dir);
     app.set_management_stats(SharedString::from(format!(
         "Live redacted statistics are available at http://127.0.0.1:{}/ui and /ui/status.\n\n{}\n\nYian Host reads learning-policy.json for retention-learning scheduling, but does not read StoryLock drafts, vault files, question text, answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.",
@@ -65,6 +72,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     let host_for_settings_lock = app.as_weak();
     let shared_status = Rc::new(RefCell::new(String::from("")));
     let shared_status_for_settings = Rc::clone(&shared_status);
+    let saved_settings_for_settings = Rc::clone(&saved_settings);
 
     app.on_open_settings(move || {
         let existing_show_result = {
@@ -109,10 +117,19 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 let host_for_language = host_for_settings.clone();
                 let host_language_for_language = Rc::clone(&host_language_for_settings);
                 let core_window_for_language = Rc::clone(&core_window_for_settings);
+                let saved_settings_for_language = Rc::clone(&saved_settings_for_settings);
 
                 settings.on_language_changed(move |language| {
                     let language_string = language.to_string();
                     *host_language_for_language.borrow_mut() = language_string.clone();
+                    let next_settings = merge_host_language_setting(
+                        &saved_settings_for_language.borrow(),
+                        &language_string,
+                    );
+                    if let Err(error) = save_storylock_ui_settings(&next_settings) {
+                        eprintln!("failed to save StoryLock UI settings: {error}");
+                    }
+                    *saved_settings_for_language.borrow_mut() = next_settings;
 
                     if let Some(settings) = settings_weak.upgrade() {
                         settings.set_language(SharedString::from(language_string.clone()));
@@ -172,22 +189,25 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     });
 
     let core_window_for_callback = Rc::clone(&core_window);
-    let core_package_dir_for_callback = core_package_dir.clone();
     let host_for_storylock_close = app.as_weak();
     let settings_window_for_storylock_close = Rc::clone(&settings_window);
     let shared_status_for_storylock_close = Rc::clone(&shared_status);
     let host_language_for_storylock = Rc::clone(&host_language);
+    let saved_settings_for_storylock = Rc::clone(&saved_settings);
 
     app.on_open_storylock_core(move || {
-        if let Err(error) = ensure_storylock_core_package(&core_package_dir_for_callback) {
+        let current_settings = saved_settings_for_storylock.borrow().clone();
+        let active_package_dir = initial_storylock_core_package_dir(&current_settings);
+        if let Err(error) = ensure_storylock_core_package(&active_package_dir) {
             eprintln!("failed to initialize StoryLock Core package: {error}");
         }
 
         if let Some(core) = core_window_for_callback.borrow().as_ref() {
-            initialize_storylock_core_window(core, &core_package_dir_for_callback);
+            initialize_storylock_core_window(core, &active_package_dir);
             core.set_language(SharedString::from(
                 host_language_for_storylock.borrow().clone(),
             ));
+            apply_storylock_ui_settings(core, &current_settings);
             set_storylock_start_page_to_questions(core);
             core.set_config_status(SharedString::from(
                 "StoryLock Core is already open. Existing local window was focused.",
@@ -205,7 +225,8 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 core.set_language(SharedString::from(
                     host_language_for_storylock.borrow().clone(),
                 ));
-                initialize_storylock_core_window(&core, &core_package_dir_for_callback);
+                initialize_storylock_core_window(&core, &active_package_dir);
+                apply_storylock_ui_settings(&core, &current_settings);
                 set_storylock_start_page_to_questions(&core);
                 let host_for_closed = host_for_storylock_close.clone();
                 let settings_window_for_closed = Rc::clone(&settings_window_for_storylock_close);
@@ -222,7 +243,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 });
                 wire_storylock_core_callbacks(
                     &core,
-                    core_package_dir_for_callback.clone(),
+                    active_package_dir,
                     Rc::clone(&core_window_for_callback),
                     notify_storylock_closed,
                     config.host_port,
@@ -240,13 +261,28 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     });
 
     let weak = app.as_weak();
+    let host_language_for_close = Rc::clone(&host_language);
+    let saved_settings_for_close = Rc::clone(&saved_settings);
     app.on_close_requested(move || {
+        let next_settings = merge_host_language_setting(
+            &saved_settings_for_close.borrow(),
+            &host_language_for_close.borrow(),
+        );
+        if let Err(error) = save_storylock_ui_settings(&next_settings) {
+            eprintln!("failed to save StoryLock UI settings: {error}");
+        }
+        *saved_settings_for_close.borrow_mut() = next_settings;
         if let Some(app) = weak.upgrade() {
             let _ = app.hide();
         }
     });
 
     app.run()?;
+    let final_settings =
+        merge_host_language_setting(&saved_settings.borrow(), &host_language.borrow());
+    if let Err(error) = save_storylock_ui_settings(&final_settings) {
+        eprintln!("failed to save StoryLock UI settings: {error}");
+    }
     Ok(())
 }
 

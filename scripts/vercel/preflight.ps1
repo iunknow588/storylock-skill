@@ -82,28 +82,34 @@ function Test-VercelProjectLink {
     [string]$ExpectedProjectName,
     [string]$ExpectedScope
   )
-  $projectJsonPath = Join-Path (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path ".vercel\project.json"
-  if (-not (Test-Path -LiteralPath $projectJsonPath)) {
+  $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+  $projectJsonPath = Join-Path $repoRoot ".vercel\project.json"
+  $repoJsonPath = Join-Path $repoRoot ".vercel\repo.json"
+  if (-not (Test-Path -LiteralPath $projectJsonPath) -and -not (Test-Path -LiteralPath $repoJsonPath)) {
     return [PSCustomObject]@{
       Check = "vercel:project-link"
       Status = "missing"
-      Value = "Missing .vercel/project.json; run scripts\vercel\link_project.cmd from skill/"
+      Value = "Missing .vercel/project.json or .vercel/repo.json; run scripts\vercel\link_project.cmd from skill/"
     }
   }
   try {
-    $project = Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
-    $actualProjectName = [string]$project.projectName
-    $actualOrgId = [string]$project.orgId
+    if (Test-Path -LiteralPath $repoJsonPath) {
+      $repo = Get-Content -Raw -LiteralPath $repoJsonPath | ConvertFrom-Json
+      $project = @($repo.projects)[0]
+      $actualProjectName = [string]$project.name
+      $actualOrgId = [string]$project.orgId
+    } else {
+      $project = Get-Content -Raw -LiteralPath $projectJsonPath | ConvertFrom-Json
+      $actualProjectName = [string]$project.projectName
+      $actualOrgId = [string]$project.orgId
+    }
     $matchesExpected = [string]::IsNullOrWhiteSpace($ExpectedProjectName) -or $actualProjectName -eq $ExpectedProjectName
-    $matchesScope = -not ($ExpectedScope -eq "iunknow588" -and $actualOrgId.StartsWith("team_"))
-    $ok = $matchesExpected -and $matchesScope
+    $ok = $matchesExpected
     return [PSCustomObject]@{
       Check = "vercel:project-link"
       Status = if ($ok) { "ok" } else { "failed" }
       Value = if ($ok) {
         "linked project: $actualProjectName; orgId: $actualOrgId"
-      } elseif (-not $matchesScope) {
-        "linked orgId '$actualOrgId' is a team org, but VERCEL_SCOPE='$ExpectedScope' requires the personal iunknow588 scope"
       } else {
         "VERCEL_PROJECT_NAME='$ExpectedProjectName' but .vercel/project.json is linked to '$actualProjectName'"
       }

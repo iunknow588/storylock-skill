@@ -1,16 +1,88 @@
-import { VerticalBox, HorizontalBox } from "std-widgets.slint";
-import { StaticRow, EditableRow, ActionButton, LogPanel } from "../common.slint";
+import { VerticalBox, ScrollView } from "std-widgets.slint";
+import { StaticRow } from "../common.slint";
+
+export component ProtectedObjectTableRow inherits Rectangle {
+    in property <bool> is-header;
+    in property <string> id;
+    in property <string> name;
+    in property <string> username;
+    in property <string> usage;
+    in property <string> level;
+    callback selected(string);
+
+    width: 704px;
+    height: 32px;
+    border-width: 1px;
+    border-color: root.is-header ? #b8c8cd : #d7e1e6;
+    background: root.is-header ? #d7e1e6 : #f7fafb;
+
+    TouchArea {
+        clicked => {
+            if !root.is-header {
+                root.selected(root.id);
+            }
+        }
+    }
+
+    Text { x: 8px; y: 0px; width: 134px; height: parent.height; text: root.name; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 150px; y: 0px; width: 210px; height: parent.height; text: root.username; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 370px; y: 0px; width: 118px; height: parent.height; text: root.usage; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 498px; y: 0px; width: 72px; height: parent.height; text: root.level; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 578px; y: 0px; width: 116px; height: parent.height; text: root.id; color: #62727d; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+}
 
 export component ProtectedObjectsPage inherits VerticalBox {
     in property <bool> is-zh;
     in property <string> resource-group;
     in property <string> display-name;
     in property <string> resource-id;
+    in property <string> resource-kind;
+    in property <string> provider-id;
     in property <string> object-id;
     in property <string> object-kind;
     in property <string> authorization-frequency;
     in property <string> protected-object-list;
-    callback manage-object();
+    in property <string> object-1-id;
+    in property <string> object-1-name;
+    in property <string> object-1-secret;
+    in property <string> object-1-usage;
+    in property <string> object-1-level;
+    in property <string> object-2-id;
+    in property <string> object-2-name;
+    in property <string> object-2-secret;
+    in property <string> object-2-usage;
+    in property <string> object-2-level;
+    in property <string> object-3-id;
+    in property <string> object-3-name;
+    in property <string> object-3-secret;
+    in property <string> object-3-usage;
+    in property <string> object-3-level;
+    in property <string> object-4-id;
+    in property <string> object-4-name;
+    in property <string> object-4-secret;
+    in property <string> object-4-usage;
+    in property <string> object-4-level;
+    in property <string> object-5-id;
+    in property <string> object-5-name;
+    in property <string> object-5-secret;
+    in property <string> object-5-usage;
+    in property <string> object-5-level;
+    in property <string> object-6-id;
+    in property <string> object-6-name;
+    in property <string> object-6-secret;
+    in property <string> object-6-usage;
+    in property <string> object-6-level;
+    in property <string> object-7-id;
+    in property <string> object-7-name;
+    in property <string> object-7-secret;
+    in property <string> object-7-usage;
+    in property <string> object-7-level;
+    in property <string> object-8-id;
+    in property <string> object-8-name;
+    in property <string> object-8-secret;
+    in property <string> object-8-usage;
+    in property <string> object-8-level;
+    callback select-object(string);
 
     x: 0px;
     y: 0px;
@@ -18,60 +90,39 @@ export component ProtectedObjectsPage inherits VerticalBox {
     height: 374px;
     spacing: 12px;
 
-    StaticRow { name: root.is-zh ? "用途" : "Purpose"; value: root.is-zh ? "从左侧选择对象级别；此页显示该级别的对象列表。" : "Choose an object level from the left menu; this page shows a plain list for that level."; }
-    StaticRow { name: root.is-zh ? "当前级别" : "Current Level"; value: root.resource-group == "normal" ? (root.is-zh ? "普通对象" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "私密对象" : "Private Objects") : (root.is-zh ? "机密对象" : "Secret Objects"); }
-    StaticRow { name: root.is-zh ? "对象名称" : "Object Name"; value: root.display-name; }
-    StaticRow { name: root.is-zh ? "资源 ID" : "Resource ID"; value: root.resource-id; }
-    StaticRow { name: root.is-zh ? "对象 ID" : "Object ID"; value: root.object-id; }
-    StaticRow { name: root.is-zh ? "对象类型" : "Object Kind"; value: root.object-kind; }
-    StaticRow { name: root.is-zh ? "授权边界" : "Authorization Boundary"; value: root.authorization-frequency; }
-    HorizontalBox {
-        spacing: 10px;
-        Rectangle { width: 164px; height: 1px; background: transparent; }
-        ActionButton {
-            label: root.is-zh ? "管理对象" : "Manage Object";
-            primary: true;
-            clicked => { root.manage-object(); }
+    StaticRow {
+        name: root.is-zh ? "用途" : "Purpose";
+        value: root.is-zh ? "点击列表中的受保护对象即可进入编辑页面。" : "Click a managed object in the list to edit it.";
+    }
+    StaticRow {
+        name: root.is-zh ? "当前级别" : "Current Level";
+        value: root.resource-group == "normal" ? (root.is-zh ? "普通对象" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "私密对象" : "Private Objects") : (root.is-zh ? "机密对象" : "Secret Objects");
+    }
+    ProtectedObjectTableRow {
+        is-header: true;
+        name: "URI";
+        username: root.is-zh ? "用户名" : "Username";
+        usage: root.is-zh ? "类型" : "Type";
+        level: root.is-zh ? "级别" : "Level";
+        id: root.is-zh ? "编号" : "ID";
+    }
+    ScrollView {
+        height: 174px;
+        vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+        viewport-width: 704px;
+        viewport-height: 264px;
+        VerticalBox {
+            width: 704px;
+            height: 264px;
+            spacing: 1px;
+            ProtectedObjectTableRow { id: root.object-1-id; name: root.object-1-name; username: root.object-1-secret; usage: root.object-1-usage; level: root.object-1-level; selected(value) => { root.select-object(value); } }
+            ProtectedObjectTableRow { id: root.object-2-id; name: root.object-2-name; username: root.object-2-secret; usage: root.object-2-usage; level: root.object-2-level; selected(value) => { root.select-object(value); } }
+            ProtectedObjectTableRow { id: root.object-3-id; name: root.object-3-name; username: root.object-3-secret; usage: root.object-3-usage; level: root.object-3-level; selected(value) => { root.select-object(value); } }
+            ProtectedObjectTableRow { id: root.object-4-id; name: root.object-4-name; username: root.object-4-secret; usage: root.object-4-usage; level: root.object-4-level; selected(value) => { root.select-object(value); } }
+            ProtectedObjectTableRow { id: root.object-5-id; name: root.object-5-name; username: root.object-5-secret; usage: root.object-5-usage; level: root.object-5-level; selected(value) => { root.select-object(value); } }
+            ProtectedObjectTableRow { id: root.object-6-id; name: root.object-6-name; username: root.object-6-secret; usage: root.object-6-usage; level: root.object-6-level; selected(value) => { root.select-object(value); } }
+            ProtectedObjectTableRow { id: root.object-7-id; name: root.object-7-name; username: root.object-7-secret; usage: root.object-7-usage; level: root.object-7-level; selected(value) => { root.select-object(value); } }
+            ProtectedObjectTableRow { id: root.object-8-id; name: root.object-8-name; username: root.object-8-secret; usage: root.object-8-usage; level: root.object-8-level; selected(value) => { root.select-object(value); } }
         }
     }
-    LogPanel { value: root.protected-object-list; panel-height: 120px; }
-}
-
-export component ObjectEditorPage inherits VerticalBox {
-    in property <bool> is-zh;
-    in-out property <string> resource-id;
-    in-out property <string> object-id;
-    in-out property <string> object-kind;
-    in-out property <string> display-name;
-    in-out property <string> resource-group;
-    in-out property <string> required-correct-count;
-    in-out property <string> secret-reference;
-    in-out property <string> authorization-frequency;
-    in property <string> config-status;
-    callback save-resource();
-
-    x: 0px;
-    y: 0px;
-    width: 720px;
-    height: 374px;
-    spacing: 12px;
-
-    EditableRow { name: root.is-zh ? "资源 ID" : "Resource ID"; value <=> root.resource-id; }
-    EditableRow { name: root.is-zh ? "对象 ID" : "Object ID"; value <=> root.object-id; }
-    EditableRow { name: root.is-zh ? "对象类型" : "Object Kind"; value <=> root.object-kind; }
-    EditableRow { name: root.is-zh ? "显示名称" : "Display Name"; value <=> root.display-name; }
-    EditableRow { name: root.is-zh ? "保护级别" : "Protection Level"; value <=> root.resource-group; }
-    EditableRow { name: root.is-zh ? "正确题数" : "Need Correct"; value <=> root.required-correct-count; }
-    EditableRow { name: root.is-zh ? "密钥引用" : "Secret Ref"; value <=> root.secret-reference; }
-    EditableRow { name: root.is-zh ? "授权频率" : "Auth Freq"; value <=> root.authorization-frequency; }
-    HorizontalBox {
-        spacing: 10px;
-        Rectangle { width: 164px; height: 1px; background: transparent; }
-        ActionButton {
-            label: root.is-zh ? "保存对象" : "Save Object";
-            primary: true;
-            clicked => { root.save-resource(); }
-        }
-    }
-    LogPanel { value: root.config-status; panel-height: 120px; }
 }

@@ -147,24 +147,46 @@ pub(super) fn emperor_new_clothes_author_draft_json() -> Value {
 pub(super) fn default_resource_catalog_json() -> Value {
     json!({
         "version": "1",
-        "resources": [{
-            "resourceId": "github-main",
-            "resourceKind": "website_account",
-            "providerId": "github",
-            "displayName": "GitHub main account",
-            "bindings": [
-                {
-                    "role": "username",
-                    "objectId": "credential/github/main/username",
-                    "objectMeta": { "objectKind": "username", "encoding": "text", "sensitivity": "private" }
-                },
-                {
-                    "role": "password",
-                    "objectId": "credential/github/main/password",
-                    "objectMeta": { "objectKind": "password", "encoding": "secret", "sensitivity": "secret" }
-                }
-            ]
-        }]
+        "resources": [
+            {
+                "resourceId": "github-main",
+                "resourceKind": "website_account",
+                "providerId": "github",
+                "displayName": "GitHub main login",
+                "resourceGroup": "secret",
+                "bindings": [
+                    {
+                        "role": "username",
+                        "objectId": "credential/github/main/username",
+                        "objectMeta": { "objectKind": "username", "encoding": "text", "sensitivity": "private" }
+                    },
+                    {
+                        "role": "password",
+                        "objectId": "credential/github/main/password",
+                        "objectMeta": { "objectKind": "password", "encoding": "secret", "sensitivity": "secret" }
+                    }
+                ]
+            },
+            {
+                "resourceId": "wallet-main",
+                "resourceKind": "key_pair",
+                "providerId": "evm",
+                "displayName": "EVM signing key pair",
+                "resourceGroup": "secret",
+                "bindings": [
+                    {
+                        "role": "public_key",
+                        "objectId": "keypair/evm/main/public_key",
+                        "objectMeta": { "objectKind": "public_key", "encoding": "text", "sensitivity": "private" }
+                    },
+                    {
+                        "role": "private_key",
+                        "objectId": "keypair/evm/main/private_key",
+                        "objectMeta": { "objectKind": "private_key", "encoding": "secret", "sensitivity": "secret" }
+                    }
+                ]
+            }
+        ]
     })
 }
 
@@ -189,11 +211,12 @@ pub(super) fn default_signing_templates_json() -> Value {
         "version": "1",
         "templateType": "signing-actions",
         "items": [{
-            "templateId": "local-signature-placeholder",
-            "displayName": "Local signature placeholder",
-            "resourceId": "github-main",
+            "templateId": "evm-signing-key",
+            "displayName": "EVM signing key",
+            "resourceId": "wallet-main",
             "bindings": [
-                { "fieldName": "username", "role": "username" }
+                { "fieldName": "publicKey", "role": "public_key" },
+                { "fieldName": "privateKey", "role": "private_key" }
             ]
         }]
     })

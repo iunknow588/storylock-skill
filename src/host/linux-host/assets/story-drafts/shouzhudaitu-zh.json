@@ -4,7 +4,7 @@
   "language": "zh-CN",
   "storyTitle": "守株待兔",
   "summary": "青年农夫阿福偶然得到一只撞树而死的兔子，便以为好运可以反复降临。他放下农具，日日守在老梨树下，最终田地荒芜，在母亲和村人的提醒中明白了勤劳才是真正的依靠。",
-  "storyPlot": "公元前332年的东周时期，宋国青石村的田间烈日明亮、蝉鸣阵阵。农夫阿福在老梨树下耕作时，一只被狐狸追赶的兔子撞树而死。阿福大喜，从此带着老黄狗守在树旁，不再认真耕作。一年后的秋天，落叶满地，田地荒芜，刘三的嘲笑和母亲的劝告让他羞愧醒悟，明白不能把生活寄托在侥幸上。",
+  "storyPlot": "公元前332年的东周时期，4月5日的盛夏，宋国青石村田间炎热而晴朗，老梨树下蝉鸣阵阵，庄稼茂盛。青年阿福是个农夫，也是村里勤快的种田人，平日一边锄地一边唱歌，常常哼小调；他的老黄狗，也就是那只黄狗，既是看门狗，也是陪伴者，总趴在田埂边陪他干活。\n\n这天，一只兔子被狐狸追赶，慌不择路地撞上老梨树死去，兔子撞树成了整件事的起因。阿福先是一愣，随即大喜，高兴地抱起兔子，以为好运会自己送上门。村里有个叫刘三的痞子，平日游手好闲，最爱嘲笑人，他看见阿福捡到兔子，故意说以后只要守着树就能天天吃肉。\n\n阿福听进了刘三的话，渐渐放弃耕作，开始每日守株。他把锄头搁在田边，只带着老黄狗守在老梨树下，盼着第二只兔子再撞上来。日子一天天过去，庄稼无人照料，原本茂盛的田地荒芜，村人路过时摇头叹气，刘三却在旁边嘲笑，最后阿福遭到全村耻笑。\n\n一年后，也就是次年秋天，正到收割季节，田边秋风萧瑟，老梨树下落叶满地，田地荒芜得几乎看不见庄稼。母亲劝告阿福说，饭要靠手中锄头挣来，不能等兔子撞树；刘三嘲笑他白守一年，也成了故事的转折。阿福站在荒芜的田地和村口之间，羞愧得低下头，终于决心勤劳。\n\n故事结束在次年秋天的收割季节。阿福明白不可侥幸，只有重新耕种、踏实劳动，才可能勤劳致富。",
   "memoryAnchors": [
     "公元前332年",
     "宋国",
@@ -32,13 +32,13 @@
       "nodeId": "question-01",
       "title": "问题 01",
       "elementId": "time",
-      "question": "《守株待兔》故事具体发生在什么时间？",
+      "question": "故事发生在什么时间？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "公元前332年",
       "acceptedAnswersLocalOnly": [
         "公元前332年",
@@ -64,23 +64,23 @@
           "isCorrect": true
         },
         {
-          "text": "公元前398年",
+          "text": "公元前330年",
           "isCorrect": false
         },
         {
-          "text": "战国时期",
+          "text": "公元前331年",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "公元前333年",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "公元前334年",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "春秋时期",
           "isCorrect": false
         }
       ]
@@ -89,13 +89,13 @@
       "nodeId": "question-02",
       "title": "问题 02",
       "elementId": "place",
-      "question": "故事主要发生在哪些地方？",
+      "question": "故事发生在什么地方？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "宋国",
       "acceptedAnswersLocalOnly": [
         "宋国",
@@ -121,23 +121,23 @@
           "isCorrect": true
         },
         {
-          "text": "战国时期",
+          "text": "卫国",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "鲁国",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "郑国",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "石桥村",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "青溪村",
           "isCorrect": false
         }
       ]
@@ -146,13 +146,13 @@
       "nodeId": "question-03",
       "title": "问题 03",
       "elementId": "person",
-      "question": "故事中的主人公叫什么？",
+      "question": "故事中最主要的人物是谁？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 1,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "阿福",
       "acceptedAnswersLocalOnly": [
         "阿福"
@@ -163,35 +163,35 @@
           "isCorrect": true
         },
         {
-          "text": "9月初",
+          "text": "阿贵",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "阿顺",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "小福",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "田平",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "老生",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "钱老爷",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "孙员外",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "吴老爷",
           "isCorrect": false
         }
       ]
@@ -200,13 +200,13 @@
       "nodeId": "question-04",
       "title": "问题 04",
       "elementId": "object",
-      "question": "阿福的身份或职业是什么？",
+      "question": "这个人物的身份或职业是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "农夫",
       "acceptedAnswersLocalOnly": [
         "农夫",
@@ -222,31 +222,31 @@
           "isCorrect": true
         },
         {
-          "text": "初秋",
+          "text": "农夫附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "农夫之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "农夫之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "种田人附近",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "种田人之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "种田人之前",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "佃农",
           "isCorrect": false
         }
       ]
@@ -255,13 +255,13 @@
       "nodeId": "question-05",
       "title": "问题 05",
       "elementId": "event",
-      "question": "阿福平时喜欢做什么？",
+      "question": "这个人物有什么重要特征或习惯？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "唱歌",
       "acceptedAnswersLocalOnly": [
         "唱歌",
@@ -277,31 +277,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "唱歌附近",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "唱歌之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "唱歌之前",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "哼小调附近",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "哼小调之后",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "哼小调之前",
           "isCorrect": false
         },
         {
-          "text": "富户",
+          "text": "吹笛",
           "isCorrect": false
         }
       ]
@@ -310,13 +310,13 @@
       "nodeId": "question-06",
       "title": "问题 06",
       "elementId": "reaction",
-      "question": "谁是阿福身边的陪伴者？",
+      "question": "故事中还有哪些重要人物或角色？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "老黄狗",
       "acceptedAnswersLocalOnly": [
         "老黄狗",
@@ -332,31 +332,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前398年",
+          "text": "老黄狗附近",
           "isCorrect": false
         },
         {
-          "text": "战国时期",
+          "text": "老黄狗之后",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "老黄狗之前",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "黄狗附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "黄狗之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "黄狗之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "黑狗",
           "isCorrect": false
         }
       ]
@@ -365,13 +365,13 @@
       "nodeId": "question-07",
       "title": "问题 07",
       "elementId": "choice",
-      "question": "老黄狗在故事中的身份是什么？",
+      "question": "这些帮手或次要角色的身份是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "看门狗",
       "acceptedAnswersLocalOnly": [
         "看门狗",
@@ -387,31 +387,31 @@
           "isCorrect": true
         },
         {
-          "text": "战国时期",
+          "text": "看门狗附近",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "看门狗之后",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "看门狗之前",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "陪伴者附近",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "陪伴者之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "陪伴者之前",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "猎狗",
           "isCorrect": false
         }
       ]
@@ -420,13 +420,13 @@
       "nodeId": "question-08",
       "title": "问题 08",
       "elementId": "result",
-      "question": "故事中嘲笑阿福的人是谁？",
+      "question": "故事中造成冲突的一方或因素是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "刘三",
       "acceptedAnswersLocalOnly": [
         "刘三",
@@ -442,31 +442,31 @@
           "isCorrect": true
         },
         {
-          "text": "9月初",
+          "text": "张三",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "李四",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "王二",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "痞子附近",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "痞子之后",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "痞子之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "陈五",
           "isCorrect": false
         }
       ]
@@ -475,13 +475,13 @@
       "nodeId": "question-09",
       "title": "问题 09",
       "elementId": "time",
-      "question": "刘三是怎样的人？",
+      "question": "这一方或因素的行为特点是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "游手好闲",
       "acceptedAnswersLocalOnly": [
         "游手好闲",
@@ -497,31 +497,31 @@
           "isCorrect": true
         },
         {
-          "text": "初秋",
+          "text": "游手好闲附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "游手好闲之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "游手好闲之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "嘲笑人附近",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "嘲笑人之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "嘲笑人之前",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "喜欢起哄",
           "isCorrect": false
         }
       ]
@@ -530,13 +530,13 @@
       "nodeId": "question-10",
       "title": "问题 10",
       "elementId": "place",
-      "question": "阿福开始守株的直接原因是什么？",
+      "question": "事件的起因是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "兔子撞树",
       "acceptedAnswersLocalOnly": [
         "兔子撞树",
@@ -552,31 +552,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "鸟儿落网",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "鹿跑过田",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "风吹落果",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "狗追野鸡",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "鹰追小鸟",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "人声惊动",
           "isCorrect": false
         },
         {
-          "text": "富户",
+          "text": "羊踩坏苗",
           "isCorrect": false
         }
       ]
@@ -585,13 +585,13 @@
       "nodeId": "question-11",
       "title": "问题 11",
       "elementId": "person",
-      "question": "故事开头的天气如何？",
+      "question": "事件开始时天气如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "炎热",
       "acceptedAnswersLocalOnly": [
         "炎热",
@@ -607,31 +607,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前398年",
+          "text": "炎热附近",
           "isCorrect": false
         },
         {
-          "text": "战国时期",
+          "text": "炎热之后",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "炎热之前",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "晴朗附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "晴朗之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "晴朗之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "闷热",
           "isCorrect": false
         }
       ]
@@ -640,13 +640,13 @@
       "nodeId": "question-12",
       "title": "问题 12",
       "elementId": "object",
-      "question": "故事开头的田间环境如何？",
+      "question": "事件开始时环境怎样？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "蝉鸣阵阵",
       "acceptedAnswersLocalOnly": [
         "蝉鸣阵阵",
@@ -662,31 +662,31 @@
           "isCorrect": true
         },
         {
-          "text": "战国时期",
+          "text": "蝉鸣阵阵附近",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "蝉鸣阵阵之后",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "蝉鸣阵阵之前",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "庄稼茂盛附近",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "庄稼茂盛之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "庄稼茂盛之前",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "蛙声连续",
           "isCorrect": false
         }
       ]
@@ -695,13 +695,13 @@
       "nodeId": "question-13",
       "title": "问题 13",
       "elementId": "event",
-      "question": "阿福捡到兔子后的心情是什么？",
+      "question": "事件开始时主要人物心情如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "大喜",
       "acceptedAnswersLocalOnly": [
         "大喜",
@@ -717,31 +717,31 @@
           "isCorrect": true
         },
         {
-          "text": "9月初",
+          "text": "大喜附近",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "大喜之后",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "大喜之前",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "高兴附近",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "高兴之后",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "高兴之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "惊喜",
           "isCorrect": false
         }
       ]
@@ -750,13 +750,13 @@
       "nodeId": "question-14",
       "title": "问题 14",
       "elementId": "reaction",
-      "question": "故事发展中阿福做了什么错误选择？",
+      "question": "事件如何继续发展？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "放弃耕作",
       "acceptedAnswersLocalOnly": [
         "放弃耕作",
@@ -772,31 +772,31 @@
           "isCorrect": true
         },
         {
-          "text": "初秋",
+          "text": "放弃耕作附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "放弃耕作之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "放弃耕作之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "每日守株附近",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "每日守株之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "每日守株之前",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "减少耕作",
           "isCorrect": false
         }
       ]
@@ -805,13 +805,13 @@
       "nodeId": "question-15",
       "title": "问题 15",
       "elementId": "choice",
-      "question": "故事高潮中出现了什么后果？",
+      "question": "故事中最关键的结果或场面是什么？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "遭到全村耻笑",
       "acceptedAnswersLocalOnly": [
         "遭到全村耻笑",
@@ -827,31 +827,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "遭到全村耻笑附近",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "遭到全村耻笑之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "遭到全村耻笑之前",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "田地荒芜附近",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "田地荒芜之后",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "田地荒芜之前",
           "isCorrect": false
         },
         {
-          "text": "富户",
+          "text": "被村人议论",
           "isCorrect": false
         }
       ]
@@ -860,13 +860,13 @@
       "nodeId": "question-16",
       "title": "问题 16",
       "elementId": "result",
-      "question": "什么事情促使阿福反思？",
+      "question": "故事的转折由什么引发？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "母亲劝告",
       "acceptedAnswersLocalOnly": [
         "母亲劝告",
@@ -882,31 +882,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前398年",
+          "text": "母亲劝告附近",
           "isCorrect": false
         },
         {
-          "text": "战国时期",
+          "text": "母亲劝告之后",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "母亲劝告之前",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "刘三嘲笑附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "刘三嘲笑之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "刘三嘲笑之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "邻人提醒",
           "isCorrect": false
         }
       ]
@@ -915,13 +915,13 @@
       "nodeId": "question-17",
       "title": "问题 17",
       "elementId": "time",
-      "question": "故事转折发生在什么时候？",
+      "question": "转折发生在什么时间？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "次年秋天",
       "acceptedAnswersLocalOnly": [
         "次年秋天",
@@ -937,31 +937,31 @@
           "isCorrect": true
         },
         {
-          "text": "战国时期",
+          "text": "次年秋天附近",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "次年秋天之后",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "次年秋天之前",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "一年后附近",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "一年后之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "一年后之前",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "第二年初秋",
           "isCorrect": false
         }
       ]
@@ -970,13 +970,13 @@
       "nodeId": "question-18",
       "title": "问题 18",
       "elementId": "place",
-      "question": "故事转折发生在哪里？",
+      "question": "转折发生在什么地点？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "田边",
       "acceptedAnswersLocalOnly": [
         "田边",
@@ -992,31 +992,31 @@
           "isCorrect": true
         },
         {
-          "text": "9月初",
+          "text": "田边附近",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "田边之后",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "田边之前",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "老槐树下",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "老桑树下",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "村口树下",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "地头",
           "isCorrect": false
         }
       ]
@@ -1025,13 +1025,13 @@
       "nodeId": "question-19",
       "title": "问题 19",
       "elementId": "person",
-      "question": "转折时的天气有什么特点？",
+      "question": "转折时天气如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "秋风",
       "acceptedAnswersLocalOnly": [
         "秋风",
@@ -1047,31 +1047,31 @@
           "isCorrect": true
         },
         {
-          "text": "初秋",
+          "text": "秋风附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "秋风之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "秋风之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "萧瑟附近",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "萧瑟之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "萧瑟之前",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "凉风",
           "isCorrect": false
         }
       ]
@@ -1080,13 +1080,13 @@
       "nodeId": "question-20",
       "title": "问题 20",
       "elementId": "object",
-      "question": "转折时的环境如何？",
+      "question": "转折时环境怎样？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "落叶满地",
       "acceptedAnswersLocalOnly": [
         "落叶满地",
@@ -1102,31 +1102,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "落叶满地附近",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "落叶满地之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "落叶满地之前",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "田地荒芜附近",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "田地荒芜之后",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "田地荒芜之前",
           "isCorrect": false
         },
         {
-          "text": "富户",
+          "text": "草木枯黄",
           "isCorrect": false
         }
       ]
@@ -1135,13 +1135,13 @@
       "nodeId": "question-21",
       "title": "问题 21",
       "elementId": "event",
-      "question": "故事结尾发生在什么时间？",
+      "question": "故事结束在什么时间？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "次年秋天",
       "acceptedAnswersLocalOnly": [
         "次年秋天",
@@ -1157,31 +1157,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前398年",
+          "text": "次年秋天附近",
           "isCorrect": false
         },
         {
-          "text": "战国时期",
+          "text": "次年秋天之后",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "次年秋天之前",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "收割季节附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "收割季节之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "收割季节之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "次年八月",
           "isCorrect": false
         }
       ]
@@ -1190,13 +1190,13 @@
       "nodeId": "question-22",
       "title": "问题 22",
       "elementId": "reaction",
-      "question": "故事结尾的地点在哪里？",
+      "question": "故事结束时地点在哪里？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "荒芜的田地",
       "acceptedAnswersLocalOnly": [
         "荒芜的田地",
@@ -1212,31 +1212,31 @@
           "isCorrect": true
         },
         {
-          "text": "战国时期",
+          "text": "荒芜的田地附近",
           "isCorrect": false
         },
         {
-          "text": "9月初",
+          "text": "荒芜的田地之后",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "荒芜的田地之前",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "村口附近",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "村口之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "村口之前",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "村边荒地",
           "isCorrect": false
         }
       ]
@@ -1245,13 +1245,13 @@
       "nodeId": "question-23",
       "title": "问题 23",
       "elementId": "choice",
-      "question": "故事结尾阿福的心情如何？",
+      "question": "故事结束后主要人物心情如何？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "羞愧",
       "acceptedAnswersLocalOnly": [
         "羞愧",
@@ -1267,31 +1267,31 @@
           "isCorrect": true
         },
         {
-          "text": "9月初",
+          "text": "羞愧附近",
           "isCorrect": false
         },
         {
-          "text": "初秋",
+          "text": "羞愧之后",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "羞愧之前",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "决心勤劳附近",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "决心勤劳之后",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "决心勤劳之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "惭愧",
           "isCorrect": false
         }
       ]
@@ -1300,13 +1300,13 @@
       "nodeId": "question-24",
       "title": "问题 24",
       "elementId": "result",
-      "question": "这个故事想让人记住什么道理？",
+      "question": "故事最后留下了什么启示？",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "守株待兔模板；题目已按故事模板文档润色，全部为多选。",
+      "editorNotes": "守株待兔模板；题目已去除故事名、人名和关键秘密，全部为多选。",
       "canonicalAnswerLocalOnly": "不可侥幸",
       "acceptedAnswersLocalOnly": [
         "不可侥幸",
@@ -1322,31 +1322,31 @@
           "isCorrect": true
         },
         {
-          "text": "初秋",
+          "text": "不可侥幸附近",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "不可侥幸之后",
           "isCorrect": false
         },
         {
-          "text": "都城郊外",
+          "text": "不可侥幸之前",
           "isCorrect": false
         },
         {
-          "text": "周老爷家",
+          "text": "勤劳致富附近",
           "isCorrect": false
         },
         {
-          "text": "院墙边",
+          "text": "勤劳致富之后",
           "isCorrect": false
         },
         {
-          "text": "周老爷",
+          "text": "勤劳致富之前",
           "isCorrect": false
         },
         {
-          "text": "商人",
+          "text": "不能等待巧合",
           "isCorrect": false
         }
       ]

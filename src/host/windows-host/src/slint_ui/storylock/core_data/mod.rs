@@ -6,6 +6,9 @@ pub(crate) use learning_policy::*;
 mod package_files;
 pub(crate) use package_files::*;
 
+mod settings;
+pub(crate) use settings::*;
+
 mod vault;
 pub(crate) use vault::*;
 

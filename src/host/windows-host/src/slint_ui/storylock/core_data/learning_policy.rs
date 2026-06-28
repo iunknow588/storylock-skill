@@ -84,7 +84,22 @@ pub(crate) fn bounded_policy_int(value: &str, field_name: &str) -> Result<i64> {
     Ok(parsed)
 }
 
+pub(crate) fn bounded_prelearning_repeat(value: &str) -> Result<i64> {
+    let parsed = value
+        .trim()
+        .parse::<i64>()
+        .map_err(|_| anyhow::anyhow!("prompts per question must be a number from 1 to 9"))?;
+    if !(1..=9).contains(&parsed) {
+        anyhow::bail!("prompts per question must be between 1 and 9");
+    }
+    Ok(parsed)
+}
+
 pub(crate) fn learning_policy_from_window(core: &StoryLockCoreApp) -> Result<Value> {
+    let prompts_per_question =
+        bounded_prelearning_repeat(core.get_pre_learning_prompts_per_question().as_str())?;
+    let total_prompts = 24 * prompts_per_question;
+    let min_repeat_gap = (24 / prompts_per_question.max(1)).max(1);
     Ok(json!({
         "schemaVersion": "1",
         "policyId": "storylock-core-learning-policy",
@@ -92,9 +107,9 @@ pub(crate) fn learning_policy_from_window(core: &StoryLockCoreApp) -> Result<Val
         "hostReadable": true,
         "preLearning": {
             "questionCount": 24,
-            "promptsPerQuestion": 2,
-            "totalPrompts": 48,
-            "minRepeatGap": 12,
+            "promptsPerQuestion": prompts_per_question,
+            "totalPrompts": total_prompts,
+            "minRepeatGap": min_repeat_gap,
             "errorTolerance": bounded_policy_int(core.get_pre_learning_error_tolerance().as_str(), "pre-learning error tolerance")?,
             "weakItemLimit": bounded_policy_int(core.get_weak_item_limit().as_str(), "weak item limit")?
         },
@@ -174,6 +189,8 @@ pub(crate) fn phase_number(policy: &Value, phase: &str, section: &str, fallback:
 }
 
 pub(crate) fn learning_policy_summary(policy: &Value) -> String {
+    let prompts_per_question = policy_number(policy, &["preLearning", "promptsPerQuestion"], 2);
+    let total_prompts = policy_number(policy, &["preLearning", "totalPrompts"], 48);
     let pre_errors = policy_number(policy, &["preLearning", "errorTolerance"], 2);
     let weak_limit = policy_number(policy, &["preLearning", "weakItemLimit"], 3);
     let initial_frequency = phase_number(policy, "initial", "frequency", 1);
@@ -182,12 +199,17 @@ pub(crate) fn learning_policy_summary(policy: &Value) -> String {
     let stable_frequency = phase_number(policy, "stable", "frequency", 1);
     let long_frequency = phase_number(policy, "long_term", "frequency", 1);
     format!(
-        "Pre-learning: 48 prompts, max errors {pre_errors}, weak items <= {weak_limit}. Retention: 22 questions; initial every {initial_frequency} day(s), consolidation every {consolidation_frequency} day(s), adaptation every {adaptation_frequency} week(s), stable every {stable_frequency} month(s), long-term every {long_frequency} year(s)."
+        "Pre-learning: 24 questions, {prompts_per_question} prompt(s) each, total {total_prompts}, max errors {pre_errors}, weak items <= {weak_limit}. Retention: 22 questions; initial every {initial_frequency} day(s), consolidation every {consolidation_frequency} day(s), adaptation every {adaptation_frequency} week(s), stable every {stable_frequency} month(s), long-term every {long_frequency} year(s)."
     )
 }
 
 pub(crate) fn load_learning_policy_into_window(core: &StoryLockCoreApp, package_dir: &Path) {
     let policy = read_learning_policy(package_dir);
+    core.set_pre_learning_prompts_per_question(SharedString::from(policy_number(
+        &policy,
+        &["preLearning", "promptsPerQuestion"],
+        2,
+    )));
     core.set_pre_learning_error_tolerance(SharedString::from(policy_number(
         &policy,
         &["preLearning", "errorTolerance"],

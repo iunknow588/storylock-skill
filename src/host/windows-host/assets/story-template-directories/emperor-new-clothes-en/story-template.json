@@ -4,7 +4,7 @@
   "language": "en-US",
   "storyTitle": "The Emperor's New Clothes",
   "summary": "Emperor Lorenzo is deceived by Marco and Pietro, two swindlers who promise magical cloth visible only to the wise. His vanity carries him into a public parade, where a child speaks plainly and exposes the lie.",
-  "storyPlot": "In 1710, on a bright summer morning in Fantasia, Emperor Lorenzo fills the palace with talk of splendid new clothes. Marco and Pietro claim they can weave invisible cloth that only worthy people can see. Alberto and Bruno inspect the empty looms and lie out of fear, so the emperor marches through the city streets in a parade wearing nothing. When a child calls out the truth, the crowd begins to whisper, and Lorenzo returns to the palace ashamed, having learned that vanity makes even rulers foolish.",
+  "storyPlot": "In 1710, in the early 18th century, a summer morning opened as a bright day over Fantasia, the proud capital of the emperor's realm. In the palace, gardens in bloom surrounded halls of palace splendor. Lorenzo, the Ruler and monarch of Fantasia, loved New clothes and splendid attire more than court reports, and he felt excited and proud whenever tailors praised his taste.\n\nInto this sunny, bright morning came Marco and Pietro, two swindlers. They were Swindlers and tricksters who knew how to flatter emperor's vanity. They offered The promise of invisible cloth, saying it could be seen only by wise and worthy people. Lorenzo's vanity made the offer irresistible, so he ordered gold, silk, and a private workroom prepared for them at once.\n\nLorenzo sent Alberto (old minister), a Minister and trusted advisor, to inspect the work. Alberto saw only empty looms, yet fear made him praise the cloth. Later Bruno (young officer), an officer and official, performed another inspection and also lied. More Inspections followed, more lying spread through the palace, and preparation for a public parade continued as if the invisible robe were real.\n\nDuring the parade later that day, the sunny weather turned warm over the city streets. Lorenzo walked among the crowd beneath colorful banners while cheering crowds filled both sides of the road. Then came The child shouting the truth: the child said the emperor had no clothes. At first there was only a crowd's whisper, but the whisper grew until Lorenzo felt The emperor realizing he was naked, and shame struck him in front of everyone.\n\nLater that evening, after the parade, Lorenzo returned from the city streets to The palace and shut himself inside the emperor's chamber. He felt Foolish, humiliated, and ashamed. The lesson stayed with him: Vanity is foolish, and children speak truth when frightened adults and flattering officials will not.",
   "memoryAnchors": [
     "1710",
     "Fantasia",
@@ -32,13 +32,13 @@
       "nodeId": "question-01",
       "title": "Question 01",
       "elementId": "time",
-      "question": "When exactly does the story take place?",
+      "question": "When does the story take place?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "1710",
       "acceptedAnswersLocalOnly": [
         "1710",
@@ -64,23 +64,23 @@
           "isCorrect": true
         },
         {
-          "text": "公元前332年",
+          "text": "1708",
           "isCorrect": false
         },
         {
-          "text": "东周时期",
+          "text": "1709",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "1711",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "1712",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "early 16th century",
           "isCorrect": false
         }
       ]
@@ -89,13 +89,13 @@
       "nodeId": "question-02",
       "title": "Question 02",
       "elementId": "place",
-      "question": "Which places frame the main action?",
+      "question": "Where does the story take place?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Fantasia",
       "acceptedAnswersLocalOnly": [
         "Fantasia",
@@ -121,23 +121,23 @@
           "isCorrect": true
         },
         {
-          "text": "东周时期",
+          "text": "Valoria",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "Florentia",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Aurelia",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "royal avenue",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "market streets",
           "isCorrect": false
         }
       ]
@@ -146,13 +146,13 @@
       "nodeId": "question-03",
       "title": "Question 03",
       "elementId": "person",
-      "question": "What is the protagonist's name?",
+      "question": "Who is the main person in the story?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 1,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Lorenzo",
       "acceptedAnswersLocalOnly": [
         "Lorenzo"
@@ -163,35 +163,35 @@
           "isCorrect": true
         },
         {
-          "text": "4月5日",
+          "text": "Leonardo",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Augusto",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Renato",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Matteo",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "Prince Lorenzo",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "King Renato",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "公元前332年",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "东周时期",
           "isCorrect": false
         }
       ]
@@ -200,13 +200,13 @@
       "nodeId": "question-04",
       "title": "Question 04",
       "elementId": "object",
-      "question": "What role does the protagonist hold?",
+      "question": "What is this person's role or occupation?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "high",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Ruler",
       "acceptedAnswersLocalOnly": [
         "Ruler",
@@ -222,31 +222,31 @@
           "isCorrect": true
         },
         {
-          "text": "盛夏",
+          "text": "Ruler nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Ruler earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Ruler later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "monarch nearby",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "monarch earlier",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "monarch later",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "King",
           "isCorrect": false
         }
       ]
@@ -255,13 +255,13 @@
       "nodeId": "question-05",
       "title": "Question 05",
       "elementId": "event",
-      "question": "What interest makes the protagonist vulnerable?",
+      "question": "What important trait or habit does this person have?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "New clothes",
       "acceptedAnswersLocalOnly": [
         "New clothes",
@@ -277,31 +277,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "New clothes nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "New clothes earlier",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "New clothes later",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "splendid attire nearby",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "splendid attire earlier",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "splendid attire later",
           "isCorrect": false
         },
         {
-          "text": "种田人",
+          "text": "fine robes",
           "isCorrect": false
         }
       ]
@@ -310,13 +310,13 @@
       "nodeId": "question-06",
       "title": "Question 06",
       "elementId": "reaction",
-      "question": "Who are the protagonist's main assistants?",
+      "question": "Which other important people or roles appear in the story?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Alberto (old minister)",
       "acceptedAnswersLocalOnly": [
         "Alberto (old minister)",
@@ -332,31 +332,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前332年",
+          "text": "Alberto (senior advisor)",
           "isCorrect": false
         },
         {
-          "text": "东周时期",
+          "text": "Roberto (old minister)",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "Alberto (court elder)",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Bruno (junior officer)",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Carlo (young officer)",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Bruno (court officer)",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "old advisor",
           "isCorrect": false
         }
       ]
@@ -365,13 +365,13 @@
       "nodeId": "question-07",
       "title": "Question 07",
       "elementId": "choice",
-      "question": "What official roles do the assistants hold?",
+      "question": "What roles or identities do those people have?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 4,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Minister",
       "acceptedAnswersLocalOnly": [
         "Minister",
@@ -397,23 +397,23 @@
           "isCorrect": true
         },
         {
-          "text": "东周时期",
+          "text": "Minister nearby",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "Minister earlier",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Minister later",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "trusted advisor nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "trusted advisor earlier",
           "isCorrect": false
         }
       ]
@@ -422,13 +422,13 @@
       "nodeId": "question-08",
       "title": "Question 08",
       "elementId": "result",
-      "question": "Who are the villains?",
+      "question": "What side or factor creates the conflict in the story?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Marco and Pietro",
       "acceptedAnswersLocalOnly": [
         "Marco and Pietro",
@@ -444,31 +444,31 @@
           "isCorrect": true
         },
         {
-          "text": "4月5日",
+          "text": "Mario and Paolo",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Marco and Paolo",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Pietro and Carlo",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "two swindlers nearby",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "two swindlers earlier",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "two swindlers later",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "two strangers",
           "isCorrect": false
         }
       ]
@@ -477,13 +477,13 @@
       "nodeId": "question-09",
       "title": "Question 09",
       "elementId": "time",
-      "question": "What kind of people are the villains?",
+      "question": "What behavior or feature describes that side or factor?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Swindlers",
       "acceptedAnswersLocalOnly": [
         "Swindlers",
@@ -499,31 +499,31 @@
           "isCorrect": true
         },
         {
-          "text": "盛夏",
+          "text": "Swindlers nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Swindlers earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Swindlers later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "tricksters nearby",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "tricksters earlier",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "tricksters later",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "con artists",
           "isCorrect": false
         }
       ]
@@ -532,13 +532,13 @@
       "nodeId": "question-10",
       "title": "Question 10",
       "elementId": "place",
-      "question": "What directly causes the deception to begin?",
+      "question": "What causes the event to begin?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The promise of invisible cloth",
       "acceptedAnswersLocalOnly": [
         "The promise of invisible cloth",
@@ -554,31 +554,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "The promise of invisible cloth nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "The promise of invisible cloth earlier",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "The promise of invisible cloth later",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "emperor's vanity nearby",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "emperor's vanity earlier",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "emperor's vanity later",
           "isCorrect": false
         },
         {
-          "text": "种田人",
+          "text": "a promise of rare fabric",
           "isCorrect": false
         }
       ]
@@ -587,13 +587,13 @@
       "nodeId": "question-11",
       "title": "Question 11",
       "elementId": "person",
-      "question": "What is the weather like when events begin?",
+      "question": "What is the weather like when the event begins?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Sunny",
       "acceptedAnswersLocalOnly": [
         "Sunny",
@@ -609,31 +609,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前332年",
+          "text": "Sunny nearby",
           "isCorrect": false
         },
         {
-          "text": "东周时期",
+          "text": "Sunny earlier",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "Sunny later",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "bright nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "bright earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "bright later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "clear",
           "isCorrect": false
         }
       ]
@@ -642,13 +642,13 @@
       "nodeId": "question-12",
       "title": "Question 12",
       "elementId": "object",
-      "question": "What is the palace environment like at the beginning?",
+      "question": "What is the setting like when the event begins?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Gardens in bloom",
       "acceptedAnswersLocalOnly": [
         "Gardens in bloom",
@@ -664,31 +664,31 @@
           "isCorrect": true
         },
         {
-          "text": "东周时期",
+          "text": "Gardens in bloom nearby",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "Gardens in bloom earlier",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Gardens in bloom later",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "palace splendor nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "palace splendor earlier",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "palace splendor later",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "bright halls",
           "isCorrect": false
         }
       ]
@@ -697,13 +697,13 @@
       "nodeId": "question-13",
       "title": "Question 13",
       "elementId": "event",
-      "question": "How does Emperor Lorenzo feel at the beginning?",
+      "question": "How does the main person feel when the event begins?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Excited",
       "acceptedAnswersLocalOnly": [
         "Excited",
@@ -719,31 +719,31 @@
           "isCorrect": true
         },
         {
-          "text": "4月5日",
+          "text": "Excited nearby",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Excited earlier",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Excited later",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "proud nearby",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "proud earlier",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "proud later",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "eager",
           "isCorrect": false
         }
       ]
@@ -752,13 +752,13 @@
       "nodeId": "question-14",
       "title": "Question 14",
       "elementId": "reaction",
-      "question": "How does the deception develop before the parade?",
+      "question": "How does the event continue to develop?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Inspections",
       "acceptedAnswersLocalOnly": [
         "Inspections",
@@ -779,27 +779,27 @@
           "isCorrect": true
         },
         {
-          "text": "盛夏",
+          "text": "Inspections nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Inspections earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Inspections later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "lying nearby",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "lying earlier",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "lying later",
           "isCorrect": false
         }
       ]
@@ -808,13 +808,13 @@
       "nodeId": "question-15",
       "title": "Question 15",
       "elementId": "choice",
-      "question": "What forms the climax of the story?",
+      "question": "What is the most important result or scene in the story?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The child shouting the truth",
       "acceptedAnswersLocalOnly": [
         "The child shouting the truth",
@@ -830,31 +830,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "The child shouting the truth nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "The child shouting the truth earlier",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "The child shouting the truth later",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "crowd's whisper nearby",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "crowd's whisper earlier",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "crowd's whisper later",
           "isCorrect": false
         },
         {
-          "text": "种田人",
+          "text": "a public cry",
           "isCorrect": false
         }
       ]
@@ -863,13 +863,13 @@
       "nodeId": "question-16",
       "title": "Question 16",
       "elementId": "result",
-      "question": "What event turns pride into shame?",
+      "question": "What triggers the turning point of the story?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "normal",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The emperor realizing he was naked",
       "acceptedAnswersLocalOnly": [
         "The emperor realizing he was naked",
@@ -885,31 +885,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前332年",
+          "text": "The emperor realizing he was naked nearby",
           "isCorrect": false
         },
         {
-          "text": "东周时期",
+          "text": "The emperor realizing he was naked earlier",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "The emperor realizing he was naked later",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "shame nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "shame earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "shame later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "realization",
           "isCorrect": false
         }
       ]
@@ -924,7 +924,7 @@
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "During the parade",
       "acceptedAnswersLocalOnly": [
         "During the parade",
@@ -940,31 +940,31 @@
           "isCorrect": true
         },
         {
-          "text": "东周时期",
+          "text": "During the parade nearby",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "During the parade earlier",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "During the parade later",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "later that day nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "later that day earlier",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "later that day later",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "at the procession",
           "isCorrect": false
         }
       ]
@@ -979,7 +979,7 @@
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "City streets",
       "acceptedAnswersLocalOnly": [
         "City streets",
@@ -995,31 +995,31 @@
           "isCorrect": true
         },
         {
-          "text": "4月5日",
+          "text": "City streets nearby",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "City streets earlier",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "City streets later",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "among the crowd nearby",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "among the crowd earlier",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "among the crowd later",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "main street",
           "isCorrect": false
         }
       ]
@@ -1034,7 +1034,7 @@
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Sunny",
       "acceptedAnswersLocalOnly": [
         "Sunny",
@@ -1050,31 +1050,31 @@
           "isCorrect": true
         },
         {
-          "text": "盛夏",
+          "text": "Sunny nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Sunny earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Sunny later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "warm nearby",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "warm earlier",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "warm later",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "bright",
           "isCorrect": false
         }
       ]
@@ -1083,13 +1083,13 @@
       "nodeId": "question-20",
       "title": "Question 20",
       "elementId": "object",
-      "question": "What is the public scene like at the turning point?",
+      "question": "What is the setting like at the turning point?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Cheering crowds",
       "acceptedAnswersLocalOnly": [
         "Cheering crowds",
@@ -1105,31 +1105,31 @@
           "isCorrect": true
         },
         {
-          "text": "宋国",
+          "text": "Cheering crowds nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Cheering crowds earlier",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "Cheering crowds later",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "colorful banners nearby",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "colorful banners earlier",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "colorful banners later",
           "isCorrect": false
         },
         {
-          "text": "种田人",
+          "text": "watching crowd",
           "isCorrect": false
         }
       ]
@@ -1144,7 +1144,7 @@
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Later that evening",
       "acceptedAnswersLocalOnly": [
         "Later that evening",
@@ -1160,31 +1160,31 @@
           "isCorrect": true
         },
         {
-          "text": "公元前332年",
+          "text": "Later that evening nearby",
           "isCorrect": false
         },
         {
-          "text": "东周时期",
+          "text": "Later that evening earlier",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "Later that evening later",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "after the parade nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "after the parade earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "after the parade later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "same evening",
           "isCorrect": false
         }
       ]
@@ -1193,13 +1193,13 @@
       "nodeId": "question-22",
       "title": "Question 22",
       "elementId": "reaction",
-      "question": "Where is the emperor when the story closes?",
+      "question": "Where is the story at the end?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "The palace",
       "acceptedAnswersLocalOnly": [
         "The palace",
@@ -1215,31 +1215,31 @@
           "isCorrect": true
         },
         {
-          "text": "东周时期",
+          "text": "The palace nearby",
           "isCorrect": false
         },
         {
-          "text": "4月5日",
+          "text": "The palace earlier",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "The palace later",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "the emperor's chamber nearby",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "the emperor's chamber earlier",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "the emperor's chamber later",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "private chamber",
           "isCorrect": false
         }
       ]
@@ -1248,13 +1248,13 @@
       "nodeId": "question-23",
       "title": "Question 23",
       "elementId": "choice",
-      "question": "How does the emperor feel after the truth is exposed?",
+      "question": "How does the main person feel after the story ends?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 3,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Foolish",
       "acceptedAnswersLocalOnly": [
         "Foolish",
@@ -1275,27 +1275,27 @@
           "isCorrect": true
         },
         {
-          "text": "4月5日",
+          "text": "Foolish nearby",
           "isCorrect": false
         },
         {
-          "text": "盛夏",
+          "text": "Foolish earlier",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Foolish later",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "humiliated nearby",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "humiliated earlier",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "humiliated later",
           "isCorrect": false
         }
       ]
@@ -1304,13 +1304,13 @@
       "nodeId": "question-24",
       "title": "Question 24",
       "elementId": "result",
-      "question": "What lesson does the emperor finally learn?",
+      "question": "What lesson or insight does the story leave behind?",
       "recommendedSelectionMode": "multi_select",
       "recommendedCorrectCount": 2,
       "candidatePoolSize": 9,
       "recallPriority": "review",
       "verifyPolicy": "caseInsensitive + trim",
-      "editorNotes": "Polished English template for The Emperor's New Clothes; all nodes are multi-select.",
+      "editorNotes": "Polished English template with vague prompts; all nodes are multi-select.",
       "canonicalAnswerLocalOnly": "Vanity is foolish",
       "acceptedAnswersLocalOnly": [
         "Vanity is foolish",
@@ -1326,31 +1326,31 @@
           "isCorrect": true
         },
         {
-          "text": "盛夏",
+          "text": "Vanity is foolish nearby",
           "isCorrect": false
         },
         {
-          "text": "宋国",
+          "text": "Vanity is foolish earlier",
           "isCorrect": false
         },
         {
-          "text": "青石村",
+          "text": "Vanity is foolish later",
           "isCorrect": false
         },
         {
-          "text": "田间",
+          "text": "children speak truth nearby",
           "isCorrect": false
         },
         {
-          "text": "老梨树下",
+          "text": "children speak truth earlier",
           "isCorrect": false
         },
         {
-          "text": "阿福",
+          "text": "children speak truth later",
           "isCorrect": false
         },
         {
-          "text": "农夫",
+          "text": "pride misleads",
           "isCorrect": false
         }
       ]

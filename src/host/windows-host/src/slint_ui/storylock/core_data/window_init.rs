@@ -21,6 +21,7 @@ pub(crate) fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_
     core.set_story_title(json_string(&draft, &["storyTitle"]));
     core.set_story_summary(json_string(&draft, &["summary"]));
     core.set_story_plot(json_string(&draft, &["storyPlot"]));
+    core.set_template_id(json_string(&draft, &["templateId"]));
     core.set_memory_anchors(SharedString::from(
         draft
             .get("memoryAnchors")
@@ -55,18 +56,13 @@ pub(crate) fn initialize_storylock_core_window(core: &StoryLockCoreApp, package_
         .and_then(Value::as_array)
         .and_then(|items| items.first())
     {
-        core.set_resource_id(json_string(resource, &["resourceId"]));
-        core.set_resource_kind(json_string(resource, &["resourceKind"]));
-        core.set_provider_id(json_string(resource, &["providerId"]));
-        core.set_display_name(json_string(resource, &["displayName"]));
-        core.set_resource_group(resource_group_from_catalog_resource(resource));
-        core.set_resource_bindings(SharedString::from(format_bindings(resource)));
-        core.set_object_meta(SharedString::from(format_object_meta(resource)));
+        load_resource_into_window(core, resource);
     }
     core.set_protected_object_list(SharedString::from(format_protected_object_list(
         &catalog,
         core.get_resource_group().as_str(),
     )));
+    set_protected_object_rows_into_window(&core, &catalog, core.get_resource_group().as_str());
     core.set_template_display_name(json_string(&draft, &["storyTitle"]));
     core.set_template_bindings(SharedString::from(format_story_draft_template_summary(
         package_dir,

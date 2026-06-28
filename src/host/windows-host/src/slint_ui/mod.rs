@@ -17,9 +17,10 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use self::storylock::{
-    ensure_storylock_core_package, host_learning_plan_status, initialize_storylock_core_window,
-    set_storylock_start_page_to_questions, storylock_core_package_dir,
-    wire_storylock_core_callbacks,
+    apply_storylock_ui_settings, ensure_storylock_core_package, host_learning_plan_status,
+    initial_storylock_core_package_dir, initialize_storylock_core_window,
+    load_storylock_ui_settings, merge_host_language_setting, save_storylock_ui_settings,
+    set_storylock_start_page_to_questions, wire_storylock_core_callbacks,
 };
 
 mod confirmation;
@@ -32,7 +33,7 @@ pub use dashboard::run;
 slint::slint! {
     import { HostDashboard, SettingsDialog } from "host_dashboard.slint";
     import { StoryLockCoreApp } from "storylock_core.slint";
-    import { StoryLockCoreSettingsDialog, AnswerEditorDialog } from "storylock_core/dialogs.slint";
+    import { StoryLockCoreSettingsDialog, AnswerEditorDialog, ObjectEditorDialog, LearningTestDialog } from "storylock_core/dialogs.slint";
     import { RequestConfirmation } from "request_confirmation.slint";
 
     export {
@@ -41,6 +42,8 @@ slint::slint! {
         StoryLockCoreApp,
         StoryLockCoreSettingsDialog,
         AnswerEditorDialog,
+        ObjectEditorDialog,
+        LearningTestDialog,
         RequestConfirmation
     }
 }

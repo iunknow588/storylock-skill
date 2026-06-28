@@ -5,6 +5,7 @@ pub(crate) fn register_authoring_callbacks(
     package_dir: &Path,
     learning_passed: Rc<RefCell<LearningProgress>>,
     answer_editor: Rc<RefCell<Option<AnswerEditorDialog>>>,
+    object_editor: Rc<RefCell<Option<ObjectEditorDialog>>>,
 ) {
     register_temp_draft_callback(core, package_dir, Rc::clone(&learning_passed));
     register_node_navigation_callbacks(
@@ -13,7 +14,7 @@ pub(crate) fn register_authoring_callbacks(
         Rc::clone(&learning_passed),
         Rc::clone(&answer_editor),
     );
-    register_resource_and_template_callbacks(core, package_dir, learning_passed);
+    register_resource_and_template_callbacks(core, package_dir, learning_passed, object_editor);
 }
 
 fn register_temp_draft_callback(
@@ -164,6 +165,7 @@ fn register_resource_and_template_callbacks(
     core: &StoryLockCoreApp,
     package_dir: &Path,
     learning_passed: Rc<RefCell<LearningProgress>>,
+    object_editor: Rc<RefCell<Option<ObjectEditorDialog>>>,
 ) {
     let weak = core.as_weak();
     let group_dir = package_dir.to_path_buf();
@@ -186,17 +188,41 @@ fn register_resource_and_template_callbacks(
                 default_resource_catalog_json(),
             );
             if let Some(resource) = first_resource_for_group(&catalog, &group) {
-                core.set_resource_id(json_string(resource, &["resourceId"]));
-                core.set_resource_kind(json_string(resource, &["resourceKind"]));
-                core.set_provider_id(json_string(resource, &["providerId"]));
-                core.set_display_name(json_string(resource, &["displayName"]));
-                core.set_resource_bindings(SharedString::from(format_bindings(resource)));
-                core.set_object_meta(SharedString::from(format_object_meta(resource)));
+                load_resource_into_window(&core, resource);
             }
             core.set_protected_object_list(SharedString::from(format_protected_object_list(
                 &catalog, &group,
             )));
+            set_protected_object_rows_into_window(&core, &catalog, &group);
             core.set_active_page(2);
+        }
+    });
+
+    let weak = core.as_weak();
+    let select_object_dir = package_dir.to_path_buf();
+    core.on_select_object(move |resource_id| {
+        if let Some(core) = weak.upgrade() {
+            let package_dir =
+                match ensure_storylock_core_package_dir_from_window(&core, &select_object_dir) {
+                    Ok(package_dir) => package_dir,
+                    Err(error) => {
+                        core.set_config_status(SharedString::from(format!(
+                            "Object load failed: {error}"
+                        )));
+                        return;
+                    }
+                };
+            let catalog = read_json_or_default(
+                &storylock_core_catalog_path(&package_dir),
+                default_resource_catalog_json(),
+            );
+            if resource_id.trim().is_empty() {
+                prepare_new_resource_in_window(&core, &catalog);
+                open_object_editor_dialog(&core, &package_dir, Rc::clone(&object_editor));
+            } else if let Some(resource) = resource_by_id(&catalog, resource_id.as_str()) {
+                load_resource_into_window(&core, resource);
+                open_object_editor_dialog(&core, &package_dir, Rc::clone(&object_editor));
+            }
         }
     });
 

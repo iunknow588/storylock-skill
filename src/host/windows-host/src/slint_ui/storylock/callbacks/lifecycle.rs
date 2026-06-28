@@ -12,6 +12,9 @@ pub(crate) fn register_lifecycle_callbacks(
     let on_button_closed = Rc::clone(&on_closed);
     core.on_close_requested(move || {
         if let Some(core) = weak.upgrade() {
+            if let Err(error) = save_storylock_ui_settings(&settings_from_storylock_core(&core)) {
+                eprintln!("failed to save StoryLock UI settings: {error}");
+            }
             let _ = core.hide();
         }
         *close_slot.borrow_mut() = None;
@@ -23,6 +26,9 @@ pub(crate) fn register_lifecycle_callbacks(
     let on_window_closed = Rc::clone(&on_closed);
     core.window().on_close_requested(move || {
         if let Some(core) = weak.upgrade() {
+            if let Err(error) = save_storylock_ui_settings(&settings_from_storylock_core(&core)) {
+                eprintln!("failed to save StoryLock UI settings: {error}");
+            }
             let _ = core.hide();
         }
         *window_close_slot.borrow_mut() = None;
@@ -56,6 +62,13 @@ pub(crate) fn register_lifecycle_callbacks(
                 match ensure_storylock_core_package(&selected_dir) {
                     Ok(()) => {
                         initialize_storylock_core_window(&core, &selected_dir);
+                        if let Err(error) =
+                            save_storylock_ui_settings(&settings_from_storylock_core(&core))
+                        {
+                            core.set_config_status(SharedString::from(format!(
+                                "Settings save failed: {error}"
+                            )));
+                        }
                         core.set_config_status(SharedString::from(
                             "StoryLock Core workspace loaded from selected directory.",
                         ));
@@ -88,6 +101,13 @@ pub(crate) fn register_lifecycle_callbacks(
             }
             if let Some(selected_dir) = dialog.pick_folder() {
                 core.set_export_package_dir(SharedString::from(selected_dir.display().to_string()));
+                if let Err(error) = save_storylock_ui_settings(&settings_from_storylock_core(&core))
+                {
+                    core.set_config_status(SharedString::from(format!(
+                        "Settings save failed: {error}"
+                    )));
+                    return;
+                }
                 core.set_config_status(SharedString::from(
                     "Export directory selected for the next package export.",
                 ));
