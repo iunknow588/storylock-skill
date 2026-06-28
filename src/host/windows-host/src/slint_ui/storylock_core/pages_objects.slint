@@ -1,5 +1,5 @@
 import { VerticalBox, ScrollView } from "std-widgets.slint";
-import { StaticRow } from "../common.slint";
+import { InfoRow } from "../common.slint";
 
 export component ProtectedObjectTableRow inherits Rectangle {
     in property <bool> is-header;
@@ -90,11 +90,11 @@ export component ProtectedObjectsPage inherits VerticalBox {
     height: 374px;
     spacing: 12px;
 
-    StaticRow {
+    InfoRow {
         name: root.is-zh ? "用途" : "Purpose";
         value: root.is-zh ? "点击列表中的受保护对象即可进入编辑页面。" : "Click a managed object in the list to edit it.";
     }
-    StaticRow {
+    InfoRow {
         name: root.is-zh ? "当前级别" : "Current Level";
         value: root.resource-group == "normal" ? (root.is-zh ? "普通对象" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "私密对象" : "Private Objects") : (root.is-zh ? "机密对象" : "Secret Objects");
     }

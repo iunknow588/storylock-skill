@@ -160,6 +160,7 @@ fn protected_object_rows_show_username_for_password_fill_resources() {
     ensure_storylock_core_package(&dir).expect("init package");
     let core = StoryLockCoreApp::new().expect("core app");
 
+    core.set_resource_group(SharedString::from("normal"));
     core.set_display_name(SharedString::from("www.huawei.com"));
     core.set_provider_id(SharedString::from("bob"));
     core.set_secret_reference(SharedString::from("pw-123"));
@@ -167,13 +168,35 @@ fn protected_object_rows_show_username_for_password_fill_resources() {
     save_object_editor_resource_from_window(&core, &dir).expect("save managed object");
 
     let catalog = read_json_or_default(&storylock_core_catalog_path(&dir), Value::Null);
-    let rows = protected_object_rows(&catalog, "secret");
+    let rows = protected_object_rows(&catalog, "normal");
     let row = rows
         .iter()
         .find(|item| item.name == "www.huawei.com")
         .expect("row for saved site");
     assert_eq!(row.secret, "bob");
     assert_eq!(row.usage, "website");
+    assert_eq!(row.level, "normal");
+    assert!(!protected_object_rows(&catalog, "secret")
+        .iter()
+        .any(|item| item.name == "www.huawei.com"));
+}
+
+#[test]
+fn new_managed_object_keeps_selected_resource_group() {
+    let _guard = ui_test_guard();
+    let dir = temp_identity_package_dir();
+    ensure_storylock_core_package(&dir).expect("init package");
+    let core = StoryLockCoreApp::new().expect("core app");
+    initialize_storylock_core_window(&core, &dir);
+    core.set_resource_group(SharedString::from("private"));
+
+    let catalog = read_json_or_default(
+        &storylock_core_catalog_path(&dir),
+        default_resource_catalog_json(),
+    );
+    prepare_new_resource_in_window(&core, &catalog);
+
+    assert_eq!(core.get_resource_group().as_str(), "private");
 }
 
 #[test]

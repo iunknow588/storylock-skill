@@ -1,4 +1,4 @@
-import { VerticalBox, HorizontalBox, ComboBox, LineEdit } from "std-widgets.slint";
+import { VerticalBox, HorizontalBox, ComboBox } from "std-widgets.slint";
 import { PathBrowseRow, StaticRow, ActionButton, QuestionConfigPanel, LearningAnswerGrid, LogPanel } from "../common.slint";
 
 export component StoryLockCoreSettingsDialog inherits Window {
@@ -194,12 +194,23 @@ export component ObjectEditorDialog inherits Window {
                 font-size: 13px;
                 vertical-alignment: center;
             }
-            LineEdit {
-                text: root.uri;
+            Rectangle {
                 width: 556px;
                 height: 32px;
-                edited(value) => {
-                    root.uri = value;
+                border-width: 1px;
+                border-color: #c9d5da;
+                border-radius: 4px;
+                background: white;
+                uri-editor := TextInput {
+                    x: 8px;
+                    y: 0px;
+                    width: parent.width - 16px;
+                    height: parent.height;
+                    text <=> root.uri;
+                    single-line: true;
+                    vertical-alignment: center;
+                    color: #17252f;
+                    font-size: 13px;
                 }
             }
         }
@@ -212,12 +223,23 @@ export component ObjectEditorDialog inherits Window {
                 font-size: 13px;
                 vertical-alignment: center;
             }
-            LineEdit {
-                text: root.username;
+            Rectangle {
                 width: 556px;
                 height: 32px;
-                edited(value) => {
-                    root.username = value;
+                border-width: 1px;
+                border-color: #c9d5da;
+                border-radius: 4px;
+                background: white;
+                username-editor := TextInput {
+                    x: 8px;
+                    y: 0px;
+                    width: parent.width - 16px;
+                    height: parent.height;
+                    text <=> root.username;
+                    single-line: true;
+                    vertical-alignment: center;
+                    color: #17252f;
+                    font-size: 13px;
                 }
             }
         }
@@ -230,13 +252,23 @@ export component ObjectEditorDialog inherits Window {
                 font-size: 13px;
                 vertical-alignment: center;
             }
-            LineEdit {
-                text: root.password;
-                width: 420px;
+            Rectangle {
+                width: 556px;
                 height: 32px;
-                input-type: root.show-password ? InputType.text : InputType.password;
-                edited(value) => {
-                    root.password = value;
+                border-width: 1px;
+                border-color: #c9d5da;
+                border-radius: 4px;
+                background: white;
+                password-editor := TextInput {
+                    x: 8px;
+                    y: 0px;
+                    width: parent.width - 16px;
+                    height: parent.height;
+                    text <=> root.password;
+                    single-line: true;
+                    vertical-alignment: center;
+                    color: #17252f;
+                    font-size: 13px;
                 }
             }
             ActionButton {

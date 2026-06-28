@@ -730,6 +730,19 @@ pre {
   gap: 22px;
 }
 
+.video-layout {
+  display: grid;
+  gap: 22px;
+}
+
+.demo-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0f1720;
+}
+
 .help-page a {
   color: var(--accent);
   text-decoration: underline;

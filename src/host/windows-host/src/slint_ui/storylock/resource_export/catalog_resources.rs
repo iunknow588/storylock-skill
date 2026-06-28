@@ -179,6 +179,7 @@ pub(crate) fn prepare_new_resource_in_window(core: &StoryLockCoreApp, catalog: &
         .and_then(Value::as_array)
         .map(|resources| resources.len() + 1)
         .unwrap_or(1);
+    let selected_group = normalize_resource_group(core.get_resource_group().as_str());
     let usage = "password_fill";
     let resource_id = format!("managed-object-{next_index}");
     core.set_resource_id(SharedString::from(resource_id.as_str()));
@@ -190,7 +191,7 @@ pub(crate) fn prepare_new_resource_in_window(core: &StoryLockCoreApp, catalog: &
     core.set_object_kind(SharedString::from(usage));
     core.set_resource_kind(SharedString::from(resource_kind_for_usage(usage)));
     core.set_provider_id(SharedString::from(""));
-    core.set_resource_group(SharedString::from("secret"));
+    core.set_resource_group(SharedString::from(selected_group));
     core.set_required_correct_count(SharedString::from(
         DEFAULT_REQUIRED_GRID_COUNT.to_string(),
     ));
@@ -374,20 +375,10 @@ fn save_resource_from_window_with_validation(
         serde_json::to_vec_pretty(&catalog)?,
     )?;
     sync_templates_for_resource(core, package_dir)?;
-    core.set_resource_bindings(SharedString::from(format_bindings(
-        catalog
-            .get("resources")
-            .and_then(Value::as_array)
-            .and_then(|items| items.first())
-            .unwrap_or(&Value::Null),
-    )));
-    core.set_object_meta(SharedString::from(format_object_meta(
-        catalog
-            .get("resources")
-            .and_then(Value::as_array)
-            .and_then(|items| items.first())
-            .unwrap_or(&Value::Null),
-    )));
+    if let Some(saved_resource) = resource_by_id(&catalog, resource_id.as_str()) {
+        core.set_resource_bindings(SharedString::from(format_bindings(saved_resource)));
+        core.set_object_meta(SharedString::from(format_object_meta(saved_resource)));
+    }
     core.set_protected_object_list(SharedString::from(format_protected_object_list(
         &catalog,
         core.get_resource_group().as_str(),

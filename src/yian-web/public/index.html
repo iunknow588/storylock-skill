@@ -12,7 +12,7 @@
       .page-panel { display: none; }
       .page-panel.is-active { display: block; }
     </style>
-    <link rel="stylesheet" href="/styles.css?v=20260620-1">
+    <link rel="stylesheet" href="/styles.css?v=20260628-1">
   </head>
   <body>
     <header class="site-header">
@@ -34,6 +34,7 @@
         <div class="wrap nav-drawer-inner">
           <a href="#home" data-page-link="home" data-i18n="nav.home">首页</a>
           <a href="#overview" data-page-link="overview" data-i18n="nav.overview">产品说明</a>
+          <a href="#demo" data-page-link="demo" data-i18n="nav.demo">视频说明</a>
           <a href="#architecture" data-page-link="architecture" data-i18n="nav.architecture">安全方式</a>
           <a href="#binding" data-page-link="binding" data-i18n="nav.binding">下载绑定</a>
           <a href="#apk" data-page-link="apk" data-i18n="nav.apk">安装版本</a>
@@ -97,6 +98,31 @@
               <p data-i18n="overview.copy1"></p>
               <p data-i18n="overview.copy2"></p>
               <p data-i18n="overview.copy3"></p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="demo" class="band alt page-panel" data-page-section data-page-title="nav.demo">
+        <div class="wrap">
+          <article class="topic-card video-layout">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="video.kicker">视频说明</p>
+              <h3 data-i18n="video.title">通过演示视频了解易安如何完成本地授权确认</h3>
+            </div>
+            <video
+              class="demo-video"
+              controls
+              preload="metadata"
+              playsinline
+              poster="/assets/yian-network-banner.png"
+            >
+              <source src="/assets/videos/yian-demo.mp4" type="video/mp4">
+              <span data-i18n="video.unsupported">当前浏览器不支持直接播放视频。</span>
+            </video>
+            <div class="copy-list">
+              <p data-i18n="video.copy1"></p>
+              <p data-i18n="video.copy2"></p>
             </div>
           </article>
         </div>
@@ -390,6 +416,6 @@
       </div>
     </footer>
 
-    <script type="module" src="/main.js?v=20260620-1"></script>
+    <script type="module" src="/main.js?v=20260628-1"></script>
   </body>
 </html>

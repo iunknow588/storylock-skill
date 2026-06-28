@@ -1,4 +1,24 @@
-use super::*;
+﻿use super::*;
+use std::ptr::{null, null_mut};
+use std::sync::atomic::{AtomicBool, Ordering};
+use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
+use windows_sys::Win32::Graphics::Gdi::{CreateSolidBrush, HBRUSH};
+use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
+use windows_sys::Win32::UI::WindowsAndMessaging::{
+    CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetDlgItem,
+    GetForegroundWindow, GetMessageW, GetWindowLongPtrW, GetWindowTextLengthW, GetWindowTextW,
+    IsDialogMessageW, IsWindow, LoadCursorW, RegisterClassW, SetForegroundWindow,
+    SetWindowLongPtrW, SetWindowPos, SetWindowTextW, ShowWindow, TranslateMessage,
+    CREATESTRUCTW, CW_USEDEFAULT, GWLP_USERDATA, HMENU, HWND_NOTOPMOST, HWND_TOPMOST, IDC_ARROW,
+    MSG, SW_SHOW, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, WINDOW_EX_STYLE, WINDOW_STYLE,
+    WM_CLOSE, WM_COMMAND, WM_CREATE, WM_DESTROY, WM_NCCREATE, WNDCLASSW, WS_BORDER, WS_CAPTION,
+    WS_CHILD, WS_CLIPCHILDREN, WS_EX_CONTROLPARENT, WS_EX_DLGMODALFRAME, WS_EX_WINDOWEDGE,
+    WS_OVERLAPPED, WS_SYSMENU, WS_TABSTOP, WS_VISIBLE,
+};
+
+const BS_DEFPUSHBUTTON: WINDOW_STYLE = 0x0000_0001;
+const BS_PUSHBUTTON: WINDOW_STYLE = 0x0000_0000;
+static NATIVE_OBJECT_EDITOR_OPEN: AtomicBool = AtomicBool::new(false);
 
 pub(crate) fn set_core_status(core: &StoryLockCoreApp, result: Result<()>, success_message: &str) {
     match result {
@@ -82,34 +102,395 @@ pub(crate) fn open_object_editor_dialog(
     package_dir: &Path,
     object_editor: Rc<RefCell<Option<ObjectEditorDialog>>>,
 ) {
-    if object_editor.borrow().is_none() {
-        match ObjectEditorDialog::new() {
-            Ok(dialog) => {
-                wire_object_editor_callbacks(
-                    &dialog,
-                    core.as_weak(),
-                    package_dir.to_path_buf(),
-                    Rc::clone(&object_editor),
-                );
-                *object_editor.borrow_mut() = Some(dialog);
-            }
-            Err(error) => {
-                core.set_config_status(SharedString::from(format!(
-                    "Object editor failed to open: {error}"
-                )));
-                return;
-            }
-        }
+    let _ = object_editor;
+    if NATIVE_OBJECT_EDITOR_OPEN.swap(true, Ordering::SeqCst) {
+        return;
     }
-
-    if let Some(dialog) = object_editor.borrow().as_ref() {
-        copy_core_object_to_dialog(core, dialog);
-        if let Err(error) = dialog.show() {
+    match prompt_managed_object_with_native_dialog(
+        core.get_language().as_str(),
+        core.get_display_name().as_str(),
+        core.get_provider_id().as_str(),
+        core.get_secret_reference().as_str(),
+    ) {
+        Ok(Some(result)) => {
+            core.set_display_name(SharedString::from(result.uri.as_str()));
+            core.set_provider_id(SharedString::from(result.username.as_str()));
+            core.set_secret_reference(SharedString::from(result.password.as_str()));
+            core.set_object_kind(SharedString::from("password_fill"));
+            set_core_status(
+                core,
+                save_object_editor_resource_from_window(core, package_dir),
+                "Managed object saved.",
+            );
+        }
+        Ok(None) => {}
+        Err(error) => {
             core.set_config_status(SharedString::from(format!(
-                "Object editor failed to show: {error}"
+                "Object editor failed to open: {error}"
             )));
         }
     }
+    NATIVE_OBJECT_EDITOR_OPEN.store(false, Ordering::SeqCst);
+}
+
+struct NativeManagedObjectDialogResult {
+    uri: String,
+    username: String,
+    password: String,
+}
+
+fn prompt_managed_object_with_native_dialog(
+    language: &str,
+    uri: &str,
+    username: &str,
+    password: &str,
+) -> Result<Option<NativeManagedObjectDialogResult>> {
+    let labels = NativeManagedObjectDialogLabels::from_language(language);
+    native_managed_object_dialog(uri, username, password, &labels)
+}
+
+const ID_URI: i32 = 1001;
+const ID_USERNAME: i32 = 1002;
+const ID_PASSWORD: i32 = 1003;
+const ID_SAVE: i32 = 1004;
+const ID_CLOSE: i32 = 1005;
+
+struct NativeManagedObjectDialogLabels {
+    title: &'static str,
+    username: &'static str,
+    password: &'static str,
+    save: &'static str,
+    close: &'static str,
+}
+
+impl NativeManagedObjectDialogLabels {
+    fn from_language(language: &str) -> Self {
+        if language == "zh" {
+            Self {
+                title: "受保护对象编辑",
+                username: "用户名",
+                password: "密码",
+                save: "保存",
+                close: "关闭",
+            }
+        } else {
+            Self {
+                title: "Managed Object Editor",
+                username: "Username",
+                password: "Password",
+                save: "Save",
+                close: "Close",
+            }
+        }
+    }
+}
+
+struct NativeManagedObjectDialogState {
+    initial_uri: String,
+    initial_username: String,
+    initial_password: String,
+    labels: NativeManagedObjectDialogLabels,
+    owner: HWND,
+    result: Option<NativeManagedObjectDialogResult>,
+}
+
+fn dialog_background_brush() -> HBRUSH {
+    unsafe { CreateSolidBrush(0x00F5F3EE) }
+}
+
+fn native_managed_object_dialog(
+    uri: &str,
+    username: &str,
+    password: &str,
+    labels: &NativeManagedObjectDialogLabels,
+) -> Result<Option<NativeManagedObjectDialogResult>> {
+    let class_name = wide_null("StoryLockManagedObjectDialog");
+    let title = wide_null(labels.title);
+    let state = Box::new(NativeManagedObjectDialogState {
+        initial_uri: uri.to_string(),
+        initial_username: username.to_string(),
+        initial_password: password.to_string(),
+        labels: NativeManagedObjectDialogLabels {
+            title: labels.title,
+            username: labels.username,
+            password: labels.password,
+            save: labels.save,
+            close: labels.close,
+        },
+        owner: 0 as HWND,
+        result: None,
+    });
+    let state_ptr = Box::into_raw(state);
+
+    unsafe {
+        let instance = GetModuleHandleW(null());
+        let wnd_class = WNDCLASSW {
+            style: 0,
+            lpfnWndProc: Some(native_managed_object_dialog_proc),
+            hInstance: instance,
+            lpszClassName: class_name.as_ptr(),
+            hCursor: LoadCursorW(null_mut(), IDC_ARROW),
+            hbrBackground: dialog_background_brush(),
+            ..std::mem::zeroed()
+        };
+        RegisterClassW(&wnd_class);
+        let owner = GetForegroundWindow();
+        (*state_ptr).owner = owner;
+
+        let hwnd = CreateWindowExW(
+            (WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT) as WINDOW_EX_STYLE,
+            class_name.as_ptr(),
+            title.as_ptr(),
+            (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_CLIPCHILDREN) as WINDOW_STYLE,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            680,
+            250,
+            owner,
+            null_mut(),
+            instance,
+            state_ptr.cast(),
+        );
+        if hwnd.is_null() {
+            let _ = Box::from_raw(state_ptr);
+            return Err(anyhow::anyhow!("native object editor window creation failed"));
+        }
+
+        SetWindowTextW(hwnd, title.as_ptr());
+        ShowWindow(hwnd, SW_SHOW);
+        SetWindowPos(
+            hwnd,
+            HWND_TOPMOST,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW,
+        );
+        SetForegroundWindow(hwnd);
+        SetWindowPos(
+            hwnd,
+            HWND_NOTOPMOST,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW,
+        );
+        let mut msg: MSG = std::mem::zeroed();
+        while IsWindow(hwnd) != 0 {
+            let status = GetMessageW(&mut msg, null_mut(), 0, 0);
+            if status == -1 {
+                let _ = Box::from_raw(state_ptr);
+                return Err(anyhow::anyhow!("native object editor message loop failed"));
+            }
+            if status == 0 {
+                break;
+            }
+            if IsDialogMessageW(hwnd, &msg) == 0 {
+                TranslateMessage(&msg);
+                DispatchMessageW(&msg);
+            }
+            if IsWindow(hwnd) == 0 {
+                break;
+            }
+        }
+
+        let state = Box::from_raw(state_ptr);
+        Ok(state.result)
+    }
+}
+
+unsafe extern "system" fn native_managed_object_dialog_proc(
+    hwnd: HWND,
+    message: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+    match message {
+        WM_NCCREATE => {
+            let create = &*(lparam as *const CREATESTRUCTW);
+            SetWindowLongPtrW(hwnd, GWLP_USERDATA, create.lpCreateParams as isize);
+            1
+        }
+        WM_CREATE => {
+            init_native_managed_object_dialog_controls(hwnd);
+            0
+        }
+        WM_COMMAND => {
+            let control_id = (wparam & 0xffff) as i32;
+            match control_id {
+                ID_SAVE => {
+                    save_native_managed_object_dialog(hwnd);
+                    0
+                }
+                ID_CLOSE => {
+                    DestroyWindow(hwnd);
+                    0
+                }
+                _ => DefWindowProcW(hwnd, message, wparam, lparam),
+            }
+        }
+        WM_CLOSE => {
+            DestroyWindow(hwnd);
+            0
+        }
+        WM_DESTROY => 0,
+        _ => DefWindowProcW(hwnd, message, wparam, lparam),
+    }
+}
+
+unsafe fn init_native_managed_object_dialog_controls(hwnd: HWND) {
+    let state_ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA) as *mut NativeManagedObjectDialogState;
+    if state_ptr.is_null() {
+        return;
+    }
+    let state = &*state_ptr;
+
+    create_static(hwnd, "URI", 24, 26, 100, 24, 0);
+    create_edit(hwnd, ID_URI, &state.initial_uri, 130, 22, 500, 24, false);
+    create_static(hwnd, state.labels.username, 24, 66, 100, 24, 0);
+    create_edit(
+        hwnd,
+        ID_USERNAME,
+        &state.initial_username,
+        130,
+        62,
+        500,
+        24,
+        false,
+    );
+    create_static(hwnd, state.labels.password, 24, 106, 100, 24, 0);
+    create_edit(
+        hwnd,
+        ID_PASSWORD,
+        &state.initial_password,
+        130,
+        102,
+        500,
+        24,
+        false,
+    );
+    create_button(hwnd, state.labels.save, ID_SAVE, 400, 152, 100, 30, true);
+    create_button(hwnd, state.labels.close, ID_CLOSE, 520, 152, 100, 30, true);
+}
+
+unsafe fn create_static(
+    parent: HWND,
+    text: &str,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+    id: i32,
+) {
+    let class = wide_null("STATIC");
+    let text = wide_null(text);
+    CreateWindowExW(
+        0,
+        class.as_ptr(),
+        text.as_ptr(),
+        (WS_CHILD | WS_VISIBLE) as WINDOW_STYLE,
+        x,
+        y,
+        width,
+        height,
+        parent,
+        id as HMENU,
+        null_mut(),
+        null_mut(),
+    );
+}
+
+unsafe fn create_edit(
+    parent: HWND,
+    id: i32,
+    value: &str,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+    _password: bool,
+) {
+    let class = wide_null("EDIT");
+    let value = wide_null(value);
+    CreateWindowExW(
+        0,
+        class.as_ptr(),
+        value.as_ptr(),
+        (WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER) as WINDOW_STYLE,
+        x,
+        y,
+        width,
+        height,
+        parent,
+        id as HMENU,
+        null_mut(),
+        null_mut(),
+    );
+}
+
+unsafe fn create_button(
+    parent: HWND,
+    text: &str,
+    id: i32,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+    tabstop: bool,
+) {
+    let class = wide_null("BUTTON");
+    let text = wide_null(text);
+    let mut style = (WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON) as WINDOW_STYLE;
+    if tabstop {
+        style |= WS_TABSTOP as WINDOW_STYLE | BS_DEFPUSHBUTTON;
+    }
+    CreateWindowExW(
+        0,
+        class.as_ptr(),
+        text.as_ptr(),
+        style,
+        x,
+        y,
+        width,
+        height,
+        parent,
+        id as HMENU,
+        null_mut(),
+        null_mut(),
+    );
+}
+
+unsafe fn save_native_managed_object_dialog(hwnd: HWND) {
+    let state_ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA) as *mut NativeManagedObjectDialogState;
+    if state_ptr.is_null() {
+        DestroyWindow(hwnd);
+        return;
+    }
+    (*state_ptr).result = Some(NativeManagedObjectDialogResult {
+        uri: get_window_text(GetDlgItem(hwnd, ID_URI)),
+        username: get_window_text(GetDlgItem(hwnd, ID_USERNAME)),
+        password: get_window_text(GetDlgItem(hwnd, ID_PASSWORD)),
+    });
+    DestroyWindow(hwnd);
+}
+
+unsafe fn get_window_text(hwnd: HWND) -> String {
+    if hwnd.is_null() {
+        return String::new();
+    }
+    let len = GetWindowTextLengthW(hwnd);
+    if len <= 0 {
+        return String::new();
+    }
+    let mut buffer = vec![0u16; len as usize + 1];
+    let written = GetWindowTextW(hwnd, buffer.as_mut_ptr(), buffer.len() as i32);
+    String::from_utf16_lossy(&buffer[..written as usize])
+}
+
+fn wide_null(value: &str) -> Vec<u16> {
+    value.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
 pub(crate) fn open_learning_test_dialog(
@@ -152,6 +533,7 @@ pub(crate) fn wire_object_editor_callbacks(
     object_editor: Rc<RefCell<Option<ObjectEditorDialog>>>,
 ) {
     let close_slot = Rc::clone(&object_editor);
+    let close_slot_for_save = Rc::clone(&close_slot);
     let core_for_save = core_weak.clone();
     let save_dir = package_dir.clone();
     let weak = dialog.as_weak();
@@ -161,7 +543,8 @@ pub(crate) fn wire_object_editor_callbacks(
             match save_object_editor_resource_from_window(&core, &save_dir) {
                 Ok(()) => {
                     core.set_config_status(SharedString::from("Managed object saved."));
-                    copy_core_object_to_dialog(&core, &dialog);
+                    let _ = dialog.hide();
+                    *close_slot_for_save.borrow_mut() = None;
                 }
                 Err(error) => {
                     let message = SharedString::from(format!("Object save failed: {error}"));
@@ -488,17 +871,22 @@ pub(crate) fn copy_answer_editor_to_core(dialog: &AnswerEditorDialog, core: &Sto
 }
 
 pub(crate) fn copy_core_object_to_dialog(core: &StoryLockCoreApp, dialog: &ObjectEditorDialog) {
+    let uri = core.get_display_name();
+    let username = core.get_provider_id();
+    let password = core.get_secret_reference();
     dialog.set_language(core.get_language());
-    dialog.set_uri(core.get_display_name());
-    dialog.set_username(core.get_provider_id());
-    dialog.set_password(core.get_secret_reference());
-    dialog.set_show_password(false);
+    dialog.set_uri(uri);
+    dialog.set_username(username);
+    dialog.set_password(password);
 }
 
 pub(crate) fn copy_dialog_object_to_core(dialog: &ObjectEditorDialog, core: &StoryLockCoreApp) {
-    core.set_display_name(dialog.get_uri());
-    core.set_provider_id(dialog.get_username());
-    core.set_secret_reference(dialog.get_password());
+    let uri = dialog.get_uri();
+    let username = dialog.get_username();
+    let password = dialog.get_password();
+    core.set_display_name(uri);
+    core.set_provider_id(username);
+    core.set_secret_reference(password);
     core.set_object_kind(SharedString::from("password_fill"));
 }
 
@@ -551,3 +939,4 @@ pub(crate) fn copy_dialog_learning_to_core(dialog: &LearningTestDialog, core: &S
     core.set_learning_answer_9(dialog.get_learning_answer_9());
     core.set_learning_answer_9_state(dialog.get_learning_answer_9_state());
 }
+
