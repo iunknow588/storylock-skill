@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -127,5 +127,5 @@ for (const requiredToken of [
 console.log(JSON.stringify({
   status: 'passed',
   filesChecked: requiredFiles.length,
-  matrix: relative(root, matrixPath).replaceAll('\\', '/'),
+  matrixId: 'storylock-platform-acceptance-matrix-20260620',
 }, null, 2));

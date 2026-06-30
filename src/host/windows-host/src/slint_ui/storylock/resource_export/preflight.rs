@@ -70,11 +70,13 @@ pub(crate) fn preflight_storylock_core_package(package_dir: &Path) -> PreflightR
 
     validate_story_draft_templates(&vault, &mut errors);
 
-    let catalog = read_json_or_default(
+    let policy_catalog = read_json_or_default(
         &storylock_core_catalog_path(package_dir),
         default_resource_catalog_json(),
     );
-    let role_index = build_catalog_role_index(&catalog, &mut errors);
+    validate_policy_catalog(&policy_catalog, &mut errors);
+    let protected_catalog = protected_resources_from_vault(&vault);
+    let role_index = build_catalog_role_index(&protected_catalog, &mut errors);
     for (file_name, bundle) in storylock_templates_from_vault(&vault)
         .as_object()
         .cloned()
@@ -84,6 +86,44 @@ pub(crate) fn preflight_storylock_core_package(package_dir: &Path) -> PreflightR
     }
 
     PreflightResult { errors }
+}
+
+pub(crate) fn validate_policy_catalog(catalog: &Value, errors: &mut Vec<PreflightIssue>) {
+    if catalog
+        .get("accessLevels")
+        .and_then(Value::as_object)
+        .is_none()
+    {
+        errors.push(PreflightIssue {
+            code: "SL_POLICY_CATALOG_INVALID",
+            path: "$.accessLevels".to_string(),
+            message: "resource-catalog.json must define non-secret access level policies"
+                .to_string(),
+        });
+    }
+    if catalog
+        .get("operationTemplates")
+        .and_then(Value::as_array)
+        .is_none()
+    {
+        errors.push(PreflightIssue {
+            code: "SL_POLICY_CATALOG_INVALID",
+            path: "$.operationTemplates".to_string(),
+            message: "resource-catalog.json must define non-secret operation templates"
+                .to_string(),
+        });
+    }
+    if catalog
+        .get("resources")
+        .and_then(Value::as_array)
+        .is_some_and(|resources| !resources.is_empty())
+    {
+        errors.push(PreflightIssue {
+            code: "SL_POLICY_CATALOG_LEAKS_RESOURCES",
+            path: "$.resources".to_string(),
+            message: "resource-catalog.json must not contain user protected objects".to_string(),
+        });
+    }
 }
 
 pub(crate) fn validate_story_draft_templates(vault: &Value, errors: &mut Vec<PreflightIssue>) {
@@ -171,8 +211,7 @@ pub(crate) fn validate_learning_policy(policy: &Value, errors: &mut Vec<Prefligh
         "$.preLearning.promptsPerQuestion",
         errors,
     );
-    let prompts_per_question =
-        policy_number_i64(policy, &["preLearning", "promptsPerQuestion"], 2);
+    let prompts_per_question = policy_number_i64(policy, &["preLearning", "promptsPerQuestion"], 2);
     let total_prompts = 24 * prompts_per_question;
     validate_fixed_policy_number(
         policy,

@@ -17,6 +17,7 @@ from pathlib import Path
 SKIP_DIRS = {
     ".git",
     ".github",
+    ".temp",
     "__pycache__",
     ".pytest_cache",
     ".ruff_cache",

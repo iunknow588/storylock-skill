@@ -250,63 +250,37 @@ pub(crate) fn execute_request(runtime: &WindowsHostRuntime, request: Value) -> V
                 );
             }
         };
-        if !is_confirmation_approved(runtime, &request, &object_ref) {
-            record_local_audit(
-                runtime,
-                "authorization_denied",
-                &request_id,
-                &capability,
-                Some(&object_ref),
-                "denied",
-                Some("SLG-003"),
-                Some("authorization_failed"),
-                merge_audit_meta(
-                    json!({
-                        "reason": "local_confirmation_denied",
-                        "approvalMode": config.approval_mode
-                    }),
-                    audit_context.clone(),
-                ),
-            );
-            return error_response(
-                config,
-                &request_id,
-                &capability,
-                "SLG-003",
-                "authorization_failed",
-                "local confirmation denied from Windows host dialog",
-                "Review the request details in the Windows confirmation dialog and choose Yes to approve.",
-            );
-        }
-
-        let authorization_record = StoredAuthorizationRecord {
-            verification_id: format!("ver-{}", Uuid::new_v4()),
-            authorization_id: format!("ses-{}", Uuid::new_v4()),
-            capability: capability.clone(),
-            object_ref: object_ref.clone(),
-            identity_id: config.identity_id.clone(),
-            allowed_action: policy.allowed_action.to_string(),
-            required_strength: policy.required_strength.to_string(),
-            confirmation_method: "windows_dialog".to_string(),
-            created_at: now_timestamp(),
-            expires_at: expires_at_after(300),
-            status: "approved".to_string(),
-        };
-        if let Err(error) = runtime
-            .secret_store
-            .write_authorization_record(&authorization_record)
-        {
-            return error_response(
-                config,
-                &request_id,
-                &capability,
-                "SLG-005",
-                "host_storage_error",
-                &format!("windows host failed to persist authorization record: {error}"),
-                "Check the Windows host data directory and DPAPI availability, then retry the request.",
-            );
-        }
-        authorization_record
+        record_local_audit(
+            runtime,
+            "execution_rejected",
+            &request_id,
+            &capability,
+            Some(&object_ref),
+            "denied",
+            Some("SLG-003"),
+            Some("authorization_required"),
+            merge_audit_meta(
+                json!({
+                    "reason": "grid_authorization_required",
+                    "authorizationChannel": policy.channel,
+                    "requiredCells": policy.required_cells,
+                    "requiredStrength": policy.required_strength
+                }),
+                audit_context.clone(),
+            ),
+        );
+        return error_response(
+            config,
+            &request_id,
+            &capability,
+            "SLG-003",
+            "authorization_required",
+            &format!(
+                "grid authorization is required before execute: {} cells for {}",
+                policy.required_cells, policy.channel
+            ),
+            "Call /verify, answer the returned grid through /authorize, then retry /execute with authorizationId.",
+        );
     };
 
     let verification_id = resolved_authorization.verification_id.clone();

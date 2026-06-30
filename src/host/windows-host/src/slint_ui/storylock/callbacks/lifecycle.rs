@@ -5,6 +5,7 @@ pub(crate) fn register_lifecycle_callbacks(
     package_dir: &Path,
     core_window_slot: Rc<RefCell<Option<StoryLockCoreApp>>>,
     on_closed: Rc<dyn Fn()>,
+    on_unlock_package: Rc<dyn Fn()>,
     settings_dialog: Rc<RefCell<Option<StoryLockCoreSettingsDialog>>>,
 ) {
     let weak = core.as_weak();
@@ -49,19 +50,23 @@ pub(crate) fn register_lifecycle_callbacks(
         }
     });
 
+    let unlock_package = Rc::clone(&on_unlock_package);
+    core.on_unlock_current_package(move || {
+        unlock_package();
+    });
+
     let weak = core.as_weak();
     let browse_fallback_dir = package_dir.to_path_buf();
     core.on_browse_core_data_dir(move || {
         if let Some(core) = weak.upgrade() {
             let current_dir = storylock_core_package_dir_from_window(&core, &browse_fallback_dir);
-            let mut dialog = rfd::FileDialog::new();
-            if current_dir.exists() {
-                dialog = dialog.set_directory(&current_dir);
-            }
-            if let Some(selected_dir) = dialog.pick_folder() {
-                match ensure_storylock_core_package(&selected_dir) {
+            if let Some(selected_path) =
+                pick_storylock_core_package_path(current_dir.as_path())
+            {
+                let package_dir = resolve_storylock_core_package_path(&selected_path);
+                match ensure_storylock_core_package(&package_dir) {
                     Ok(()) => {
-                        initialize_storylock_core_window(&core, &selected_dir);
+                        initialize_storylock_core_empty_window(&core, &package_dir);
                         if let Err(error) =
                             save_storylock_ui_settings(&settings_from_storylock_core(&core))
                         {
@@ -70,7 +75,7 @@ pub(crate) fn register_lifecycle_callbacks(
                             )));
                         }
                         core.set_config_status(SharedString::from(
-                            "StoryLock Core workspace loaded from selected directory.",
+                            "StoryLock Core target package selected. Unlock the current package to load package content.",
                         ));
                     }
                     Err(error) => {
@@ -100,7 +105,12 @@ pub(crate) fn register_lifecycle_callbacks(
                     dialog.set_directory(default_storylock_export_dir(&export_browse_fallback_dir));
             }
             if let Some(selected_dir) = dialog.pick_folder() {
-                core.set_export_package_dir(SharedString::from(selected_dir.display().to_string()));
+                let normalized = normalize_storylock_export_dir_path(
+                    &core,
+                    &export_browse_fallback_dir,
+                    &selected_dir.display().to_string(),
+                );
+                core.set_export_package_dir(SharedString::from(normalized.display().to_string()));
                 if let Err(error) = save_storylock_ui_settings(&settings_from_storylock_core(&core))
                 {
                     core.set_config_status(SharedString::from(format!(
@@ -109,7 +119,7 @@ pub(crate) fn register_lifecycle_callbacks(
                     return;
                 }
                 core.set_config_status(SharedString::from(
-                    "Export directory selected for the next package export.",
+                    "Current package save location selected.",
                 ));
             }
         }

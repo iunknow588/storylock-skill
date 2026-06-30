@@ -10,6 +10,11 @@ pub(crate) fn main() -> Result<()> {
     if args.iter().any(|arg| arg == "--slint-ui") {
         return run_slint_ui_entry(config);
     }
+    if args.iter().any(|arg| arg == "--server-only")
+        || matches!(start_mode.as_str(), "server" | "server-only" | "console" | "debug")
+    {
+        return run_console_entry(config);
+    }
     if args.iter().any(|arg| arg == "--print-config") {
         println!("{}", serde_json::to_string_pretty(&config)?);
         return Ok(());
@@ -49,16 +54,9 @@ pub(crate) fn main() -> Result<()> {
         );
         return Ok(());
     }
-    if matches!(start_mode.as_str(), "console" | "debug") {
-        eprintln!(
-            "STORYLOCK_WINDOWS_START_MODE={start_mode} is ignored by the default Windows Slint UI build."
-        );
-    }
-
     run_default_entry(config)
 }
 
-#[cfg(not(feature = "ui-slint"))]
 pub(crate) fn run_console_entry(config: WindowsHostConfig) -> Result<()> {
     let runtime = WindowsHostRuntime::new(config)?;
     println!("{}", serde_json::to_string_pretty(&runtime.config)?);

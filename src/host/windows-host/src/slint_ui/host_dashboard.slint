@@ -1,28 +1,29 @@
-import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
-import { MenuButton, SubMenuButton, InfoRow, FormRow, EditableRow, PathBrowseRow, LargeEditableText, QuestionTableRow, QuestionIdTableRow, QuestionOverviewGrid, QuestionConfigPanel, ActionButton, SettingsIconButton, StaticRow, LogPanel } from "common.slint";
+﻿import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { MenuButton, SideActionButton, SubMenuButton, InfoRow, FormRow, EditableRow, PathBrowseRow, LargeEditableText, QuestionTableRow, QuestionIdTableRow, QuestionOverviewGrid, QuestionConfigPanel, ActionButton, SettingsIconButton, StaticRow, LogPanel, LearningAnswerGrid } from "common.slint";
 export component HostDashboard inherits Window {
-        in-out property <int> active-page: 1;
+        in-out property <int> active-page: 0;
         in-out property <string> language: "zh";
         property <bool> is-zh: language == "zh";
         in-out property <bool> settings-open: false;
-        in-out property <string> nine-grid-status: "九宫格测试尚未开始";
-        in-out property <string> nine-grid-summary: "对象: 未选择";
+        in-out property <string> nine-grid-status: "\u{4e5d}\u{5bab}\u{683c}\u{6d4b}\u{8bd5}\u{5c1a}\u{672a}\u{5f00}\u{59cb}";
+        in-out property <string> nine-grid-summary: "\u{5bf9}\u{8c61}: \u{672a}\u{9009}\u{62e9}";
+        in-out property <string> storylock-data-dir: "";
         in property <string> product;
         in property <string> version;
         in property <string> mode;
         in property <string> identity-id;
         in property <string> device-id;
-        in property <string> local-api;
-        in property <string> capabilities;
-        in property <string> call-chain;
         in property <string> management-stats;
         in property <string> diagnostics;
+        in property <string> status-summary;
+        in property <string> package-self-check;
         in-out property <string> connection-test-status: "No connection test has run yet.";
         property <string> core-launch-status: "StoryLock: closed | launch: none | language: zh";
-        property <string> current-title: active-page == 0 ? (is-zh ? "状态" : "Status") : active-page == 1 ? (is-zh ? "本地主机" : "Local Host") : active-page == 2 ? (is-zh ? "管理" : "Management") : (is-zh ? "诊断" : "Diagnostics");
+        property <string> current-title: active-page == 0 ? (is-zh ? "\u{8fdc}\u{7aef} Web \u{63a5}\u{53e3}\u{914d}\u{7f6e}" : "Remote Web Interface") : active-page == 1 ? (is-zh ? "\u{5e95}\u{5c42} StoryLock \u{914d}\u{7f6e}" : "StoryLock Core") : (is-zh ? "\u{5176}\u{4ed6}\u{89c2}\u{5bdf}\u{914d}\u{7f6e}" : "Observation");
         callback close-requested();
         callback open-storylock-core();
         callback open-settings();
+        callback browse-storylock-data-dir();
         callback test-local-host() -> string;
         callback test-remote-connection() -> string;
         callback test-managed-object-nine-grid(string) -> string;
@@ -49,28 +50,27 @@ export component HostDashboard inherits Window {
                     spacing: 14px;
 
                     MenuButton {
-                        label: root.is-zh ? "状态" : "Status";
+                        label: root.is-zh ? "\u{8fdc}\u{7aef} Web" : "Remote Web";
                         selected: root.active-page == 0;
                         clicked => { root.active-page = 0; }
                     }
                     MenuButton {
-                        label: root.is-zh ? "本地主机" : "Local Host";
+                        label: root.is-zh ? "\u{5e95}\u{5c42} StoryLock" : "StoryLock";
                         selected: root.active-page == 1;
                         clicked => { root.active-page = 1; }
                     }
                     MenuButton {
-                        label: root.is-zh ? "管理" : "Management";
+                        label: root.is-zh ? "\u{5176}\u{4ed6}\u{89c2}\u{5bdf}" : "Observation";
                         selected: root.active-page == 2;
                         clicked => { root.active-page = 2; }
                     }
-                    MenuButton {
-                        label: root.is-zh ? "诊断" : "Diagnostics";
-                        selected: root.active-page == 3;
-                        clicked => { root.active-page = 3; }
+                    Rectangle {
+                        width: 144px;
+                        height: 1px;
+                        background: #c9d5da;
                     }
-                    MenuButton {
-                        label: root.is-zh ? "打开 StoryLock 配置" : "Open StoryLock";
-                        selected: false;
+                    SideActionButton {
+                        label: root.is-zh ? "\u{6253}\u{5f00} StoryLock" : "Open StoryLock";
                         clicked => { root.open-storylock-core(); }
                     }
                 }
@@ -132,22 +132,24 @@ export component HostDashboard inherits Window {
                                 width: 600px;
                                 height: 360px;
                                 spacing: 12px;
-                                FormRow { name: root.is-zh ? "身份" : "Identity"; value: root.identity-id; }
-                                FormRow { name: root.is-zh ? "设备" : "Device"; value: root.device-id; }
-                                FormRow { name: root.is-zh ? "本地 API" : "Local API"; value: root.local-api; }
-                                StaticRow { name: root.is-zh ? "模式" : "Mode"; value: root.mode; }
-                                StaticRow { name: root.is-zh ? "连接测试" : "Connection Test"; value: root.connection-test-status; }
+                                FormRow { name: root.is-zh ? "\u{8eab}\u{4efd}" : "Identity"; value: root.identity-id; }
+                                FormRow { name: root.is-zh ? "\u{8bbe}\u{5907}" : "Device"; value: root.device-id; }
+                                StaticRow { name: root.is-zh ? "\u{6a21}\u{5f0f}" : "Mode"; value: root.mode; }
+                                StaticRow { name: root.is-zh ? "\u{8fdc}\u{7a0b}\u{8bbf}\u{95ee}" : "Remote Access"; value: root.is-zh ? "\u{9ed8}\u{8ba4}\u{5173}\u{95ed}" : "Disabled by default"; }
+                                StaticRow { name: root.is-zh ? "\u{8fde}\u{63a5}\u{6d4b}\u{8bd5}" : "Connection Test"; value: root.connection-test-status; }
+                                StaticRow { name: root.is-zh ? "\u{72b6}\u{6001}" : "Status"; value: root.status-summary; }
+                                LogPanel { value: root.package-self-check; panel-height: 96px; }
                                 HorizontalBox {
                                     spacing: 12px;
                                     ActionButton {
-                                        label: root.is-zh ? "测试本地主机" : "Test Local Host";
+                                        label: root.is-zh ? "\u{6d4b}\u{8bd5}\u{672c}\u{5730} Host" : "Test Local Host";
                                         primary: true;
                                         clicked => {
                                             root.connection-test-status = root.test-local-host();
                                         }
                                     }
                                     ActionButton {
-                                        label: root.is-zh ? "测试远程连接" : "Test Remote";
+                                        label: root.is-zh ? "\u{6d4b}\u{8bd5}\u{8fdc}\u{7a0b} Web" : "Test Remote";
                                         primary: false;
                                         clicked => {
                                             root.connection-test-status = root.test-remote-connection();
@@ -161,29 +163,23 @@ export component HostDashboard inherits Window {
                                 y: 0px;
                                 width: 600px;
                                 height: 360px;
-                                spacing: 12px;
-                                FormRow { name: root.is-zh ? "能力" : "Capabilities"; value: root.capabilities; }
-                                FormRow { name: root.is-zh ? "调用链" : "Call Chain"; value: root.call-chain; }
-                                StaticRow { name: root.is-zh ? "边界" : "Boundary"; value: root.is-zh ? "仅 Relay、本地 API 与授权代理" : "Relay, localhost API, and approval broker only"; }
-                                StaticRow { name: root.is-zh ? "远程访问" : "Remote Access"; value: root.is-zh ? "默认关闭" : "Disabled by default"; }
-                                StaticRow { name: root.is-zh ? "StoryLock 数据" : "StoryLock Data"; value: root.is-zh ? "Yian Host 不可读取" : "Not readable from Yian Host"; }
-                            }
-
-                            if root.active-page == 2: VerticalBox {
-                                x: 0px;
-                                y: 0px;
-                                width: 600px;
-                                height: 360px;
-                                spacing: 12px;
-                                StaticRow { name: root.is-zh ? "单项读取" : "Single Read"; value: root.is-zh ? "解锁 9 格中的 6 格，中等强度，允许远程" : "6 of 9 cells, medium strength, remote allowed"; }
-                                StaticRow { name: root.is-zh ? "批量读取" : "Batch Read"; value: root.is-zh ? "解锁 12 格中的 12 格，高强度，允许远程" : "12 of 12 cells, high strength, remote allowed"; }
-                                StaticRow { name: root.is-zh ? "故事编辑" : "Story Edit"; value: root.is-zh ? "解锁 24 格中的 22 格，仅本地 StoryLock UI" : "22 of 24 cells, local StoryLock UI only"; }
-                                StaticRow { name: root.is-zh ? "九宫格测试" : "Nine-Grid Test"; value: root.nine-grid-status; }
-                                StaticRow { name: root.is-zh ? "测试对象" : "Test Object"; value: root.nine-grid-summary; }
+                                spacing: 10px;
+                                PathBrowseRow {
+                                    name: root.is-zh ? "StoryLock \u{52a0}\u{5bc6}\u{5305}" : "StoryLock Package";
+                                    value <=> root.storylock-data-dir;
+                                    is-zh: root.is-zh;
+                                    browse => { root.browse-storylock-data-dir(); }
+                                }
+                                StaticRow { name: root.is-zh ? "StoryLock \u{72b6}\u{6001}" : "StoryLock Status"; value: root.core-launch-status; }
+                                StaticRow { name: root.is-zh ? "\u{6570}\u{636e}\u{8fb9}\u{754c}" : "Data Boundary"; value: root.is-zh ? "Host \u{53ea}\u{89e6}\u{53d1}\u{6d4b}\u{8bd5}\u{4e0e}\u{6388}\u{6743}" : "Host triggers tests and authorization only"; }
+                                StaticRow { name: root.is-zh ? "\u{5355}\u{9879}\u{8bfb}\u{53d6}" : "Single Read"; value: root.is-zh ? "\u{89e3}\u{9501} 9 \u{683c}\u{4e2d}\u{7684} 6 \u{683c}\u{ff0c}\u{4e2d}\u{7b49}\u{5f3a}\u{5ea6}" : "6 of 9 cells, medium strength"; }
+                                StaticRow { name: root.is-zh ? "\u{6279}\u{91cf}\u{8bfb}\u{53d6}" : "Batch Read"; value: root.is-zh ? "\u{89e3}\u{9501} 12 \u{683c}\u{4e2d}\u{7684} 12 \u{683c}\u{ff0c}\u{9ad8}\u{5f3a}\u{5ea6}" : "12 of 12 cells, high strength"; }
+                                StaticRow { name: root.is-zh ? "\u{6545}\u{4e8b}\u{7f16}\u{8f91}" : "Story Edit"; value: root.is-zh ? "\u{6253}\u{5f00} StoryLock \u{5148}\u{8fdb}\u{5165}\u{7a7a}\u{6a21}\u{5f0f}\u{ff0c}\u{89e3}\u{9501}\u{540e}\u{52a0}\u{8f7d}\u{5f53}\u{524d}\u{5305}\u{5185}\u{5bb9}" : "Opening StoryLock starts in empty mode. Unlock the current package to load package content."; }
+                                StaticRow { name: root.is-zh ? "\u{4e5d}\u{5bab}\u{683c}\u{6d4b}\u{8bd5}" : "Nine-Grid Test"; value: root.nine-grid-status; }
                                 HorizontalBox {
                                     spacing: 8px;
                                     ActionButton {
-                                        label: root.is-zh ? "6格普通对象" : "6-cell Normal";
+                                        label: root.is-zh ? "6 \u{683c}\u{5bf9}\u{8c61}" : "6-cell Object";
                                         primary: true;
                                         button-width: 128px;
                                         clicked => {
@@ -192,34 +188,37 @@ export component HostDashboard inherits Window {
                                         }
                                     }
                                     ActionButton {
-                                        label: root.is-zh ? "12格保密对象" : "12-cell Confidential";
+                                        label: root.is-zh ? "12 \u{683c}\u{5bf9}\u{8c61}" : "12-cell Object";
                                         primary: false;
-                                        button-width: 136px;
+                                        button-width: 128px;
                                         clicked => {
                                             root.nine-grid-status = root.test-managed-object-nine-grid("confidential");
                                             root.nine-grid-summary = root.nine-grid-status;
                                         }
                                     }
                                     ActionButton {
-                                        label: root.is-zh ? "22格高机密对象" : "22-cell Top Secret";
+                                        label: root.is-zh ? "22 \u{683c}\u{5bf9}\u{8c61}" : "22-cell Object";
                                         primary: false;
-                                        button-width: 136px;
+                                        button-width: 128px;
                                         clicked => {
                                             root.nine-grid-status = root.test-managed-object-nine-grid("top-secret");
                                             root.nine-grid-summary = root.nine-grid-status;
                                         }
                                     }
                                 }
-                                LogPanel { value: root.management-stats; panel-height: 150px; }
+                                StaticRow { name: root.is-zh ? "\u{6d4b}\u{8bd5}\u{5bf9}\u{8c61}" : "Test Object"; value: root.nine-grid-summary; }
                             }
 
-                            if root.active-page == 3: VerticalBox {
+                            if root.active-page == 2: VerticalBox {
                                 x: 0px;
                                 y: 0px;
                                 width: 600px;
                                 height: 360px;
                                 spacing: 12px;
-                                LogPanel { value: root.diagnostics; }
+                                StaticRow { name: root.is-zh ? "\u{7ba1}\u{7406}\u{7edf}\u{8ba1}" : "Stats"; value: root.is-zh ? "\u{53ea}\u{8bfb}\u{89c2}\u{5bdf}" : "Read-only observation"; }
+                                LogPanel { value: root.management-stats; panel-height: 136px; }
+                                StaticRow { name: root.is-zh ? "\u{8bca}\u{65ad}" : "Diagnostics"; value: root.is-zh ? "\u{8fb9}\u{754c}\u{4e0e}\u{9519}\u{8bef}\u{4fe1}\u{606f}" : "Boundary and error details"; }
+                                LogPanel { value: root.diagnostics; panel-height: 136px; }
                             }
                         }
                     }
@@ -228,16 +227,19 @@ export component HostDashboard inherits Window {
         }
     }
 
+
 export component SettingsDialog inherits Window {
         in-out property <string> language: "zh";
         in-out property <string> core-launch-status: "StoryLock: closed | launch: none | language: zh";
+        in-out property <string> encrypted-data-dir: "";
         property <bool> is-zh: language == "zh";
         callback close-requested();
         callback language-changed(string);
+        callback browse-encrypted-data-dir();
 
         title: is-zh ? "\u{8bbe}\u{7f6e}" : "Settings";
-        preferred-width: 640px;
-        preferred-height: 360px;
+        preferred-width: 760px;
+        preferred-height: 420px;
         background: #eef3f5;
 
         VerticalBox {
@@ -278,8 +280,156 @@ export component SettingsDialog inherits Window {
                     }
                 }
             }
+            PathBrowseRow {
+                name: is-zh ? "StoryLock \u{52a0}\u{5bc6}\u{5305}\u{76ee}\u{5f55}\u{6216}\u{6587}\u{4ef6}" : "StoryLock Package Dir/File";
+                value <=> root.encrypted-data-dir;
+                is-zh: root.is-zh;
+                browse => { root.browse-encrypted-data-dir(); }
+            }
             StaticRow { name: is-zh ? "StoryLock \u{72b6}\u{6001}" : "StoryLock Status"; value: root.core-launch-status; }
-            StaticRow { name: is-zh ? "\u{89e6}\u{53d1}\u{65b9}\u{5f0f}" : "Trigger"; value: is-zh ? "\u{8bf7}\u{4ece}\u{4e3b}\u{754c}\u{9762}\u{7684} StoryLock \u{6309}\u{94ae}\u{6253}\u{5f00}\u{3002}" : "Open StoryLock from the main Host page."; }
-            StaticRow { name: is-zh ? "\u{8bf4}\u{660e}" : "Note"; value: is-zh ? "\u{8bed}\u{8a00}\u{5207}\u{6362}\u{4f1a}\u{7acb}\u{5373}\u{4f5c}\u{7528}\u{4e8e}\u{4e3b}\u{754c}\u{9762}\u{4e0e} StoryLock Core\u{3002}" : "Language changes apply to the Host UI and StoryLock Core immediately."; }
+            StaticRow { name: is-zh ? "\u{89e6}\u{53d1}\u{65b9}\u{5f0f}" : "Trigger"; value: is-zh ? "\u{8bf7}\u{4ece}\u{4e3b}\u{754c}\u{9762}\u{6253}\u{5f00} StoryLock\u{ff0c}\u{5148}\u{8fdb}\u{5165}\u{7a7a}\u{6a21}\u{5f0f}\u{3002}" : "Open StoryLock from the main Host page. It starts in empty mode first."; }
+            StaticRow { name: is-zh ? "\u{8bf4}\u{660e}" : "Note"; value: is-zh ? "\u{9009}\u{4e2d}\u{5305}\u{76ee}\u{5f55}\u{6216} vault.stlk \u{540e}\u{ff0c}\u{9700}\u{89e3}\u{9501}\u{5f53}\u{524d}\u{5305}\u{624d}\u{52a0}\u{8f7d}\u{5305}\u{5185}\u{6545}\u{4e8b}\u{3001}\u{7b54}\u{6848}\u{548c}\u{53d7}\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}\u{3002}" : "After selecting a package directory or vault.stlk, unlock the current package before loading stories, answers, or protected objects."; }
         }
     }
+
+export component StoryLockAuthorizationDialog inherits Window {
+        in property <bool> is-zh: true;
+        in property <int> challenge-count: 22;
+        in-out property <int> current-index: 0;
+        in property <bool> can-previous: current-index > 0;
+        in property <bool> can-next: current-index + 1 < challenge-count;
+        in property <string> current-position: "1/22";
+        in property <string> current-prompt: "";
+        in property <string> selected-answer: "";
+        in property <string> option-1: "";
+        in property <string> option-2: "";
+        in property <string> option-3: "";
+        in property <string> option-4: "";
+        in property <string> option-5: "";
+        in property <string> option-6: "";
+        in property <string> option-7: "";
+        in property <string> option-8: "";
+        in property <string> option-9: "";
+        in-out property <string> option-1-state: "wrong";
+        in-out property <string> option-2-state: "wrong";
+        in-out property <string> option-3-state: "wrong";
+        in-out property <string> option-4-state: "wrong";
+        in-out property <string> option-5-state: "wrong";
+        in-out property <string> option-6-state: "wrong";
+        in-out property <string> option-7-state: "wrong";
+        in-out property <string> option-8-state: "wrong";
+        in-out property <string> option-9-state: "wrong";
+        callback select-answer(int);
+        callback previous-requested();
+        callback next-requested();
+        callback authorize-requested();
+        callback cancel-requested();
+
+        title: root.is-zh ? "StoryLock \u{4e5d}\u{5bab}\u{683c}\u{6311}\u{6218}" : "StoryLock Grid Challenge";
+        preferred-width: 960px;
+        preferred-height: 540px;
+        min-width: 960px;
+        max-width: 960px;
+        min-height: 540px;
+        max-height: 540px;
+        background: #eef3f5;
+
+        VerticalBox {
+            padding: 20px;
+            spacing: 10px;
+            Text {
+                text: root.is-zh ? "\u{8bf7}\u{4ece}\u{4e5d}\u{5bab}\u{683c}\u{4e2d}\u{9009}\u{62e9}\u{6bcf}\u{9898}\u{7684}\u{7b54}\u{6848}\u{3002}" : "Select the answer for each grid challenge.";
+                height: 28px;
+                font-size: 16px;
+                font-weight: 800;
+                color: #17252f;
+                overflow: elide;
+            }
+            Rectangle {
+                width: 920px;
+                height: 66px;
+                border-radius: 6px;
+                border-width: 1px;
+                border-color: #c9d5da;
+                background: #f7fafb;
+                Text {
+                    x: 14px;
+                    y: 8px;
+                    width: 892px;
+                    height: 14px;
+                    text: root.current-position;
+                    color: #62727d;
+                    font-size: 11px;
+                    font-weight: 700;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+                Text {
+                    x: 14px;
+                    y: 26px;
+                    width: 892px;
+                    height: 32px;
+                    text: root.current-prompt;
+                    color: #17252f;
+                    font-size: 14px;
+                    font-weight: 600;
+                    vertical-alignment: top;
+                    wrap: word-wrap;
+                    overflow: elide;
+                }
+            }
+            HorizontalBox {
+                width: 920px;
+                height: 326px;
+                spacing: 16px;
+
+                LearningAnswerGrid {
+                    answer-1: root.option-1;
+                    answer-1-state <=> root.option-1-state;
+                    answer-2: root.option-2;
+                    answer-2-state <=> root.option-2-state;
+                    answer-3: root.option-3;
+                    answer-3-state <=> root.option-3-state;
+                    answer-4: root.option-4;
+                    answer-4-state <=> root.option-4-state;
+                    answer-5: root.option-5;
+                    answer-5-state <=> root.option-5-state;
+                    answer-6: root.option-6;
+                    answer-6-state <=> root.option-6-state;
+                    answer-7: root.option-7;
+                    answer-7-state <=> root.option-7-state;
+                    answer-8: root.option-8;
+                    answer-8-state <=> root.option-8-state;
+                    answer-9: root.option-9;
+                    answer-9-state <=> root.option-9-state;
+                    toggle-answer(index) => { root.select-answer(index); }
+                }
+                Rectangle {
+                    width: 180px;
+                    height: 210px;
+                    border-width: 1px;
+                    border-color: #d7e1e6;
+                    border-radius: 6px;
+                    background: #f7fafb;
+                    Text {
+                        x: 0px;
+                        y: 8px;
+                        width: parent.width;
+                        height: 18px;
+                        text: root.current-position;
+                        color: #17252f;
+                        font-size: 16px;
+                        font-weight: 700;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+                    ActionButton { x: 12px; y: 38px; label: root.is-zh ? "\u{4e0a}\u{4e00}\u{9898}" : "Previous"; primary: false; enabled: root.can-previous; button-width: 156px; clicked => { root.previous-requested(); } }
+                    ActionButton { x: 12px; y: 76px; label: root.is-zh ? "\u{4e0b}\u{4e00}\u{9898}" : "Next"; primary: false; enabled: root.can-next; button-width: 156px; clicked => { root.next-requested(); } }
+                    Rectangle { x: 20px; y: 118px; width: 140px; height: 1px; background: #d7e1e6; }
+                    ActionButton { x: 12px; y: 130px; label: root.is-zh ? "\u{6388}\u{6743}" : "Authorize"; primary: true; button-width: 156px; clicked => { root.authorize-requested(); } }
+                    ActionButton { x: 12px; y: 168px; label: root.is-zh ? "\u{53d6}\u{6d88}" : "Cancel"; primary: false; button-width: 156px; clicked => { root.cancel-requested(); } }
+                }
+            }
+        }
+}

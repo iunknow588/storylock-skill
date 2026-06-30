@@ -63,6 +63,20 @@ fn authorize_all_cells(runtime: &WindowsHostRuntime, verification_id: &str) -> S
         .to_string()
 }
 
+fn grid_authorize_request(runtime: &WindowsHostRuntime, request: Value) -> String {
+    let verification = create_grid_verification(runtime, &request);
+    assert_eq!(
+        verification.get("status").and_then(Value::as_str),
+        Some("success")
+    );
+    let verification_id = verification
+        .get("result")
+        .and_then(|value| value.get("verificationId"))
+        .and_then(Value::as_str)
+        .expect("verification id");
+    authorize_all_cells(runtime, verification_id)
+}
+
 fn local_audit_events(runtime: &WindowsHostRuntime) -> Vec<Value> {
     let path = runtime.secret_store.audit_log_path();
     let content = fs::read_to_string(path).expect("audit jsonl");

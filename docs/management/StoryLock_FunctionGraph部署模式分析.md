@@ -1,4 +1,4 @@
-﻿# FunctionGraph 部署模式分析：单用户 vs 多用户共享
+# FunctionGraph 部署模式分析：单用户 vs 多用户共享
 
 ## 一、核心结论
 

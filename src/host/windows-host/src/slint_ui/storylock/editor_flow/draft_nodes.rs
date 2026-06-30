@@ -2,15 +2,20 @@ use super::*;
 
 pub(crate) fn reset_learning_gate(
     core: &StoryLockCoreApp,
+    package_dir: &Path,
     learning_passed: &Rc<RefCell<LearningProgress>>,
     message: &str,
 ) {
-    core.set_export_ready(false);
+    let changed = clear_learning_completed_state_if_answer_config_changed(package_dir)
+        .unwrap_or(false);
+    core.set_export_ready(has_current_learning_completed_state(package_dir));
     *learning_passed.borrow_mut() = LearningProgress::new();
-    core.set_learning_status(SharedString::from(message));
-    core.set_learning_result(SharedString::from(
-        "Learning progress reset because local configuration changed.",
-    ));
+    if changed {
+        core.set_learning_status(SharedString::from(message));
+        core.set_learning_result(SharedString::from(
+            "Training progress reset because the answer configuration changed.",
+        ));
+    }
 }
 
 pub(crate) fn save_story_from_window(core: &StoryLockCoreApp, package_dir: &Path) -> Result<()> {
@@ -69,9 +74,17 @@ pub(crate) fn write_current_node_to_draft(core: &StoryLockCoreApp, draft: &mut V
         node["elementId"] = json!(core.get_element_id().to_string());
         node["question"] = json!(core.get_question_text().to_string());
         node["recommendedSelectionMode"] = json!(core.get_selection_mode().to_string());
-        node["recommendedCorrectCount"] =
-            json!(core.get_correct_count().parse::<u32>().unwrap_or(3));
         let answer_options = answer_options_from_window(core);
+        let correct_count = answer_options
+            .iter()
+            .filter(|option| {
+                option
+                    .get("isCorrect")
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false)
+            })
+            .count() as u32;
+        node["recommendedCorrectCount"] = json!(correct_count);
         node["candidatePoolSize"] = json!(answer_options.len() as u32);
         node["recallPriority"] = json!(core.get_recall_priority().to_string());
         node["verifyPolicy"] = json!(core.get_verify_policy().to_string());
@@ -109,7 +122,23 @@ pub(crate) fn load_node_into_window(
         node.get("recommendedCorrectCount")
             .and_then(Value::as_u64)
             .map(|value| value.to_string())
-            .unwrap_or_else(|| "3".to_string()),
+            .unwrap_or_else(|| {
+                node.get("answerOptionsLocalOnly")
+                    .and_then(Value::as_array)
+                    .map(|options| {
+                        options
+                            .iter()
+                            .filter(|option| {
+                                option
+                                    .get("isCorrect")
+                                    .and_then(Value::as_bool)
+                                    .unwrap_or(false)
+                            })
+                            .count()
+                            .to_string()
+                    })
+                    .unwrap_or_else(|| "3".to_string())
+            }),
     ));
     core.set_candidate_pool_size(SharedString::from(
         node.get("candidatePoolSize")

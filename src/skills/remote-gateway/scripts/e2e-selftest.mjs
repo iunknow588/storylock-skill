@@ -34,10 +34,14 @@ function sampleQuestions(count = 9) {
   }));
 }
 
-function answersFor(count) {
-  return Array.from({ length: count }, (_, index) => ({
-    cellId: `cell-${index + 1}`,
-    answer: `answer-${index + 1}`,
+function answerForQuestionId(questionId) {
+  return `answer-${String(questionId).replace(/^q-/, '')}`;
+}
+
+function answersForGrid(grid) {
+  return grid.cells.map((cell) => ({
+    cellId: cell.cellId,
+    answer: answerForQuestionId(cell.questionId),
   }));
 }
 
@@ -48,7 +52,7 @@ const grid = new GridChallengeSkill({ host: policy.host });
 const auth = new LocalAuthorizationSkill({ host: policy.host });
 
 try {
-  policy.host.enrollQuestionSet('id-e2e', sampleQuestions(9));
+  policy.host.enrollQuestionSet('id-e2e', sampleQuestions(12));
 
   const gateway = new StoryLockRemoteGateway({
     transport(request) {
@@ -77,14 +81,14 @@ try {
         expiry: request.expiry,
       });
       assert.equal(verification.status, 'success');
-      assert.equal(verification.result.grid.requiredCells, 9);
+      assert.equal(verification.result.grid.requiredCells, 12);
 
       const authorization = await auth.run({
         identityId: request.payload.identityId,
         objectRef: request.payload.keyId,
         verificationId: verification.result.verificationId,
         allowedAction: 'signature',
-        answers: answersFor(9),
+        answers: answersForGrid(verification.result.grid),
         requestId: `${request.requestId}:auth`,
       });
       assert.equal(authorization.status, 'success');

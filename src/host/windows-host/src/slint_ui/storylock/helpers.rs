@@ -1,5 +1,9 @@
 use super::*;
 
+pub(super) fn binary_state_text(is_correct: bool) -> SharedString {
+    SharedString::from(if is_correct { "correct" } else { "wrong" })
+}
+
 pub(super) fn default_author_draft_json() -> Value {
     shouzhudaitu_author_draft_json()
 }
@@ -147,6 +151,24 @@ pub(super) fn emperor_new_clothes_author_draft_json() -> Value {
 pub(super) fn default_resource_catalog_json() -> Value {
     json!({
         "version": "1",
+        "catalogType": "policy-and-template-catalog",
+        "accessLevels": {
+            "normal": { "requiredCells": 3, "gridSize": 9, "requiredStrength": "normal" },
+            "private": { "requiredCells": 9, "gridSize": 12, "requiredStrength": "private" },
+            "secret": { "requiredCells": 22, "gridSize": 24, "requiredStrength": "secret" }
+        },
+        "operationTemplates": [
+            { "operation": "password_fill", "defaultAccessLevel": "private", "allowedAction": "password_fill" },
+            { "operation": "sign", "defaultAccessLevel": "secret", "allowedAction": "signature" },
+            { "operation": "policy_modify", "defaultAccessLevel": "secret", "allowedAction": "policy_modify", "requiredCells": 22 }
+        ],
+        "resources": []
+    })
+}
+
+pub(super) fn default_protected_resources_catalog_json() -> Value {
+    json!({
+        "version": "1",
         "resources": [
             {
                 "resourceId": "github-main",
@@ -276,46 +298,45 @@ pub(super) fn answer_options_from_window(core: &StoryLockCoreApp) -> Vec<Value> 
     .collect()
 }
 
+pub(super) fn option_text_and_state(
+    options: &[Value],
+    index: usize,
+) -> (SharedString, SharedString) {
+    let option = options.get(index).unwrap_or(&Value::Null);
+    let text = option.get("text").and_then(Value::as_str).unwrap_or("");
+    let state = option
+        .get("isCorrect")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    (SharedString::from(text), binary_state_text(state))
+}
+
 pub(super) fn set_answer_options_into_window(core: &StoryLockCoreApp, options: &[Value]) {
-    let get = |index: usize| -> (SharedString, SharedString) {
-        let option = options.get(index).unwrap_or(&Value::Null);
-        let text = option.get("text").and_then(Value::as_str).unwrap_or("");
-        let state = if option
-            .get("isCorrect")
-            .and_then(Value::as_bool)
-            .unwrap_or(false)
-        {
-            "correct"
-        } else {
-            "wrong"
-        };
-        (SharedString::from(text), SharedString::from(state))
-    };
-    let (text, state) = get(0);
+    let (text, state) = option_text_and_state(options, 0);
     core.set_answer_1(text);
     core.set_answer_1_state(state);
-    let (text, state) = get(1);
+    let (text, state) = option_text_and_state(options, 1);
     core.set_answer_2(text);
     core.set_answer_2_state(state);
-    let (text, state) = get(2);
+    let (text, state) = option_text_and_state(options, 2);
     core.set_answer_3(text);
     core.set_answer_3_state(state);
-    let (text, state) = get(3);
+    let (text, state) = option_text_and_state(options, 3);
     core.set_answer_4(text);
     core.set_answer_4_state(state);
-    let (text, state) = get(4);
+    let (text, state) = option_text_and_state(options, 4);
     core.set_answer_5(text);
     core.set_answer_5_state(state);
-    let (text, state) = get(5);
+    let (text, state) = option_text_and_state(options, 5);
     core.set_answer_6(text);
     core.set_answer_6_state(state);
-    let (text, state) = get(6);
+    let (text, state) = option_text_and_state(options, 6);
     core.set_answer_7(text);
     core.set_answer_7_state(state);
-    let (text, state) = get(7);
+    let (text, state) = option_text_and_state(options, 7);
     core.set_answer_8(text);
     core.set_answer_8_state(state);
-    let (text, state) = get(8);
+    let (text, state) = option_text_and_state(options, 8);
     core.set_answer_9(text);
     core.set_answer_9_state(state);
 }
@@ -493,51 +514,42 @@ pub(super) fn format_template_bindings(template: &Value) -> String {
 #[allow(dead_code)]
 pub(super) fn format_all_template_bundles(package_dir: &Path) -> String {
     let templates = storylock_templates_from_vault(&read_storylock_vault(package_dir));
-    [
-        ("login-sites.json", default_login_templates_json()),
-        ("signing-actions.json", default_signing_templates_json()),
-        ("agent-tasks.json", default_agent_templates_json()),
-    ]
-    .iter()
-    .map(|(file_name, fallback)| {
-        let key = match *file_name {
-            "login-sites.json" => "loginSites",
-            "signing-actions.json" => "signingActions",
-            "agent-tasks.json" => "agentTasks",
-            _ => "",
-        };
-        let bundle = templates
-            .get(key)
-            .cloned()
-            .unwrap_or_else(|| fallback.clone());
-        let items = bundle
-            .get("items")
-            .and_then(Value::as_array)
-            .map(|items| {
-                items
-                    .iter()
-                    .map(|item| {
-                        format!(
-                            "  {} ({})\n{}",
-                            item.get("templateId")
-                                .and_then(Value::as_str)
-                                .unwrap_or("template"),
-                            item.get("resourceId")
-                                .and_then(Value::as_str)
-                                .unwrap_or("resource"),
-                            format_template_bindings(item)
-                                .lines()
-                                .map(|line| format!("    {line}"))
-                                .collect::<Vec<_>>()
-                                .join("\n")
-                        )
-                    })
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            })
-            .unwrap_or_default();
-        format!("{file_name}\n{items}")
-    })
-    .collect::<Vec<_>>()
-    .join("\n\n")
+    TEMPLATE_CHILD_SPECS
+        .iter()
+        .map(|spec| {
+            let file_name = spec.file_name;
+            let bundle = templates
+                .get(spec.bundle_key)
+                .cloned()
+                .unwrap_or_else(|| (spec.fallback_bundle)());
+            let items = bundle
+                .get("items")
+                .and_then(Value::as_array)
+                .map(|items| {
+                    items
+                        .iter()
+                        .map(|item| {
+                            format!(
+                                "  {} ({})\n{}",
+                                item.get("templateId")
+                                    .and_then(Value::as_str)
+                                    .unwrap_or("template"),
+                                item.get("resourceId")
+                                    .and_then(Value::as_str)
+                                    .unwrap_or("resource"),
+                                format_template_bindings(item)
+                                    .lines()
+                                    .map(|line| format!("    {line}"))
+                                    .collect::<Vec<_>>()
+                                    .join("\n")
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                })
+                .unwrap_or_default();
+            format!("{file_name}\n{items}")
+        })
+        .collect::<Vec<_>>()
+        .join("\n\n")
 }

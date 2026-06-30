@@ -98,6 +98,8 @@ pub(crate) struct VerificationCell {
     pub(crate) question_id: String,
     pub(crate) version_tag: String,
     pub(crate) prompt_text: String,
+    #[serde(default, rename = "answerOptions")]
+    pub(crate) answer_options: Vec<String>,
     pub(crate) expected_answer: String,
     pub(crate) position: u32,
     pub(crate) question_set_version: String,

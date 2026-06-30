@@ -1,4 +1,4 @@
-﻿# StoryLock 中 KMS 具体存储信息清单
+# StoryLock 中 KMS 具体存储信息清单
 
 ## 一、核心结论
 

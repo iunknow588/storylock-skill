@@ -31,6 +31,8 @@ pub(crate) fn build_verification_cells(
     (0..required_cells)
         .map(|index| {
             let entry = &bank[(seed + index as usize) % bank.len()];
+            let answer_options =
+                build_answer_options(bank, (seed + index as usize) % bank.len(), index as usize);
             VerificationCell {
                 cell_id: format!("cell-{}", index + 1),
                 prompt_ref: entry.prompt_ref.clone(),
@@ -40,6 +42,7 @@ pub(crate) fn build_verification_cells(
                     "{} Object: {object_ref}. Strength: {required_strength}.",
                     entry.prompt_text
                 ),
+                answer_options,
                 expected_answer: entry.answer.clone(),
                 position: index,
                 question_set_version: question_set_version.to_string(),
@@ -47,6 +50,38 @@ pub(crate) fn build_verification_cells(
             }
         })
         .collect()
+}
+
+fn build_answer_options(
+    bank: &[QuestionBankEntry],
+    correct_index: usize,
+    challenge_index: usize,
+) -> Vec<String> {
+    let correct = bank
+        .get(correct_index)
+        .map(|entry| entry.answer.clone())
+        .unwrap_or_default();
+    let mut options = vec![correct.clone()];
+    let mut offset = 1usize;
+    while options.len() < 9 && offset <= bank.len().saturating_mul(2).max(1) {
+        let candidate = bank[(correct_index + challenge_index + offset) % bank.len()]
+            .answer
+            .clone();
+        if !candidate.trim().is_empty() && !options.iter().any(|item| item == &candidate) {
+            options.push(candidate);
+        }
+        offset += 1;
+    }
+    while options.len() < 9 {
+        options.push(correct.clone());
+    }
+    let rotation = if options.is_empty() {
+        0
+    } else {
+        (challenge_index * 3 + correct_index) % options.len()
+    };
+    options.rotate_left(rotation);
+    options
 }
 
 pub(crate) fn verification_record_from_policy(
@@ -187,6 +222,7 @@ pub(crate) fn create_grid_verification(runtime: &WindowsHostRuntime, request: &V
                     "questionId": cell.question_id,
                     "versionTag": cell.version_tag,
                     "promptText": cell.prompt_text,
+                    "answerOptions": cell.answer_options,
                     "position": cell.position,
                     "questionSetVersion": cell.question_set_version,
                     "normalizationVersion": cell.normalization_version

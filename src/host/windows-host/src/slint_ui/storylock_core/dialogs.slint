@@ -1,5 +1,5 @@
-import { VerticalBox, HorizontalBox, ComboBox } from "std-widgets.slint";
-import { PathBrowseRow, StaticRow, ActionButton, QuestionConfigPanel, LearningAnswerGrid, LogPanel } from "../common.slint";
+import { VerticalBox, HorizontalBox, ComboBox, LineEdit } from "std-widgets.slint";
+import { PathBrowseRow, StaticRow, ActionButton, QuestionConfigPanel, LearningAnswerGrid } from "../common.slint";
 
 export component StoryLockCoreSettingsDialog inherits Window {
     in-out property <string> language: "zh";
@@ -9,7 +9,7 @@ export component StoryLockCoreSettingsDialog inherits Window {
     callback language-changed(string);
     callback browse-core-data-dir();
 
-    title: root.is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
+    title: root.is-zh ? "StoryLock Core \u{8bbe}\u{7f6e}" : "StoryLock Core Settings";
     preferred-width: 800px;
     preferred-height: 450px;
     min-width: 800px;
@@ -21,6 +21,7 @@ export component StoryLockCoreSettingsDialog inherits Window {
     VerticalBox {
         padding: 20px;
         spacing: 12px;
+
         Rectangle {
             height: 36px;
             background: transparent;
@@ -29,19 +30,21 @@ export component StoryLockCoreSettingsDialog inherits Window {
                 y: 4px;
                 width: 720px;
                 height: 28px;
-                text: root.is-zh ? "StoryLock Core 设置" : "StoryLock Core Settings";
+                text: root.is-zh ? "StoryLock Core \u{8bbe}\u{7f6e}" : "StoryLock Core Settings";
                 color: #17252f;
                 font-size: 16px;
                 font-weight: 800;
                 overflow: elide;
             }
         }
+
         VerticalBox {
             spacing: 14px;
+
             HorizontalBox {
                 spacing: 14px;
                 Text {
-                    text: root.is-zh ? "界面语言" : "UI Language";
+                    text: root.is-zh ? "\u{754c}\u{9762}\u{8bed}\u{8a00}" : "UI Language";
                     width: 150px;
                     color: #62727d;
                     font-size: 13px;
@@ -50,24 +53,26 @@ export component StoryLockCoreSettingsDialog inherits Window {
                 ComboBox {
                     width: 420px;
                     height: 32px;
-                    model: root.is-zh ? ["中文", "英文"] : ["Chinese", "English"];
-                    current-value: root.is-zh ? "中文" : "English";
+                    model: root.is-zh ? ["\u{4e2d}\u{6587}", "\u{82f1}\u{6587}"] : ["Chinese", "English"];
+                    current-value: root.is-zh ? "\u{4e2d}\u{6587}" : "English";
                     selected(value) => {
-                        root.language = (value == "Chinese" || value == "中文") ? "zh" : "en";
+                        root.language = (value == "Chinese" || value == "\u{4e2d}\u{6587}") ? "zh" : "en";
                         root.language-changed(root.language);
                     }
                 }
             }
+
             PathBrowseRow {
-                name: root.is-zh ? "工作目录" : "Workspace Dir";
+                name: root.is-zh ? "\u{5de5}\u{4f5c}\u{76ee}\u{5f55}" : "Workspace Dir";
                 value <=> root.core-data-dir;
                 is-zh: root.is-zh;
                 browse => { root.browse-core-data-dir(); }
             }
-            StaticRow { name: root.is-zh ? "保险库文件" : "Vault File"; value: "vault.stlk"; }
-            StaticRow { name: root.is-zh ? "学习参数文件" : "Learning Policy"; value: "learning-policy.json"; }
-            StaticRow { name: root.is-zh ? "清单文件" : "Package Manifest"; value: "package-manifest.json"; }
-            StaticRow { name: root.is-zh ? "资源目录文件" : "Resource Catalog"; value: "resource-catalog.json"; }
+
+            StaticRow { name: root.is-zh ? "\u{4fdd}\u{9669}\u{5e93}\u{6587}\u{4ef6}" : "Vault File"; value: "vault.stlk"; }
+            StaticRow { name: root.is-zh ? "\u{5b66}\u{4e60}\u{7b56}\u{7565}" : "Learning Policy"; value: "learning-policy.json"; }
+            StaticRow { name: root.is-zh ? "\u{5305}\u{6e05}\u{5355}" : "Package Manifest"; value: "package-manifest.json"; }
+            StaticRow { name: root.is-zh ? "\u{8d44}\u{6e90}\u{76ee}\u{5f55}" : "Resource Catalog"; value: "resource-catalog.json"; }
         }
     }
 }
@@ -99,7 +104,7 @@ export component AnswerEditorDialog inherits Window {
     callback next-node();
     callback select-node(string);
 
-    title: root.is-zh ? "答案编辑" : "Answer Editor";
+    title: root.is-zh ? "\u{7b54}\u{6848}\u{7f16}\u{8f91}" : "Answer Editor";
     preferred-width: 960px;
     preferred-height: 540px;
     min-width: 960px;
@@ -111,6 +116,7 @@ export component AnswerEditorDialog inherits Window {
     VerticalBox {
         padding: 20px;
         spacing: 12px;
+
         Rectangle {
             height: 36px;
             background: transparent;
@@ -119,13 +125,14 @@ export component AnswerEditorDialog inherits Window {
                 y: 4px;
                 width: 900px;
                 height: 28px;
-                text: (root.is-zh ? "答案编辑 - " : "Answer Editor - ") + root.selected-question;
+                text: (root.is-zh ? "\u{7b54}\u{6848}\u{7f16}\u{8f91} - " : "Answer Editor - ") + root.selected-question;
                 color: #17252f;
                 font-size: 16px;
                 font-weight: 800;
                 overflow: elide;
             }
         }
+
         QuestionConfigPanel {
             panel-height: 422px;
             selected-question <=> root.selected-question;
@@ -165,7 +172,7 @@ export component ObjectEditorDialog inherits Window {
     callback save-requested();
     callback close-requested();
 
-    title: root.is-zh ? "受保护对象编辑" : "Managed Object Editor";
+    title: root.is-zh ? "\u{53d7}\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}\u{7f16}\u{8f91}" : "Managed Object Editor";
     preferred-width: 760px;
     preferred-height: 300px;
     min-width: 760px;
@@ -177,14 +184,16 @@ export component ObjectEditorDialog inherits Window {
     VerticalBox {
         padding: 20px;
         spacing: 12px;
+
         Text {
             height: 28px;
-            text: root.is-zh ? "受保护对象编辑" : "Managed Object Editor";
+            text: root.is-zh ? "\u{53d7}\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}\u{7f16}\u{8f91}" : "Managed Object Editor";
             color: #17252f;
             font-size: 16px;
             font-weight: 800;
             overflow: elide;
         }
+
         HorizontalBox {
             spacing: 14px;
             Text {
@@ -194,102 +203,55 @@ export component ObjectEditorDialog inherits Window {
                 font-size: 13px;
                 vertical-alignment: center;
             }
-            Rectangle {
+            LineEdit {
+                text <=> root.uri;
                 width: 556px;
                 height: 32px;
-                border-width: 1px;
-                border-color: #c9d5da;
-                border-radius: 4px;
-                background: white;
-                uri-editor := TextInput {
-                    x: 8px;
-                    y: 0px;
-                    width: parent.width - 16px;
-                    height: parent.height;
-                    text <=> root.uri;
-                    single-line: true;
-                    vertical-alignment: center;
-                    color: #17252f;
-                    font-size: 13px;
-                }
             }
         }
+
         HorizontalBox {
             spacing: 14px;
             Text {
-                text: root.is-zh ? "用户名" : "Username";
+                text: root.is-zh ? "\u{7528}\u{6237}\u{540d}" : "Username";
                 width: 150px;
                 color: #62727d;
                 font-size: 13px;
                 vertical-alignment: center;
             }
-            Rectangle {
+            LineEdit {
+                text <=> root.username;
                 width: 556px;
                 height: 32px;
-                border-width: 1px;
-                border-color: #c9d5da;
-                border-radius: 4px;
-                background: white;
-                username-editor := TextInput {
-                    x: 8px;
-                    y: 0px;
-                    width: parent.width - 16px;
-                    height: parent.height;
-                    text <=> root.username;
-                    single-line: true;
-                    vertical-alignment: center;
-                    color: #17252f;
-                    font-size: 13px;
-                }
             }
         }
+
         HorizontalBox {
             spacing: 14px;
             Text {
-                text: root.is-zh ? "密码" : "Password";
+                text: root.is-zh ? "\u{5bc6}\u{7801}" : "Password";
                 width: 150px;
                 color: #62727d;
                 font-size: 13px;
                 vertical-alignment: center;
             }
-            Rectangle {
+            LineEdit {
+                text <=> root.password;
                 width: 556px;
                 height: 32px;
-                border-width: 1px;
-                border-color: #c9d5da;
-                border-radius: 4px;
-                background: white;
-                password-editor := TextInput {
-                    x: 8px;
-                    y: 0px;
-                    width: parent.width - 16px;
-                    height: parent.height;
-                    text <=> root.password;
-                    single-line: true;
-                    vertical-alignment: center;
-                    color: #17252f;
-                    font-size: 13px;
-                }
-            }
-            ActionButton {
-                label: root.show-password ? (root.is-zh ? "隐藏" : "Hide") : (root.is-zh ? "显示" : "Show");
-                primary: false;
-                button-width: 86px;
-                clicked => {
-                    root.show-password = !root.show-password;
-                }
             }
         }
+
         HorizontalBox {
             spacing: 10px;
             Rectangle { width: 164px; height: 1px; background: transparent; }
             ActionButton {
-                label: root.is-zh ? "保存" : "Save";
+                label: root.is-zh ? "\u{4fdd}\u{5b58}" : "Save";
                 primary: true;
                 clicked => { root.save-requested(); }
             }
             ActionButton {
-                label: root.is-zh ? "关闭" : "Close";
+                label: root.is-zh ? "\u{5173}\u{95ed}" : "Close";
                 primary: false;
                 clicked => { root.close-requested(); }
             }
@@ -297,98 +259,236 @@ export component ObjectEditorDialog inherits Window {
     }
 }
 
-export component LearningTestDialog inherits Dialog {
+export component LearningTestDialog inherits Window {
     in-out property <string> language: "zh";
     property <bool> is-zh: language == "zh";
     in property <string> learning-plan-summary;
     in property <string> learning-status;
     in property <string> learning-progress-summary;
+    in property <int> learning-total-questions;
+    in property <int> learning-current-question;
+    in property <int> learning-checked-prompts;
+    in property <int> learning-total-prompts;
+    in property <int> learning-error-count;
+    in property <int> learning-progress-percent;
+    in property <string> learning-progress-headline;
     in property <string> learning-action-hint;
     in property <string> learning-position;
     in property <string> learning-question;
+    in property <bool> can-learning-previous: learning-checked-prompts > 0;
+    in property <bool> can-learning-next: learning-checked-prompts < learning-total-prompts;
     in-out property <string> learning-answer-1;
-    in-out property <string> learning-answer-1-state;
+    in-out property <string> learning-answer-1-state: "wrong";
     in-out property <string> learning-answer-2;
-    in-out property <string> learning-answer-2-state;
+    in-out property <string> learning-answer-2-state: "wrong";
     in-out property <string> learning-answer-3;
-    in-out property <string> learning-answer-3-state;
+    in-out property <string> learning-answer-3-state: "wrong";
     in-out property <string> learning-answer-4;
-    in-out property <string> learning-answer-4-state;
+    in-out property <string> learning-answer-4-state: "wrong";
     in-out property <string> learning-answer-5;
-    in-out property <string> learning-answer-5-state;
+    in-out property <string> learning-answer-5-state: "wrong";
     in-out property <string> learning-answer-6;
-    in-out property <string> learning-answer-6-state;
+    in-out property <string> learning-answer-6-state: "wrong";
     in-out property <string> learning-answer-7;
-    in-out property <string> learning-answer-7-state;
+    in-out property <string> learning-answer-7-state: "wrong";
     in-out property <string> learning-answer-8;
-    in-out property <string> learning-answer-8-state;
+    in-out property <string> learning-answer-8-state: "wrong";
     in-out property <string> learning-answer-9;
-    in-out property <string> learning-answer-9-state;
+    in-out property <string> learning-answer-9-state: "wrong";
     in property <string> learning-result;
     callback restart-learning();
-    callback reveal-learning-answer();
     callback learning-previous();
     callback learning-next();
-    callback check-learning-current();
+    callback learning-toggle-answer(int);
     callback close-requested();
 
-    title: root.is-zh ? "九宫格学习测试" : "Nine-Grid Learning Test";
-    preferred-width: 860px;
-    preferred-height: 760px;
-    min-width: 860px;
-    max-width: 860px;
-    min-height: 760px;
-    max-height: 760px;
+    title: root.is-zh ? "\u{5bfc}\u{51fa}\u{524d}\u{786e}\u{8ba4}\u{6d4b}\u{8bd5}" : "Export Confirmation Test";
+    preferred-width: 960px;
+    preferred-height: 540px;
+    min-width: 960px;
+    max-width: 960px;
+    min-height: 540px;
+    max-height: 540px;
     background: #eef3f5;
 
     Rectangle {
         background: #eef3f5;
+
         VerticalBox {
             padding: 20px;
-            spacing: 12px;
-            Text {
+            spacing: 10px;
+
+            Rectangle {
                 height: 28px;
-                text: root.is-zh ? "九宫格学习测试" : "Nine-Grid Learning Test";
-                color: #17252f;
-                font-size: 16px;
-                font-weight: 800;
-                overflow: elide;
+                background: transparent;
+                Text {
+                    x: 0px;
+                    y: 2px;
+                    width: 920px;
+                    height: 24px;
+                    text: root.is-zh ? "\u{5bfc}\u{51fa}\u{524d}\u{786e}\u{8ba4}\u{6d4b}\u{8bd5}" : "Export Confirmation Test";
+                    color: #17252f;
+                    font-size: 16px;
+                    font-weight: 800;
+                    overflow: elide;
+                }
             }
-            StaticRow { name: root.is-zh ? "训练规则" : "Training Rule"; value: root.learning-plan-summary; }
-            StaticRow { name: root.is-zh ? "训练状态" : "Training Status"; value: root.learning-status; }
-            StaticRow { name: root.is-zh ? "当前进度" : "Progress"; value: root.learning-progress-summary; }
-            StaticRow { name: root.is-zh ? "下一步" : "Next Step"; value: root.learning-action-hint; }
-            StaticRow { name: root.is-zh ? "当前题目" : "Current Question"; value: root.learning-position + "  " + root.learning-question; }
-            LearningAnswerGrid {
-                answer-1: root.learning-answer-1;
-                answer-1-state <=> root.learning-answer-1-state;
-                answer-2: root.learning-answer-2;
-                answer-2-state <=> root.learning-answer-2-state;
-                answer-3: root.learning-answer-3;
-                answer-3-state <=> root.learning-answer-3-state;
-                answer-4: root.learning-answer-4;
-                answer-4-state <=> root.learning-answer-4-state;
-                answer-5: root.learning-answer-5;
-                answer-5-state <=> root.learning-answer-5-state;
-                answer-6: root.learning-answer-6;
-                answer-6-state <=> root.learning-answer-6-state;
-                answer-7: root.learning-answer-7;
-                answer-7-state <=> root.learning-answer-7-state;
-                answer-8: root.learning-answer-8;
-                answer-8-state <=> root.learning-answer-8-state;
-                answer-9: root.learning-answer-9;
-                answer-9-state <=> root.learning-answer-9-state;
+
+            Rectangle {
+                width: 920px;
+                height: 92px;
+                border-width: 1px;
+                border-color: #c9d5da;
+                border-radius: 6px;
+                background: #f7fafb;
+
+                Text {
+                    x: 14px;
+                    y: 8px;
+                    width: 892px;
+                    height: 16px;
+                    text: root.learning-progress-headline;
+                    color: #17252f;
+                    font-size: 12px;
+                    font-weight: 700;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+                Text {
+                    x: 14px;
+                    y: 28px;
+                    width: 892px;
+                    height: 16px;
+                    text: root.learning-action-hint;
+                    color: #45606b;
+                    font-size: 12px;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+                Text {
+                    x: 14px;
+                    y: 48px;
+                    width: 892px;
+                    height: 16px;
+                    text: root.learning-result;
+                    color: #17252f;
+                    font-size: 12px;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+                Rectangle {
+                    x: 14px;
+                    y: 72px;
+                    width: 892px;
+                    height: 10px;
+                    border-radius: 5px;
+                    background: #e2e9ec;
+                    Rectangle {
+                        width: 892px * root.learning-progress-percent / 100;
+                        height: parent.height;
+                        border-radius: 5px;
+                        background: #45606b;
+                    }
+                }
             }
+
+            Rectangle {
+                width: 920px;
+                height: 66px;
+                border-width: 1px;
+                border-color: #c9d5da;
+                border-radius: 6px;
+                background: #f7fafb;
+
+                Text {
+                    x: 14px;
+                    y: 8px;
+                    width: 892px;
+                    height: 14px;
+                    text: root.is-zh ? "\u{5f53}\u{524d}\u{95ee}\u{9898}" : "Current Question";
+                    color: #62727d;
+                    font-size: 11px;
+                    font-weight: 700;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+                Text {
+                    x: 14px;
+                    y: 26px;
+                    width: 892px;
+                    height: 32px;
+                    text: root.learning-question;
+                    color: #17252f;
+                    font-size: 14px;
+                    font-weight: 600;
+                    vertical-alignment: top;
+                    wrap: word-wrap;
+                    overflow: elide;
+                }
+            }
+
             HorizontalBox {
-                spacing: 10px;
-                ActionButton { label: root.is-zh ? "重新开始" : "Restart"; primary: true; button-width: 110px; clicked => { root.restart-learning(); } }
-                ActionButton { label: root.is-zh ? "显示答案" : "Reveal"; primary: false; button-width: 110px; clicked => { root.reveal-learning-answer(); } }
-                ActionButton { label: root.is-zh ? "上一题" : "Previous"; primary: false; button-width: 110px; clicked => { root.learning-previous(); } }
-                ActionButton { label: root.is-zh ? "下一题" : "Next"; primary: false; button-width: 110px; clicked => { root.learning-next(); } }
-                ActionButton { label: root.is-zh ? "检查" : "Check"; primary: true; button-width: 110px; clicked => { root.check-learning-current(); } }
-                ActionButton { label: root.is-zh ? "关闭" : "Close"; primary: false; button-width: 110px; clicked => { root.close-requested(); } }
+                width: 920px;
+                height: 210px;
+                spacing: 16px;
+
+                LearningAnswerGrid {
+                    answer-1: root.learning-answer-1;
+                    answer-1-state <=> root.learning-answer-1-state;
+                    answer-2: root.learning-answer-2;
+                    answer-2-state <=> root.learning-answer-2-state;
+                    answer-3: root.learning-answer-3;
+                    answer-3-state <=> root.learning-answer-3-state;
+                    answer-4: root.learning-answer-4;
+                    answer-4-state <=> root.learning-answer-4-state;
+                    answer-5: root.learning-answer-5;
+                    answer-5-state <=> root.learning-answer-5-state;
+                    answer-6: root.learning-answer-6;
+                    answer-6-state <=> root.learning-answer-6-state;
+                    answer-7: root.learning-answer-7;
+                    answer-7-state <=> root.learning-answer-7-state;
+                    answer-8: root.learning-answer-8;
+                    answer-8-state <=> root.learning-answer-8-state;
+                    answer-9: root.learning-answer-9;
+                    answer-9-state <=> root.learning-answer-9-state;
+                    toggle-answer(index) => { root.learning-toggle-answer(index); }
+                }
+
+                Rectangle {
+                    width: 180px;
+                    height: 210px;
+                    border-width: 1px;
+                    border-color: #d7e1e6;
+                    border-radius: 6px;
+                    background: #f7fafb;
+
+                    Text {
+                        x: 0px;
+                        y: 8px;
+                        width: parent.width;
+                        height: 18px;
+                        text: root.learning-position;
+                        color: #17252f;
+                        font-size: 16px;
+                        font-weight: 700;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+
+                    ActionButton { x: 12px; y: 20px; label: root.is-zh ? "\u{4e0a}\u{4e00}\u{9898}" : "Previous"; primary: false; enabled: root.can-learning-previous; button-width: 156px; clicked => { root.learning-previous(); } }
+                    ActionButton { x: 12px; y: 58px; label: root.is-zh ? "\u{4e0b}\u{4e00}\u{9898}" : "Next"; primary: false; enabled: root.can-learning-next; button-width: 156px; clicked => { root.learning-next(); } }
+                    Rectangle {
+                        x: 20px;
+                        y: 100px;
+                        width: 140px;
+                        height: 1px;
+                        background: #d7e1e6;
+                    }
+                    ActionButton { x: 12px; y: 112px; label: root.is-zh ? "\u{91cd}\u{65b0}\u{5f00}\u{59cb}" : "Restart"; primary: true; button-width: 156px; clicked => { root.restart-learning(); } }
+                    ActionButton { x: 12px; y: 150px; label: root.is-zh ? "\u{5173}\u{95ed}" : "Close"; primary: false; button-width: 156px; clicked => { root.close-requested(); } }
+                }
             }
-            LogPanel { value: root.learning-result; panel-height: 120px; }
         }
     }
 }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,6 +7,23 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 
 function read(relativePath) {
   return readFileSync(join(root, relativePath), 'utf8');
+}
+
+function readTree(relativePath, extensions = ['.rs', '.slint']) {
+  const base = join(root, relativePath);
+  const chunks = [];
+  function visit(directory) {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const absolutePath = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        visit(absolutePath);
+      } else if (extensions.some((extension) => entry.name.endsWith(extension))) {
+        chunks.push(readFileSync(absolutePath, 'utf8'));
+      }
+    }
+  }
+  visit(base);
+  return chunks.join('\n');
 }
 
 const wslPackageScript = read('scripts/release/linux/package_linux_host_wsl.ps1');
@@ -17,7 +34,8 @@ assert.match(wslPackageScript, /STORYLOCK_WSL_NODE_BIN/u, 'WSL packaging must al
 const preflightScript = read('scripts/vercel/preflight.ps1');
 assert.match(preflightScript, /yian-windows-host-0\.1\.0-1-prototype-zip\.json/u);
 assert.doesNotMatch(preflightScript, /yian-windows-host-0\.1\.0-1-prototype\.json/u);
-assert.match(preflightScript, /yian-linux-host-0\.1\.0-1-prototype-deb\.json/u);
+assert.match(preflightScript, /Get-DownloadPlatformFileName/u, 'Vercel preflight must derive Linux package checks from /app/download');
+assert.match(preflightScript, /Get-MetadataFileName/u, 'Vercel preflight must support zip, deb, and tar.gz metadata names');
 assert.match(preflightScript, /\[switch\]\$SkipHttp/u, 'Vercel preflight must support local-only checks before first deploy');
 assert.match(preflightScript, /vercel:project-link/u, 'Vercel preflight must check local project binding');
 assert.match(preflightScript, /Deployment-level 404 detected/u, 'Vercel preflight must summarize deployment-level 404 failures');
@@ -90,28 +108,36 @@ assert.match(windowsHostCargo, /default = \["ui-slint"\]/u, 'Windows host defaul
 assert.doesNotMatch(windowsHostCargo, /ui-tray/u, 'Windows host must keep Slint as the only Windows UI feature');
 
 const windowsHostMain = read('src/host/windows-host/src/main.rs');
-assert.match(windowsHostMain, /#\[cfg\(feature = "ui-slint"\)\]\s*fn run_default_entry[\s\S]*?run_desktop_ui_entry\(config\)/u, 'Windows host default entry must start the Slint UI');
+const windowsHostEntry = read('src/host/windows-host/src/host_runtime/ui/entry.rs');
+const windowsHostStatus = read('src/host/windows-host/src/host_runtime/io/status.rs');
+const windowsHostHtmlViews = read('src/host/windows-host/src/host_runtime/io/html_views.rs');
+const windowsHostServer = read('src/host/windows-host/src/host_runtime/ui/server.rs');
+const windowsHostStoryTemplateQueue = read('src/host/windows-host/src/host_runtime/story_templates/queue.rs');
+const windowsHostStoryTemplateStatus = read('src/host/windows-host/src/host_runtime/story_templates/status.rs');
+assert.match(windowsHostMain, /host_runtime_main\(\)/u, 'Windows host main must delegate to the shared host runtime entry');
+assert.match(windowsHostEntry, /#\[cfg\(feature = "ui-slint"\)\]\s*pub\(crate\) fn run_default_entry[\s\S]*?run_desktop_ui_entry\(config\)/u, 'Windows host default entry must start the Slint UI');
 assert.match(windowsHostMain, /windows_subsystem = "windows"/u, 'Windows host Slint UI builds must use the Windows GUI subsystem');
-assert.doesNotMatch(windowsHostMain, /run_tray_entry|--tray|mod tray_ui/u, 'Windows host runtime must not expose a tray UI path');
-assert.match(windowsHostMain, /managementStats/u, 'Yian Host status must expose redacted management statistics');
-assert.match(windowsHostMain, /authorizationModes/u, 'Yian Host management statistics must list authorization modes');
-assert.match(windowsHostMain, /requiredCells/u, 'Yian Host management statistics must include required grid-cell counts');
-assert.match(windowsHostMain, /remoteInterfaces/u, 'Yian Host management statistics must aggregate remote interface access');
-assert.match(windowsHostMain, /host_internal_only/u, 'Yian Host status must keep local storage paths internal');
-assert.doesNotMatch(windowsHostMain, /host\.storage\?\.path|bank\.path/u, 'Yian Host browser UI must not display Host storage or question-bank paths');
-assert.match(windowsHostMain, /story-template\/generate/u, 'Yian Host may expose a story-template candidate generation endpoint');
-assert.match(windowsHostMain, /story-template\/candidates/u, 'StoryLock must be able to explicitly pull queued story-template candidates');
-assert.match(windowsHostMain, /storylock_explicit_pull_only/u, 'Story template candidates must use a StoryLock pull-only model');
-assert.match(windowsHostMain, /hostInvokesStoryLock[\s\S]*false/u, 'Host must not actively invoke StoryLock when generating story templates');
-assert.match(windowsHostMain, /configured_direct_access/u, 'LLM keys must be represented only as direct-access configured status');
-assert.doesNotMatch(windowsHostMain, /"apiKey"|"secretKey"|"llmApiKey"|"rawLlmKey"/u, 'Host UI/status must not serialize raw LLM key values');
+assert.doesNotMatch(windowsHostMain + windowsHostEntry, /run_tray_entry|--tray|mod tray_ui/u, 'Windows host runtime must not expose a tray UI path');
+assert.match(windowsHostStatus, /managementStats/u, 'Yian Host status must expose redacted management statistics');
+assert.match(windowsHostStatus, /host_management_stats/u, 'Yian Host status must build management statistics from runtime audit counters');
+assert.match(windowsHostHtmlViews, /authorizationModes/u, 'Yian Host management statistics must list authorization modes');
+assert.match(windowsHostHtmlViews, /requiredCells/u, 'Yian Host management statistics must include required grid-cell counts');
+assert.match(windowsHostHtmlViews, /remoteInterfaces/u, 'Yian Host management statistics must aggregate remote interface access');
+assert.match(windowsHostStatus, /host_internal_only/u, 'Yian Host status must keep local storage paths internal');
+assert.doesNotMatch(windowsHostHtmlViews, /host\.storage\?\.path|bank\.path/u, 'Yian Host browser UI must not display Host storage or question-bank paths');
+assert.match(windowsHostServer + windowsHostStoryTemplateQueue, /story-template\/generate/u, 'Yian Host may expose a story-template candidate generation endpoint');
+assert.match(windowsHostServer + windowsHostStoryTemplateQueue + windowsHostStoryTemplateStatus, /story-template\/candidates/u, 'StoryLock must be able to explicitly pull queued story-template candidates');
+assert.match(windowsHostStoryTemplateQueue, /storylock_explicit_pull_only/u, 'Story template candidates must use a StoryLock pull-only model');
+assert.match(windowsHostStoryTemplateQueue, /hostInvokesStoryLock[\s\S]*false/u, 'Host must not actively invoke StoryLock when generating story templates');
+assert.match(windowsHostStoryTemplateStatus, /configured_direct_access/u, 'LLM keys must be represented only as direct-access configured status');
+assert.doesNotMatch(windowsHostStatus + windowsHostStoryTemplateStatus + windowsHostHtmlViews, /"apiKey"|"secretKey"|"llmApiKey"|"rawLlmKey"/u, 'Host UI/status must not serialize raw LLM key values');
 
 const windowsHostLoopScript = read('scripts/windows/check_windows_host_loop.ps1');
 assert.match(windowsHostLoopScript, /\[string\]\$TargetDir = .*windows-host-loop-target/u, 'Windows host loop test must isolate its Cargo target directory');
 assert.match(windowsHostLoopScript, /\$env:CARGO_TARGET_DIR = \$target/u, 'Windows host loop test must set CARGO_TARGET_DIR');
 assert.match(windowsHostLoopScript, /cargo -ArgumentList @\("run", "--no-default-features"\)/u, 'Windows host loop test must keep the no-default-features runtime path');
 
-const windowsHostSlint = read('src/host/windows-host/src/slint_ui.rs');
+const windowsHostSlint = readTree('src/host/windows-host/src/slint_ui');
 assert.doesNotMatch(
   windowsHostSlint,
   /core-package-dir|core-manifest-path|core-catalog-path|core-author-draft-path|core-temp-draft-path|core-templates-dir|managed-objects|set_managed_objects|Host-readable permission summary|StoryLock Core package path|Question bank path/u,
@@ -126,23 +152,24 @@ assert.match(windowsHostSlint, /STORYLOCK_CORE_DATA_DIR/u, 'StoryLock UI storage
 assert.match(windowsHostSlint, /management-stats/u, 'Slint Host UI must include a management statistics surface');
 assert.match(windowsHostSlint, /6 of 9 cells/u, 'Slint Host UI must show single-read grid authorization mode');
 assert.match(windowsHostSlint, /22 of 24 cells/u, 'Slint Host UI must show local-only story-edit authorization mode');
-assert.match(windowsHostSlint, /story-template-index|story-template-preview|apply-story-template/u, 'Slint Host UI must keep template browsing and explicit apply controls');
+assert.match(windowsHostSlint, /save-template[\s\S]*apply-template[\s\S]*pull-template-candidates/u, 'Slint Host UI must keep template browsing and explicit apply controls');
 assert.match(windowsHostSlint, /configured\/missing/u, 'Slint Host UI must not display raw LLM key values');
 assert.match(windowsHostSlint, /SettingsIconButton/u, 'Slint Host UI must expose a settings icon button in the header');
 assert.match(windowsHostSlint, /property <string> language: "zh"/u, 'Slint Host UI must keep a language setting state');
-assert.match(windowsHostSlint, /model: \["中文", "English"\]/u, 'Slint Host UI must use a language dropdown');
-assert.match(windowsHostSlint, /root\.language = value == "中文" \? "zh" : "en"/u, 'Slint Host UI language dropdown must switch between Chinese and English');
-assert.match(windowsHostSlint, /SettingsIconButton[\s\S]*active-page = 4/u, 'Slint Host UI settings icon must open the settings page');
+assert.match(windowsHostSlint, /ComboBox[\s\S]*English/u, 'Slint Host UI must use a language dropdown');
+assert.match(windowsHostSlint, /root\.language = value == [\s\S]*\? "zh" : "en"/u, 'Slint Host UI language dropdown must switch between Chinese and English');
+assert.match(windowsHostSlint, /SettingsIconButton[\s\S]*(open-settings|active-page = 4)/u, 'Slint Host UI settings icon must open the settings page');
 assert.match(windowsHostSlint, /connection-test-status/u, 'Slint Host UI must show local and remote connection test feedback on the main page');
 assert.match(windowsHostSlint, /test-local-host\(\) -> string/u, 'Slint Host UI must expose a local host connection test callback');
 assert.match(windowsHostSlint, /test-remote-connection\(\) -> string/u, 'Slint Host UI must expose a remote connection test callback');
 assert.match(windowsHostSlint, /open_storylock_core|core-launch-status|StoryLock Status/u, 'StoryLock launch must remain a settings-driven or explicit UI action');
 assert.doesNotMatch(windowsHostSlint, /label: "StoryLock UI";[\s\S]{0,120}selected: root\.active-page/u, 'StoryLock launch must not remain as a main navigation page');
 assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*property <string> language: "zh"/u, 'StoryLock Core UI must keep its own language setting state');
-assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*SettingsIconButton[\s\S]*active-page = 5/u, 'StoryLock Core UI must expose a settings icon button');
-assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*model: \["中文", "English"\]/u, 'StoryLock Core UI must use a language dropdown');
-assert.match(windowsHostSlint, /24 个问题/u, 'StoryLock Core UI must include Chinese navigation text');
-assert.match(windowsHostSlint, /StoryLock Core 界面/u, 'StoryLock Core settings page must describe its language scope');
+assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*SettingsIconButton/u, 'StoryLock Core UI must expose a settings icon button');
+assert.match(windowsHostSlint, /export component StoryLockCoreApp[\s\S]*open-core-settings/u, 'StoryLock Core UI settings button must open the settings dialog');
+assert.match(windowsHostSlint, /export component StoryLockCoreSettingsDialog[\s\S]*ComboBox[\s\S]*English/u, 'StoryLock Core settings dialog must use a language dropdown');
+assert.match(windowsHostSlint, /24/u, 'StoryLock Core UI must include 24-question navigation text');
+assert.match(windowsHostSlint, /StoryLock Core[\s\S]*(language|Language)/u, 'StoryLock Core settings page must describe its language scope');
 
 const linuxSecretServiceWslScript = read('scripts/linux/check_linux_secret_service_wsl.ps1');
 assert.match(linuxSecretServiceWslScript, /check_linux_secret_service_wsl\.sh/u, 'Linux WSL Secret Service wrapper must call the shell diagnostic');

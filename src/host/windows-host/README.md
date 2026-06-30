@@ -1,4 +1,4 @@
-﻿# Yian Windows Host
+# Yian Windows Host
 
 This directory is the Windows desktop local host skeleton for Yian / StoryLock.
 
@@ -182,7 +182,7 @@ Default local state path:
 Override local state path:
 
 ```powershell
-$env:STORYLOCK_WINDOWS_DATA_DIR="E:\\2026OPC澶ц禌\\skill\\.temp\\runtime\\windows-host-data"
+$env:STORYLOCK_WINDOWS_DATA_DIR="E:\storylock\skill\.temp\runtime\windows-host-data"
 ```
 
 Question bank bootstrap:

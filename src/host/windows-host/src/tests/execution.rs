@@ -21,14 +21,44 @@ fn rejects_unsupported_capability() {
 }
 
 #[test]
+fn execute_requires_grid_authorization_before_storylock_call() {
+    let runtime = test_runtime();
+    let response = execute_request(
+        &runtime,
+        json!({
+            "requestId": "req-needs-grid",
+            "capability": "requestSignature",
+            "keyId": "wallet-needs-grid"
+        }),
+    );
+    assert_eq!(response.get("status").and_then(Value::as_str), Some("error"));
+    assert_eq!(
+        response
+            .get("error")
+            .and_then(|value| value.get("type"))
+            .and_then(Value::as_str),
+        Some("authorization_required")
+    );
+}
+
+#[test]
 fn approves_signature_and_persists_key() {
     let runtime = test_runtime();
+    let authorization_id = grid_authorize_request(
+        &runtime,
+        json!({
+            "requestId": "req-approved-verify",
+            "capability": "requestSignature",
+            "keyId": "wallet-main"
+        }),
+    );
     let response = execute_request(
         &runtime,
         json!({
             "requestId": "req-approved",
             "capability": "requestSignature",
-            "keyId": "wallet-main"
+            "keyId": "wallet-main",
+            "authorizationId": authorization_id
         }),
     );
     assert_eq!(
@@ -47,24 +77,27 @@ fn approves_signature_and_persists_key() {
         .and_then(|value| value.get("verificationId"))
         .and_then(Value::as_str)
         .is_some());
-    let authorization_id = response
-        .get("result")
-        .and_then(|value| value.get("authorizationId"))
-        .and_then(Value::as_str)
-        .expect("authorization id");
     assert!(runtime
         .secret_store
         .signature_key_path("wallet-main")
         .exists());
     assert!(runtime
         .secret_store
-        .authorization_path(authorization_id)
+        .authorization_path(&authorization_id)
         .exists());
 }
 
 #[test]
 fn password_fill_uses_dpapi_backed_credential_store() {
     let runtime = test_runtime();
+    let first_authorization_id = grid_authorize_request(
+        &runtime,
+        json!({
+            "requestId": "req-password-verify-1",
+            "capability": "requestPasswordFill",
+            "credentialRef": "mailbox-primary"
+        }),
+    );
     let first = execute_request(
         &runtime,
         json!({
@@ -72,7 +105,16 @@ fn password_fill_uses_dpapi_backed_credential_store() {
             "capability": "requestPasswordFill",
             "credentialRef": "mailbox-primary",
             "usernameHint": "alice",
-            "targetOrigin": "https://mail.example.test"
+            "targetOrigin": "https://mail.example.test",
+            "authorizationId": first_authorization_id
+        }),
+    );
+    let second_authorization_id = grid_authorize_request(
+        &runtime,
+        json!({
+            "requestId": "req-password-verify-2",
+            "capability": "requestPasswordFill",
+            "credentialRef": "mailbox-primary"
         }),
     );
     let second = execute_request(
@@ -80,7 +122,8 @@ fn password_fill_uses_dpapi_backed_credential_store() {
         json!({
             "requestId": "req-password-2",
             "capability": "requestPasswordFill",
-            "credentialRef": "mailbox-primary"
+            "credentialRef": "mailbox-primary",
+            "authorizationId": second_authorization_id
         }),
     );
     let first_password = first
@@ -166,20 +209,14 @@ fn verify_authorize_execute_flow_reuses_authorization_session() {
 #[test]
 fn revoked_authorization_cannot_execute() {
     let runtime = test_runtime();
-    let approved = execute_request(
+    let authorization_id = grid_authorize_request(
         &runtime,
         json!({
-            "requestId": "req-revoke-seed",
+            "requestId": "req-revoke-seed-verify",
             "capability": "requestSignature",
             "keyId": "wallet-revoked"
         }),
     );
-    let authorization_id = approved
-        .get("result")
-        .and_then(|value| value.get("authorizationId"))
-        .and_then(Value::as_str)
-        .expect("authorization id")
-        .to_string();
 
     let revoke = revoke_local_authorization(
         &runtime,

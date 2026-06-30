@@ -77,6 +77,7 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> node-output: "Configure 24 local questions before export.";
         in-out property <string> vault-name: "storylock-local-vault";
         in-out property <string> resource-group: "normal";
+        in-out property <string> editing-resource-group: "normal";
         in-out property <string> resource-id: "github-main";
         in-out property <string> resource-kind: "website_account";
         in-out property <string> provider-id: "github";
@@ -153,10 +154,18 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> config-status: "All edits stay inside StoryLock UI. Yian Host receives no draft, vault, catalog, template, or package path.";
         in-out property <string> learning-status: "Pre-export test is required before export.";
         in-out property <string> learning-progress-summary: "0 / 0 prompts completed, errors recorded: 0";
+        in-out property <int> learning-total-questions: 24;
+        in-out property <int> learning-current-question: 1;
+        in-out property <int> learning-checked-prompts: 0;
+        in-out property <int> learning-total-prompts: 0;
+        in-out property <int> learning-error-count: 0;
+        in-out property <int> learning-progress-percent: 0;
+        in-out property <string> learning-progress-headline: "Total questions 24 | Current prompt 1 / 48 | Answered 0 / 48 | Errors 0";
         in-out property <string> learning-action-hint: "Start training from the current draft, then complete the full 3x3 test.";
         in-out property <bool> export-ready: false;
+        in-out property <bool> package-unlocked: false;
         in-out property <int> learning-index: 0;
-        in-out property <string> learning-position: "1 / 24";
+        in-out property <string> learning-position: "1 / 48";
         in-out property <string> learning-question: "";
         in-out property <string> learning-result: "Toggle the 9 answer states, then check current question.";
         in-out property <string> learning-answer-1: "";
@@ -186,7 +195,7 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> export-package-dir: "";
         in-out property <string> temp-draft-label: "Save Draft";
         in-out property <bool> temp-draft-cooling: false;
-        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "受保护对象" : "Protected Objects") : active-page == 3 ? (is-zh ? "学习设置" : "Learning Settings") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案编辑" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
+        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "受保护对象" : "Protected Objects") : active-page == 3 ? (is-zh ? "学习策略设置" : "Learning Policy Settings") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案编辑" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
         callback close-requested();
         callback save-temp-draft();
         callback previous-node();
@@ -201,14 +210,13 @@ export component StoryLockCoreApp inherits Window {
         callback refresh-export();
         callback save-learning-policy();
         callback run-learning();
-        callback reveal-learning-answer();
         callback learning-previous();
         callback learning-next();
-        callback check-learning-current();
         callback export-package();
         callback browse-core-data-dir();
         callback browse-export-package-dir();
         callback open-core-settings();
+        callback unlock-current-package();
 
         title: "StoryLock Core";
         preferred-width: 960px;
@@ -244,6 +252,14 @@ export component StoryLockCoreApp inherits Window {
                         clicked => { root.active-page = 0; }
                     }
                     MenuButton {
+                        label: root.package-unlocked
+                            ? (root.is-zh ? "当前包已解锁" : "Package Unlocked")
+                            : (root.is-zh ? "解锁当前包" : "Unlock Package");
+                        selected: false;
+                        enabled: !root.package-unlocked;
+                        clicked => { root.unlock-current-package(); }
+                    }
+                    MenuButton {
                         label: root.is-zh ? "受保护对象" : "Protected Objects";
                         selected: root.active-page == 2;
                         clicked => { root.active-page = 2; }
@@ -272,17 +288,19 @@ export component StoryLockCoreApp inherits Window {
                     MenuButton {
                         label: root.temp-draft-label;
                         selected: false;
-                        enabled: !root.temp-draft-cooling;
+                        enabled: root.package-unlocked && !root.temp-draft-cooling;
                         clicked => { root.save-temp-draft(); }
                     }
                     MenuButton {
-                        label: root.is-zh ? "学习" : "Learning";
+                        label: root.is-zh ? "学习策略设置" : "Learning Policy";
                         selected: root.active-page == 3;
+                        enabled: root.package-unlocked;
                         clicked => { root.active-page = 3; }
                     }
                     MenuButton {
                         label: root.is-zh ? "导出" : "Export";
                         selected: root.active-page == 4;
+                        enabled: root.package-unlocked;
                         clicked => { root.active-page = 4; }
                     }
                 }
@@ -480,6 +498,7 @@ export component StoryLockCoreApp inherits Window {
                             learning-progress-summary: root.learning-progress-summary;
                             learning-action-hint: root.learning-action-hint;
                             learning-result: root.learning-result;
+                            config-status: root.config-status;
                             export-ready: root.export-ready;
                             run-learning => { root.run-learning(); }
                             export-package => { root.export-package(); }

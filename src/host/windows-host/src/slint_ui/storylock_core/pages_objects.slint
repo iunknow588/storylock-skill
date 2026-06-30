@@ -91,15 +91,12 @@ export component ProtectedObjectsPage inherits VerticalBox {
     spacing: 12px;
 
     InfoRow {
-        name: root.is-zh ? "用途" : "Purpose";
-        value: root.is-zh ? "点击列表中的受保护对象即可进入编辑页面。" : "Click a managed object in the list to edit it.";
-    }
-    InfoRow {
         name: root.is-zh ? "当前级别" : "Current Level";
         value: root.resource-group == "normal" ? (root.is-zh ? "普通对象" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "私密对象" : "Private Objects") : (root.is-zh ? "机密对象" : "Secret Objects");
     }
     ProtectedObjectTableRow {
         is-header: true;
+        width: 704px;
         name: "URI";
         username: root.is-zh ? "用户名" : "Username";
         usage: root.is-zh ? "类型" : "Type";
@@ -107,8 +104,10 @@ export component ProtectedObjectsPage inherits VerticalBox {
         id: root.is-zh ? "编号" : "ID";
     }
     ScrollView {
-        height: 174px;
-        vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+        width: 704px;
+        height: 264px;
+        vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+        horizontal-scrollbar-policy: ScrollBarPolicy.always-off;
         viewport-width: 704px;
         viewport-height: 264px;
         VerticalBox {

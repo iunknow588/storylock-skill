@@ -3,6 +3,18 @@ use super::*;
 #[test]
 fn ui_status_reports_redacted_management_stats() {
     let runtime = test_runtime();
+    let authorization_id = grid_authorize_request(
+        &runtime,
+        json!({
+            "requestId": "req-management-success-verify",
+            "capability": "requestPasswordFill",
+            "credentialRef": "mailbox-management",
+            "requester": "agent-alpha",
+            "origin": "https://agent.example.test",
+            "remoteRequest": true,
+            "remoteInterface": "relay_gateway"
+        }),
+    );
     let success = execute_request(
         &runtime,
         json!({
@@ -12,7 +24,8 @@ fn ui_status_reports_redacted_management_stats() {
             "requester": "agent-alpha",
             "origin": "https://agent.example.test",
             "remoteRequest": true,
-            "remoteInterface": "relay_gateway"
+            "remoteInterface": "relay_gateway",
+            "authorizationId": authorization_id
         }),
     );
     assert_eq!(
@@ -58,8 +71,8 @@ fn ui_status_reports_redacted_management_stats() {
         .iter()
         .find(|item| item.get("objectRef").and_then(Value::as_str) == Some("mailbox-management"))
         .expect("managed object");
-    assert_eq!(object.get("calls").and_then(Value::as_u64), Some(2));
-    assert_eq!(object.get("successes").and_then(Value::as_u64), Some(1));
+    assert_eq!(object.get("calls").and_then(Value::as_u64), Some(3));
+    assert_eq!(object.get("successes").and_then(Value::as_u64), Some(2));
     assert_eq!(object.get("failures").and_then(Value::as_u64), Some(1));
 
     assert!(stats

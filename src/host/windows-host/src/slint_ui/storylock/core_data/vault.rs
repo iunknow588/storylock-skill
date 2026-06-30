@@ -5,6 +5,7 @@ pub(crate) fn default_storylock_vault_json() -> Value {
         "schemaVersion": "1",
         "authorDraft": default_author_draft_json(),
         "pendingAuthorDraft": Value::Null,
+        "protectedResources": default_protected_resources_catalog_json(),
         "storyDraftTemplates": default_story_draft_templates_json(),
         "templates": default_storylock_templates_json()
     })
@@ -53,6 +54,14 @@ pub(crate) fn ensure_storylock_vault_with_optional_author_draft(
             let draft = storylock_author_draft_from_vault(&vault);
             vault["storyDraftTemplates"] = story_draft_templates_from_draft(&draft);
         }
+        if vault.get("protectedResources").is_none() {
+            let legacy_catalog = read_json_or_default(
+                &storylock_core_catalog_path(package_dir),
+                default_protected_resources_catalog_json(),
+            );
+            vault["protectedResources"] = protected_resources_from_legacy_catalog_or_default(&legacy_catalog);
+        }
+        normalize_builtin_protected_resources_and_templates(&mut vault);
         refresh_placeholder_author_draft_nodes(&mut vault);
         merge_builtin_story_draft_templates(&mut vault);
         if vault != before {
@@ -83,10 +92,180 @@ pub(crate) fn ensure_storylock_vault_with_optional_author_draft(
         "schemaVersion": "1",
         "authorDraft": author_draft.clone(),
         "pendingAuthorDraft": Value::Null,
+        "protectedResources": protected_resources_from_legacy_catalog_or_default(&read_json_or_default(
+            &package_dir.join("resource-catalog.json"),
+            default_protected_resources_catalog_json(),
+        )),
         "storyDraftTemplates": story_draft_templates_from_draft(&author_draft),
         "templates": legacy_templates,
     });
     write_storylock_vault(package_dir, &vault)
+}
+
+pub(crate) fn normalize_builtin_protected_resources_and_templates(vault: &mut Value) {
+    let default_resources = default_protected_resources_catalog_json();
+    let mut protected = protected_resources_from_vault(vault);
+    let mut resources = protected
+        .get("resources")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    for default_resource in default_resources
+        .get("resources")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default()
+    {
+        let resource_id = default_resource
+            .get("resourceId")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        if !resource_id.is_empty()
+            && !resources
+                .iter()
+                .any(|resource| resource.get("resourceId").and_then(Value::as_str) == Some(resource_id))
+        {
+            resources.push(default_resource);
+        }
+    }
+    protected["version"] = json!("1");
+    protected["resources"] = Value::Array(resources);
+    vault["protectedResources"] = protected;
+
+    let mut templates = storylock_templates_from_vault(vault);
+    remove_template_items_with_missing_resource_roles(&mut templates, &vault["protectedResources"]);
+    normalize_builtin_template_bundle(
+        &mut templates,
+        "loginSites",
+        "github.com",
+        default_login_templates_json,
+    );
+    normalize_builtin_template_bundle(
+        &mut templates,
+        "signingActions",
+        "evm-signing-key",
+        default_signing_templates_json,
+    );
+    normalize_builtin_template_bundle(
+        &mut templates,
+        "agentTasks",
+        "local-agent-placeholder",
+        default_agent_templates_json,
+    );
+    vault["templates"] = templates;
+}
+
+fn remove_template_items_with_missing_resource_roles(templates: &mut Value, protected: &Value) {
+    let role_index = protected
+        .get("resources")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|resource| {
+            let resource_id = resource.get("resourceId").and_then(Value::as_str)?.to_string();
+            let roles = resource
+                .get("bindings")
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|binding| {
+                    binding
+                        .get("role")
+                        .and_then(Value::as_str)
+                        .map(ToOwned::to_owned)
+                })
+                .collect::<HashSet<_>>();
+            Some((resource_id, roles))
+        })
+        .collect::<HashMap<_, _>>();
+
+    for spec in TEMPLATE_CHILD_SPECS {
+        let fallback = template_bundle_fallback(spec.bundle_key);
+        let mut bundle = templates
+            .get(spec.bundle_key)
+            .cloned()
+            .unwrap_or_else(|| fallback.clone());
+        if !bundle.is_object() {
+            bundle = fallback.clone();
+        }
+        let mut items = bundle
+            .get("items")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        items.retain(|item| {
+            let resource_id = item
+                .get("resourceId")
+                .and_then(Value::as_str)
+                .unwrap_or_default();
+            let Some(resource_roles) = role_index.get(resource_id) else {
+                return false;
+            };
+            item.get("bindings")
+                .and_then(Value::as_array)
+                .is_some_and(|bindings| {
+                    bindings.iter().all(|binding| {
+                        binding
+                            .get("role")
+                            .and_then(Value::as_str)
+                            .is_some_and(|role| resource_roles.contains(role))
+                    })
+                })
+        });
+        bundle["items"] = Value::Array(items);
+        templates[spec.bundle_key] = bundle;
+    }
+}
+
+fn normalize_builtin_template_bundle(
+    templates: &mut Value,
+    bundle_key: &str,
+    template_id: &str,
+    fallback_bundle: fn() -> Value,
+) {
+    let fallback = fallback_bundle();
+    let fallback_item = fallback
+        .get("items")
+        .and_then(Value::as_array)
+        .and_then(|items| {
+            items
+                .iter()
+                .find(|item| item.get("templateId").and_then(Value::as_str) == Some(template_id))
+                .cloned()
+        });
+    let mut bundle = templates
+        .get(bundle_key)
+        .cloned()
+        .unwrap_or_else(|| fallback.clone());
+    if !bundle.is_object() {
+        bundle = fallback.clone();
+    }
+    bundle["version"] = fallback
+        .get("version")
+        .cloned()
+        .unwrap_or_else(|| json!("1"));
+    bundle["templateType"] = fallback
+        .get("templateType")
+        .cloned()
+        .unwrap_or_else(|| json!(bundle_key));
+    let mut items = bundle
+        .get("items")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    if let Some(fallback_item) = fallback_item {
+        match items
+            .iter()
+            .position(|item| item.get("templateId").and_then(Value::as_str) == Some(template_id))
+        {
+            Some(index) => items[index] = fallback_item,
+            None => items.push(fallback_item),
+        }
+    }
+    bundle["items"] = Value::Array(items);
+    templates[bundle_key] = bundle;
 }
 
 pub(crate) fn refresh_placeholder_author_draft_nodes(vault: &mut Value) {
@@ -270,6 +449,50 @@ pub(crate) fn storylock_templates_from_vault(vault: &Value) -> Value {
         .and_then(Value::as_object)
         .map(|templates| Value::Object(templates.clone()))
         .unwrap_or_else(default_storylock_templates_json)
+}
+
+pub(crate) fn protected_resources_from_catalog_value(catalog: &Value) -> Value {
+    json!({
+        "version": catalog
+            .get("version")
+            .and_then(Value::as_str)
+            .unwrap_or("1"),
+        "resources": catalog
+            .get("resources")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default()
+    })
+}
+
+pub(crate) fn protected_resources_from_legacy_catalog_or_default(catalog: &Value) -> Value {
+    let migrated = protected_resources_from_catalog_value(catalog);
+    if migrated
+        .get("resources")
+        .and_then(Value::as_array)
+        .is_some_and(|resources| !resources.is_empty())
+    {
+        migrated
+    } else {
+        default_protected_resources_catalog_json()
+    }
+}
+
+pub(crate) fn protected_resources_from_vault(vault: &Value) -> Value {
+    vault
+        .get("protectedResources")
+        .cloned()
+        .unwrap_or_else(default_protected_resources_catalog_json)
+}
+
+pub(crate) fn read_protected_resources(package_dir: &Path) -> Value {
+    protected_resources_from_vault(&read_storylock_vault_payload(package_dir))
+}
+
+pub(crate) fn save_protected_resources(package_dir: &Path, resources: Value) -> Result<()> {
+    let mut vault = read_storylock_vault_payload(package_dir);
+    vault["protectedResources"] = protected_resources_from_catalog_value(&resources);
+    save_storylock_vault_payload(package_dir, vault)
 }
 
 pub(crate) fn read_effective_author_draft(package_dir: &Path) -> Value {

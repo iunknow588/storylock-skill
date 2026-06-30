@@ -5,12 +5,13 @@ pub(crate) fn build_export_preview(package_dir: &Path) -> String {
         &storylock_core_catalog_path(package_dir),
         default_resource_catalog_json(),
     );
+    let protected_catalog = read_protected_resources(package_dir);
     let resources = catalog
-        .get("resources")
+        .get("operationTemplates")
         .and_then(Value::as_array)
         .map(Vec::len)
         .unwrap_or(0);
-    let permission_objects = catalog
+    let permission_objects = protected_catalog
         .get("resources")
         .and_then(Value::as_array)
         .map(Vec::len)
@@ -29,6 +30,11 @@ pub(crate) fn build_export_preview(package_dir: &Path) -> String {
     } else {
         "no pending temporary draft"
     };
+    let learning_state = if has_current_learning_completed_state(package_dir) {
+        "completed for current story answers"
+    } else {
+        "not completed for current story answers"
+    };
     let errors = if preflight.errors.is_empty() {
         "none".to_string()
     } else {
@@ -40,7 +46,7 @@ pub(crate) fn build_export_preview(package_dir: &Path) -> String {
             .join("\n")
     };
     format!(
-        "identity-package/\n  vault.stlk\n  package-manifest.json\n  resource-catalog.json\n  learning-policy.json\n\nLocal path: {}\ntemporaryDraft={pending_state}\nresources={resources}\npermissionObjects={permission_objects}\npreflight={status}\nerrors:\n{errors}\n\nStoryLock UI internal export preview only; Yian Host reads learning-policy.json for retention scheduling, but does not read drafts, vault files, raw story, answers, passwords, private keys, or signingKeyBytes.",
+        "current package save\n  vault.stlk\n  package-manifest.json\n  resource-catalog.json\n  learning-policy.json\n\nLocal path: {}\ntemporaryDraft={pending_state}\nlearningState={learning_state}\npolicyTemplates={resources}\npermissionObjects={permission_objects}\npreflight={status}\nerrors:\n{errors}\n\nStoryLock UI internal preview only; export means saving the current package in place unless Save As is chosen.",
         package_dir.display()
     )
 }
@@ -102,22 +108,41 @@ pub(crate) fn validate_learning_test_inputs(package_dir: &Path) -> Result<String
 }
 
 pub(crate) fn default_storylock_export_dir(package_dir: &Path) -> std::path::PathBuf {
-    package_dir
-        .parent()
-        .map(|parent| parent.join("storylock-managed-key-package"))
-        .unwrap_or_else(|| std::path::PathBuf::from("storylock-managed-key-package"))
+    package_dir.to_path_buf()
+}
+
+pub(crate) fn normalize_storylock_export_dir_path(
+    core: &StoryLockCoreApp,
+    package_dir: &Path,
+    configured: &str,
+) -> std::path::PathBuf {
+    let trimmed = configured.trim();
+    if trimmed.is_empty() {
+        return default_storylock_export_dir(package_dir);
+    }
+    let resolved = std::path::PathBuf::from(trimmed);
+    let resolved = resolve_storylock_core_package_path(&resolved);
+    if resolved.file_name().and_then(|value| value.to_str()) == Some("vault.stlk") {
+        return resolved
+            .parent()
+            .map(Path::to_path_buf)
+            .unwrap_or(resolved);
+    }
+    if resolved == default_storylock_export_dir(package_dir) {
+        return resolved;
+    }
+    if core.get_export_package_dir().trim().is_empty() {
+        default_storylock_export_dir(package_dir)
+    } else {
+        resolved
+    }
 }
 
 pub(crate) fn storylock_export_dir_from_window(
     core: &StoryLockCoreApp,
     package_dir: &Path,
 ) -> std::path::PathBuf {
-    let configured = core.get_export_package_dir().trim().to_string();
-    if configured.is_empty() {
-        default_storylock_export_dir(package_dir)
-    } else {
-        std::path::PathBuf::from(configured)
-    }
+    normalize_storylock_export_dir_path(core, package_dir, core.get_export_package_dir().as_str())
 }
 
 #[cfg(test)]
@@ -130,6 +155,12 @@ pub(crate) fn export_storylock_package_to(
     package_dir: &Path,
     export_dir: &Path,
 ) -> Result<std::path::PathBuf> {
+    let mut vault = read_storylock_vault_payload(package_dir);
+    let before = vault.clone();
+    normalize_builtin_protected_resources_and_templates(&mut vault);
+    if vault != before {
+        save_storylock_vault_payload(package_dir, vault)?;
+    }
     let preflight = preflight_storylock_core_package(package_dir);
     if !preflight.errors.is_empty() {
         anyhow::bail!(
@@ -137,25 +168,41 @@ pub(crate) fn export_storylock_package_to(
             preflight
                 .errors
                 .iter()
-                .map(|issue| issue.code)
+                .map(|issue| format!("{} {} {}", issue.code, issue.path, issue.message))
                 .collect::<Vec<_>>()
-                .join(", ")
+                .join("; ")
         );
     }
     promote_pending_author_draft(package_dir)?;
+    let package_dir = package_dir.canonicalize().unwrap_or_else(|_| package_dir.to_path_buf());
+    let export_dir_canonical = export_dir
+        .canonicalize()
+        .unwrap_or_else(|_| export_dir.to_path_buf());
+    if package_dir == export_dir_canonical {
+        fs::write(
+            export_dir.join("EXPORT_STATUS.txt"),
+            format!(
+                "Saved current StoryLock package in place after learning test.\nSource: {}\nSavedAt: {}\nTemporaryDraftCleared: true\n",
+                package_dir.display(),
+                ui_now_timestamp()
+            ),
+        )?;
+        remove_pending_author_draft(&package_dir)?;
+        return Ok(export_dir.to_path_buf());
+    }
     if export_dir.exists() {
         fs::remove_dir_all(export_dir)?;
     }
-    copy_dir_recursive(package_dir, export_dir)?;
+    copy_dir_recursive(&package_dir, export_dir)?;
     fs::write(
         export_dir.join("EXPORT_STATUS.txt"),
         format!(
-            "Exported from StoryLock Core after learning test.\nSource: {}\nExportedAt: {}\nTemporaryDraftCleared: true\n",
+            "Saved StoryLock package after learning test.\nSource: {}\nSavedAt: {}\nTemporaryDraftCleared: true\n",
             package_dir.display(),
             ui_now_timestamp()
         ),
     )?;
-    remove_pending_author_draft(package_dir)?;
+    remove_pending_author_draft(&package_dir)?;
     Ok(export_dir.to_path_buf())
 }
 

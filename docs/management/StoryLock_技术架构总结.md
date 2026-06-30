@@ -1,4 +1,4 @@
-﻿# StoryLock 技术架构总结
+# StoryLock 技术架构总结
 
 ## 一、总体架构
 

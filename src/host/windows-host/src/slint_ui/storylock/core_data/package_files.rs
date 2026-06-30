@@ -132,12 +132,21 @@ pub(crate) fn ensure_storylock_core_package(package_dir: &Path) -> Result<()> {
         &default_learning_policy_json(),
     )?;
     ensure_storylock_vault_with_optional_author_draft(package_dir, directory_story_template)?;
+    rewrite_resource_catalog_as_policy_template(package_dir)?;
     ensure_storylock_template_files(package_dir)?;
     ensure_story_draft_template_files(package_dir)?;
     cleanup_redundant_storylock_template_files(package_dir)?;
     cleanup_legacy_nested_storylock_template_package_files(package_dir)?;
     cleanup_legacy_storylock_package_files(package_dir)?;
     Ok(())
+}
+
+pub(crate) fn rewrite_resource_catalog_as_policy_template(package_dir: &Path) -> Result<()> {
+    fs::write(
+        storylock_core_catalog_path(package_dir),
+        serde_json::to_vec_pretty(&default_resource_catalog_json())?,
+    )?;
+    ensure_manifest_lists_required_files(package_dir)
 }
 
 pub(crate) fn ensure_storylock_template_files(package_dir: &Path) -> Result<()> {

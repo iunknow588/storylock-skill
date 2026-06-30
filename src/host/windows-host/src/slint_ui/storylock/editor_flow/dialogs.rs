@@ -1,16 +1,18 @@
-﻿use super::*;
+use super::*;
+use std::cell::Cell;
 use std::ptr::{null, null_mut};
 use std::sync::atomic::{AtomicBool, Ordering};
 use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 use windows_sys::Win32::Graphics::Gdi::{CreateSolidBrush, HBRUSH};
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
+use windows_sys::Win32::UI::Input::KeyboardAndMouse::EnableWindow;
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetDlgItem,
     GetForegroundWindow, GetMessageW, GetWindowLongPtrW, GetWindowTextLengthW, GetWindowTextW,
-    IsDialogMessageW, IsWindow, LoadCursorW, RegisterClassW, SetForegroundWindow,
-    SetWindowLongPtrW, SetWindowPos, SetWindowTextW, ShowWindow, TranslateMessage,
-    CREATESTRUCTW, CW_USEDEFAULT, GWLP_USERDATA, HMENU, HWND_NOTOPMOST, HWND_TOPMOST, IDC_ARROW,
-    MSG, SW_SHOW, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, WINDOW_EX_STYLE, WINDOW_STYLE,
+    IsDialogMessageW, IsWindow, LoadCursorW, MessageBoxW, RegisterClassW, SetForegroundWindow,
+    SetWindowLongPtrW, SetWindowPos, SetWindowTextW, ShowWindow, TranslateMessage, CREATESTRUCTW,
+    CW_USEDEFAULT, GWLP_USERDATA, HMENU, HWND_NOTOPMOST, HWND_TOPMOST, IDC_ARROW, MB_ICONINFORMATION,
+    MB_OK, MSG, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SW_SHOW, WINDOW_EX_STYLE, WINDOW_STYLE,
     WM_CLOSE, WM_COMMAND, WM_CREATE, WM_DESTROY, WM_NCCREATE, WNDCLASSW, WS_BORDER, WS_CAPTION,
     WS_CHILD, WS_CLIPCHILDREN, WS_EX_CONTROLPARENT, WS_EX_DLGMODALFRAME, WS_EX_WINDOWEDGE,
     WS_OVERLAPPED, WS_SYSMENU, WS_TABSTOP, WS_VISIBLE,
@@ -112,17 +114,31 @@ pub(crate) fn open_object_editor_dialog(
         core.get_provider_id().as_str(),
         core.get_secret_reference().as_str(),
     ) {
-        Ok(Some(result)) => {
-            core.set_display_name(SharedString::from(result.uri.as_str()));
-            core.set_provider_id(SharedString::from(result.username.as_str()));
-            core.set_secret_reference(SharedString::from(result.password.as_str()));
-            core.set_object_kind(SharedString::from("password_fill"));
-            set_core_status(
-                core,
-                save_object_editor_resource_from_window(core, package_dir),
-                "Managed object saved.",
-            );
-        }
+        Ok(Some(result)) => match result.action {
+            NativeManagedObjectDialogAction::Save => {
+                core.set_display_name(SharedString::from(result.uri.as_str()));
+                core.set_provider_id(SharedString::from(result.username.as_str()));
+                core.set_secret_reference(SharedString::from(result.password.as_str()));
+                if core.get_object_kind().trim().is_empty() {
+                    core.set_object_kind(SharedString::from("password_fill"));
+                }
+                if core.get_resource_group().trim().is_empty() {
+                    core.set_resource_group(SharedString::from("normal"));
+                }
+                set_core_status(
+                    core,
+                    save_object_editor_resource_from_window(core, package_dir),
+                    "Managed object saved.",
+                );
+            }
+            NativeManagedObjectDialogAction::Delete => {
+                set_core_status(
+                    core,
+                    delete_object_editor_resource_from_window(core, package_dir),
+                    "Managed object deleted.",
+                );
+            }
+        },
         Ok(None) => {}
         Err(error) => {
             core.set_config_status(SharedString::from(format!(
@@ -133,7 +149,13 @@ pub(crate) fn open_object_editor_dialog(
     NATIVE_OBJECT_EDITOR_OPEN.store(false, Ordering::SeqCst);
 }
 
+enum NativeManagedObjectDialogAction {
+    Save,
+    Delete,
+}
+
 struct NativeManagedObjectDialogResult {
+    action: NativeManagedObjectDialogAction,
     uri: String,
     username: String,
     password: String,
@@ -154,12 +176,14 @@ const ID_USERNAME: i32 = 1002;
 const ID_PASSWORD: i32 = 1003;
 const ID_SAVE: i32 = 1004;
 const ID_CLOSE: i32 = 1005;
+const ID_DELETE: i32 = 1006;
 
 struct NativeManagedObjectDialogLabels {
     title: &'static str,
     username: &'static str,
     password: &'static str,
     save: &'static str,
+    delete: &'static str,
     close: &'static str,
 }
 
@@ -167,11 +191,12 @@ impl NativeManagedObjectDialogLabels {
     fn from_language(language: &str) -> Self {
         if language == "zh" {
             Self {
-                title: "受保护对象编辑",
-                username: "用户名",
-                password: "密码",
-                save: "保存",
-                close: "关闭",
+                title: "\u{53d7}\u{63a7}\u{5bf9}\u{8c61}\u{7f16}\u{8f91}",
+                username: "\u{7528}\u{6237}\u{540d}",
+                password: "\u{5bc6}\u{7801}",
+                save: "\u{4fdd}\u{5b58}",
+                delete: "\u{5220}\u{9664}",
+                close: "\u{5173}\u{95ed}",
             }
         } else {
             Self {
@@ -179,6 +204,7 @@ impl NativeManagedObjectDialogLabels {
                 username: "Username",
                 password: "Password",
                 save: "Save",
+                delete: "Delete",
                 close: "Close",
             }
         }
@@ -215,6 +241,7 @@ fn native_managed_object_dialog(
             username: labels.username,
             password: labels.password,
             save: labels.save,
+            delete: labels.delete,
             close: labels.close,
         },
         owner: 0 as HWND,
@@ -241,7 +268,8 @@ fn native_managed_object_dialog(
             (WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT) as WINDOW_EX_STYLE,
             class_name.as_ptr(),
             title.as_ptr(),
-            (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_CLIPCHILDREN) as WINDOW_STYLE,
+            (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | WS_CLIPCHILDREN)
+                as WINDOW_STYLE,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
             680,
@@ -253,9 +281,14 @@ fn native_managed_object_dialog(
         );
         if hwnd.is_null() {
             let _ = Box::from_raw(state_ptr);
-            return Err(anyhow::anyhow!("native object editor window creation failed"));
+            return Err(anyhow::anyhow!(
+                "native object editor window creation failed"
+            ));
         }
 
+        if !owner.is_null() {
+            EnableWindow(owner, 0);
+        }
         SetWindowTextW(hwnd, title.as_ptr());
         ShowWindow(hwnd, SW_SHOW);
         SetWindowPos(
@@ -281,6 +314,10 @@ fn native_managed_object_dialog(
         while IsWindow(hwnd) != 0 {
             let status = GetMessageW(&mut msg, null_mut(), 0, 0);
             if status == -1 {
+                if !owner.is_null() {
+                    EnableWindow(owner, 1);
+                    SetForegroundWindow(owner);
+                }
                 let _ = Box::from_raw(state_ptr);
                 return Err(anyhow::anyhow!("native object editor message loop failed"));
             }
@@ -296,6 +333,10 @@ fn native_managed_object_dialog(
             }
         }
 
+        if !owner.is_null() {
+            EnableWindow(owner, 1);
+            SetForegroundWindow(owner);
+        }
         let state = Box::from_raw(state_ptr);
         Ok(state.result)
     }
@@ -328,6 +369,10 @@ unsafe extern "system" fn native_managed_object_dialog_proc(
                     DestroyWindow(hwnd);
                     0
                 }
+                ID_DELETE => {
+                    delete_native_managed_object_dialog(hwnd);
+                    0
+                }
                 _ => DefWindowProcW(hwnd, message, wparam, lparam),
             }
         }
@@ -347,7 +392,12 @@ unsafe fn init_native_managed_object_dialog_controls(hwnd: HWND) {
     }
     let state = &*state_ptr;
 
-    create_static(hwnd, "URI", 24, 26, 100, 24, 0);
+    let uri_label = if state.labels.title == "\u{53d7}\u{63a7}\u{5bf9}\u{8c61}\u{7f16}\u{8f91}" {
+        "\u{5bf9}\u{8c61}\u{540d}\u{79f0}"
+    } else {
+        "URI"
+    };
+    create_static(hwnd, uri_label, 24, 26, 100, 24, 0);
     create_edit(hwnd, ID_URI, &state.initial_uri, 130, 22, 500, 24, false);
     create_static(hwnd, state.labels.username, 24, 66, 100, 24, 0);
     create_edit(
@@ -371,8 +421,18 @@ unsafe fn init_native_managed_object_dialog_controls(hwnd: HWND) {
         24,
         false,
     );
-    create_button(hwnd, state.labels.save, ID_SAVE, 400, 152, 100, 30, true);
-    create_button(hwnd, state.labels.close, ID_CLOSE, 520, 152, 100, 30, true);
+    create_button(hwnd, state.labels.save, ID_SAVE, 280, 152, 100, 30, true);
+    create_button(hwnd, state.labels.close, ID_CLOSE, 400, 152, 100, 30, false);
+    create_button(
+        hwnd,
+        state.labels.delete,
+        ID_DELETE,
+        520,
+        152,
+        100,
+        30,
+        false,
+    );
 }
 
 unsafe fn create_static(
@@ -469,6 +529,22 @@ unsafe fn save_native_managed_object_dialog(hwnd: HWND) {
         return;
     }
     (*state_ptr).result = Some(NativeManagedObjectDialogResult {
+        action: NativeManagedObjectDialogAction::Save,
+        uri: get_window_text(GetDlgItem(hwnd, ID_URI)),
+        username: get_window_text(GetDlgItem(hwnd, ID_USERNAME)),
+        password: get_window_text(GetDlgItem(hwnd, ID_PASSWORD)),
+    });
+    DestroyWindow(hwnd);
+}
+
+unsafe fn delete_native_managed_object_dialog(hwnd: HWND) {
+    let state_ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA) as *mut NativeManagedObjectDialogState;
+    if state_ptr.is_null() {
+        DestroyWindow(hwnd);
+        return;
+    }
+    (*state_ptr).result = Some(NativeManagedObjectDialogResult {
+        action: NativeManagedObjectDialogAction::Delete,
         uri: get_window_text(GetDlgItem(hwnd, ID_URI)),
         username: get_window_text(GetDlgItem(hwnd, ID_USERNAME)),
         password: get_window_text(GetDlgItem(hwnd, ID_PASSWORD)),
@@ -497,103 +573,69 @@ pub(crate) fn open_learning_test_dialog(
     core: &StoryLockCoreApp,
     learning_dialog: Rc<RefCell<Option<LearningTestDialog>>>,
 ) {
-    if learning_dialog.borrow().is_none() {
-        match LearningTestDialog::new() {
-            Ok(dialog) => {
-                wire_learning_test_dialog_callbacks(
-                    &dialog,
-                    core.as_weak(),
-                    Rc::clone(&learning_dialog),
-                );
-                *learning_dialog.borrow_mut() = Some(dialog);
-            }
-            Err(error) => {
-                core.set_config_status(SharedString::from(format!(
-                    "Learning dialog failed to open: {error}"
-                )));
-                return;
-            }
+    if let Some(dialog) = learning_dialog.borrow().as_ref() {
+        copy_core_learning_to_dialog(core, dialog);
+        dialog.window().request_redraw();
+        return;
+    }
+
+    let new_modal_owner: Rc<Cell<HWND>>;
+    match LearningTestDialog::new() {
+        Ok(dialog) => {
+            let modal_owner = Rc::new(Cell::new(null_mut()));
+            wire_learning_test_dialog_callbacks(
+                &dialog,
+                core.as_weak(),
+                Rc::clone(&learning_dialog),
+                Rc::clone(&modal_owner),
+            );
+            *learning_dialog.borrow_mut() = Some(dialog);
+            new_modal_owner = modal_owner;
+        }
+        Err(error) => {
+            core.set_config_status(SharedString::from(format!(
+                "Learning dialog failed to open: {error}"
+            )));
+            return;
         }
     }
 
     if let Some(dialog) = learning_dialog.borrow().as_ref() {
         copy_core_learning_to_dialog(core, dialog);
+        let owner = unsafe { GetForegroundWindow() };
+        new_modal_owner.set(owner);
+        if !owner.is_null() {
+            unsafe {
+                EnableWindow(owner, 0);
+            }
+        }
         if let Err(error) = dialog.show() {
+            restore_learning_modal_owner(&new_modal_owner);
             core.set_config_status(SharedString::from(format!(
                 "Learning dialog failed to show: {error}"
             )));
         }
+        dialog.window().request_redraw();
     }
-}
-
-pub(crate) fn wire_object_editor_callbacks(
-    dialog: &ObjectEditorDialog,
-    core_weak: slint::Weak<StoryLockCoreApp>,
-    package_dir: std::path::PathBuf,
-    object_editor: Rc<RefCell<Option<ObjectEditorDialog>>>,
-) {
-    let close_slot = Rc::clone(&object_editor);
-    let close_slot_for_save = Rc::clone(&close_slot);
-    let core_for_save = core_weak.clone();
-    let save_dir = package_dir.clone();
-    let weak = dialog.as_weak();
-    dialog.on_save_requested(move || {
-        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_save.upgrade()) {
-            copy_dialog_object_to_core(&dialog, &core);
-            match save_object_editor_resource_from_window(&core, &save_dir) {
-                Ok(()) => {
-                    core.set_config_status(SharedString::from("Managed object saved."));
-                    let _ = dialog.hide();
-                    *close_slot_for_save.borrow_mut() = None;
-                }
-                Err(error) => {
-                    let message = SharedString::from(format!("Object save failed: {error}"));
-                    core.set_config_status(message.clone());
-                }
-            }
-        }
-    });
-
-    let weak = dialog.as_weak();
-    let close_slot_for_button = Rc::clone(&close_slot);
-    dialog.on_close_requested(move || {
-        if let Some(dialog) = weak.upgrade() {
-            let _ = dialog.hide();
-        }
-        *close_slot_for_button.borrow_mut() = None;
-    });
-
-    let weak = dialog.as_weak();
-    let close_slot_for_window = close_slot;
-    dialog.window().on_close_requested(move || {
-        if let Some(dialog) = weak.upgrade() {
-            let _ = dialog.hide();
-        }
-        *close_slot_for_window.borrow_mut() = None;
-        slint::CloseRequestResponse::HideWindow
-    });
 }
 
 pub(crate) fn wire_learning_test_dialog_callbacks(
     dialog: &LearningTestDialog,
     core_weak: slint::Weak<StoryLockCoreApp>,
     learning_dialog: Rc<RefCell<Option<LearningTestDialog>>>,
+    modal_owner: Rc<Cell<HWND>>,
 ) {
     let weak = dialog.as_weak();
     let core_for_restart = core_weak.clone();
+    let restart_slot = Rc::clone(&learning_dialog);
+    let modal_owner_for_restart = Rc::clone(&modal_owner);
     dialog.on_restart_learning(move || {
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_restart.upgrade()) {
             copy_dialog_learning_to_core(&dialog, &core);
+            let _ = dialog.hide();
+            restore_learning_modal_owner(&modal_owner_for_restart);
+            *restart_slot.borrow_mut() = None;
             core.invoke_run_learning();
-        }
-    });
-
-    let weak = dialog.as_weak();
-    let core_for_reveal = core_weak.clone();
-    dialog.on_reveal_learning_answer(move || {
-        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_reveal.upgrade()) {
-            copy_dialog_learning_to_core(&dialog, &core);
-            core.invoke_reveal_learning_answer();
         }
     });
 
@@ -608,28 +650,39 @@ pub(crate) fn wire_learning_test_dialog_callbacks(
 
     let weak = dialog.as_weak();
     let core_for_next = core_weak.clone();
+    let next_slot = Rc::clone(&learning_dialog);
+    let modal_owner_for_next = Rc::clone(&modal_owner);
     dialog.on_learning_next(move || {
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_next.upgrade()) {
             copy_dialog_learning_to_core(&dialog, &core);
             core.invoke_learning_next();
+            if core.get_export_ready() {
+                show_learning_passed_message();
+                let _ = dialog.hide();
+                restore_learning_modal_owner(&modal_owner_for_next);
+                *next_slot.borrow_mut() = None;
+            }
         }
     });
 
     let weak = dialog.as_weak();
-    let core_for_check = core_weak;
-    dialog.on_check_learning_current(move || {
-        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_check.upgrade()) {
+    let core_for_toggle = core_weak.clone();
+    dialog.on_learning_toggle_answer(move |index| {
+        if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_toggle.upgrade()) {
             copy_dialog_learning_to_core(&dialog, &core);
-            core.invoke_check_learning_current();
+            toggle_learning_answer_state(&core, index.max(0) as usize);
+            copy_core_learning_to_dialog(&core, &dialog);
         }
     });
 
     let weak = dialog.as_weak();
     let close_slot_for_button = Rc::clone(&learning_dialog);
+    let modal_owner_for_button = Rc::clone(&modal_owner);
     dialog.on_close_requested(move || {
         if let Some(dialog) = weak.upgrade() {
             let _ = dialog.hide();
         }
+        restore_learning_modal_owner(&modal_owner_for_button);
         *close_slot_for_button.borrow_mut() = None;
     });
 
@@ -639,9 +692,33 @@ pub(crate) fn wire_learning_test_dialog_callbacks(
         if let Some(dialog) = weak.upgrade() {
             let _ = dialog.hide();
         }
+        restore_learning_modal_owner(&modal_owner);
         *close_slot_for_window.borrow_mut() = None;
         slint::CloseRequestResponse::HideWindow
     });
+}
+
+fn restore_learning_modal_owner(modal_owner: &Cell<HWND>) {
+    let owner = modal_owner.replace(null_mut());
+    if !owner.is_null() && unsafe { IsWindow(owner) } != 0 {
+        unsafe {
+            EnableWindow(owner, 1);
+            SetForegroundWindow(owner);
+        }
+    }
+}
+
+fn show_learning_passed_message() {
+    let title = wide_null("九宫格测试");
+    let message = wide_null("测试已通过，可以导出。");
+    unsafe {
+        MessageBoxW(
+            GetForegroundWindow(),
+            message.as_ptr(),
+            title.as_ptr(),
+            MB_OK | MB_ICONINFORMATION,
+        );
+    }
 }
 
 pub(crate) fn wire_storylock_core_settings_callbacks(
@@ -708,9 +785,10 @@ pub(crate) fn wire_storylock_core_settings_callbacks(
                 file_dialog = file_dialog.set_directory(&current_dir);
             }
             if let Some(selected_dir) = file_dialog.pick_folder() {
-                match ensure_storylock_core_package(&selected_dir) {
+                let package_dir = resolve_storylock_core_package_path(&selected_dir);
+                match ensure_storylock_core_package(&package_dir) {
                     Ok(()) => {
-                        initialize_storylock_core_window(&core, &selected_dir);
+                        initialize_storylock_core_empty_window(&core, &package_dir);
                         if let Err(error) =
                             save_storylock_ui_settings(&settings_from_storylock_core(&core))
                         {
@@ -719,7 +797,7 @@ pub(crate) fn wire_storylock_core_settings_callbacks(
                             )));
                         }
                         core.set_config_status(SharedString::from(
-                            "StoryLock Core workspace loaded from selected directory.",
+                            "StoryLock Core target package selected. Unlock the current package to load package content.",
                         ));
                         copy_core_settings_to_dialog(&core, &dialog);
                     }
@@ -746,8 +824,13 @@ pub(crate) fn wire_answer_editor_callbacks(
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_window_close.upgrade()) {
             copy_answer_editor_to_core(&dialog, &core);
             match save_current_node_from_window(&core, &close_dir) {
-                Ok(()) => core
-                    .set_config_status(SharedString::from("Answer editor saved current question.")),
+                Ok(()) => {
+                    let _ = clear_learning_completed_state(&close_dir);
+                    core.set_export_ready(false);
+                    core.set_config_status(SharedString::from(
+                        "Answer editor saved current question. Learning must run again before export.",
+                    ));
+                }
                 Err(error) => core.set_config_status(SharedString::from(format!(
                     "Answer editor save failed: {error}"
                 ))),
@@ -764,6 +847,8 @@ pub(crate) fn wire_answer_editor_callbacks(
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_previous.upgrade()) {
             copy_answer_editor_to_core(&dialog, &core);
             if save_current_node_from_window(&core, &previous_dir).is_ok() {
+                let _ = clear_learning_completed_state(&previous_dir);
+                core.set_export_ready(false);
                 let next_index = core.get_node_index().saturating_sub(1);
                 load_node_into_window(&core, &previous_dir, next_index);
                 copy_core_question_to_answer_editor(&core, &dialog);
@@ -778,6 +863,8 @@ pub(crate) fn wire_answer_editor_callbacks(
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_next.upgrade()) {
             copy_answer_editor_to_core(&dialog, &core);
             if save_current_node_from_window(&core, &next_dir).is_ok() {
+                let _ = clear_learning_completed_state(&next_dir);
+                core.set_export_ready(false);
                 let next_index = (core.get_node_index() + 1).min(23);
                 load_node_into_window(&core, &next_dir, next_index);
                 copy_core_question_to_answer_editor(&core, &dialog);
@@ -792,6 +879,8 @@ pub(crate) fn wire_answer_editor_callbacks(
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_select.upgrade()) {
             copy_answer_editor_to_core(&dialog, &core);
             if save_current_node_from_window(&core, &select_dir).is_ok() {
+                let _ = clear_learning_completed_state(&select_dir);
+                core.set_export_ready(false);
                 let selected_index = value
                     .parse::<i32>()
                     .ok()
@@ -870,31 +959,18 @@ pub(crate) fn copy_answer_editor_to_core(dialog: &AnswerEditorDialog, core: &Sto
     core.set_answer_9_state(dialog.get_answer_9_state());
 }
 
-pub(crate) fn copy_core_object_to_dialog(core: &StoryLockCoreApp, dialog: &ObjectEditorDialog) {
-    let uri = core.get_display_name();
-    let username = core.get_provider_id();
-    let password = core.get_secret_reference();
-    dialog.set_language(core.get_language());
-    dialog.set_uri(uri);
-    dialog.set_username(username);
-    dialog.set_password(password);
-}
-
-pub(crate) fn copy_dialog_object_to_core(dialog: &ObjectEditorDialog, core: &StoryLockCoreApp) {
-    let uri = dialog.get_uri();
-    let username = dialog.get_username();
-    let password = dialog.get_password();
-    core.set_display_name(uri);
-    core.set_provider_id(username);
-    core.set_secret_reference(password);
-    core.set_object_kind(SharedString::from("password_fill"));
-}
-
 pub(crate) fn copy_core_learning_to_dialog(core: &StoryLockCoreApp, dialog: &LearningTestDialog) {
     dialog.set_language(core.get_language());
     dialog.set_learning_plan_summary(core.get_learning_plan_summary());
     dialog.set_learning_status(core.get_learning_status());
     dialog.set_learning_progress_summary(core.get_learning_progress_summary());
+    dialog.set_learning_total_questions(core.get_learning_total_questions());
+    dialog.set_learning_current_question(core.get_learning_current_question());
+    dialog.set_learning_checked_prompts(core.get_learning_checked_prompts());
+    dialog.set_learning_total_prompts(core.get_learning_total_prompts());
+    dialog.set_learning_error_count(core.get_learning_error_count());
+    dialog.set_learning_progress_percent(core.get_learning_progress_percent());
+    dialog.set_learning_progress_headline(core.get_learning_progress_headline());
     dialog.set_learning_action_hint(core.get_learning_action_hint());
     dialog.set_learning_position(core.get_learning_position());
     dialog.set_learning_question(core.get_learning_question());
@@ -939,4 +1015,3 @@ pub(crate) fn copy_dialog_learning_to_core(dialog: &LearningTestDialog, core: &S
     core.set_learning_answer_9(dialog.get_learning_answer_9());
     core.set_learning_answer_9_state(dialog.get_learning_answer_9_state());
 }
-

@@ -78,6 +78,8 @@ assert.ok(leakedValidation.errors.some((item) => item.code === "SL_PKG_HOST_READ
 
 console.log(JSON.stringify({
   status: "passed",
-  validFixture,
-  invalidFixture,
+  fixtures: {
+    valid: "scripts/test/fixtures/storylock-package/valid",
+    invalid: "scripts/test/fixtures/storylock-package/invalid",
+  },
 }, null, 2));

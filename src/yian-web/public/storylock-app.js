@@ -696,13 +696,17 @@ function bindActions() {
     }
     if (action === "add-resource") {
       const next = resources.length + 1;
+      const group = resourceGroups.some((item) => item.id === state.selectedResourceGroup)
+        ? state.selectedResourceGroup
+        : "normal";
+      const groupMeta = resourceGroups.find((item) => item.id === group) ?? resourceGroups[0];
       const resource = {
         id: `resource-${next}`,
-        group: "normal",
+        group,
         name: `本地保护对象 ${next}`,
         kind: "secret",
         action: "requestSignature",
-        strength: "普通",
+        strength: groupMeta.chip,
         description: "新建的本地保护对象，请补充用途和授权边界。",
       };
       resources.push(resource);

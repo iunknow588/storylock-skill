@@ -1,5 +1,5 @@
-import { VerticalBox, HorizontalBox, ScrollView } from "std-widgets.slint";
-import { StaticRow, EditableRow, ActionButton, LogPanel } from "../common.slint";
+﻿import { VerticalBox, HorizontalBox, ScrollView } from "std-widgets.slint";
+import { StaticRow, EditableRow, ActionButton, StaticTextPanel, CopyableLogPanel } from "../common.slint";
 
 export component LearningPage inherits VerticalBox {
     in property <bool> is-zh;
@@ -38,26 +38,26 @@ export component LearningPage inherits VerticalBox {
             width: 690px;
             height: 660px;
             spacing: 10px;
-            StaticRow { name: root.is-zh ? "学习参数文件" : "Learning File"; value: "learning-policy.json"; }
-            EditableRow { name: root.is-zh ? "每题训练次数" : "Prompts Per Q"; value <=> root.pre-learning-prompts-per-question; }
-            EditableRow { name: root.is-zh ? "错误上限" : "Error Max"; value <=> root.pre-learning-error-tolerance; }
-            EditableRow { name: root.is-zh ? "弱项上限" : "Weak Item Max"; value <=> root.weak-item-limit; }
-            EditableRow { name: root.is-zh ? "初始天数" : "Initial Days"; value <=> root.initial-days; }
-            EditableRow { name: root.is-zh ? "初始频率" : "Initial Freq"; value <=> root.initial-frequency-days; }
-            EditableRow { name: root.is-zh ? "巩固天数" : "Consolid. Days"; value <=> root.consolidation-days; }
-            EditableRow { name: root.is-zh ? "巩固频率" : "Consolid. Freq"; value <=> root.consolidation-frequency-days; }
-            EditableRow { name: root.is-zh ? "适应周数" : "Adapt Weeks"; value <=> root.adaptation-weeks; }
-            EditableRow { name: root.is-zh ? "适应频率" : "Adapt Freq"; value <=> root.adaptation-frequency-weeks; }
-            EditableRow { name: root.is-zh ? "稳定月数" : "Stable Months"; value <=> root.stable-months; }
-            EditableRow { name: root.is-zh ? "稳定频率" : "Stable Freq"; value <=> root.stable-frequency-months; }
-            EditableRow { name: root.is-zh ? "长期年数" : "Long Years"; value <=> root.long-term-years; }
-            EditableRow { name: root.is-zh ? "长期频率" : "Long Freq"; value <=> root.long-term-frequency-years; }
-            StaticRow { name: root.is-zh ? "训练摘要" : "Training Summary"; value: root.learning-plan-summary; }
-            StaticRow { name: root.is-zh ? "当前状态" : "Status"; value: root.learning-status; }
+            StaticRow { name: root.is-zh ? "\u{8bad}\u{7ec3}\u{53c2}\u{6570}\u{6587}\u{4ef6}" : "Learning File"; value: "learning-policy.json"; }
+            EditableRow { name: root.is-zh ? "\u{6bcf}\u{9898}\u{8bad}\u{7ec3}\u{6b21}\u{6570}" : "Prompts Per Q"; value <=> root.pre-learning-prompts-per-question; }
+            EditableRow { name: root.is-zh ? "\u{9519}\u{8bef}\u{4e0a}\u{9650}" : "Error Max"; value <=> root.pre-learning-error-tolerance; }
+            EditableRow { name: root.is-zh ? "\u{5f31}\u{9879}\u{4e0a}\u{9650}" : "Weak Item Max"; value <=> root.weak-item-limit; }
+            EditableRow { name: root.is-zh ? "\u{521d}\u{59cb}\u{5929}\u{6570}" : "Initial Days"; value <=> root.initial-days; }
+            EditableRow { name: root.is-zh ? "\u{521d}\u{59cb}\u{9891}\u{7387}" : "Initial Freq"; value <=> root.initial-frequency-days; }
+            EditableRow { name: root.is-zh ? "\u{5de9}\u{56fa}\u{5929}\u{6570}" : "Consolid. Days"; value <=> root.consolidation-days; }
+            EditableRow { name: root.is-zh ? "\u{5de9}\u{56fa}\u{9891}\u{7387}" : "Consolid. Freq"; value <=> root.consolidation-frequency-days; }
+            EditableRow { name: root.is-zh ? "\u{9002}\u{5e94}\u{5468}\u{6570}" : "Adapt Weeks"; value <=> root.adaptation-weeks; }
+            EditableRow { name: root.is-zh ? "\u{9002}\u{5e94}\u{9891}\u{7387}" : "Adapt Freq"; value <=> root.adaptation-frequency-weeks; }
+            EditableRow { name: root.is-zh ? "\u{7a33}\u{5b9a}\u{6708}\u{6570}" : "Stable Months"; value <=> root.stable-months; }
+            EditableRow { name: root.is-zh ? "\u{7a33}\u{5b9a}\u{9891}\u{7387}" : "Stable Freq"; value <=> root.stable-frequency-months; }
+            EditableRow { name: root.is-zh ? "\u{957f}\u{671f}\u{5e74}\u{6570}" : "Long Years"; value <=> root.long-term-years; }
+            EditableRow { name: root.is-zh ? "\u{957f}\u{671f}\u{9891}\u{7387}" : "Long Freq"; value <=> root.long-term-frequency-years; }
+            StaticRow { name: root.is-zh ? "\u{8bad}\u{7ec3}\u{6458}\u{8981}" : "Training Summary"; value: root.learning-plan-summary; }
+            StaticRow { name: root.is-zh ? "\u{5f53}\u{524d}\u{72b6}\u{6001}" : "Status"; value: root.learning-status; }
             HorizontalBox {
                 spacing: 10px;
                 Rectangle { width: 164px; height: 1px; background: transparent; }
-                ActionButton { label: root.is-zh ? "保存参数" : "Save Settings"; primary: true; clicked => { root.save-learning-policy(); } }
+                ActionButton { label: root.is-zh ? "\u{4fdd}\u{5b58}\u{53c2}\u{6570}" : "Save Settings"; primary: true; clicked => { root.save-learning-policy(); } }
             }
         }
     }
@@ -70,6 +70,7 @@ export component ExportPage inherits VerticalBox {
     in property <string> learning-progress-summary;
     in property <string> learning-action-hint;
     in property <string> learning-result;
+    in property <string> config-status;
     in property <bool> export-ready;
     callback run-learning();
     callback export-package();
@@ -83,16 +84,32 @@ export component ExportPage inherits VerticalBox {
     VerticalBox {
         width: 690px;
         spacing: 10px;
-        StaticRow { name: root.is-zh ? "训练规则" : "Training Rule"; value: root.learning-plan-summary; }
-        StaticRow { name: root.is-zh ? "训练状态" : "Training Status"; value: root.learning-status; }
-        StaticRow { name: root.is-zh ? "当前进度" : "Progress"; value: root.learning-progress-summary; }
-        StaticRow { name: root.is-zh ? "下一步" : "Next Step"; value: root.learning-action-hint; }
+        StaticTextPanel {
+            width: 690px;
+            panel-height: 72px;
+            value: (root.is-zh ? "\u{8bad}\u{7ec3}\u{89c4}\u{5219}: " : "Rule: ")
+                + root.learning-plan-summary
+                + "\n"
+                + (root.is-zh ? "\u{8bad}\u{7ec3}\u{72b6}\u{6001}: " : "Status: ")
+                + root.learning-status
+                + "\n"
+                + (root.is-zh ? "\u{8bad}\u{7ec3}\u{8fdb}\u{5ea6}: " : "Progress: ")
+                + root.learning-progress-summary;
+        }
         HorizontalBox {
             spacing: 10px;
             Rectangle { width: 164px; height: 1px; background: transparent; }
-            ActionButton { label: root.is-zh ? "开始测试" : "Start Test"; primary: true; clicked => { root.run-learning(); } }
-            ActionButton { label: root.is-zh ? "导出" : "Export"; primary: root.export-ready; clicked => { root.export-package(); } }
+            ActionButton { label: root.is-zh ? "\u{5f00}\u{59cb}\u{6d4b}\u{8bd5}" : "Start Test"; primary: true; enabled: true; clicked => { root.run-learning(); } }
+            ActionButton { label: root.export-ready ? (root.is-zh ? "\u{5bfc}\u{51fa}" : "Export") : (root.is-zh ? "\u{672a}\u{6d4b}\u{8bd5}\u{ff0c}\u{4e0d}\u{53ef}\u{5bfc}\u{51fa}" : "Export Locked"); primary: root.export-ready; enabled: root.export-ready; button-width: 170px; clicked => { root.export-package(); } }
         }
-        LogPanel { value: root.learning-result; panel-height: 150px; }
+        CopyableLogPanel {
+            width: 690px;
+            panel-height: 160px;
+            value: (root.is-zh ? "\u{6d4b}\u{8bd5}\u{72b6}\u{6001}: " : "Test Status: ")
+                + root.learning-result
+                + "\n\n"
+                + (root.is-zh ? "\u{5bfc}\u{51fa}\u{72b6}\u{6001}: " : "Export Status: ")
+                + root.config-status;
+        }
     }
 }

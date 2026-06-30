@@ -91,6 +91,33 @@ export component SubMenuButton inherits Rectangle {
         }
     }
 
+export component SideActionButton inherits Rectangle {
+        in property <string> label;
+        callback clicked();
+
+        width: 144px;
+        height: 40px;
+        border-radius: 6px;
+        border-width: 1px;
+        border-color: #45606b;
+        background: #45606b;
+        TouchArea {
+            clicked => { root.clicked(); }
+        }
+        Text {
+            text: root.label;
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            x: 10px;
+            width: parent.width - 20px;
+            height: parent.height;
+            overflow: elide;
+        }
+    }
+
 export component InfoRow inherits HorizontalLayout {
         in property <string> name;
         in property <string> value;
@@ -229,6 +256,98 @@ export component LargeEditableText inherits Rectangle {
                     text <=> root.value;
                 }
             }
+    }
+}
+
+export component BinaryStateMark inherits Rectangle {
+        in-out property <string> state: "wrong";
+        in property <bool> interactive: false;
+        in property <length> glyph-size: 12px;
+        in property <length> mark-radius: 3px;
+
+        width: 18px;
+        height: 18px;
+        border-width: 1px;
+        border-color: state == "correct" ? #7fb38d : #cda6a6;
+        border-radius: root.mark-radius;
+        background: state == "correct" ? #edf7f0 : #f7fafb;
+
+        TouchArea {
+            enabled: root.interactive;
+            clicked => {
+                root.state = root.state == "correct" ? "wrong" : "correct";
+            }
+        }
+
+        Text {
+            text: root.state == "correct" ? "\u{2713}" : "X";
+            width: parent.width;
+            height: parent.height;
+            color: root.state == "correct" ? #246b3d : #8d3333;
+            font-family: "Segoe UI Symbol";
+            font-size: root.glyph-size;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+
+export component BinaryStateCheckBox inherits Rectangle {
+        in-out property <string> state: "wrong";
+        in property <bool> interactive: true;
+        in property <bool> show-label: true;
+        in property <bool> show-frame: true;
+        in property <string> correct-label: "正确";
+        in property <string> wrong-label: "错误";
+
+        width: 130px;
+        height: 32px;
+        border-width: root.show-frame ? 1px : 0px;
+        border-color: #d7e1e6;
+        border-radius: 4px;
+        background: root.show-frame ? #f7fafb : transparent;
+
+        TouchArea {
+            enabled: root.interactive;
+            clicked => {
+                root.state = root.state == "correct" ? "wrong" : "correct";
+            }
+        }
+
+        if root.show-label: HorizontalBox {
+            x: root.show-label ? 8px : 0px;
+            y: 0px;
+            width: root.show-label ? parent.width - 20px : parent.width;
+            height: parent.height;
+            spacing: 8px;
+
+            BinaryStateMark {
+                y: root.show-label ? 6px : 0px;
+                state <=> root.state;
+                interactive: false;
+                width: root.show-label ? 20px : parent.width;
+                height: root.show-label ? 20px : parent.height;
+                glyph-size: root.show-label ? 12px : 24px;
+                mark-radius: root.show-label ? 3px : 4px;
+            }
+
+            if root.show-label: Text {
+                text: root.state == "correct" ? root.correct-label : root.wrong-label;
+                color: #17252f;
+                font-size: 13px;
+                vertical-alignment: center;
+            }
+        }
+
+        if !root.show-label: BinaryStateMark {
+            x: 0px;
+            y: 0px;
+            state <=> root.state;
+            interactive: false;
+            width: parent.width;
+            height: parent.height;
+            glyph-size: 24px;
+            mark-radius: 4px;
         }
     }
 
@@ -270,50 +389,10 @@ export component QuestionTableRow inherits Rectangle {
             height: 32px;
             text <=> root.value;
         }
-        if root.show-state: Rectangle {
+        if root.show-state: BinaryStateCheckBox {
             x: 540px;
             y: 0px;
-            width: 130px;
-            height: 32px;
-            border-width: 1px;
-            border-color: #d7e1e6;
-            border-radius: 4px;
-            background: #f7fafb;
-            TouchArea {
-                clicked => {
-                    root.state = root.state == "correct" ? "wrong" : "correct";
-                }
-            }
-            HorizontalBox {
-                x: 8px;
-                y: 0px;
-                width: parent.width - 20px;
-                height: parent.height;
-                spacing: 8px;
-                Rectangle {
-                    width: 20px;
-                    height: 20px;
-                    y: 6px;
-                    border-width: 0px;
-                    background: transparent;
-                    Text {
-                        text: root.state == "correct" ? "✓" : "×";
-                        width: parent.width;
-                        height: parent.height;
-                        color: root.state == "correct" ? #246b3d : #8d3333;
-                        font-family: "Segoe UI Symbol";
-                        font-size: 15px;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                    }
-                }
-                Text {
-                    text: root.state == "correct" ? "正确" : "错误";
-                    color: #17252f;
-                    font-size: 13px;
-                    vertical-alignment: center;
-                }
-            }
+            state <=> root.state;
         }
     }
 
@@ -481,69 +560,60 @@ export component QuestionOverviewGrid inherits Rectangle {
     }
 
 export component LearningAnswerTile inherits Rectangle {
-        in property <string> label;
         in property <string> value;
         in-out property <string> state;
+        callback toggle-requested();
 
-        width: 216px;
-        height: 108px;
+        width: 237px;
+        height: 66px;
         border-width: 1px;
         border-color: state == "correct" ? #7fb38d : #d7e1e6;
         border-radius: 6px;
-        background: state == "correct" ? #edf7f0 : #f7fafb;
-
-        TouchArea {
-            clicked => {
-                root.state = root.state == "correct" ? "wrong" : "correct";
-            }
-        }
-
-        Rectangle {
-            x: 10px;
-            y: 10px;
-            width: parent.width - 20px;
-            height: 18px;
-            background: transparent;
-            Text {
-                text: root.label;
-                width: parent.width;
-                height: parent.height;
-                color: #62727d;
-                font-size: 12px;
-                font-weight: 600;
-                vertical-alignment: center;
-                overflow: elide;
-            }
-        }
+        background: #f7fafb;
 
         Text {
             x: 10px;
-            y: 34px;
-            width: parent.width - 20px;
-            height: 44px;
+            y: 8px;
+            width: parent.width - 76px;
+            height: parent.height - 16px;
             text: root.value;
             color: #17252f;
             font-size: 13px;
+            vertical-alignment: top;
             wrap: word-wrap;
             overflow: elide;
         }
 
-        Rectangle {
-            x: 10px;
-            y: 80px;
-            width: 84px;
-            height: 18px;
-            border-radius: 4px;
-            background: state == "correct" ? #d9ecdf : #f1dede;
-            Text {
-                text: root.state == "correct" ? "正确" : "错误";
-                width: parent.width;
-                height: parent.height;
-                color: state == "correct" ? #246b3d : #8d3333;
-                font-size: 12px;
-                font-weight: 700;
-                horizontal-alignment: center;
-                vertical-alignment: center;
+        BinaryStateCheckBox {
+            x: parent.width - 62px;
+            y: parent.height - 34px;
+            width: 60px;
+            height: 32px;
+            state <=> root.state;
+            show-label: false;
+            show-frame: false;
+            interactive: false;
+            correct-label: "打勾";
+            wrong-label: "打叉";
+        }
+
+        TouchArea {
+            x: 0px;
+            y: 0px;
+            width: parent.width - 76px;
+            height: parent.height;
+            double-clicked => {
+                root.toggle-requested();
+            }
+        }
+
+        TouchArea {
+            x: parent.width - 62px;
+            y: parent.height - 34px;
+            width: 60px;
+            height: 32px;
+            clicked => {
+                root.toggle-requested();
             }
         }
     }
@@ -567,9 +637,10 @@ export component LearningAnswerGrid inherits Rectangle {
         in-out property <string> answer-8-state;
         in property <string> answer-9;
         in-out property <string> answer-9-state;
+        callback toggle-answer(int);
 
-        width: 690px;
-        height: 340px;
+        width: 724px;
+        height: 210px;
         background: transparent;
 
         GridLayout {
@@ -577,23 +648,47 @@ export component LearningAnswerGrid inherits Rectangle {
             y: 0px;
             width: parent.width;
             height: parent.height;
-            spacing: 10px;
+            spacing: 6px;
 
             Row {
-                LearningAnswerTile { label: "答案 1"; value: root.answer-1; state <=> root.answer-1-state; }
-                LearningAnswerTile { label: "答案 2"; value: root.answer-2; state <=> root.answer-2-state; }
-                LearningAnswerTile { label: "答案 3"; value: root.answer-3; state <=> root.answer-3-state; }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-1; state <=> root.answer-1-state; toggle-requested => { root.toggle-answer(0); } }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-2; state <=> root.answer-2-state; toggle-requested => { root.toggle-answer(1); } }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-3; state <=> root.answer-3-state; toggle-requested => { root.toggle-answer(2); } }
             }
             Row {
-                LearningAnswerTile { label: "答案 4"; value: root.answer-4; state <=> root.answer-4-state; }
-                LearningAnswerTile { label: "答案 5"; value: root.answer-5; state <=> root.answer-5-state; }
-                LearningAnswerTile { label: "答案 6"; value: root.answer-6; state <=> root.answer-6-state; }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-4; state <=> root.answer-4-state; toggle-requested => { root.toggle-answer(3); } }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-5; state <=> root.answer-5-state; toggle-requested => { root.toggle-answer(4); } }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-6; state <=> root.answer-6-state; toggle-requested => { root.toggle-answer(5); } }
             }
             Row {
-                LearningAnswerTile { label: "答案 7"; value: root.answer-7; state <=> root.answer-7-state; }
-                LearningAnswerTile { label: "答案 8"; value: root.answer-8; state <=> root.answer-8-state; }
-                LearningAnswerTile { label: "答案 9"; value: root.answer-9; state <=> root.answer-9-state; }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-7; state <=> root.answer-7-state; toggle-requested => { root.toggle-answer(6); } }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-8; state <=> root.answer-8-state; toggle-requested => { root.toggle-answer(7); } }
+                LearningAnswerTile { width: (root.width - 12px) / 3; height: (root.height - 12px) / 3; value: root.answer-9; state <=> root.answer-9-state; toggle-requested => { root.toggle-answer(8); } }
             }
+        }
+}
+
+export component StaticTextPanel inherits Rectangle {
+        in property <string> value;
+        in property <length> panel-height: 60px;
+
+        width: 690px;
+        height: root.panel-height;
+        border-radius: 6px;
+        border-width: 1px;
+        border-color: #d7e1e6;
+        background: #e8eef1;
+
+        Text {
+            x: 10px;
+            y: 8px;
+            width: parent.width - 20px;
+            height: parent.height - 16px;
+            text: root.value;
+            color: #17252f;
+            font-size: 12px;
+            wrap: word-wrap;
+            vertical-alignment: top;
         }
     }
 
@@ -666,19 +761,21 @@ export component QuestionConfigPanel inherits Rectangle {
 export component ActionButton inherits Rectangle {
         in property <string> label;
         in property <bool> primary;
+        in property <bool> enabled: true;
         in property <length> button-width: 150px;
         callback clicked();
 
         width: root.button-width;
         height: 34px;
         border-radius: 6px;
-        background: primary ? #45606b : #d7e1e6;
+        background: !enabled ? #d8e0e4 : (primary ? #45606b : #d7e1e6);
         TouchArea {
+            enabled: root.enabled;
             clicked => { root.clicked(); }
         }
         Text {
             text: root.label;
-            color: primary ? white : #17252f;
+            color: !enabled ? #8a98a0 : (primary ? white : #17252f);
             font-size: 13px;
             font-weight: 700;
             horizontal-alignment: center;
@@ -761,3 +858,29 @@ export component LogPanel inherits Rectangle {
         }
     }
 
+export component CopyableLogPanel inherits Rectangle {
+        in property <string> value;
+        in property <length> panel-height: 96px;
+        height: root.panel-height;
+        border-radius: 6px;
+        border-width: 1px;
+        border-color: #c9d5da;
+        background: #f7fafb;
+        ScrollView {
+            x: 8px;
+            y: 8px;
+            width: parent.width - 16px;
+            height: parent.height - 16px;
+            vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+            horizontal-scrollbar-policy: ScrollBarPolicy.as-needed;
+            viewport-width: parent.width - 16px;
+            viewport-height: max(parent.height - 16px, 72px);
+            TextEdit {
+                width: parent.viewport-width;
+                height: parent.viewport-height;
+                text: root.value;
+                read-only: true;
+                font-size: 12px;
+            }
+        }
+    }

@@ -7,28 +7,64 @@ const DEFAULT_AUTHORIZATION_FREQUENCY: &str = "Every high-risk request";
 
 pub(crate) fn normalize_resource_group(value: &str) -> String {
     match value.trim().to_ascii_lowercase().as_str() {
-        "normal" => "normal".to_string(),
-        "private" => "private".to_string(),
-        "secret" => "secret".to_string(),
+        "normal" | "low" | "public" => "normal".to_string(),
+        "private" | "medium" => "private".to_string(),
+        "secret" | "high" | "top-secret" => "secret".to_string(),
         _ => "normal".to_string(),
     }
+}
+
+fn resource_group_from_binding_sensitivity(resource: &Value) -> Option<String> {
+    let bindings = resource.get("bindings").and_then(Value::as_array)?;
+    let mut has_private = false;
+    for binding in bindings {
+        let group = binding
+            .get("objectMeta")
+            .and_then(|meta| meta.get("sensitivity"))
+            .and_then(Value::as_str)
+            .map(normalize_resource_group)
+            .unwrap_or_else(|| "normal".to_string());
+        if group == "secret" {
+            return Some(group);
+        }
+        if group == "private" {
+            has_private = true;
+        }
+    }
+    Some(if has_private { "private" } else { "normal" }.to_string())
 }
 
 pub(crate) fn resource_group_from_catalog_resource(resource: &Value) -> SharedString {
     let group = resource
         .get("resourceGroup")
         .and_then(Value::as_str)
-        .or_else(|| {
-            resource
-                .get("bindings")
-                .and_then(Value::as_array)
-                .and_then(|bindings| bindings.first())
-                .and_then(|binding| binding.get("objectMeta"))
-                .and_then(|meta| meta.get("sensitivity"))
-                .and_then(Value::as_str)
-        })
-        .unwrap_or("normal");
-    SharedString::from(normalize_resource_group(group))
+        .map(normalize_resource_group)
+        .or_else(|| resource_group_from_binding_sensitivity(resource))
+        .unwrap_or_else(|| "normal".to_string());
+    SharedString::from(group.as_str())
+}
+
+pub(crate) fn normalize_legacy_resource_catalog_groups(catalog: &mut Value) -> bool {
+    let Some(resources) = catalog.get_mut("resources").and_then(Value::as_array_mut) else {
+        return false;
+    };
+    let mut changed = false;
+    for resource in resources {
+        let normalized = resource_group_from_catalog_resource(resource);
+        if resource.get("resourceGroup").and_then(Value::as_str) != Some(normalized.as_str()) {
+            resource["resourceGroup"] = json!(normalized.to_string());
+            changed = true;
+        }
+    }
+    changed
+}
+
+pub(crate) fn normalize_legacy_resource_catalog_file(package_dir: &Path) -> Result<()> {
+    let mut catalog = read_protected_resources(package_dir);
+    if normalize_legacy_resource_catalog_groups(&mut catalog) {
+        save_protected_resources(package_dir, catalog)?;
+    }
+    Ok(())
 }
 
 pub(crate) fn format_protected_object_list(catalog: &Value, selected_group: &str) -> String {
@@ -72,7 +108,10 @@ pub(crate) struct ProtectedObjectRow {
     pub(crate) level: String,
 }
 
-pub(crate) fn protected_object_rows(catalog: &Value, selected_group: &str) -> Vec<ProtectedObjectRow> {
+pub(crate) fn protected_object_rows(
+    catalog: &Value,
+    selected_group: &str,
+) -> Vec<ProtectedObjectRow> {
     let selected_group = normalize_resource_group(selected_group);
     let mut rows = Vec::new();
     if let Some(resources) = catalog.get("resources").and_then(Value::as_array) {
@@ -85,15 +124,7 @@ pub(crate) fn protected_object_rows(catalog: &Value, selected_group: &str) -> Ve
                 .get("displayName")
                 .and_then(Value::as_str)
                 .unwrap_or(resource_id);
-            let resource_group = resource
-                .get("resourceGroup")
-                .and_then(Value::as_str)
-                .unwrap_or("normal");
-            if resource
-                .get("bindings")
-                .and_then(Value::as_array)
-                .is_none()
-            {
+            if resource.get("bindings").and_then(Value::as_array).is_none() {
                 continue;
             }
             let group = resource_group_from_catalog_resource(resource);
@@ -105,7 +136,7 @@ pub(crate) fn protected_object_rows(catalog: &Value, selected_group: &str) -> Ve
                 name: display_name.to_string(),
                 secret: read_username_for_resource(resource),
                 usage: object_usage_label_for_resource(resource),
-                level: resource_group.to_string(),
+                level: group.to_string(),
             });
         }
     }
@@ -124,14 +155,70 @@ macro_rules! set_row {
     };
 }
 
-set_row!(set_row_1, set_object_1_id, set_object_1_name, set_object_1_secret, set_object_1_usage, set_object_1_level);
-set_row!(set_row_2, set_object_2_id, set_object_2_name, set_object_2_secret, set_object_2_usage, set_object_2_level);
-set_row!(set_row_3, set_object_3_id, set_object_3_name, set_object_3_secret, set_object_3_usage, set_object_3_level);
-set_row!(set_row_4, set_object_4_id, set_object_4_name, set_object_4_secret, set_object_4_usage, set_object_4_level);
-set_row!(set_row_5, set_object_5_id, set_object_5_name, set_object_5_secret, set_object_5_usage, set_object_5_level);
-set_row!(set_row_6, set_object_6_id, set_object_6_name, set_object_6_secret, set_object_6_usage, set_object_6_level);
-set_row!(set_row_7, set_object_7_id, set_object_7_name, set_object_7_secret, set_object_7_usage, set_object_7_level);
-set_row!(set_row_8, set_object_8_id, set_object_8_name, set_object_8_secret, set_object_8_usage, set_object_8_level);
+set_row!(
+    set_row_1,
+    set_object_1_id,
+    set_object_1_name,
+    set_object_1_secret,
+    set_object_1_usage,
+    set_object_1_level
+);
+set_row!(
+    set_row_2,
+    set_object_2_id,
+    set_object_2_name,
+    set_object_2_secret,
+    set_object_2_usage,
+    set_object_2_level
+);
+set_row!(
+    set_row_3,
+    set_object_3_id,
+    set_object_3_name,
+    set_object_3_secret,
+    set_object_3_usage,
+    set_object_3_level
+);
+set_row!(
+    set_row_4,
+    set_object_4_id,
+    set_object_4_name,
+    set_object_4_secret,
+    set_object_4_usage,
+    set_object_4_level
+);
+set_row!(
+    set_row_5,
+    set_object_5_id,
+    set_object_5_name,
+    set_object_5_secret,
+    set_object_5_usage,
+    set_object_5_level
+);
+set_row!(
+    set_row_6,
+    set_object_6_id,
+    set_object_6_name,
+    set_object_6_secret,
+    set_object_6_usage,
+    set_object_6_level
+);
+set_row!(
+    set_row_7,
+    set_object_7_id,
+    set_object_7_name,
+    set_object_7_secret,
+    set_object_7_usage,
+    set_object_7_level
+);
+set_row!(
+    set_row_8,
+    set_object_8_id,
+    set_object_8_name,
+    set_object_8_secret,
+    set_object_8_usage,
+    set_object_8_level
+);
 
 pub(crate) fn first_resource_for_group<'a>(
     catalog: &'a Value,
@@ -168,7 +255,9 @@ pub(crate) fn load_resource_into_window(core: &StoryLockCoreApp, resource: &Valu
     core.set_object_id(object_id_prefix_for_resource(resource));
     core.set_secret_reference(SharedString::from(password.unwrap_or_default()));
     core.set_object_kind(object_type_for_resource(resource));
-    core.set_resource_group(resource_group_from_catalog_resource(resource));
+    let resource_group = resource_group_from_catalog_resource(resource);
+    core.set_resource_group(resource_group.clone());
+    core.set_editing_resource_group(resource_group);
     core.set_resource_bindings(SharedString::from(format_bindings(resource)));
     core.set_object_meta(SharedString::from(format_object_meta(resource)));
 }
@@ -191,10 +280,9 @@ pub(crate) fn prepare_new_resource_in_window(core: &StoryLockCoreApp, catalog: &
     core.set_object_kind(SharedString::from(usage));
     core.set_resource_kind(SharedString::from(resource_kind_for_usage(usage)));
     core.set_provider_id(SharedString::from(""));
-    core.set_resource_group(SharedString::from(selected_group));
-    core.set_required_correct_count(SharedString::from(
-        DEFAULT_REQUIRED_GRID_COUNT.to_string(),
-    ));
+    core.set_resource_group(SharedString::from(selected_group.clone()));
+    core.set_editing_resource_group(SharedString::from(selected_group));
+    core.set_required_correct_count(SharedString::from(DEFAULT_REQUIRED_GRID_COUNT.to_string()));
     core.set_authorization_frequency(SharedString::from(DEFAULT_AUTHORIZATION_FREQUENCY));
 }
 
@@ -268,6 +356,60 @@ pub(crate) fn save_object_editor_resource_from_window(
     save_resource_from_window_with_validation(core, package_dir, true)
 }
 
+pub(crate) fn delete_object_editor_resource_from_window(
+    core: &StoryLockCoreApp,
+    package_dir: &Path,
+) -> Result<()> {
+    let resource_id = core.get_resource_id().to_string();
+    if resource_id.trim().is_empty() {
+        return Err(anyhow!("No managed object is selected"));
+    }
+
+    let mut catalog = read_protected_resources(package_dir);
+    let mut resources = catalog
+        .get("resources")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let deleted_resource = resources
+        .iter()
+        .find(|item| item.get("resourceId").and_then(Value::as_str) == Some(resource_id.as_str()))
+        .cloned();
+    let original_len = resources.len();
+    resources.retain(|item| {
+        item.get("resourceId").and_then(Value::as_str) != Some(resource_id.as_str())
+    });
+    if resources.len() == original_len {
+        return Err(anyhow!("Managed object not found: {resource_id}"));
+    }
+
+    catalog["version"] = json!("1");
+    catalog["resources"] = Value::Array(resources);
+    save_protected_resources(package_dir, catalog.clone())?;
+    if let Some(resource) = deleted_resource {
+        delete_managed_object_credential(&resource);
+        remove_template_child_records_for_resource(package_dir, &resource)?;
+    }
+
+    core.set_resource_id(SharedString::from(""));
+    core.set_resource_kind(SharedString::from(""));
+    core.set_provider_id(SharedString::from(""));
+    core.set_display_name(SharedString::from(""));
+    core.set_object_id(SharedString::from(""));
+    core.set_secret_reference(SharedString::from(""));
+    core.set_resource_bindings(SharedString::from(""));
+    core.set_object_meta(SharedString::from(""));
+    let selected_group = normalize_resource_group(core.get_resource_group().as_str());
+    core.set_resource_group(SharedString::from(selected_group.as_str()));
+    core.set_editing_resource_group(SharedString::from(selected_group.as_str()));
+    core.set_protected_object_list(SharedString::from(format_protected_object_list(
+        &catalog,
+        selected_group.as_str(),
+    )));
+    set_protected_object_rows_into_window(core, &catalog, selected_group.as_str());
+    Ok(())
+}
+
 fn save_resource_from_window_with_validation(
     core: &StoryLockCoreApp,
     package_dir: &Path,
@@ -278,7 +420,7 @@ fn save_resource_from_window_with_validation(
         .parse::<u64>()
         .unwrap_or(DEFAULT_REQUIRED_GRID_COUNT)
         .clamp(1, 24);
-    let sensitivity = normalize_resource_group(core.get_resource_group().as_str());
+    let sensitivity = normalize_resource_group(core.get_editing_resource_group().as_str());
     let uri = normalize_uri(core.get_display_name().as_str());
     if require_editor_fields && uri.is_empty() {
         return Err(anyhow!("URI is required"));
@@ -292,7 +434,26 @@ fn save_resource_from_window_with_validation(
         return Err(anyhow!("Password is required"));
     }
     let fallback_resource_id = core.get_resource_id().to_string();
-    let resource_id = if uri.is_empty() {
+    let mut catalog = read_protected_resources(package_dir);
+    let mut resources = catalog
+        .get("resources")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let existing_resource_id = fallback_resource_id.trim().to_string();
+    let existing_resource = resources
+        .iter()
+        .find(|item| {
+            item.get("resourceId").and_then(Value::as_str) == Some(existing_resource_id.as_str())
+        })
+        .cloned();
+    let editing_existing_resource = !existing_resource_id.is_empty()
+        && resources.iter().any(|item| {
+            item.get("resourceId").and_then(Value::as_str) == Some(existing_resource_id.as_str())
+        });
+    let resource_id = if editing_existing_resource {
+        existing_resource_id
+    } else if uri.is_empty() {
         if fallback_resource_id.trim().is_empty() {
             "managed-object".to_string()
         } else {
@@ -301,9 +462,11 @@ fn save_resource_from_window_with_validation(
     } else {
         resource_id_from_uri(uri.as_str())
     };
-    let usage = "password_fill".to_string();
+    let usage = normalize_usage(core.get_object_kind().as_str());
     let resource_kind = resource_kind_for_usage(&usage).to_string();
     let provider_slug = if uri.is_empty() {
+        provider_id_from_resource_id(&resource_id)
+    } else if editing_existing_resource {
         provider_id_from_resource_id(&resource_id)
     } else {
         provider_id_from_uri(uri.as_str())
@@ -318,6 +481,7 @@ fn save_resource_from_window_with_validation(
         sanitize_segment(&provider_slug),
         sanitize_segment(&resource_id)
     );
+    let previous_credential_ref = existing_resource.as_ref().and_then(resource_credential_ref);
     if !username.is_empty() && !password.trim().is_empty() && !display_name.trim().is_empty() {
         write_managed_object_credential(&credential_ref, &username, &password, &display_name)?;
     }
@@ -327,9 +491,7 @@ fn save_resource_from_window_with_validation(
     core.set_display_name(SharedString::from(display_name.as_str()));
     core.set_secret_reference(SharedString::from(password.as_str()));
     core.set_object_kind(SharedString::from(usage.as_str()));
-    core.set_required_correct_count(SharedString::from(
-        required_grid_count.to_string(),
-    ));
+    core.set_required_correct_count(SharedString::from(required_grid_count.to_string()));
     core.set_authorization_frequency(SharedString::from(DEFAULT_AUTHORIZATION_FREQUENCY));
     let bindings = resource_bindings_from_window(
         core,
@@ -338,52 +500,48 @@ fn save_resource_from_window_with_validation(
         &usage,
         &credential_ref,
     );
+    let template_shell = template_shell_from_resource(&resource_id, &display_name, &usage);
     let resource = json!({
             "resourceId": resource_id,
             "resourceKind": resource_kind,
             "providerId": provider_slug,
             "displayName": display_name,
             "resourceGroup": sensitivity.clone(),
-            "bindings": bindings
+            "bindings": bindings,
+            "templateShell": template_shell
     });
-    let mut catalog = read_json_or_default(
-        &storylock_core_catalog_path(package_dir),
-        default_resource_catalog_json(),
-    );
-    let mut resources = catalog
-        .get("resources")
-        .and_then(Value::as_array)
-        .cloned()
-        .unwrap_or_default();
     let resource_id = resource
         .get("resourceId")
         .and_then(Value::as_str)
         .unwrap_or_default()
         .to_string();
-    if let Some(index) = resources
-        .iter()
-        .position(|item| item.get("resourceId").and_then(Value::as_str) == Some(resource_id.as_str()))
-    {
+    if let Some(index) = resources.iter().position(|item| {
+        item.get("resourceId").and_then(Value::as_str) == Some(resource_id.as_str())
+    }) {
         resources[index] = resource;
     } else {
         resources.push(resource);
     }
     catalog["version"] = json!("1");
     catalog["resources"] = Value::Array(resources);
-    fs::write(
-        storylock_core_catalog_path(package_dir),
-        serde_json::to_vec_pretty(&catalog)?,
-    )?;
+    save_protected_resources(package_dir, catalog.clone())?;
     sync_templates_for_resource(core, package_dir)?;
     if let Some(saved_resource) = resource_by_id(&catalog, resource_id.as_str()) {
         core.set_resource_bindings(SharedString::from(format_bindings(saved_resource)));
         core.set_object_meta(SharedString::from(format_object_meta(saved_resource)));
     }
+    core.set_resource_group(SharedString::from(sensitivity.as_str()));
+    core.set_editing_resource_group(SharedString::from(sensitivity.as_str()));
+    if let Some(previous_credential_ref) = previous_credential_ref {
+        if previous_credential_ref != credential_ref {
+            delete_credential_file(&previous_credential_ref);
+        }
+    }
     core.set_protected_object_list(SharedString::from(format_protected_object_list(
         &catalog,
-        core.get_resource_group().as_str(),
+        sensitivity.as_str(),
     )));
-    set_protected_object_rows_into_window(core, &catalog, core.get_resource_group().as_str());
+    set_protected_object_rows_into_window(core, &catalog, sensitivity.as_str());
     Ok(())
 }
 
@@ -541,6 +699,17 @@ pub(crate) fn read_stored_credential_field(credential_ref: &str, field: &str) ->
     }
 }
 
+fn resource_credential_ref(resource: &Value) -> Option<String> {
+    resource
+        .get("bindings")
+        .and_then(Value::as_array)?
+        .first()
+        .and_then(|binding| binding.get("objectMeta"))
+        .and_then(|meta| meta.get("secretRef"))
+        .and_then(Value::as_str)
+        .map(|value| value.to_string())
+}
+
 fn write_managed_object_credential(
     credential_ref: &str,
     username: &str,
@@ -565,6 +734,17 @@ fn write_managed_object_credential(
     };
     fs::write(path, serde_json::to_vec_pretty(&envelope)?)?;
     Ok(())
+}
+
+fn delete_managed_object_credential(resource: &Value) {
+    if let Some(credential_ref) = resource_credential_ref(resource) {
+        delete_credential_file(&credential_ref);
+    }
+}
+
+fn delete_credential_file(credential_ref: &str) {
+    let path = credential_store_path(credential_ref);
+    let _ = fs::remove_file(path);
 }
 
 fn credential_store_path(credential_ref: &str) -> std::path::PathBuf {
@@ -611,7 +791,11 @@ fn object_prefix_from_window(core: &StoryLockCoreApp, usage: &str) -> String {
     }
     let resource_id = core.get_resource_id().to_string();
     let provider_id = provider_id_from_resource_id(&resource_id);
-    let prefix = if usage == "sign" { "keypair" } else { "credential" };
+    let prefix = if usage == "sign" {
+        "keypair"
+    } else {
+        "credential"
+    };
     format!(
         "{}/{}/{}",
         prefix,
@@ -664,38 +848,12 @@ fn sync_templates_for_resource(core: &StoryLockCoreApp, package_dir: &Path) -> R
     let usage = normalize_usage(core.get_object_kind().as_str());
     let mut vault = read_storylock_vault_payload(package_dir);
     let mut templates = storylock_templates_from_vault(&vault);
-
-    if usage == "password_fill" {
-        templates["loginSites"] = json!({
-            "version": "1",
-            "templateType": "login-sites",
-            "items": [{
-                "templateId": format!("{}-login", sanitize_segment(resource_id.as_str())),
-                "displayName": core.get_display_name().to_string(),
-                "resourceId": resource_id,
-                "bindings": [
-                    { "fieldName": "username", "role": "username" },
-                    { "fieldName": "password", "role": "password" }
-                ]
-            }]
-        });
-    }
-
-    if usage == "sign" {
-        templates["signingActions"] = json!({
-            "version": "1",
-            "templateType": "signing-actions",
-            "items": [{
-                "templateId": format!("{}-sign", sanitize_segment(resource_id.as_str())),
-                "displayName": core.get_display_name().to_string(),
-                "resourceId": resource_id,
-                "bindings": [
-                    { "fieldName": "publicKey", "role": "public_key" },
-                    { "fieldName": "privateKey", "role": "private_key" }
-                ]
-            }]
-        });
-    }
+    sync_template_children_for_resource(
+        &mut templates,
+        resource_id.as_str(),
+        core.get_display_name().as_str(),
+        &usage,
+    );
 
     vault["templates"] = templates;
     save_storylock_vault_payload(package_dir, vault)?;

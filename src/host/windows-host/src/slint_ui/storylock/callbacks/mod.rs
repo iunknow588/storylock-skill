@@ -1,7 +1,7 @@
 use super::*;
 
 mod authoring;
-mod learning_export;
+pub(super) mod learning_export;
 mod lifecycle;
 
 pub(crate) fn wire_storylock_core_callbacks(
@@ -9,6 +9,7 @@ pub(crate) fn wire_storylock_core_callbacks(
     package_dir: std::path::PathBuf,
     core_window_slot: Rc<RefCell<Option<StoryLockCoreApp>>>,
     on_closed: Rc<dyn Fn()>,
+    on_unlock_package: Rc<dyn Fn()>,
     host_port: u16,
 ) {
     let learning_passed = Rc::new(RefCell::new(LearningProgress::new()));
@@ -23,6 +24,7 @@ pub(crate) fn wire_storylock_core_callbacks(
         &package_dir,
         Rc::clone(&core_window_slot),
         Rc::clone(&on_closed),
+        Rc::clone(&on_unlock_package),
         Rc::clone(&settings_dialog),
     );
     authoring::register_authoring_callbacks(

@@ -423,6 +423,37 @@ function inferReleaseChannel(packageKind, configuredChannel = null) {
   return 'unspecified';
 }
 
+function configuredAndroidPackageKindForArtifact(artifactName, configuredKind = null) {
+  const kind = optionalString(configuredKind);
+  if (!kind) {
+    return null;
+  }
+  const normalizedArtifactName = String(artifactName ?? '').toLowerCase();
+  const artifactLooksRelease = normalizedArtifactName.includes('-release.apk');
+  const artifactLooksDebug = normalizedArtifactName.includes('-debug.apk');
+  if (kind === 'release' && artifactLooksDebug) {
+    return null;
+  }
+  if (kind === 'debug' && artifactLooksRelease) {
+    return null;
+  }
+  return kind;
+}
+
+function configuredAndroidReleaseChannelForPackageKind(packageKind, configuredChannel = null) {
+  const channel = optionalString(configuredChannel);
+  if (!channel) {
+    return null;
+  }
+  if (
+    (packageKind === 'release' && channel === 'candidate')
+    || (packageKind === 'debug' && channel === 'internal')
+  ) {
+    return channel;
+  }
+  return null;
+}
+
 function optionalPositiveInteger(value) {
   const parsed = Number.parseInt(String(value ?? ''), 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
@@ -436,7 +467,11 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
   const artifactName = apkFilePath ? basename(apkFilePath) : DEFAULT_ANDROID_RELEASE_APK_FILE_NAME;
   const windowsArtifactName = windowsPackageFilePath ? basename(windowsPackageFilePath) : DEFAULT_WINDOWS_PACKAGE_FILE_NAME;
   const linuxArtifactName = linuxPackageFilePath ? basename(linuxPackageFilePath) : DEFAULT_LINUX_PACKAGE_FILE_NAME;
-  const packageKind = inferAndroidPackageKind(artifactName, optionalString(appDistribution.androidPackageKind));
+  const configuredAndroidPackageKind = configuredAndroidPackageKindForArtifact(
+    artifactName,
+    appDistribution.androidPackageKind,
+  );
+  const packageKind = inferAndroidPackageKind(artifactName, configuredAndroidPackageKind);
   const windowsPackageKind = inferHostPackageKind(windowsArtifactName, optionalString(appDistribution.windowsPackageKind));
   const linuxPackageKind = inferHostPackageKind(linuxArtifactName, optionalString(env.STORYLOCK_LINUX_PACKAGE_KIND));
   const artifactInfo = apkFilePath
@@ -478,7 +513,8 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
       packageKind,
       releaseChannel: inferReleaseChannel(
         packageKind,
-        optionalString(appDistribution.androidReleaseChannel) ?? optionalString(bundledAndroidMetadata?.releaseChannel),
+        configuredAndroidReleaseChannelForPackageKind(packageKind, appDistribution.androidReleaseChannel)
+          ?? optionalString(bundledAndroidMetadata?.releaseChannel),
       ),
       downloadStrategy: apkFilePath
         ? 'local_apk_file'
@@ -507,7 +543,8 @@ async function buildAppDistributionStatus(env, gatewayBaseUrl) {
         packageKind,
         releaseChannel: inferReleaseChannel(
           packageKind,
-          optionalString(appDistribution.androidReleaseChannel) ?? optionalString(bundledAndroidMetadata?.releaseChannel),
+          configuredAndroidReleaseChannelForPackageKind(packageKind, appDistribution.androidReleaseChannel)
+            ?? optionalString(bundledAndroidMetadata?.releaseChannel),
         ),
       },
       windows: {

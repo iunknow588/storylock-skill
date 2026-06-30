@@ -199,6 +199,35 @@ function Test-JsonField {
   }
 }
 
+function Get-MetadataFileName {
+  param([string]$FileName)
+  if ([string]::IsNullOrWhiteSpace($FileName)) {
+    return ""
+  }
+  if ($FileName -match "\.tar\.gz$") {
+    return ($FileName -replace "\.tar\.gz$", "-tar-gz.json")
+  }
+  return ($FileName -replace "\.([^.]+)$", '-$1.json')
+}
+
+function Get-DownloadPlatformFileName {
+  param(
+    [string]$Url,
+    [string]$Platform,
+    [string]$FallbackFileName
+  )
+  try {
+    $downloadStatus = Invoke-RestMethod -Uri $Url -TimeoutSec 30 -ErrorAction Stop
+    $fileName = [string]$downloadStatus.platforms.$Platform.fileName
+    if (-not [string]::IsNullOrWhiteSpace($fileName)) {
+      return $fileName
+    }
+  } catch {
+    return $FallbackFileName
+  }
+  return $FallbackFileName
+}
+
 Merge-EnvFile -Path $exampleEnvPath
 Merge-EnvFile -Path $EnvFile -Override
 Import-EnvValues -Values $script:EnvValues
@@ -283,9 +312,14 @@ $targetBaseUrl = if ($BaseUrl) {
 if (-not $SkipHttp -and -not [string]::IsNullOrWhiteSpace($targetBaseUrl)) {
   $windowsZipUrl = "$targetBaseUrl/downloads/yian-windows-host-0.1.0-1-prototype.zip"
   $windowsMetadataUrl = "$targetBaseUrl/downloads/yian-windows-host-0.1.0-1-prototype-zip.json"
-  $linuxPackageUrl = "$targetBaseUrl/downloads/yian-linux-host-0.1.0-1-prototype.deb"
-  $linuxMetadataUrl = "$targetBaseUrl/downloads/yian-linux-host-0.1.0-1-prototype-deb.json"
   $downloadStatusUrl = "$targetBaseUrl/app/download"
+  $linuxFileName = Get-DownloadPlatformFileName `
+    -Url $downloadStatusUrl `
+    -Platform "linux" `
+    -FallbackFileName "yian-linux-host-0.1.0-1-prototype.deb"
+  $linuxMetadataFileName = Get-MetadataFileName -FileName $linuxFileName
+  $linuxPackageUrl = "$targetBaseUrl/downloads/$linuxFileName"
+  $linuxMetadataUrl = "$targetBaseUrl/downloads/$linuxMetadataFileName"
   $rows += Test-Http -Url "$targetBaseUrl/" -AllowedStatus @(200)
   $rows += Test-Http -Url "$targetBaseUrl/main.js" -AllowedStatus @(200)
   $rows += Test-Http -Url "$targetBaseUrl/styles.css" -AllowedStatus @(200)

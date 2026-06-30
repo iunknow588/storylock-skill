@@ -29,9 +29,11 @@ except Exception:
 SKIP_DIRS = {
     ".git",
     ".github",
+    ".temp",
     "__pycache__",
     ".pytest_cache",
     ".ruff_cache",
+    ".vercel",
     ".vscode",
     "node_modules",
     "venv",
@@ -105,18 +107,18 @@ def detect_encoding(data: bytes) -> str:
         return "utf-8-sig"
     if data.startswith(b"\xff\xfe") or data.startswith(b"\xfe\xff"):
         return "utf-16"
+    try:
+        data.decode("utf-8")
+        return "utf-8"
+    except Exception:
+        pass
     # use chardet if available
     if chardet is not None:
         res = chardet.detect(data)
         enc = res.get("encoding")
         if enc:
             return enc
-    # fallback
-    try:
-        data.decode("utf-8")
-        return "utf-8"
-    except Exception:
-        return "latin-1"
+    return "latin-1"
 
 
 def normalize_text(text: str) -> str:
@@ -137,7 +139,7 @@ def process_file(path: Path, fix: bool) -> Optional[str]:
     if is_binary_bytes(data[:CHUNK]):
         return None
 
-    enc = detect_encoding(data[:CHUNK*4])
+    enc = detect_encoding(data)
 
     try:
         text = data.decode(enc, errors="strict")

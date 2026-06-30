@@ -15,10 +15,13 @@ $normalizer = Join-Path $workspaceRoot "scripts\text\normalize_text_files.py"
 $lineEndingArgs = @(
   $checker,
   "--root",
-  $targetRoot,
-  "--fail-on-bom",
-  "--fail-on-crlf"
+  $targetRoot
 )
+
+if (-not $Fix) {
+  $lineEndingArgs += "--fail-on-bom"
+  $lineEndingArgs += "--fail-on-crlf"
+}
 
 if ($OnlyChanged) {
   $lineEndingArgs += "--only-changed"
