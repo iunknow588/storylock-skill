@@ -31,7 +31,10 @@ fn execute_requires_grid_authorization_before_storylock_call() {
             "keyId": "wallet-needs-grid"
         }),
     );
-    assert_eq!(response.get("status").and_then(Value::as_str), Some("error"));
+    assert_eq!(
+        response.get("status").and_then(Value::as_str),
+        Some("error")
+    );
     assert_eq!(
         response
             .get("error")

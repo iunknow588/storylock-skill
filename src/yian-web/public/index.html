@@ -40,9 +40,10 @@
           <a href="#apk" data-page-link="apk" data-i18n="nav.apk">安装版本</a>
           <a href="#user-guide" data-page-link="user-guide" data-i18n="nav.userGuide">使用说明</a>
           <a href="#flow" data-page-link="flow" data-i18n="nav.flow">使用流程</a>
+          <a href="#flow-gallery" data-page-link="flow-gallery" data-i18n="nav.flowGallery">图解流程</a>
           <a href="#faq" data-page-link="faq" data-i18n="nav.faq">常见问题</a>
-          <a href="#runtime" data-page-link="runtime" data-i18n="nav.runtime">请求状态</a>
           <a href="#help" data-page-link="help" data-i18n="nav.help">帮助说明</a>
+          <a href="#observe-debug" data-page-link="observe-debug" data-i18n="nav.observeDebug">观察调试</a>
         </div>
       </nav>
     </header>
@@ -62,8 +63,6 @@
                 <a class="button" href="/app/download/android" data-i18n="hero.downloadAndroid">下载 Android 版本</a>
                 <a class="button" href="/app/download/linux" data-i18n="hero.downloadLinux">下载 Linux 原型包</a>
                 <a class="button" href="/app/bind" data-i18n="hero.bind">打开绑定入口</a>
-                <a class="button" href="/storylock-app.html">StoryLock 工作台</a>
-                <a class="button" href="/local-agent-app.html">Agent 控制台</a>
               </div>
             </div>
             <figure class="hero-diagram">
@@ -279,6 +278,93 @@
         </div>
       </section>
 
+      <section id="flow-gallery" class="band page-panel" data-page-section data-page-title="nav.flowGallery">
+        <div class="wrap">
+          <article class="topic-card flow-gallery">
+            <div class="section-head">
+              <p class="section-kicker" data-i18n="flowGallery.kicker">图解流程</p>
+              <h3 data-i18n="flowGallery.title">把下载、设置、授权和保存放到同一张路线图里</h3>
+            </div>
+            <div class="copy-list">
+              <p data-i18n="flowGallery.copy1"></p>
+              <p data-i18n="flowGallery.copy2"></p>
+            </div>
+            <figure class="flow-feature">
+              <a href="/assets/flows/storylock-complete.png" target="_blank" rel="noopener">
+                <img src="/assets/flows/storylock-complete.png" alt="" data-i18n-alt="flowGallery.completeAlt">
+              </a>
+              <figcaption data-i18n="flowGallery.completeCaption">完整操作流程图：从获取 StoryLock 包到保存并应用当前包。</figcaption>
+            </figure>
+            <div class="flow-card-grid">
+              <figure class="flow-card">
+                <a href="/assets/flows/storylock-overview.png" target="_blank" rel="noopener">
+                  <img src="/assets/flows/storylock-overview.png" alt="" data-i18n-alt="flowGallery.overviewAlt">
+                </a>
+                <figcaption>
+                  <strong data-i18n="flowGallery.overviewTitle">总览图</strong>
+                  <span data-i18n="flowGallery.overviewCopy">先理解同一个包目录如何贯穿下载、解锁、保存和应用。</span>
+                </figcaption>
+              </figure>
+              <figure class="flow-card">
+                <a href="/assets/flows/storylock-download.png" target="_blank" rel="noopener">
+                  <img src="/assets/flows/storylock-download.png" alt="" data-i18n-alt="flowGallery.downloadAlt">
+                </a>
+                <figcaption>
+                  <strong data-i18n="flowGallery.downloadTitle">下载阶段</strong>
+                  <span data-i18n="flowGallery.downloadCopy">下载后检查包结构、固定本地目录和关键文件。</span>
+                </figcaption>
+              </figure>
+              <figure class="flow-card">
+                <a href="/assets/flows/storylock-setup.png" target="_blank" rel="noopener">
+                  <img src="/assets/flows/storylock-setup.png" alt="" data-i18n-alt="flowGallery.setupAlt">
+                </a>
+                <figcaption>
+                  <strong data-i18n="flowGallery.setupTitle">设置阶段</strong>
+                  <span data-i18n="flowGallery.setupCopy">选择包目录或 vault.stlk，完成路径归一和冲突检查。</span>
+                </figcaption>
+              </figure>
+              <figure class="flow-card">
+                <a href="/assets/flows/storylock-approval.png" target="_blank" rel="noopener">
+                  <img src="/assets/flows/storylock-approval.png" alt="" data-i18n-alt="flowGallery.approvalAlt">
+                </a>
+                <figcaption>
+                  <strong data-i18n="flowGallery.approvalTitle">授权与保存</strong>
+                  <span data-i18n="flowGallery.approvalCopy">空模式下先挑战解锁，再加载内容、学习、保存当前包。</span>
+                </figcaption>
+              </figure>
+            </div>
+            <div class="flow-insight-grid">
+              <section class="flow-insight">
+                <h4 data-i18n="flowGallery.boundaryTitle">安全边界</h4>
+                <div class="boundary-lanes" aria-label="Security boundary">
+                  <div>
+                    <strong data-i18n="flowGallery.boundaryCloudTitle">云端入口</strong>
+                    <span data-i18n="flowGallery.boundaryCloudCopy">只负责展示、下载、中转请求和返回最小状态。</span>
+                  </div>
+                  <div>
+                    <strong data-i18n="flowGallery.boundaryAssistantTitle">私人智能助理</strong>
+                    <span data-i18n="flowGallery.boundaryAssistantCopy">解释来源、内容和风险，不直接读取故事存储。</span>
+                  </div>
+                  <div>
+                    <strong data-i18n="flowGallery.boundaryCoreTitle">StoryLock Core</strong>
+                    <span data-i18n="flowGallery.boundaryCoreCopy">离线处理敏感内容，授权前不展示答案和受保护对象。</span>
+                  </div>
+                </div>
+              </section>
+              <section class="flow-insight">
+                <h4 data-i18n="flowGallery.troubleTitle">遇到问题先判断</h4>
+                <ol class="decision-list">
+                  <li data-i18n="flowGallery.troubleItem1">下载后先核对文件名、大小和校验值。</li>
+                  <li data-i18n="flowGallery.troubleItem2">选择包时确认只指向一个包根目录或一个 vault.stlk。</li>
+                  <li data-i18n="flowGallery.troubleItem3">空模式看不到内容是正常保护，挑战通过后才加载。</li>
+                  <li data-i18n="flowGallery.troubleItem4">保存后 Host 应继续使用同一路径，另存为新包需要手动切换。</li>
+                </ol>
+              </section>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="faq" class="band page-panel" data-page-section data-page-title="nav.faq">
         <div class="wrap">
           <article class="topic-card">
@@ -308,44 +394,216 @@
         </div>
       </section>
 
-      <section id="runtime" class="band alt page-panel" data-page-section data-page-title="nav.runtime">
+      <section id="observe-debug" class="band alt page-panel" data-page-section data-page-title="nav.observeDebug">
         <div class="wrap">
-          <article class="topic-card runtime-grid">
-            <div>
+          <article class="topic-card">
             <div class="section-head">
-              <p class="section-kicker" data-i18n="runtime.kicker">请求状态</p>
-              <h3 data-i18n="runtime.title">查看当前请求、来源和本地设备情况</h3>
+              <p class="section-kicker" data-i18n="observeDebug.kicker">观察调试</p>
+              <h3 data-i18n="observeDebug.title">把 host 测试和 web 测试集中放到这里</h3>
             </div>
-            <div class="action-row">
-              <button class="button primary" type="button" data-action="gateway-status" data-i18n="runtime.loadGateway">加载请求状态</button>
-              <button class="button" type="button" data-action="registrations" data-i18n="runtime.loadRegistrations">查看设备连接</button>
+            <div class="subnav-row" role="tablist" aria-label="Observe and debug sections">
+              <button class="subnav-button is-active" type="button" data-subpage-link="runtime" data-i18n="observeDebug.subnav.runtime">运行状态</button>
+              <button class="subnav-button" type="button" data-subpage-link="web-tests" data-i18n="observeDebug.subnav.webTests">Web 联调</button>
+              <button class="subnav-button" type="button" data-subpage-link="host-tests" data-i18n="observeDebug.subnav.hostTests">Host 联调</button>
             </div>
-            <dl class="status-grid">
-              <div>
-                <dt data-i18n="runtime.requestQueue">待处理请求</dt>
-                <dd data-field="request-queue" data-i18n="runtime.pending">等待加载</dd>
-              </div>
-              <div>
-                <dt data-i18n="runtime.requestSource">请求来源</dt>
-                <dd data-field="request-source" data-i18n="runtime.pending">等待加载</dd>
-              </div>
-              <div>
-                <dt data-i18n="runtime.activeHosts">在线设备</dt>
-                <dd data-field="active-host-count">0</dd>
-              </div>
-              <div>
-                <dt data-i18n="runtime.currentMode">通信方式</dt>
-                <dd data-field="connect-mode" data-i18n="runtime.pending">等待加载</dd>
-              </div>
-            </dl>
-          </div>
-          <details class="console-block">
-            <summary class="console-head">
-              <h4 data-i18n="runtime.responseTitle">查看原始 JSON</h4>
-              <p class="muted" data-i18n="runtime.responseNote"></p>
-            </summary>
-            <pre data-region="output"></pre>
-          </details>
+            <div class="topic-steps">
+              <section class="topic-step subpage-panel is-active" data-subpage-section="runtime">
+                <h4 data-i18n="observeDebug.runtimeTitle">连接与运行状态</h4>
+                <p data-i18n="observeDebug.runtimeCopy">这里集中查看 gateway、relay、设备连接和当前请求状态。</p>
+                <div class="action-row">
+                  <button class="button primary" type="button" data-action="gateway-status" data-i18n="runtime.loadGateway">加载请求状态</button>
+                  <button class="button" type="button" data-action="registrations" data-i18n="runtime.loadRegistrations">查看设备连接</button>
+                  <button class="button" type="button" data-action="refresh-runtime" data-i18n="runtime.refresh">刷新当前分区</button>
+                  <button class="button" type="button" data-action="toggle-runtime-autorefresh" data-i18n="runtime.autorefreshOff">自动刷新：关</button>
+                </div>
+                <div class="summary-banner" data-region="runtime-summary" data-i18n="runtime.summaryWaiting">等待生成运行摘要。</div>
+                <p class="summary-meta" data-region="runtime-refreshed" data-i18n="runtime.refreshedWaiting">最近刷新：等待加载</p>
+                <div class="section-minihead">
+                  <h5 data-i18n="runtime.group.current">当前策略</h5>
+                </div>
+                <dl class="status-grid">
+                  <div>
+                    <dt data-i18n="runtime.requestQueue">待处理请求</dt>
+                    <dd data-field="request-queue" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.requestSource">请求来源</dt>
+                    <dd data-field="request-source" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.activeHosts">在线设备</dt>
+                    <dd data-field="active-host-count">0</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.currentMode">通信方式</dt>
+                    <dd data-field="connect-mode" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                </dl>
+                <dl class="status-grid">
+                  <div>
+                    <dt data-i18n="runtime.relayTransport">Relay 传输</dt>
+                    <dd data-field="relay-transport" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.relayWait">默认等待</dt>
+                    <dd data-field="relay-wait" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.relayCoordination">协调方式</dt>
+                    <dd data-field="relay-coordination" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.relayReadiness">生产就绪</dt>
+                    <dd data-field="relay-readiness" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.waitingPolls">Waiting Poll</dt>
+                    <dd data-field="waiting-polls" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.pendingResponses">Pending Response</dt>
+                    <dd data-field="pending-responses" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                </dl>
+                <div class="section-minihead">
+                  <h5 data-i18n="runtime.group.recent">最近事件</h5>
+                </div>
+                <dl class="status-grid">
+                  <div>
+                    <dt data-i18n="runtime.lastResolved">最近成功返回</dt>
+                    <dd data-field="last-resolved" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.lastTimeout">最近超时</dt>
+                    <dd data-field="last-timeout" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.lastIdleTimeout">最近空闲超时</dt>
+                    <dd data-field="last-idle-timeout" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.lastReplacedPoll">最近替换轮询</dt>
+                    <dd data-field="last-replaced-poll" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.lastClientClosed">最近客户端断开</dt>
+                    <dd data-field="last-client-closed" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                </dl>
+                <div class="section-minihead">
+                  <h5 data-i18n="runtime.group.total">累计统计</h5>
+                </div>
+                <dl class="status-grid">
+                  <div>
+                    <dt data-i18n="runtime.totalRequests">累计请求</dt>
+                    <dd data-field="total-requests" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.resolvedResponses">累计成功返回</dt>
+                    <dd data-field="resolved-responses" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.timeoutCount">累计超时</dt>
+                    <dd data-field="timeout-count" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.idleTimeoutCount">累计空闲超时</dt>
+                    <dd data-field="idle-timeout-count" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.replacedPollCount">累计替换轮询</dt>
+                    <dd data-field="replaced-poll-count" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="runtime.clientClosedPollCount">累计客户端断开</dt>
+                    <dd data-field="client-closed-poll-count" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                </dl>
+                <details class="console-block">
+                  <summary class="console-head">
+                    <h4 data-i18n="runtime.responseTitle">查看原始 JSON</h4>
+                    <p class="muted" data-i18n="runtime.responseNote"></p>
+                  </summary>
+                  <pre data-region="output"></pre>
+                </details>
+              </section>
+              <section class="topic-step subpage-panel" data-subpage-section="web-tests">
+                <h4 data-i18n="observeDebug.webTestsTitle">Web 测试入口</h4>
+                <p data-i18n="observeDebug.webTestsCopy">保留 StoryLock 工作台和 Agent 控制台，供联调和演示使用。</p>
+                <div class="download-options">
+                  <a class="button" href="/storylock-app.html" data-i18n="observeDebug.storylockWorkbench">StoryLock 工作台</a>
+                  <a class="button" href="/local-agent-app.html" data-i18n="observeDebug.agentConsole">Agent 控制台</a>
+                </div>
+              </section>
+              <section class="topic-step subpage-panel" data-subpage-section="host-tests">
+                <h4 data-i18n="observeDebug.hostTestsTitle">Host 调试说明</h4>
+                <p data-i18n="observeDebug.hostTestsCopy">Windows Host、本地 relay 和设备状态观察统一从这里进入，避免主页面承载联调噪音。</p>
+                <div class="action-row">
+                  <button class="button primary" type="button" data-action="host-health" data-i18n="observeDebug.hostActions.health">读取 Host Health</button>
+                  <button class="button" type="button" data-action="host-status" data-i18n="observeDebug.hostActions.status">读取 Host 状态</button>
+                  <button class="button" type="button" data-action="host-diagnostics" data-i18n="observeDebug.hostActions.diagnostics">读取 Host 诊断</button>
+                  <button class="button" type="button" data-action="refresh-host" data-i18n="observeDebug.hostActions.refresh">刷新当前分区</button>
+                  <button class="button" type="button" data-action="toggle-host-autorefresh" data-i18n="observeDebug.hostActions.autorefreshOff">自动刷新：关</button>
+                </div>
+                <div class="summary-banner" data-region="host-summary" data-i18n="observeDebug.hostSummaryWaiting">等待生成 Host 摘要。</div>
+                <p class="summary-meta" data-region="host-refreshed" data-i18n="observeDebug.hostRefreshedWaiting">最近刷新：等待加载</p>
+                <div class="section-minihead">
+                  <h5 data-i18n="observeDebug.hostGroup.endpoints">本地接口</h5>
+                </div>
+                <div class="action-row">
+                  <button class="button" type="button" data-action="open-host-management" data-i18n="observeDebug.hostEndpointActions.openManagement">打开管理页</button>
+                  <button class="button" type="button" data-action="copy-host-status-url" data-i18n="observeDebug.hostEndpointActions.copyStatus">复制状态接口</button>
+                  <button class="button" type="button" data-action="copy-host-diagnostics-url" data-i18n="observeDebug.hostEndpointActions.copyDiagnostics">复制诊断接口</button>
+                </div>
+                <dl class="status-grid">
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.managementUrl">管理页</dt>
+                    <dd data-field="host-management-url" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.statusUrl">状态接口</dt>
+                    <dd data-field="host-status-url" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.diagnosticsUrl">诊断接口</dt>
+                    <dd data-field="host-diagnostics-url" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.gatewayUrl">Gateway</dt>
+                    <dd data-field="host-gateway-url" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                </dl>
+                <div class="section-minihead">
+                  <h5 data-i18n="observeDebug.hostGroup.current">当前状态</h5>
+                </div>
+                <dl class="status-grid">
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.online">本地 Host</dt>
+                    <dd data-field="host-online" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.relay">Relay 状态</dt>
+                    <dd data-field="host-relay" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.mode">运行模式</dt>
+                    <dd data-field="host-mode" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                  <div>
+                    <dt data-i18n="observeDebug.hostSummary.lastError">最近错误</dt>
+                    <dd data-field="host-last-error" data-i18n="runtime.pending">等待加载</dd>
+                  </div>
+                </dl>
+                <div class="section-minihead">
+                  <h5 data-i18n="observeDebug.hostGroup.notes">最近错误</h5>
+                </div>
+                <ul>
+                  <li data-i18n="observeDebug.hostTestsItem1">先看设备是否在线，再看是否有待处理请求。</li>
+                  <li data-i18n="observeDebug.hostTestsItem2">需要联调时再打开工作台或控制台，不放在首页主流程。</li>
+                  <li data-i18n="observeDebug.hostTestsItem3">原始 JSON 只用于观察和排障，不作为普通用户阅读入口。</li>
+                </ul>
+              </section>
+            </div>
           </article>
         </div>
       </section>
@@ -409,9 +667,8 @@
         <div class="footer-links">
           <a href="/app/download" data-i18n="footer.androidHost">易安 App</a>
           <a href="/app/registrations" data-i18n="footer.registrations">设备连接</a>
-          <a href="/storylock-app.html">StoryLock 工作台</a>
-          <a href="/local-agent-app.html">Agent 控制台</a>
           <a href="#help" data-page-link="help" data-i18n="footer.help">帮助说明</a>
+          <a href="#observe-debug" data-page-link="observe-debug" data-i18n="footer.observeDebug">观察调试</a>
         </div>
       </div>
     </footer>

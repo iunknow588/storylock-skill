@@ -356,7 +356,9 @@ pub(crate) fn check_learning_current(
     if checked >= total {
         write_learning_completed_state(package_dir)?;
         core.set_export_ready(true);
-        core.set_learning_action_hint(SharedString::from("Training completed. You can export now."));
+        core.set_learning_action_hint(SharedString::from(
+            "Training completed. You can export now.",
+        ));
         return Ok(format!(
             "Training complete: {checked}/{total} prompts checked, errors recorded={errors}, weakItems={weak_items}. Export is enabled."
         ));

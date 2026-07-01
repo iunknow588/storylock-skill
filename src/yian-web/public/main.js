@@ -13,8 +13,9 @@ const I18N = {
     "nav.apk": "安装版本",
     "nav.userGuide": "使用说明",
     "nav.flow": "使用流程",
+    "nav.flowGallery": "图解流程",
     "nav.faq": "常见问题",
-    "nav.runtime": "请求状态",
+    "nav.observeDebug": "观察调试",
     "nav.help": "帮助说明",
     "hero.kicker": "StoryLock 本地安全确认",
     "hero.imageAlt": "第三方 Agent 通过云平台上的易安远程入口与私人智能助理双向通信，StoryLock 本地核心只与私人智能助理本地通信的示意图",
@@ -112,6 +113,36 @@ const I18N = {
     "flow.item4": "绑定完成后，在请求状态页查看本地设备是否在线、是否有待处理请求。",
     "flow.item5": "之后遇到需要授权的操作时，先由私人智能助理解释请求来源、内容和风险。",
     "flow.item6": "确认无误后，再由 StoryLock 本地核心配合本地设备解锁、生物识别或设备凭据完成确认。",
+    "flowGallery.kicker": "图解流程",
+    "flowGallery.title": "把下载、设置、授权和保存放到同一张路线图里",
+    "flowGallery.copy1": "这组流程图用于说明 StoryLock 包从下载到本地、选择当前包、进入空模式、挑战解锁、加载内容、学习检查、保存当前包并继续应用的完整链路。",
+    "flowGallery.copy2": "核心原则是始终围绕同一个包根目录：下载、设置、解锁、保存和 Host 应用都应该指向同一个 vault.stlk 所在目录。点击任意图片可以打开大图查看细节。",
+    "flowGallery.completeAlt": "StoryLock 完整操作流程图",
+    "flowGallery.completeCaption": "完整操作流程图：从获取 StoryLock 包到保存并应用当前包。",
+    "flowGallery.overviewAlt": "StoryLock 操作总览图",
+    "flowGallery.overviewTitle": "总览图",
+    "flowGallery.overviewCopy": "先理解同一个包目录如何贯穿下载、解锁、保存和应用。",
+    "flowGallery.downloadAlt": "StoryLock 下载流程图",
+    "flowGallery.downloadTitle": "下载阶段",
+    "flowGallery.downloadCopy": "下载后检查包结构、固定本地目录和关键文件。",
+    "flowGallery.setupAlt": "StoryLock 设置流程图",
+    "flowGallery.setupTitle": "设置阶段",
+    "flowGallery.setupCopy": "选择包目录或 vault.stlk，完成路径归一和冲突检查。",
+    "flowGallery.approvalAlt": "StoryLock 使用与授权流程图",
+    "flowGallery.approvalTitle": "授权与保存",
+    "flowGallery.approvalCopy": "空模式下先挑战解锁，再加载内容、学习、保存当前包。",
+    "flowGallery.boundaryTitle": "安全边界",
+    "flowGallery.boundaryCloudTitle": "云端入口",
+    "flowGallery.boundaryCloudCopy": "只负责展示、下载、中转请求和返回最小状态。",
+    "flowGallery.boundaryAssistantTitle": "私人智能助理",
+    "flowGallery.boundaryAssistantCopy": "解释来源、内容和风险，不直接读取故事存储。",
+    "flowGallery.boundaryCoreTitle": "StoryLock Core",
+    "flowGallery.boundaryCoreCopy": "离线处理敏感内容，授权前不展示答案和受保护对象。",
+    "flowGallery.troubleTitle": "遇到问题先判断",
+    "flowGallery.troubleItem1": "下载后先核对文件名、大小和校验值。",
+    "flowGallery.troubleItem2": "选择包时确认只指向一个包根目录或一个 vault.stlk。",
+    "flowGallery.troubleItem3": "空模式看不到内容是正常保护，挑战通过后才加载。",
+    "flowGallery.troubleItem4": "保存后 Host 应继续使用同一路径，另存为新包需要手动切换。",
     "faq.kicker": "常见问题",
     "faq.title": "绑定或确认遇到问题时先看这里",
     "faq.offline.title": "状态显示离线怎么办？",
@@ -126,11 +157,37 @@ const I18N = {
     "runtime.title": "查看当前请求、来源和本地设备情况",
     "runtime.loadGateway": "加载请求状态",
     "runtime.loadRegistrations": "查看设备连接",
+    "runtime.refresh": "刷新当前分区",
+    "runtime.autorefreshOn": "自动刷新：开",
+    "runtime.autorefreshOff": "自动刷新：关",
     "runtime.requestQueue": "待处理请求",
     "runtime.requestSource": "请求来源",
     "runtime.currentMode": "通信方式",
     "runtime.activeHosts": "在线设备",
     "runtime.pending": "等待加载",
+    "runtime.relayTransport": "Relay 传输",
+    "runtime.relayWait": "默认等待",
+    "runtime.relayCoordination": "协调方式",
+    "runtime.relayReadiness": "生产就绪",
+    "runtime.waitingPolls": "Waiting Poll",
+    "runtime.pendingResponses": "Pending Response",
+    "runtime.group.current": "当前策略",
+    "runtime.group.recent": "最近事件",
+    "runtime.group.total": "累计统计",
+    "runtime.summaryWaiting": "等待生成运行摘要。",
+    "runtime.summaryUnavailable": "当前还没有足够的运行状态信息。",
+    "runtime.refreshedWaiting": "最近刷新：等待加载",
+    "runtime.lastResolved": "最近成功返回",
+    "runtime.lastTimeout": "最近超时",
+    "runtime.lastIdleTimeout": "最近空闲超时",
+    "runtime.lastReplacedPoll": "最近替换轮询",
+    "runtime.lastClientClosed": "最近客户端断开",
+    "runtime.totalRequests": "累计请求",
+    "runtime.resolvedResponses": "累计成功返回",
+    "runtime.timeoutCount": "累计超时",
+    "runtime.idleTimeoutCount": "累计空闲超时",
+    "runtime.replacedPollCount": "累计替换轮询",
+    "runtime.clientClosedPollCount": "累计客户端断开",
     "runtime.responseTitle": "查看原始 JSON",
     "runtime.responseNote": "这里用于查看当前请求、绑定和在线状态；普通使用时请重点确认是否有待处理请求、来源是否可信、设备是否在线。",
     "help.kicker": "帮助说明",
@@ -158,6 +215,45 @@ const I18N = {
     "footer.androidHost": "易安 App",
     "footer.registrations": "设备连接",
     "footer.help": "帮助说明",
+    "footer.observeDebug": "观察调试",
+    "observeDebug.kicker": "观察调试",
+    "observeDebug.title": "把 host 测试和 web 测试集中放到这里",
+    "observeDebug.subnav.runtime": "运行状态",
+    "observeDebug.subnav.webTests": "Web 联调",
+    "observeDebug.subnav.hostTests": "Host 联调",
+    "observeDebug.runtimeTitle": "连接与运行状态",
+    "observeDebug.runtimeCopy": "这里集中查看 gateway、relay、设备连接和当前请求状态。",
+    "observeDebug.webTestsTitle": "Web 测试入口",
+    "observeDebug.webTestsCopy": "保留 StoryLock 工作台和 Agent 控制台，供联调和演示使用。",
+    "observeDebug.storylockWorkbench": "StoryLock 工作台",
+    "observeDebug.agentConsole": "Agent 控制台",
+    "observeDebug.hostTestsTitle": "Host 调试说明",
+    "observeDebug.hostTestsCopy": "Windows Host、本地 relay 和设备状态观察统一从这里进入，避免主页面承载联调噪音。",
+    "observeDebug.hostActions.health": "读取 Host Health",
+    "observeDebug.hostActions.status": "读取 Host 状态",
+    "observeDebug.hostActions.diagnostics": "读取 Host 诊断",
+    "observeDebug.hostActions.refresh": "刷新当前分区",
+    "observeDebug.hostActions.autorefreshOn": "自动刷新：开",
+    "observeDebug.hostActions.autorefreshOff": "自动刷新：关",
+    "observeDebug.hostSummaryWaiting": "等待生成 Host 摘要。",
+    "observeDebug.hostRefreshedWaiting": "最近刷新：等待加载",
+    "observeDebug.hostGroup.endpoints": "本地接口",
+    "observeDebug.hostGroup.current": "当前状态",
+    "observeDebug.hostGroup.notes": "最近错误",
+    "observeDebug.hostEndpointActions.openManagement": "打开管理页",
+    "observeDebug.hostEndpointActions.copyStatus": "复制状态接口",
+    "observeDebug.hostEndpointActions.copyDiagnostics": "复制诊断接口",
+    "observeDebug.hostSummary.managementUrl": "管理页",
+    "observeDebug.hostSummary.statusUrl": "状态接口",
+    "observeDebug.hostSummary.diagnosticsUrl": "诊断接口",
+    "observeDebug.hostSummary.gatewayUrl": "Gateway",
+    "observeDebug.hostSummary.online": "本地 Host",
+    "observeDebug.hostSummary.relay": "Relay 状态",
+    "observeDebug.hostSummary.mode": "运行模式",
+    "observeDebug.hostSummary.lastError": "最近错误",
+    "observeDebug.hostTestsItem1": "先看设备是否在线，再看是否有待处理请求。",
+    "observeDebug.hostTestsItem2": "需要联调时再打开工作台或控制台，不放在首页主流程。",
+    "observeDebug.hostTestsItem3": "原始 JSON 只用于观察和排障，不作为普通用户阅读入口。",
     unconfigured: "未配置",
     unavailable: "未获取",
     connectionRelay: "云端中转连接",
@@ -182,8 +278,9 @@ const I18N = {
     "nav.apk": "Install",
     "nav.userGuide": "Guide",
     "nav.flow": "Flow",
+    "nav.flowGallery": "Diagrams",
     "nav.faq": "FAQ",
-    "nav.runtime": "Requests",
+    "nav.observeDebug": "Observe & Debug",
     "nav.help": "Help",
     "hero.kicker": "StoryLock Local Safety",
     "hero.imageAlt": "Diagram showing third-party agents calling Yian Remote Entry, bidirectional communication with a private assistant, and local-only communication with the offline StoryLock Local Core",
@@ -281,6 +378,36 @@ const I18N = {
     "flow.item4": "After binding, use the request status page to check whether the local device is online and whether requests are pending.",
     "flow.item5": "When an approval request appears later, the private assistant explains the source, content, and risk first.",
     "flow.item6": "If it looks right, StoryLock Local Core completes approval with local device unlock, biometrics, or device credential.",
+    "flowGallery.kicker": "Diagrams",
+    "flowGallery.title": "Put download, setup, approval, and saving on one route map",
+    "flowGallery.copy1": "These diagrams explain the full StoryLock package path: download locally, choose the current package, enter empty mode, pass the challenge, load content, run learning checks, save the current package, and keep applying it.",
+    "flowGallery.copy2": "The main rule is to stay on one package root. Download, setup, unlock, save, and Host application should all point to the directory that contains the same vault.stlk. Open any image to inspect the full-size diagram.",
+    "flowGallery.completeAlt": "Complete StoryLock operation flow diagram",
+    "flowGallery.completeCaption": "Complete operation flow: from getting a StoryLock package to saving and applying the current package.",
+    "flowGallery.overviewAlt": "StoryLock operation overview diagram",
+    "flowGallery.overviewTitle": "Overview",
+    "flowGallery.overviewCopy": "Understand how one package directory carries download, unlock, save, and application.",
+    "flowGallery.downloadAlt": "StoryLock download flow diagram",
+    "flowGallery.downloadTitle": "Download",
+    "flowGallery.downloadCopy": "After download, check the package structure, local folder, and required files.",
+    "flowGallery.setupAlt": "StoryLock setup flow diagram",
+    "flowGallery.setupTitle": "Setup",
+    "flowGallery.setupCopy": "Choose the package directory or vault.stlk, normalize the path, and check conflicts.",
+    "flowGallery.approvalAlt": "StoryLock use and approval flow diagram",
+    "flowGallery.approvalTitle": "Approval and Save",
+    "flowGallery.approvalCopy": "Start in empty mode, pass the challenge, then load, learn, and save the current package.",
+    "flowGallery.boundaryTitle": "Security Boundary",
+    "flowGallery.boundaryCloudTitle": "Cloud Entry",
+    "flowGallery.boundaryCloudCopy": "Shows pages, serves downloads, relays requests, and returns minimal status.",
+    "flowGallery.boundaryAssistantTitle": "Private Assistant",
+    "flowGallery.boundaryAssistantCopy": "Explains source, content, and risk without directly reading story storage.",
+    "flowGallery.boundaryCoreTitle": "StoryLock Core",
+    "flowGallery.boundaryCoreCopy": "Handles sensitive content offline and hides answers and protected objects before approval.",
+    "flowGallery.troubleTitle": "Check This First",
+    "flowGallery.troubleItem1": "After download, verify file name, size, and checksum.",
+    "flowGallery.troubleItem2": "When choosing a package, point to one package root or one vault.stlk.",
+    "flowGallery.troubleItem3": "Seeing no content in empty mode is expected protection; content loads only after the challenge passes.",
+    "flowGallery.troubleItem4": "After saving, Host should keep using the same path. Saving as a new package requires a manual switch.",
     "faq.kicker": "FAQ",
     "faq.title": "Start here when binding or approval does not work",
     "faq.offline.title": "What if the status is offline?",
@@ -295,11 +422,37 @@ const I18N = {
     "runtime.title": "Inspect current requests, source, and local device status",
     "runtime.loadGateway": "Load Request Status",
     "runtime.loadRegistrations": "View Device Connections",
+    "runtime.refresh": "Refresh Section",
+    "runtime.autorefreshOn": "Auto Refresh: On",
+    "runtime.autorefreshOff": "Auto Refresh: Off",
     "runtime.requestQueue": "Pending Requests",
     "runtime.requestSource": "Request Source",
     "runtime.currentMode": "Communication",
     "runtime.activeHosts": "Online Devices",
     "runtime.pending": "Pending",
+    "runtime.relayTransport": "Relay Transport",
+    "runtime.relayWait": "Default Wait",
+    "runtime.relayCoordination": "Coordination",
+    "runtime.relayReadiness": "Production Readiness",
+    "runtime.waitingPolls": "Waiting Polls",
+    "runtime.pendingResponses": "Pending Responses",
+    "runtime.group.current": "Current Policy",
+    "runtime.group.recent": "Recent Events",
+    "runtime.group.total": "Lifetime Stats",
+    "runtime.summaryWaiting": "Waiting to generate a runtime summary.",
+    "runtime.summaryUnavailable": "Not enough runtime status information is available yet.",
+    "runtime.refreshedWaiting": "Last refreshed: waiting",
+    "runtime.lastResolved": "Last Resolved",
+    "runtime.lastTimeout": "Last Timeout",
+    "runtime.lastIdleTimeout": "Last Idle Timeout",
+    "runtime.lastReplacedPoll": "Last Replaced Poll",
+    "runtime.lastClientClosed": "Last Client Closed Poll",
+    "runtime.totalRequests": "Total Requests",
+    "runtime.resolvedResponses": "Resolved Responses",
+    "runtime.timeoutCount": "Timeout Count",
+    "runtime.idleTimeoutCount": "Idle Timeout Count",
+    "runtime.replacedPollCount": "Replaced Poll Count",
+    "runtime.clientClosedPollCount": "Client Closed Poll Count",
     "runtime.responseTitle": "View Raw JSON",
     "runtime.responseNote": "This area shows request, binding, and online status. For normal use, focus on pending requests, trusted source, and whether the device is online.",
     "help.kicker": "Help",
@@ -327,6 +480,45 @@ const I18N = {
     "footer.androidHost": "Yian App",
     "footer.registrations": "Device Connections",
     "footer.help": "Help",
+    "footer.observeDebug": "Observe & Debug",
+    "observeDebug.kicker": "Observe & Debug",
+    "observeDebug.title": "Keep host and web test entry points here",
+    "observeDebug.subnav.runtime": "Runtime",
+    "observeDebug.subnav.webTests": "Web Integration",
+    "observeDebug.subnav.hostTests": "Host Integration",
+    "observeDebug.runtimeTitle": "Connection and Runtime Status",
+    "observeDebug.runtimeCopy": "Use this area to inspect gateway, relay, device connections, and current request status.",
+    "observeDebug.webTestsTitle": "Web Test Entry Points",
+    "observeDebug.webTestsCopy": "Keep the StoryLock workbench and Agent console available here for demos and integration checks.",
+    "observeDebug.storylockWorkbench": "StoryLock Workbench",
+    "observeDebug.agentConsole": "Agent Console",
+    "observeDebug.hostTestsTitle": "Host Debug Notes",
+    "observeDebug.hostTestsCopy": "Windows Host, local relay, and device-state observation now live here so the main website stays focused.",
+    "observeDebug.hostActions.health": "Load Host Health",
+    "observeDebug.hostActions.status": "Load Host Status",
+    "observeDebug.hostActions.diagnostics": "Load Host Diagnostics",
+    "observeDebug.hostActions.refresh": "Refresh Section",
+    "observeDebug.hostActions.autorefreshOn": "Auto Refresh: On",
+    "observeDebug.hostActions.autorefreshOff": "Auto Refresh: Off",
+    "observeDebug.hostSummaryWaiting": "Waiting to generate a Host summary.",
+    "observeDebug.hostRefreshedWaiting": "Last refreshed: waiting",
+    "observeDebug.hostGroup.endpoints": "Local Endpoints",
+    "observeDebug.hostGroup.current": "Current Status",
+    "observeDebug.hostGroup.notes": "Recent Errors",
+    "observeDebug.hostEndpointActions.openManagement": "Open Management",
+    "observeDebug.hostEndpointActions.copyStatus": "Copy Status API",
+    "observeDebug.hostEndpointActions.copyDiagnostics": "Copy Diagnostics API",
+    "observeDebug.hostSummary.managementUrl": "Management",
+    "observeDebug.hostSummary.statusUrl": "Status API",
+    "observeDebug.hostSummary.diagnosticsUrl": "Diagnostics API",
+    "observeDebug.hostSummary.gatewayUrl": "Gateway",
+    "observeDebug.hostSummary.online": "Local Host",
+    "observeDebug.hostSummary.relay": "Relay Status",
+    "observeDebug.hostSummary.mode": "Runtime Mode",
+    "observeDebug.hostSummary.lastError": "Last Error",
+    "observeDebug.hostTestsItem1": "Check whether devices are online before looking at pending requests.",
+    "observeDebug.hostTestsItem2": "Open the workbench or console only for integration checks, not from the main hero flow.",
+    "observeDebug.hostTestsItem3": "Raw JSON stays here for observation and troubleshooting, not as a normal user entry.",
     unconfigured: "Not configured",
     unavailable: "Unavailable",
     connectionRelay: "Cloud relay connection",
@@ -343,20 +535,56 @@ const STORAGE_KEY = "yian-site-locale";
 
 const el = {
   output: document.querySelector("[data-region='output']"),
+  runtimeSummary: document.querySelector("[data-region='runtime-summary']"),
+  hostSummary: document.querySelector("[data-region='host-summary']"),
+  runtimeRefreshed: document.querySelector("[data-region='runtime-refreshed']"),
+  hostRefreshed: document.querySelector("[data-region='host-refreshed']"),
   connectMode: document.querySelector("[data-field='connect-mode']"),
   requestQueue: document.querySelector("[data-field='request-queue']"),
   requestSource: document.querySelector("[data-field='request-source']"),
   activeHostCount: document.querySelector("[data-field='active-host-count']"),
+  relayTransport: document.querySelector("[data-field='relay-transport']"),
+  relayWait: document.querySelector("[data-field='relay-wait']"),
+  relayCoordination: document.querySelector("[data-field='relay-coordination']"),
+  relayReadiness: document.querySelector("[data-field='relay-readiness']"),
+  waitingPolls: document.querySelector("[data-field='waiting-polls']"),
+  pendingResponses: document.querySelector("[data-field='pending-responses']"),
+  lastResolved: document.querySelector("[data-field='last-resolved']"),
+  lastTimeout: document.querySelector("[data-field='last-timeout']"),
+  lastIdleTimeout: document.querySelector("[data-field='last-idle-timeout']"),
+  lastReplacedPoll: document.querySelector("[data-field='last-replaced-poll']"),
+  lastClientClosed: document.querySelector("[data-field='last-client-closed']"),
+  totalRequests: document.querySelector("[data-field='total-requests']"),
+  resolvedResponses: document.querySelector("[data-field='resolved-responses']"),
+  timeoutCount: document.querySelector("[data-field='timeout-count']"),
+  idleTimeoutCount: document.querySelector("[data-field='idle-timeout-count']"),
+  replacedPollCount: document.querySelector("[data-field='replaced-poll-count']"),
+  clientClosedPollCount: document.querySelector("[data-field='client-closed-poll-count']"),
+  hostOnline: document.querySelector("[data-field='host-online']"),
+  hostRelay: document.querySelector("[data-field='host-relay']"),
+  hostMode: document.querySelector("[data-field='host-mode']"),
+  hostLastError: document.querySelector("[data-field='host-last-error']"),
+  hostManagementUrl: document.querySelector("[data-field='host-management-url']"),
+  hostStatusUrl: document.querySelector("[data-field='host-status-url']"),
+  hostDiagnosticsUrl: document.querySelector("[data-field='host-diagnostics-url']"),
+  hostGatewayUrl: document.querySelector("[data-field='host-gateway-url']"),
   downloadMetadata: document.querySelector("[data-region='download-metadata']"),
   localeButtons: Array.from(document.querySelectorAll("[data-locale]")),
   metaDescription: document.querySelector("meta[name='description']"),
   pageSections: Array.from(document.querySelectorAll("[data-page-section]")),
   pageLinks: Array.from(document.querySelectorAll("[data-page-link]")),
   pageTitle: document.querySelector("[data-region='page-title']"),
+  subpageSections: Array.from(document.querySelectorAll("[data-subpage-section]")),
+  subpageLinks: Array.from(document.querySelectorAll("[data-subpage-link]")),
 };
 
 let currentLocale = resolveInitialLocale();
 let currentPageIndex = 0;
+let currentSubpageId = "runtime";
+let runtimeAutoRefreshEnabled = false;
+let hostAutoRefreshEnabled = false;
+let runtimeAutoRefreshTimer = null;
+let hostAutoRefreshTimer = null;
 let touchStartX = null;
 let touchStartY = null;
 let currentDownloadPlatforms = null;
@@ -395,6 +623,7 @@ function applyLocale(locale) {
     renderDownloadMetadata(currentDownloadPlatforms);
   }
   updatePagerTitle();
+  updateAutoRefreshButtons();
 }
 
 function pageIdFromHash() {
@@ -436,6 +665,20 @@ function setActivePage(pageId, options = {}) {
   }
 }
 
+function setActiveSubpage(subpageId) {
+  const nextId = el.subpageSections.some((section) => section.dataset.subpageSection === subpageId)
+    ? subpageId
+    : "runtime";
+  currentSubpageId = nextId;
+  el.subpageSections.forEach((section) => {
+    section.classList.toggle("is-active", section.dataset.subpageSection === nextId);
+  });
+  el.subpageLinks.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.subpageLink === nextId);
+  });
+  syncAutoRefreshTimers();
+}
+
 function movePage(step) {
   if (!el.pageSections.length) {
     return;
@@ -449,6 +692,78 @@ function setOutput(value) {
     return;
   }
   el.output.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+}
+
+function setSummaryBanner(node, value, state = "neutral") {
+  if (!node) {
+    return;
+  }
+  node.textContent = value && String(value).trim() ? String(value) : t("runtime.summaryUnavailable");
+  node.classList.remove("is-good", "is-warn", "is-bad");
+  if (state === "good") {
+    node.classList.add("is-good");
+  } else if (state === "warn") {
+    node.classList.add("is-warn");
+  } else if (state === "bad") {
+    node.classList.add("is-bad");
+  }
+}
+
+function setRefreshedMeta(node, date = new Date()) {
+  if (!node) {
+    return;
+  }
+  const locale = currentLocale === "zh" ? "zh-CN" : "en-US";
+  const label = currentLocale === "zh" ? "最近刷新：" : "Last refreshed: ";
+  node.textContent = `${label}${new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date)}`;
+}
+
+function updateAutoRefreshButtons() {
+  const runtimeButton = document.querySelector("[data-action='toggle-runtime-autorefresh']");
+  const hostButton = document.querySelector("[data-action='toggle-host-autorefresh']");
+  if (runtimeButton) {
+    runtimeButton.textContent = t(runtimeAutoRefreshEnabled ? "runtime.autorefreshOn" : "runtime.autorefreshOff");
+  }
+  if (hostButton) {
+    hostButton.textContent = t(hostAutoRefreshEnabled ? "observeDebug.hostActions.autorefreshOn" : "observeDebug.hostActions.autorefreshOff");
+  }
+}
+
+function syncAutoRefreshTimers() {
+  if (runtimeAutoRefreshTimer) {
+    clearInterval(runtimeAutoRefreshTimer);
+    runtimeAutoRefreshTimer = null;
+  }
+  if (hostAutoRefreshTimer) {
+    clearInterval(hostAutoRefreshTimer);
+    hostAutoRefreshTimer = null;
+  }
+  const activePageId = el.pageSections[currentPageIndex]?.id;
+  if (document.hidden || activePageId !== "observe-debug") {
+    return;
+  }
+  if (runtimeAutoRefreshEnabled && currentSubpageId === "runtime") {
+    runtimeAutoRefreshTimer = setInterval(() => {
+      refreshRuntimeSection().catch(() => {});
+    }, 5000);
+  }
+  if (hostAutoRefreshEnabled && currentSubpageId === "host-tests") {
+    hostAutoRefreshTimer = setInterval(() => {
+      refreshHostSection().catch(() => {});
+    }, 5000);
+  }
+}
+
+function textValue(node) {
+  return String(node?.textContent ?? "").trim();
 }
 
 function formatBytes(value) {
@@ -590,6 +905,21 @@ function setText(node, value) {
   node.textContent = value && String(value).trim() ? String(value) : t("unconfigured");
 }
 
+function setFieldState(node, state = "neutral") {
+  const card = node?.closest("div");
+  if (!(card instanceof HTMLElement)) {
+    return;
+  }
+  card.classList.remove("is-good", "is-warn", "is-bad");
+  if (state === "good") {
+    card.classList.add("is-good");
+  } else if (state === "warn") {
+    card.classList.add("is-warn");
+  } else if (state === "bad") {
+    card.classList.add("is-bad");
+  }
+}
+
 function formatConnectionMode(value) {
   const raw = String(value ?? "").trim();
   if (!raw) {
@@ -605,6 +935,262 @@ function formatConnectionMode(value) {
     return t("connectionLocal");
   }
   return raw;
+}
+
+function formatDurationMs(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) {
+    return t("unavailable");
+  }
+  return `${number} ms`;
+}
+
+function formatTimestamp(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return t("unavailable");
+  }
+  const parsed = Date.parse(raw);
+  if (!Number.isFinite(parsed)) {
+    return raw;
+  }
+  const locale = currentLocale === "zh" ? "zh-CN" : "en-US";
+  return new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(new Date(parsed));
+}
+
+function formatRelayReadiness(readiness) {
+  if (!readiness || typeof readiness !== "object") {
+    return t("unavailable");
+  }
+  if (readiness.singleInstance && readiness.multiInstance) {
+    return currentLocale === "zh" ? "单实例/多实例可用" : "Single and multi-instance ready";
+  }
+  if (readiness.singleInstance && readiness.missingExternalCoordinator) {
+    return currentLocale === "zh" ? "单实例可用，生产多实例需外部协调" : "Single-instance ready, multi-instance needs external coordination";
+  }
+  if (readiness.singleInstance) {
+    return currentLocale === "zh" ? "单实例可用" : "Single-instance ready";
+  }
+  return t("unavailable");
+}
+
+function relayReadinessSummary(readiness) {
+  if (!readiness || typeof readiness !== "object") {
+    return currentLocale === "zh" ? "生产就绪信息未返回" : "readiness data is unavailable";
+  }
+  if (readiness.singleInstance && readiness.multiInstance) {
+    return currentLocale === "zh" ? "单实例和多实例都可用" : "single-instance and multi-instance are ready";
+  }
+  if (readiness.singleInstance && readiness.missingExternalCoordinator) {
+    return currentLocale === "zh" ? "单实例可用，多实例仍需外部协调" : "single-instance is ready, multi-instance still needs external coordination";
+  }
+  if (readiness.singleInstance) {
+    return currentLocale === "zh" ? "当前仅确认单实例可用" : "only single-instance readiness is currently confirmed";
+  }
+  return currentLocale === "zh" ? "当前未确认生产可用性" : "production readiness is not yet confirmed";
+}
+
+function runtimeSummaryText({
+  transport,
+  readiness,
+  waitingPollCount,
+  pendingResponseCount,
+  lastTimeoutAt,
+}) {
+  if (!transport && !readiness) {
+    return {
+      text: t("runtime.summaryUnavailable"),
+      state: "neutral",
+    };
+  }
+  const parts = [];
+  const rawTransport = String(transport ?? "").trim() || t("unavailable");
+  if (currentLocale === "zh") {
+    parts.push(`当前 ${rawTransport}`);
+    parts.push(relayReadinessSummary(readiness));
+    parts.push(`waiting poll ${Number.isFinite(waitingPollCount) ? waitingPollCount : 0}`);
+    parts.push(`pending response ${Number.isFinite(pendingResponseCount) ? pendingResponseCount : 0}`);
+    parts.push(lastTimeoutAt ? "最近发生过 timeout" : "最近未记录 timeout");
+  } else {
+    parts.push(`Current transport is ${rawTransport}`);
+    parts.push(relayReadinessSummary(readiness));
+    parts.push(`waiting polls ${Number.isFinite(waitingPollCount) ? waitingPollCount : 0}`);
+    parts.push(`pending responses ${Number.isFinite(pendingResponseCount) ? pendingResponseCount : 0}`);
+    parts.push(lastTimeoutAt ? "a timeout was recorded recently" : "no recent timeout was recorded");
+  }
+  let state = "good";
+  if (lastTimeoutAt || Number(waitingPollCount) > 0 || Number(pendingResponseCount) > 0) {
+    state = "warn";
+  }
+  if (relayReadinessState(readiness) === "bad") {
+    state = "bad";
+  }
+  return {
+    text: parts.join(currentLocale === "zh" ? "，" : "; "),
+    state,
+  };
+}
+
+function relayReadinessState(readiness) {
+  if (!readiness || typeof readiness !== "object") {
+    return "neutral";
+  }
+  if (readiness.singleInstance && readiness.multiInstance) {
+    return "good";
+  }
+  if (readiness.singleInstance && readiness.missingExternalCoordinator) {
+    return "warn";
+  }
+  return readiness.singleInstance ? "warn" : "bad";
+}
+
+function relayCoordinationState(value) {
+  const raw = String(value ?? "").toLowerCase();
+  if (!raw) {
+    return "neutral";
+  }
+  if (raw.includes("redis") || raw.includes("kv") || raw.includes("pubsub")) {
+    return "good";
+  }
+  if (raw.includes("memory") || raw.includes("in_process") || raw.includes("volatile")) {
+    return "warn";
+  }
+  return "neutral";
+}
+
+function relayTransportState(value) {
+  const raw = String(value ?? "").toLowerCase();
+  if (!raw) {
+    return "neutral";
+  }
+  if (raw.includes("long_poll")) {
+    return "good";
+  }
+  if (raw.includes("short_poll")) {
+    return "warn";
+  }
+  return "neutral";
+}
+
+function queueCountState(value) {
+  const count = Number(value);
+  if (!Number.isFinite(count)) {
+    return "neutral";
+  }
+  if (count === 0) {
+    return "good";
+  }
+  if (count <= 2) {
+    return "warn";
+  }
+  return "bad";
+}
+
+function eventCountState(value, {
+  warnAt = 1,
+  badAt = 3,
+  zeroState = "good",
+} = {}) {
+  const count = Number(value);
+  if (!Number.isFinite(count)) {
+    return "neutral";
+  }
+  if (count === 0) {
+    return zeroState;
+  }
+  if (count < warnAt) {
+    return zeroState;
+  }
+  if (count < badAt) {
+    return "warn";
+  }
+  return "bad";
+}
+
+function timestampState(value, emphasis = "recent_good") {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return emphasis === "recent_bad" ? "good" : "neutral";
+  }
+  return emphasis === "recent_bad" ? "bad" : "good";
+}
+
+function hostOnlineState(value) {
+  const raw = String(value ?? "").toLowerCase();
+  if (!raw) {
+    return "neutral";
+  }
+  if (raw.includes("ok") || raw.includes("success") || raw.includes("healthy")) {
+    return "good";
+  }
+  return "warn";
+}
+
+function hostRelayState(value) {
+  const raw = String(value ?? "").toLowerCase();
+  if (!raw) {
+    return "neutral";
+  }
+  if (raw.includes("online") || raw.includes("handled_request") || raw.includes("idle")) {
+    return "good";
+  }
+  if (raw.includes("starting") || raw.includes("local_only")) {
+    return "warn";
+  }
+  if (raw.includes("error")) {
+    return "bad";
+  }
+  return "neutral";
+}
+
+function hostLastErrorState(value) {
+  const raw = String(value ?? "").trim().toLowerCase();
+  if (!raw || raw === "none" || raw === "null" || raw === "unavailable") {
+    return "good";
+  }
+  return "bad";
+}
+
+function hostSummaryText({
+  online,
+  relayStatus,
+  mode,
+  lastError,
+}) {
+  const hasError = Boolean(String(lastError ?? "").trim()) && !["none", "null", "unavailable"].includes(String(lastError ?? "").trim().toLowerCase());
+  const rawMode = String(mode ?? "").trim() || t("unavailable");
+  const rawRelay = String(relayStatus ?? "").trim() || t("unavailable");
+  const rawOnline = String(online ?? "").trim() || t("unavailable");
+  const parts = [];
+  if (currentLocale === "zh") {
+    parts.push(`本地 Host ${rawOnline}`);
+    parts.push(`relay ${rawRelay}`);
+    parts.push(`模式 ${rawMode}`);
+    parts.push(hasError ? "最近记录到错误" : "最近未记录错误");
+  } else {
+    parts.push(`Local Host ${rawOnline}`);
+    parts.push(`relay ${rawRelay}`);
+    parts.push(`mode ${rawMode}`);
+    parts.push(hasError ? "an error was recorded recently" : "no recent error was recorded");
+  }
+  let state = "good";
+  if (hasError) {
+    state = "bad";
+  } else if (hostRelayState(relayStatus) === "warn" || rawMode === "local_only") {
+    state = "warn";
+  }
+  return {
+    text: parts.join(currentLocale === "zh" ? "，" : "; "),
+    state,
+  };
 }
 
 function updateGatewaySummary(payload) {
@@ -625,10 +1211,99 @@ function updateGatewaySummary(payload) {
   const hostCount = payload?.hostRegistry?.activeHostCount
     ?? payload?.onlineStatus?.activeHostCount
     ?? payload?.activeHostCount;
+  const relayPolicy = payload?.relayPolicy ?? {};
+  const failureTracking = relayPolicy?.failureTracking ?? {};
   setText(el.connectMode, formatConnectionMode(mode));
+  setFieldState(el.connectMode, "good");
   setText(el.requestQueue, Number.isFinite(pendingRequests) ? pendingRequests : t("unavailable"));
+  setFieldState(el.requestQueue, queueCountState(pendingRequests));
   setText(el.requestSource, requestSource ?? t("unavailable"));
+  setFieldState(el.requestSource, requestSource ? "good" : "neutral");
   setText(el.activeHostCount, Number.isFinite(hostCount) ? hostCount : "0");
+  setFieldState(el.activeHostCount, Number(hostCount) > 0 ? "good" : "warn");
+  setText(el.relayTransport, relayPolicy?.transport ?? t("unavailable"));
+  setFieldState(el.relayTransport, relayTransportState(relayPolicy?.transport));
+  setText(
+    el.relayWait,
+    `${formatDurationMs(relayPolicy?.defaultWaitMs)} / ${formatDurationMs(relayPolicy?.clientTimeoutMs)}`,
+  );
+  setFieldState(el.relayWait, "good");
+  setText(el.relayCoordination, relayPolicy?.coordination ?? t("unavailable"));
+  setFieldState(el.relayCoordination, relayCoordinationState(relayPolicy?.coordination));
+  setText(el.relayReadiness, formatRelayReadiness(relayPolicy?.readiness));
+  setFieldState(el.relayReadiness, relayReadinessState(relayPolicy?.readiness));
+  setText(el.waitingPolls, Number.isFinite(failureTracking?.waitingPollCount) ? failureTracking.waitingPollCount : "0");
+  setFieldState(el.waitingPolls, queueCountState(failureTracking?.waitingPollCount));
+  setText(el.pendingResponses, Number.isFinite(failureTracking?.pendingResponseCount) ? failureTracking.pendingResponseCount : "0");
+  setFieldState(el.pendingResponses, queueCountState(failureTracking?.pendingResponseCount));
+  setText(el.lastResolved, formatTimestamp(failureTracking?.lastResolvedAt));
+  setFieldState(el.lastResolved, timestampState(failureTracking?.lastResolvedAt, "recent_good"));
+  setText(el.lastTimeout, formatTimestamp(failureTracking?.lastTimeoutAt));
+  setFieldState(el.lastTimeout, timestampState(failureTracking?.lastTimeoutAt, "recent_bad"));
+  setText(el.lastIdleTimeout, formatTimestamp(failureTracking?.lastIdleTimeoutAt));
+  setFieldState(el.lastIdleTimeout, timestampState(failureTracking?.lastIdleTimeoutAt, "recent_bad"));
+  setText(el.lastReplacedPoll, formatTimestamp(failureTracking?.lastReplacedPollAt));
+  setFieldState(el.lastReplacedPoll, timestampState(failureTracking?.lastReplacedPollAt, "recent_bad"));
+  setText(el.lastClientClosed, formatTimestamp(failureTracking?.lastClientClosedPollAt));
+  setFieldState(el.lastClientClosed, timestampState(failureTracking?.lastClientClosedPollAt, "recent_bad"));
+  setText(el.totalRequests, Number.isFinite(failureTracking?.totalRequests) ? failureTracking.totalRequests : "0");
+  setFieldState(el.totalRequests, Number(failureTracking?.totalRequests) > 0 ? "good" : "neutral");
+  setText(el.resolvedResponses, Number.isFinite(failureTracking?.resolvedResponses) ? failureTracking.resolvedResponses : "0");
+  setFieldState(el.resolvedResponses, Number(failureTracking?.resolvedResponses) > 0 ? "good" : "neutral");
+  setText(el.timeoutCount, Number.isFinite(failureTracking?.timeoutCount) ? failureTracking.timeoutCount : "0");
+  setFieldState(el.timeoutCount, eventCountState(failureTracking?.timeoutCount));
+  setText(el.idleTimeoutCount, Number.isFinite(failureTracking?.idleTimeoutCount) ? failureTracking.idleTimeoutCount : "0");
+  setFieldState(el.idleTimeoutCount, eventCountState(failureTracking?.idleTimeoutCount));
+  setText(el.replacedPollCount, Number.isFinite(failureTracking?.replacedPollCount) ? failureTracking.replacedPollCount : "0");
+  setFieldState(el.replacedPollCount, eventCountState(failureTracking?.replacedPollCount));
+  setText(el.clientClosedPollCount, Number.isFinite(failureTracking?.clientClosedPollCount) ? failureTracking.clientClosedPollCount : "0");
+  setFieldState(el.clientClosedPollCount, eventCountState(failureTracking?.clientClosedPollCount));
+  const runtimeSummary = runtimeSummaryText({
+    transport: relayPolicy?.transport,
+    readiness: relayPolicy?.readiness,
+    waitingPollCount: failureTracking?.waitingPollCount,
+    pendingResponseCount: failureTracking?.pendingResponseCount,
+    lastTimeoutAt: failureTracking?.lastTimeoutAt,
+  });
+  setSummaryBanner(el.runtimeSummary, runtimeSummary.text, runtimeSummary.state);
+  setRefreshedMeta(el.runtimeRefreshed);
+}
+
+function updateHostSummary(payload) {
+  const result = payload?.result ?? payload ?? {};
+  const host = result?.host ?? {};
+  const relay = result?.relay ?? result?.ui?.relay ?? {};
+  const remote = result?.remote ?? result?.ui?.remote ?? {};
+  const ui = result?.ui ?? {};
+  const localEndpoints = result?.localEndpoints ?? {};
+  const online = host?.status ?? payload?.status ?? null;
+  const relayStatus = relay?.status ?? t("unavailable");
+  const mode = remote?.mode ?? t("unavailable");
+  const lastError = relay?.lastError ?? t("unavailable");
+  setText(el.hostOnline, online ?? t("unavailable"));
+  setFieldState(el.hostOnline, hostOnlineState(online));
+  setText(el.hostRelay, relayStatus);
+  setFieldState(el.hostRelay, hostRelayState(relayStatus));
+  setText(el.hostMode, formatConnectionMode(mode));
+  setFieldState(el.hostMode, remote?.mode === "relay_url" ? "good" : "warn");
+  setText(el.hostLastError, lastError);
+  setFieldState(el.hostLastError, hostLastErrorState(lastError));
+  setText(el.hostManagementUrl, ui?.managementUrl ?? localEndpoints?.management ?? t("unavailable"));
+  setFieldState(el.hostManagementUrl, ui?.managementUrl || localEndpoints?.management ? "good" : "neutral");
+  setText(el.hostStatusUrl, ui?.statusUrl ?? t("unavailable"));
+  setFieldState(el.hostStatusUrl, ui?.statusUrl ? "good" : "neutral");
+  setText(el.hostDiagnosticsUrl, localEndpoints?.diagnostics ?? t("unavailable"));
+  setFieldState(el.hostDiagnosticsUrl, localEndpoints?.diagnostics ? "good" : "neutral");
+  setText(el.hostGatewayUrl, remote?.gatewayUrl ?? t("unavailable"));
+  setFieldState(el.hostGatewayUrl, remote?.gatewayUrl ? "good" : "warn");
+  const hostSummary = hostSummaryText({
+    online,
+    relayStatus,
+    mode: remote?.mode ?? mode,
+    lastError,
+  });
+  setSummaryBanner(el.hostSummary, hostSummary.text, hostSummary.state);
+  setRefreshedMeta(el.hostRefreshed);
 }
 
 async function loadGatewayStatus() {
@@ -650,6 +1325,48 @@ async function loadRegistrations() {
     setText(el.activeHostCount, payload.hosts.length);
   }
   setOutput(payload);
+}
+
+async function loadHostHealth() {
+  const payload = await fetchJsonWithFallback([
+    "/api/host-observe/health",
+  ]);
+  updateHostSummary(payload);
+  setOutput(payload);
+}
+
+async function loadHostStatus() {
+  const payload = await fetchJsonWithFallback([
+    "/api/host-observe/status",
+  ]);
+  updateHostSummary(payload);
+  setOutput(payload);
+}
+
+async function loadHostDiagnostics() {
+  const payload = await fetchJsonWithFallback([
+    "/api/host-observe/diagnostics",
+  ]);
+  updateHostSummary(payload);
+  setOutput(payload);
+}
+
+async function refreshRuntimeSection() {
+  await loadGatewayStatus();
+  try {
+    await loadRegistrations();
+  } catch {
+    // Keep the gateway summary visible even if registrations temporarily fail.
+  }
+}
+
+async function refreshHostSection() {
+  await loadHostStatus();
+  try {
+    await loadHostDiagnostics();
+  } catch {
+    // Keep the latest host status visible even if diagnostics temporarily fail.
+  }
 }
 
 async function loadDownloadMetadata() {
@@ -693,10 +1410,37 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
+  const subpageLink = target.closest("[data-subpage-link]");
+  if (subpageLink instanceof HTMLElement) {
+    setActiveSubpage(subpageLink.dataset.subpageLink ?? "runtime");
+    return;
+  }
+
   try {
     if (target.matches("[data-action='copy-checksum']")) {
       await navigator.clipboard.writeText(target.dataset.checksum ?? "");
       target.textContent = t("apk.metadata.copied");
+      return;
+    }
+    if (target.matches("[data-action='open-host-management']")) {
+      const url = textValue(el.hostManagementUrl);
+      if (url && url !== t("unavailable") && /^https?:\/\//i.test(url)) {
+        window.open(url, "_blank", "noopener");
+      }
+      return;
+    }
+    if (target.matches("[data-action='copy-host-status-url']")) {
+      const url = textValue(el.hostStatusUrl);
+      if (url && url !== t("unavailable")) {
+        await navigator.clipboard.writeText(url);
+      }
+      return;
+    }
+    if (target.matches("[data-action='copy-host-diagnostics-url']")) {
+      const url = textValue(el.hostDiagnosticsUrl);
+      if (url && url !== t("unavailable")) {
+        await navigator.clipboard.writeText(url);
+      }
       return;
     }
     if (target.matches("[data-action='gateway-status']")) {
@@ -704,6 +1448,33 @@ document.addEventListener("click", async (event) => {
     }
     if (target.matches("[data-action='registrations']")) {
       await loadRegistrations();
+    }
+    if (target.matches("[data-action='refresh-runtime']")) {
+      await refreshRuntimeSection();
+    }
+    if (target.matches("[data-action='toggle-runtime-autorefresh']")) {
+      runtimeAutoRefreshEnabled = !runtimeAutoRefreshEnabled;
+      updateAutoRefreshButtons();
+      syncAutoRefreshTimers();
+      return;
+    }
+    if (target.matches("[data-action='host-health']")) {
+      await loadHostHealth();
+    }
+    if (target.matches("[data-action='host-status']")) {
+      await loadHostStatus();
+    }
+    if (target.matches("[data-action='host-diagnostics']")) {
+      await loadHostDiagnostics();
+    }
+    if (target.matches("[data-action='refresh-host']")) {
+      await refreshHostSection();
+    }
+    if (target.matches("[data-action='toggle-host-autorefresh']")) {
+      hostAutoRefreshEnabled = !hostAutoRefreshEnabled;
+      updateAutoRefreshButtons();
+      syncAutoRefreshTimers();
+      return;
     }
   } catch (error) {
     setOutput([
@@ -716,6 +1487,10 @@ document.addEventListener("click", async (event) => {
 
 window.addEventListener("hashchange", () => {
   setActivePage(pageIdFromHash(), { skipHash: true });
+});
+
+document.addEventListener("visibilitychange", () => {
+  syncAutoRefreshTimers();
 });
 
 document.addEventListener("keydown", (event) => {
@@ -752,16 +1527,9 @@ document.addEventListener("touchend", (event) => {
 
 applyLocale(currentLocale);
 setActivePage(pageIdFromHash(), { skipHash: true, skipScroll: true });
+setActiveSubpage(currentSubpageId);
 setOutput(t("waiting"));
-
-loadGatewayStatus().catch((error) => {
-  setOutput([
-    t("siteLoaded"),
-    t("gatewayMissing"),
-    "",
-    error?.message ?? String(error),
-  ].join("\n"));
-});
+updateAutoRefreshButtons();
 
 loadDownloadMetadata().catch(() => {
   if (el.downloadMetadata) {

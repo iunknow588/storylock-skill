@@ -59,10 +59,13 @@ pub(crate) fn clear_learning_completed_state(package_dir: &Path) -> Result<()> {
 }
 
 pub(crate) fn stored_learning_state_fingerprint(package_dir: &Path) -> Option<String> {
-    read_json_or_default(&storylock_core_learning_state_path(package_dir), Value::Null)
-        .get("fingerprint")
-        .and_then(Value::as_str)
-        .map(ToOwned::to_owned)
+    read_json_or_default(
+        &storylock_core_learning_state_path(package_dir),
+        Value::Null,
+    )
+    .get("fingerprint")
+    .and_then(Value::as_str)
+    .map(ToOwned::to_owned)
 }
 
 pub(crate) fn clear_learning_completed_state_if_answer_config_changed(
@@ -79,7 +82,10 @@ pub(crate) fn clear_learning_completed_state_if_answer_config_changed(
 }
 
 pub(crate) fn has_current_learning_completed_state(package_dir: &Path) -> bool {
-    let state = read_json_or_default(&storylock_core_learning_state_path(package_dir), Value::Null);
+    let state = read_json_or_default(
+        &storylock_core_learning_state_path(package_dir),
+        Value::Null,
+    );
     state.get("schemaVersion").and_then(Value::as_str) == Some(LEARNING_STATE_SCHEMA_VERSION)
         && state
             .get("learningCompleted")

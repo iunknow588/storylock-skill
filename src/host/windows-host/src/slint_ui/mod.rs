@@ -20,17 +20,13 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
 };
 
 use self::storylock::{
-    apply_storylock_ui_settings, ensure_storylock_core_package,
-    host_learning_plan_status, initial_storylock_core_package_dir,
-    initialize_storylock_core_empty_window, initialize_storylock_core_window,
-    load_storylock_ui_settings,
-    merge_host_settings, normalize_storylock_ui_settings,
-    pick_storylock_core_package_path, read_effective_author_draft,
-    package_dir_status_report,
-    resolve_storylock_core_package_path,
-    resolve_storylock_core_package_with_conflict_prompt,
-    save_storylock_ui_settings, set_storylock_start_page_to_questions,
-    wire_storylock_core_callbacks, StoryLockUiSettings,
+    apply_storylock_ui_settings, ensure_storylock_core_package, host_learning_plan_status,
+    initial_storylock_core_package_dir, initialize_storylock_core_empty_window,
+    initialize_storylock_core_window, load_storylock_ui_settings, merge_host_settings,
+    normalize_storylock_ui_settings, package_dir_status_report, pick_storylock_core_package_path,
+    read_effective_author_draft, resolve_storylock_core_package_path,
+    resolve_storylock_core_package_with_conflict_prompt, save_storylock_ui_settings,
+    set_storylock_start_page_to_questions, wire_storylock_core_callbacks, StoryLockUiSettings,
 };
 
 mod confirmation;

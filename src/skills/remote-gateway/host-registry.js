@@ -26,6 +26,14 @@ function hostIdFor(deviceId, appInstanceId) {
   return `${deviceId}:${appInstanceId}`;
 }
 
+function clampNumber(value, { min, max, fallback }) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) {
+    return fallback;
+  }
+  return Math.max(min, Math.min(max, number));
+}
+
 function compareByLastSeen(a, b) {
   return (b.lastSeenAt ?? 0) - (a.lastSeenAt ?? 0);
 }
@@ -38,6 +46,10 @@ export class StoryLockHostRegistry {
     bindingTokenTtlMs = 10 * 60_000,
     relayTimeoutMs = 35_000,
     relayPollIntervalMs = 2_000,
+    relayLongPollWaitMs = 25_000,
+    relayLongPollMaxWaitMs = 55_000,
+    relayClientTimeoutMs = 35_000,
+    relayMaxWaitersPerHost = 1,
     relayRetryBackoffMs = [500, 1_500, 5_000],
     now = () => Date.now(),
   } = {}) {
@@ -47,6 +59,10 @@ export class StoryLockHostRegistry {
     this.bindingTokenTtlMs = bindingTokenTtlMs;
     this.relayTimeoutMs = relayTimeoutMs;
     this.relayPollIntervalMs = relayPollIntervalMs;
+    this.relayLongPollWaitMs = relayLongPollWaitMs;
+    this.relayLongPollMaxWaitMs = relayLongPollMaxWaitMs;
+    this.relayClientTimeoutMs = relayClientTimeoutMs;
+    this.relayMaxWaitersPerHost = relayMaxWaitersPerHost;
     this.relayRetryBackoffMs = Array.isArray(relayRetryBackoffMs)
       ? relayRetryBackoffMs.filter((value) => Number.isFinite(value) && value >= 0)
       : [];
@@ -54,13 +70,20 @@ export class StoryLockHostRegistry {
     this.hosts = new Map();
     this.bindingTokens = new Map();
     this.relayQueues = new Map();
+    this.relayPollWaiters = new Map();
     this.pendingRelayResponses = new Map();
     this.relayStats = {
       totalRequests: 0,
       resolvedResponses: 0,
       timeoutCount: 0,
+      idleTimeoutCount: 0,
+      replacedPollCount: 0,
+      clientClosedPollCount: 0,
       lastTimeoutAt: null,
       lastResolvedAt: null,
+      lastIdleTimeoutAt: null,
+      lastReplacedPollAt: null,
+      lastClientClosedPollAt: null,
     };
     this.load();
   }
@@ -297,6 +320,7 @@ export class StoryLockHostRegistry {
       });
     });
     this.relayStats.totalRequests += 1;
+    this.dispatchRelayWaiter(hostId);
 
     return {
       relayRequestId,
@@ -319,6 +343,116 @@ export class StoryLockHostRegistry {
       ...item,
       status: 'dispatch',
     };
+  }
+
+  waitForRelayRequest({
+    deviceId,
+    appInstanceId,
+    waitMs = this.relayLongPollWaitMs,
+    onCancel = null,
+  } = {}) {
+    const immediate = this.takeRelayRequest({ deviceId, appInstanceId });
+    if (immediate) {
+      return Promise.resolve(immediate);
+    }
+
+    const hostId = hostIdFor(deviceId, appInstanceId);
+    const boundedWaitMs = clampNumber(waitMs, {
+      min: 0,
+      max: this.relayLongPollMaxWaitMs,
+      fallback: 0,
+    });
+    if (boundedWaitMs <= 0) {
+      return Promise.resolve(null);
+    }
+
+    return new Promise((resolve) => {
+      const settle = (waiter, value) => {
+        if (waiter.settled) {
+          return;
+        }
+        waiter.settled = true;
+        clearTimeout(waiter.timer);
+        this.removeRelayWaiter(hostId, waiter);
+        resolve(value);
+      };
+      const waiter = {
+        deviceId,
+        appInstanceId,
+        settled: false,
+        timer: null,
+        cancel: null,
+        dispatch: null,
+      };
+      waiter.cancel = (reason = 'cancelled') => settle(waiter, { status: 'idle', reason });
+      waiter.dispatch = (value) => settle(waiter, value);
+      waiter.timer = setTimeout(() => {
+        this.touchHost(deviceId, appInstanceId);
+        this.relayStats.idleTimeoutCount += 1;
+        this.relayStats.lastIdleTimeoutAt = this.now();
+        settle(waiter, null);
+      }, boundedWaitMs);
+      const waiters = this.relayPollWaiters.get(hostId) ?? [];
+      while (waiters.length >= this.relayMaxWaitersPerHost) {
+        const replaced = waiters.shift();
+        if (replaced) {
+          this.relayStats.replacedPollCount += 1;
+          this.relayStats.lastReplacedPollAt = this.now();
+          replaced.cancel('replaced_by_new_poll');
+        }
+      }
+      waiters.push(waiter);
+      this.relayPollWaiters.set(hostId, waiters);
+      if (typeof onCancel === 'function') {
+        onCancel(() => waiter.cancel());
+      }
+      this.touchHost(deviceId, appInstanceId);
+      this.dispatchRelayWaiter(hostId);
+    });
+  }
+
+  dispatchRelayWaiter(hostId) {
+    const waiters = this.relayPollWaiters.get(hostId) ?? [];
+    if (waiters.length === 0) {
+      return;
+    }
+    const queue = this.relayQueues.get(hostId) ?? [];
+    while (waiters.length > 0 && queue.length > 0) {
+      const waiter = waiters.shift();
+      const item = queue.shift();
+      this.touchHost(waiter.deviceId, waiter.appInstanceId);
+      waiter.dispatch({
+        ...item,
+        status: 'dispatch',
+      });
+    }
+    if (waiters.length === 0) {
+      this.relayPollWaiters.delete(hostId);
+    } else {
+      this.relayPollWaiters.set(hostId, waiters);
+    }
+    this.relayQueues.set(hostId, queue);
+  }
+
+  removeRelayWaiter(hostId, waiter) {
+    const waiters = this.relayPollWaiters.get(hostId) ?? [];
+    const next = waiters.filter((item) => item !== waiter);
+    if (next.length === 0) {
+      this.relayPollWaiters.delete(hostId);
+      return;
+    }
+    this.relayPollWaiters.set(hostId, next);
+  }
+
+  cancelRelayWaiter(cancel, reason = 'cancelled') {
+    if (typeof cancel !== 'function') {
+      return;
+    }
+    if (reason === 'client_closed') {
+      this.relayStats.clientClosedPollCount += 1;
+      this.relayStats.lastClientClosedPollAt = this.now();
+    }
+    cancel(reason);
   }
 
   resolveRelayResponse({ relayRequestId, response }) {
@@ -348,6 +482,7 @@ export class StoryLockHostRegistry {
       if (ageMs > this.hostRetentionMs || host.status === 'revoked') {
         this.hosts.delete(hostId);
         this.relayQueues.delete(hostId);
+        this.relayPollWaiters.delete(hostId);
         changed = true;
       }
     }
@@ -395,13 +530,28 @@ export class StoryLockHostRegistry {
       relay: {
         timeoutMs: this.relayTimeoutMs,
         pollIntervalMs: this.relayPollIntervalMs,
+        longPollWaitMs: this.relayLongPollWaitMs,
+        longPollMaxWaitMs: this.relayLongPollMaxWaitMs,
+        clientTimeoutMs: this.relayClientTimeoutMs,
+        maxWaitersPerHost: this.relayMaxWaitersPerHost,
+        coordination: this.filePath ? 'file_backed_host_registry_in_memory_relay' : 'process_memory',
+        durability: 'volatile_relay_queue',
+        productionExternalCoordinatorRequired: true,
         retryBackoffMs: this.relayRetryBackoffMs,
+        waitingPollCount: Array.from(this.relayPollWaiters.values())
+          .reduce((total, waiters) => total + waiters.length, 0),
         pendingResponseCount: this.pendingRelayResponses.size,
         totalRequests: this.relayStats.totalRequests,
         resolvedResponses: this.relayStats.resolvedResponses,
         timeoutCount: this.relayStats.timeoutCount,
+        idleTimeoutCount: this.relayStats.idleTimeoutCount,
+        replacedPollCount: this.relayStats.replacedPollCount,
+        clientClosedPollCount: this.relayStats.clientClosedPollCount,
         lastTimeoutAt: this.relayStats.lastTimeoutAt,
         lastResolvedAt: this.relayStats.lastResolvedAt,
+        lastIdleTimeoutAt: this.relayStats.lastIdleTimeoutAt,
+        lastReplacedPollAt: this.relayStats.lastReplacedPollAt,
+        lastClientClosedPollAt: this.relayStats.lastClientClosedPollAt,
       },
       hosts,
     };

@@ -109,8 +109,7 @@ pub(crate) fn validate_policy_catalog(catalog: &Value, errors: &mut Vec<Prefligh
         errors.push(PreflightIssue {
             code: "SL_POLICY_CATALOG_INVALID",
             path: "$.operationTemplates".to_string(),
-            message: "resource-catalog.json must define non-secret operation templates"
-                .to_string(),
+            message: "resource-catalog.json must define non-secret operation templates".to_string(),
         });
     }
     if catalog

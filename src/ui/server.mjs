@@ -21,6 +21,7 @@ const configPath = resolve(uiRoot, '../skills/local-story-access/assets/demo-sto
 const port = Number(process.env.PORT || 4174);
 const host = String(process.env.HOST || process.env.STORYLOCK_UI_HOST || '127.0.0.1').trim();
 const gatewayBaseUrl = String(process.env.STORYLOCK_UI_GATEWAY_BASE_URL || '').trim() || null;
+const localHostObserveBaseUrl = String(process.env.STORYLOCK_WINDOWS_HOST_OBSERVE_URL || 'http://127.0.0.1:4510').trim();
 
 const mimeByExtension = {
   '.html': 'text/html; charset=utf-8',
@@ -85,6 +86,19 @@ async function proxyJson(pathname) {
   const body = await response.json();
   if (!response.ok || body.status === 'error') {
     throw new Error(body.message ?? `proxy request failed: ${response.status}`);
+  }
+  return body;
+}
+
+async function proxyLocalHostJson(pathname) {
+  const response = await fetch(new URL(pathname, localHostObserveBaseUrl), {
+    headers: {
+      accept: 'application/json',
+    },
+  });
+  const body = await response.json();
+  if (!response.ok || body.status === 'error') {
+    throw new Error(body.message ?? `local host proxy failed: ${response.status}`);
   }
   return body;
 }
@@ -365,6 +379,18 @@ const server = createServer(async (req, res) => {
       const parsed = body.trim() ? JSON.parse(body) : null;
       const config = parsed && Object.keys(parsed).length > 0 ? parsed : readJson(configPath);
       sendJson(res, 200, await runDemo(config));
+      return;
+    }
+    if (req.method === 'GET' && url.pathname === '/api/host-observe/health') {
+      sendJson(res, 200, await proxyLocalHostJson('/health'));
+      return;
+    }
+    if (req.method === 'GET' && url.pathname === '/api/host-observe/status') {
+      sendJson(res, 200, await proxyLocalHostJson('/ui/status'));
+      return;
+    }
+    if (req.method === 'GET' && url.pathname === '/api/host-observe/diagnostics') {
+      sendJson(res, 200, await proxyLocalHostJson('/diagnostics'));
       return;
     }
     if (

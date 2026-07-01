@@ -3,13 +3,14 @@ export component MenuButton inherits Rectangle {
         in property <string> label;
         in property <bool> selected;
         in property <bool> enabled: true;
+        in property <length> button-height: 36px;
         callback clicked();
 
         width: 144px;
-        height: 36px;
+        height: root.button-height;
         border-radius: 6px;
-        background: !enabled ? #d8e0e4 : (selected ? #b8c8cd : #e2e9ec);
-        TouchArea {
+        background: !enabled ? #d8e0e4 : (selected ? #b8c8cd : (touch.pressed ? #cbd8dd : (touch.has-hover ? #d8e3e7 : #e2e9ec)));
+        touch := TouchArea {
             clicked => {
                 if root.enabled {
                     root.clicked();
@@ -39,22 +40,23 @@ export component MenuButton inherits Rectangle {
 export component SubMenuButton inherits Rectangle {
         in property <string> label;
         in property <bool> selected;
+        in property <length> button-height: 32px;
         callback clicked();
 
         width: 124px;
-        height: 32px;
+        height: root.button-height;
         background: transparent;
 
         Rectangle {
             x: 10px;
             y: -8px;
             width: 1px;
-            height: 48px;
+            height: root.button-height + 16px;
             background: #9fb0b8;
         }
         Rectangle {
             x: 10px;
-            y: 16px;
+            y: root.button-height / 2;
             width: 12px;
             height: 1px;
             background: #9fb0b8;
@@ -63,9 +65,9 @@ export component SubMenuButton inherits Rectangle {
             x: 22px;
             y: 0px;
             width: 102px;
-            height: 32px;
+            height: root.button-height;
             border-radius: 6px;
-            background: selected ? #b8c8cd : #e2e9ec;
+            background: selected ? #b8c8cd : (touch.pressed ? #cbd8dd : (touch.has-hover ? #d8e3e7 : #e2e9ec));
             Rectangle {
                 x: 0px;
                 y: 0px;
@@ -85,7 +87,7 @@ export component SubMenuButton inherits Rectangle {
                 height: parent.height;
                 overflow: elide;
             }
-            TouchArea {
+            touch := TouchArea {
                 clicked => { root.clicked(); }
             }
         }
@@ -100,8 +102,8 @@ export component SideActionButton inherits Rectangle {
         border-radius: 6px;
         border-width: 1px;
         border-color: #45606b;
-        background: #45606b;
-        TouchArea {
+        background: touch.pressed ? #344b54 : (touch.has-hover ? #3a5a66 : #45606b);
+        touch := TouchArea {
             clicked => { root.clicked(); }
         }
         Text {
@@ -141,18 +143,21 @@ export component InfoRow inherits HorizontalLayout {
 export component FormRow inherits HorizontalLayout {
         in property <string> name;
         in property <string> value;
+        in property <length> editor-width: 390px;
+        in property <length> row-height: 32px;
         spacing: 14px;
         Text {
             text: root.name;
             width: 150px;
+            height: root.row-height;
             color: #62727d;
             font-size: 13px;
             vertical-alignment: center;
         }
         LineEdit {
             text: root.value;
-            width: 420px;
-            height: 32px;
+            width: root.editor-width;
+            height: root.row-height;
         }
     }
 
@@ -160,10 +165,12 @@ export component EditableRow inherits HorizontalLayout {
         in property <string> name;
         in-out property <string> value;
         in property <length> editor-width: 556px;
+        in property <length> row-height: 32px;
         spacing: 14px;
         Text {
             text: root.name;
             width: 150px;
+            height: root.row-height;
             color: #62727d;
             font-size: 13px;
             vertical-alignment: center;
@@ -171,7 +178,7 @@ export component EditableRow inherits HorizontalLayout {
         LineEdit {
             text <=> root.value;
             width: root.editor-width;
-            height: 32px;
+            height: root.row-height;
         }
     }
 
@@ -179,33 +186,38 @@ export component PathBrowseRow inherits HorizontalLayout {
         in property <string> name;
         in-out property <string> value;
         in property <bool> is-zh: true;
+        in property <length> editor-width: 358px;
+        in property <length> row-height: 32px;
         callback browse();
 
         spacing: 14px;
         Text {
             text: root.name;
             width: 150px;
+            height: root.row-height;
             color: #62727d;
             font-size: 13px;
             vertical-alignment: center;
         }
         LineEdit {
             text <=> root.value;
-            width: 366px;
-            height: 32px;
+            width: root.editor-width;
+            height: root.row-height;
         }
         Rectangle {
             width: 40px;
-            height: 32px;
+            height: root.row-height;
             border-radius: 6px;
-            background: #d7e1e6;
-            TouchArea {
+            border-width: 1px;
+            border-color: #45606b;
+            background: touch.pressed ? #344b54 : (touch.has-hover ? #3a5a66 : #45606b);
+            touch := TouchArea {
                 clicked => { root.browse(); }
             }
             Text {
-                text: "...";
-                color: #17252f;
-                font-size: 13px;
+                text: "\u{22ef}";
+                color: white;
+                font-size: 16px;
                 font-weight: 700;
                 horizontal-alignment: center;
                 vertical-alignment: center;
@@ -223,7 +235,7 @@ export component LargeEditableText inherits Rectangle {
 
         width: 720px;
         height: root.editor-height;
-        background: #eef3f5;
+        background: transparent;
         Text {
             x: 0px;
             y: 0px;
@@ -240,7 +252,9 @@ export component LargeEditableText inherits Rectangle {
             width: 556px;
             height: root.editor-height;
             border-radius: 6px;
-            background: #eef3f5;
+            border-width: 1px;
+            border-color: #c9d5da;
+            background: #ffffff;
             ScrollView {
                 x: 0px;
                 y: 0px;
@@ -457,10 +471,12 @@ export component QuestionIdTableRow inherits Rectangle {
 export component QuestionTile inherits Rectangle {
         in property <string> label;
         in property <bool> selected;
+        in property <length> tile-width: 171px;
+        in property <length> tile-height: 56px;
         callback clicked();
 
-        width: 171px;
-        height: 56px;
+        width: root.tile-width;
+        height: root.tile-height;
         border-width: 1px;
         border-color: selected ? #45606b : #d7e1e6;
         border-radius: 6px;
@@ -470,9 +486,9 @@ export component QuestionTile inherits Rectangle {
         }
         Text {
             x: 10px;
-            y: 8px;
+            y: 6px;
             width: parent.width - 20px;
-            height: parent.height - 16px;
+            height: parent.height - 12px;
             text: root.label;
             color: #17252f;
             font-size: 12px;
@@ -510,6 +526,8 @@ export component QuestionOverviewGrid inherits Rectangle {
         in property <string> question-23;
         in property <string> question-24;
         callback select-node(string);
+        property <length> tile-width: (root.width - 24px) / 4;
+        property <length> tile-height: (root.height - 40px) / 6;
 
         width: 720px;
         height: 374px;
@@ -521,40 +539,40 @@ export component QuestionOverviewGrid inherits Rectangle {
             height: parent.height;
             spacing: 8px;
             Row {
-                QuestionTile { label: root.question-1; selected: root.selection-enabled && root.selected-question == "1"; clicked => { root.select-node("1"); } }
-                QuestionTile { label: root.question-2; selected: root.selection-enabled && root.selected-question == "2"; clicked => { root.select-node("2"); } }
-                QuestionTile { label: root.question-3; selected: root.selection-enabled && root.selected-question == "3"; clicked => { root.select-node("3"); } }
-                QuestionTile { label: root.question-4; selected: root.selection-enabled && root.selected-question == "4"; clicked => { root.select-node("4"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-1; selected: root.selection-enabled && root.selected-question == "1"; clicked => { root.select-node("1"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-2; selected: root.selection-enabled && root.selected-question == "2"; clicked => { root.select-node("2"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-3; selected: root.selection-enabled && root.selected-question == "3"; clicked => { root.select-node("3"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-4; selected: root.selection-enabled && root.selected-question == "4"; clicked => { root.select-node("4"); } }
             }
             Row {
-                QuestionTile { label: root.question-5; selected: root.selection-enabled && root.selected-question == "5"; clicked => { root.select-node("5"); } }
-                QuestionTile { label: root.question-6; selected: root.selection-enabled && root.selected-question == "6"; clicked => { root.select-node("6"); } }
-                QuestionTile { label: root.question-7; selected: root.selection-enabled && root.selected-question == "7"; clicked => { root.select-node("7"); } }
-                QuestionTile { label: root.question-8; selected: root.selection-enabled && root.selected-question == "8"; clicked => { root.select-node("8"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-5; selected: root.selection-enabled && root.selected-question == "5"; clicked => { root.select-node("5"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-6; selected: root.selection-enabled && root.selected-question == "6"; clicked => { root.select-node("6"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-7; selected: root.selection-enabled && root.selected-question == "7"; clicked => { root.select-node("7"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-8; selected: root.selection-enabled && root.selected-question == "8"; clicked => { root.select-node("8"); } }
             }
             Row {
-                QuestionTile { label: root.question-9; selected: root.selection-enabled && root.selected-question == "9"; clicked => { root.select-node("9"); } }
-                QuestionTile { label: root.question-10; selected: root.selection-enabled && root.selected-question == "10"; clicked => { root.select-node("10"); } }
-                QuestionTile { label: root.question-11; selected: root.selection-enabled && root.selected-question == "11"; clicked => { root.select-node("11"); } }
-                QuestionTile { label: root.question-12; selected: root.selection-enabled && root.selected-question == "12"; clicked => { root.select-node("12"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-9; selected: root.selection-enabled && root.selected-question == "9"; clicked => { root.select-node("9"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-10; selected: root.selection-enabled && root.selected-question == "10"; clicked => { root.select-node("10"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-11; selected: root.selection-enabled && root.selected-question == "11"; clicked => { root.select-node("11"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-12; selected: root.selection-enabled && root.selected-question == "12"; clicked => { root.select-node("12"); } }
             }
             Row {
-                QuestionTile { label: root.question-13; selected: root.selection-enabled && root.selected-question == "13"; clicked => { root.select-node("13"); } }
-                QuestionTile { label: root.question-14; selected: root.selection-enabled && root.selected-question == "14"; clicked => { root.select-node("14"); } }
-                QuestionTile { label: root.question-15; selected: root.selection-enabled && root.selected-question == "15"; clicked => { root.select-node("15"); } }
-                QuestionTile { label: root.question-16; selected: root.selection-enabled && root.selected-question == "16"; clicked => { root.select-node("16"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-13; selected: root.selection-enabled && root.selected-question == "13"; clicked => { root.select-node("13"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-14; selected: root.selection-enabled && root.selected-question == "14"; clicked => { root.select-node("14"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-15; selected: root.selection-enabled && root.selected-question == "15"; clicked => { root.select-node("15"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-16; selected: root.selection-enabled && root.selected-question == "16"; clicked => { root.select-node("16"); } }
             }
             Row {
-                QuestionTile { label: root.question-17; selected: root.selection-enabled && root.selected-question == "17"; clicked => { root.select-node("17"); } }
-                QuestionTile { label: root.question-18; selected: root.selection-enabled && root.selected-question == "18"; clicked => { root.select-node("18"); } }
-                QuestionTile { label: root.question-19; selected: root.selection-enabled && root.selected-question == "19"; clicked => { root.select-node("19"); } }
-                QuestionTile { label: root.question-20; selected: root.selection-enabled && root.selected-question == "20"; clicked => { root.select-node("20"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-17; selected: root.selection-enabled && root.selected-question == "17"; clicked => { root.select-node("17"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-18; selected: root.selection-enabled && root.selected-question == "18"; clicked => { root.select-node("18"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-19; selected: root.selection-enabled && root.selected-question == "19"; clicked => { root.select-node("19"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-20; selected: root.selection-enabled && root.selected-question == "20"; clicked => { root.select-node("20"); } }
             }
             Row {
-                QuestionTile { label: root.question-21; selected: root.selection-enabled && root.selected-question == "21"; clicked => { root.select-node("21"); } }
-                QuestionTile { label: root.question-22; selected: root.selection-enabled && root.selected-question == "22"; clicked => { root.select-node("22"); } }
-                QuestionTile { label: root.question-23; selected: root.selection-enabled && root.selected-question == "23"; clicked => { root.select-node("23"); } }
-                QuestionTile { label: root.question-24; selected: root.selection-enabled && root.selected-question == "24"; clicked => { root.select-node("24"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-21; selected: root.selection-enabled && root.selected-question == "21"; clicked => { root.select-node("21"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-22; selected: root.selection-enabled && root.selected-question == "22"; clicked => { root.select-node("22"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-23; selected: root.selection-enabled && root.selected-question == "23"; clicked => { root.select-node("23"); } }
+                QuestionTile { tile-width: root.tile-width; tile-height: root.tile-height; label: root.question-24; selected: root.selection-enabled && root.selected-question == "24"; clicked => { root.select-node("24"); } }
             }
         }
     }
@@ -567,9 +585,9 @@ export component LearningAnswerTile inherits Rectangle {
         width: 237px;
         height: 66px;
         border-width: 1px;
-        border-color: state == "correct" ? #7fb38d : #d7e1e6;
+        border-color: state == "correct" ? #7fb38d : (touch-main.has-hover || touch-mark.has-hover ? #b7c6cc : #d7e1e6);
         border-radius: 6px;
-        background: #f7fafb;
+        background: state == "correct" ? #edf7f0 : (touch-main.pressed || touch-mark.pressed ? #edf3f5 : #ffffff);
 
         Text {
             x: 10px;
@@ -597,7 +615,7 @@ export component LearningAnswerTile inherits Rectangle {
             wrong-label: "打叉";
         }
 
-        TouchArea {
+        touch-main := TouchArea {
             x: 0px;
             y: 0px;
             width: parent.width - 76px;
@@ -607,7 +625,7 @@ export component LearningAnswerTile inherits Rectangle {
             }
         }
 
-        TouchArea {
+        touch-mark := TouchArea {
             x: parent.width - 62px;
             y: parent.height - 34px;
             width: 60px;
@@ -677,7 +695,7 @@ export component StaticTextPanel inherits Rectangle {
         border-radius: 6px;
         border-width: 1px;
         border-color: #d7e1e6;
-        background: #e8eef1;
+        background: #ffffff;
 
         Text {
             x: 10px;
@@ -722,7 +740,7 @@ export component QuestionConfigPanel inherits Rectangle {
         height: root.panel-height;
         border-radius: 6px;
         border-width: 0px;
-        background: #eef3f5;
+        background: transparent;
 
         ScrollView {
             x: 10px;
@@ -762,20 +780,26 @@ export component ActionButton inherits Rectangle {
         in property <string> label;
         in property <bool> primary;
         in property <bool> enabled: true;
+        in property <bool> danger: false;
         in property <length> button-width: 150px;
+        in property <length> button-height: 34px;
         callback clicked();
 
         width: root.button-width;
-        height: 34px;
+        height: root.button-height;
         border-radius: 6px;
-        background: !enabled ? #d8e0e4 : (primary ? #45606b : #d7e1e6);
-        TouchArea {
+        border-width: 1px;
+        border-color: !enabled ? #d8e0e4 : (danger ? #b94d4d : (primary ? #45606b : #c9d5da));
+        background: !enabled ? #d8e0e4 : (danger ? (touch.pressed ? #9f3f3f : (touch.has-hover ? #b94d4d : #c45c5c)) : (primary ? (touch.pressed ? #344b54 : (touch.has-hover ? #3a5a66 : #45606b)) : (touch.pressed ? #c9d5da : (touch.has-hover ? #dfe8ec : #f7fafb))));
+        touch := TouchArea {
             enabled: root.enabled;
             clicked => { root.clicked(); }
         }
         Text {
             text: root.label;
-            color: !enabled ? #8a98a0 : (primary ? white : #17252f);
+            width: parent.width;
+            height: parent.height;
+            color: !enabled ? #8a98a0 : (primary || danger ? white : #17252f);
             font-size: 13px;
             font-weight: 700;
             horizontal-alignment: center;
@@ -792,8 +816,8 @@ export component SettingsIconButton inherits Rectangle {
         border-radius: 6px;
         border-width: 1px;
         border-color: selected ? #45606b : #c9d5da;
-        background: selected ? #d7e1e6 : #f7fafb;
-        TouchArea {
+        background: selected ? #d7e1e6 : (touch.pressed ? #d7e1e6 : (touch.has-hover ? #edf3f5 : #f7fafb));
+        touch := TouchArea {
             clicked => { root.clicked(); }
         }
         Text {
@@ -807,24 +831,51 @@ export component SettingsIconButton inherits Rectangle {
         }
     }
 
+export component SectionTitle inherits Text {
+        in property <string> label;
+
+        text: root.label;
+        height: 20px;
+        color: #17252f;
+        font-size: 14px;
+        font-weight: 700;
+        vertical-alignment: center;
+        overflow: elide;
+    }
+
+export component SectionPanel inherits Rectangle {
+        in property <length> panel-width: 564px;
+        in property <length> panel-height: 96px;
+
+        width: root.panel-width;
+        height: root.panel-height;
+        border-radius: 6px;
+        border-width: 1px;
+        border-color: #d7e1e6;
+        background: #ffffff;
+    }
+
 export component StaticRow inherits HorizontalLayout {
         in property <string> name;
         in property <string> value;
+        in property <length> value-width: 390px;
+        in property <length> row-height: 32px;
         spacing: 14px;
         Text {
             text: root.name;
             width: 150px;
+            height: root.row-height;
             color: #62727d;
             font-size: 13px;
             vertical-alignment: center;
         }
         Rectangle {
-            width: 420px;
-            height: 32px;
+            width: root.value-width;
+            height: root.row-height;
             border-radius: 4px;
             border-width: 1px;
             border-color: #d7e1e6;
-            background: #e8eef1;
+            background: #ffffff;
             Text {
                 x: 10px;
                 width: parent.width - 20px;

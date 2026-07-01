@@ -11,6 +11,7 @@ import { StoryLockHostRegistry } from './host-registry.js';
 
 let cachedRegistry = null;
 let cachedRegistryFile = null;
+let cachedRegistryPolicyKey = null;
 
 function json(res, statusCode, value) {
   res.statusCode = statusCode;
@@ -56,6 +57,16 @@ function optionalString(value) {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function optionalFiniteNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function envNumber(env, name, fallback) {
+  const number = optionalFiniteNumber(env[name]);
+  return number === null ? fallback : number;
 }
 
 function wantsHtml(req) {
@@ -111,9 +122,20 @@ function renderSimplePage({ title, lead, actions = [], notes = [] }) {
 
 function getRegistry(env = process.env) {
   const filePath = optionalString(env.STORYLOCK_ANDROID_REGISTRY_FILE);
-  if (!cachedRegistry || cachedRegistryFile !== filePath) {
-    cachedRegistry = new StoryLockHostRegistry({ filePath });
+  const policy = {
+    relayLongPollWaitMs: envNumber(env, 'STORYLOCK_RELAY_LONG_POLL_WAIT_MS', 25_000),
+    relayLongPollMaxWaitMs: envNumber(env, 'STORYLOCK_RELAY_LONG_POLL_MAX_WAIT_MS', 55_000),
+    relayClientTimeoutMs: envNumber(env, 'STORYLOCK_RELAY_CLIENT_TIMEOUT_MS', 35_000),
+    relayMaxWaitersPerHost: envNumber(env, 'STORYLOCK_RELAY_MAX_WAITERS_PER_HOST', 1),
+  };
+  const policyKey = JSON.stringify(policy);
+  if (!cachedRegistry || cachedRegistryFile !== filePath || cachedRegistryPolicyKey !== policyKey) {
+    cachedRegistry = new StoryLockHostRegistry({
+      filePath,
+      ...policy,
+    });
     cachedRegistryFile = filePath;
+    cachedRegistryPolicyKey = policyKey;
   }
   return cachedRegistry;
 }
@@ -717,6 +739,7 @@ async function transportForMode(remoteRequest, {
 
 function buildRegistrationResponse(req, env, host) {
   const gatewayBaseUrl = getGatewayBaseUrl(req, env);
+  const registrySummary = getRegistry(env).getStatusSummary();
   return {
     status: 'ok',
     registration: summarizeHost(host),
@@ -724,6 +747,14 @@ function buildRegistrationResponse(req, env, host) {
       relayUrl: new URL('/local-host/relay', gatewayBaseUrl).toString(),
       pollUrl: new URL('/local-host/relay/poll', gatewayBaseUrl).toString(),
       respondUrl: new URL('/local-host/relay/respond', gatewayBaseUrl).toString(),
+      pollPolicy: {
+        transport: 'long_poll',
+        waitMs: registrySummary.relay.longPollWaitMs,
+        maxWaitMs: registrySummary.relay.longPollMaxWaitMs,
+        clientTimeoutMs: registrySummary.relay.clientTimeoutMs,
+        maxWaitersPerHost: registrySummary.relay.maxWaitersPerHost,
+        compatibility: 'omit waitMs for short_poll fallback',
+      },
     },
     gateway: {
       baseUrl: gatewayBaseUrl,
@@ -967,17 +998,37 @@ async function handleGet(req, res, url, env) {
       hosts: registrySummary.hosts.map(summarizeHost),
     },
     relayPolicy: {
-      transport: 'poll_respond',
+      transport: 'long_poll_respond',
       timeoutMs: registrySummary.relay.timeoutMs,
       pollIntervalMs: registrySummary.relay.pollIntervalMs,
       retryBackoffMs: registrySummary.relay.retryBackoffMs,
+      defaultWaitMs: registrySummary.relay.longPollWaitMs,
+      maxWaitMs: registrySummary.relay.longPollMaxWaitMs,
+      clientTimeoutMs: registrySummary.relay.clientTimeoutMs,
+      maxWaitersPerHost: registrySummary.relay.maxWaitersPerHost,
+      coordination: registrySummary.relay.coordination,
+      durability: registrySummary.relay.durability,
+      productionExternalCoordinatorRequired: registrySummary.relay.productionExternalCoordinatorRequired,
+      readiness: {
+        singleInstance: true,
+        multiInstance: !registrySummary.relay.productionExternalCoordinatorRequired,
+        missingExternalCoordinator: registrySummary.relay.productionExternalCoordinatorRequired,
+        recommendedCoordinator: 'redis_or_kv_with_pubsub',
+      },
       failureTracking: {
+        waitingPollCount: registrySummary.relay.waitingPollCount,
         pendingResponseCount: registrySummary.relay.pendingResponseCount,
         totalRequests: registrySummary.relay.totalRequests,
         resolvedResponses: registrySummary.relay.resolvedResponses,
         timeoutCount: registrySummary.relay.timeoutCount,
+        idleTimeoutCount: registrySummary.relay.idleTimeoutCount,
+        replacedPollCount: registrySummary.relay.replacedPollCount,
+        clientClosedPollCount: registrySummary.relay.clientClosedPollCount,
         lastTimeoutAt: registrySummary.relay.lastTimeoutAt,
         lastResolvedAt: registrySummary.relay.lastResolvedAt,
+        lastIdleTimeoutAt: registrySummary.relay.lastIdleTimeoutAt,
+        lastReplacedPollAt: registrySummary.relay.lastReplacedPollAt,
+        lastClientClosedPollAt: registrySummary.relay.lastClientClosedPollAt,
       },
       recoveryStrategy: 'host continues polling after timeout; gateway reissues on next request',
     },
@@ -1035,6 +1086,10 @@ async function handleRelayPoll(req, res, env) {
   const body = await readBody(req);
   const deviceId = optionalString(body.deviceId);
   const appInstanceId = optionalString(body.appInstanceId);
+  const waitMs = optionalFiniteNumber(body.waitMs);
+  const transport = waitMs && waitMs > 0 ? 'long_poll' : 'short_poll';
+  let cancelLongPoll = null;
+  let completed = false;
   if (!deviceId || !appInstanceId) {
     json(res, 400, {
       status: 'error',
@@ -1042,16 +1097,34 @@ async function handleRelayPoll(req, res, env) {
     });
     return;
   }
-  const dispatched = registry.takeRelayRequest({ deviceId, appInstanceId });
-  if (!dispatched) {
+  res.once('close', () => {
+    if (!completed && typeof cancelLongPoll === 'function') {
+      registry.cancelRelayWaiter(cancelLongPoll, 'client_closed');
+    }
+  });
+  const dispatched = waitMs && waitMs > 0
+    ? await registry.waitForRelayRequest({
+      deviceId,
+      appInstanceId,
+      waitMs,
+      onCancel(cancel) {
+        cancelLongPoll = cancel;
+      },
+    })
+    : registry.takeRelayRequest({ deviceId, appInstanceId });
+  completed = true;
+  if (!dispatched || dispatched.status === 'idle') {
     json(res, 200, {
       status: 'idle',
+      transport,
+      ...(dispatched?.reason ? { reason: dispatched.reason } : {}),
       registration: registry.touchHost(deviceId, appInstanceId),
     });
     return;
   }
   json(res, 200, {
     status: 'ok',
+    transport,
     relayRequestId: dispatched.relayRequestId,
     request: dispatched.request,
     registration: registry.touchHost(deviceId, appInstanceId),

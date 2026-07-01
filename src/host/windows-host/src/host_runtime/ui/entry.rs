@@ -10,9 +10,15 @@ pub(crate) fn main() -> Result<()> {
     if args.iter().any(|arg| arg == "--slint-ui") {
         return run_slint_ui_entry(config);
     }
-    if args.iter().any(|arg| arg == "--server-only")
-        || matches!(start_mode.as_str(), "server" | "server-only" | "console" | "debug")
-    {
+    if args.iter().any(|arg| {
+        matches!(
+            arg.as_str(),
+            "--server-only" | "--debug-host" | "--runtime-debug"
+        )
+    }) || matches!(
+        start_mode.as_str(),
+        "server" | "server-only" | "console" | "debug" | "debug-host" | "runtime-debug"
+    ) {
         return run_console_entry(config);
     }
     if args.iter().any(|arg| arg == "--print-config") {

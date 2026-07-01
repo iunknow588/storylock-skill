@@ -1,5 +1,5 @@
 import { VerticalBox, ScrollView } from "std-widgets.slint";
-import { InfoRow } from "../common.slint";
+import { InfoRow, SectionPanel, SectionTitle } from "../common.slint";
 
 export component ProtectedObjectTableRow inherits Rectangle {
     in property <bool> is-header;
@@ -10,13 +10,13 @@ export component ProtectedObjectTableRow inherits Rectangle {
     in property <string> level;
     callback selected(string);
 
-    width: 704px;
+    width: 668px;
     height: 32px;
     border-width: 1px;
     border-color: root.is-header ? #b8c8cd : #d7e1e6;
-    background: root.is-header ? #d7e1e6 : #f7fafb;
+    background: root.is-header ? #d7e1e6 : #ffffff;
 
-    TouchArea {
+    touch := TouchArea {
         clicked => {
             if !root.is-header {
                 root.selected(root.id);
@@ -24,11 +24,11 @@ export component ProtectedObjectTableRow inherits Rectangle {
         }
     }
 
-    Text { x: 8px; y: 0px; width: 134px; height: parent.height; text: root.name; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
-    Text { x: 150px; y: 0px; width: 210px; height: parent.height; text: root.username; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
-    Text { x: 370px; y: 0px; width: 118px; height: parent.height; text: root.usage; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
-    Text { x: 498px; y: 0px; width: 72px; height: parent.height; text: root.level; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
-    Text { x: 578px; y: 0px; width: 116px; height: parent.height; text: root.id; color: #62727d; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 8px; y: 0px; width: 126px; height: parent.height; text: root.name; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 142px; y: 0px; width: 194px; height: parent.height; text: root.username; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 346px; y: 0px; width: 110px; height: parent.height; text: root.usage; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 466px; y: 0px; width: 70px; height: parent.height; text: root.level; color: #17252f; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
+    Text { x: 546px; y: 0px; width: 112px; height: parent.height; text: root.id; color: #62727d; font-size: 12px; font-weight: root.is-header ? 700 : 500; vertical-alignment: center; overflow: elide; }
 }
 
 export component ProtectedObjectsPage inherits VerticalBox {
@@ -88,40 +88,53 @@ export component ProtectedObjectsPage inherits VerticalBox {
     y: 0px;
     width: 720px;
     height: 374px;
-    spacing: 12px;
+    spacing: 0px;
 
-    InfoRow {
-        name: root.is-zh ? "当前级别" : "Current Level";
-        value: root.resource-group == "normal" ? (root.is-zh ? "普通对象" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "私密对象" : "Private Objects") : (root.is-zh ? "机密对象" : "Secret Objects");
-    }
-    ProtectedObjectTableRow {
-        is-header: true;
-        width: 704px;
-        name: "URI";
-        username: root.is-zh ? "用户名" : "Username";
-        usage: root.is-zh ? "类型" : "Type";
-        level: root.is-zh ? "级别" : "Level";
-        id: root.is-zh ? "编号" : "ID";
-    }
-    ScrollView {
-        width: 704px;
-        height: 264px;
-        vertical-scrollbar-policy: ScrollBarPolicy.always-off;
-        horizontal-scrollbar-policy: ScrollBarPolicy.always-off;
-        viewport-width: 704px;
-        viewport-height: 264px;
+    SectionPanel {
+        x: 12px;
+        panel-width: 696px;
+        panel-height: 350px;
         VerticalBox {
-            width: 704px;
-            height: 264px;
-            spacing: 1px;
-            ProtectedObjectTableRow { id: root.object-1-id; name: root.object-1-name; username: root.object-1-secret; usage: root.object-1-usage; level: root.object-1-level; selected(value) => { root.select-object(value); } }
-            ProtectedObjectTableRow { id: root.object-2-id; name: root.object-2-name; username: root.object-2-secret; usage: root.object-2-usage; level: root.object-2-level; selected(value) => { root.select-object(value); } }
-            ProtectedObjectTableRow { id: root.object-3-id; name: root.object-3-name; username: root.object-3-secret; usage: root.object-3-usage; level: root.object-3-level; selected(value) => { root.select-object(value); } }
-            ProtectedObjectTableRow { id: root.object-4-id; name: root.object-4-name; username: root.object-4-secret; usage: root.object-4-usage; level: root.object-4-level; selected(value) => { root.select-object(value); } }
-            ProtectedObjectTableRow { id: root.object-5-id; name: root.object-5-name; username: root.object-5-secret; usage: root.object-5-usage; level: root.object-5-level; selected(value) => { root.select-object(value); } }
-            ProtectedObjectTableRow { id: root.object-6-id; name: root.object-6-name; username: root.object-6-secret; usage: root.object-6-usage; level: root.object-6-level; selected(value) => { root.select-object(value); } }
-            ProtectedObjectTableRow { id: root.object-7-id; name: root.object-7-name; username: root.object-7-secret; usage: root.object-7-usage; level: root.object-7-level; selected(value) => { root.select-object(value); } }
-            ProtectedObjectTableRow { id: root.object-8-id; name: root.object-8-name; username: root.object-8-secret; usage: root.object-8-usage; level: root.object-8-level; selected(value) => { root.select-object(value); } }
+            x: 14px;
+            y: 10px;
+            width: 668px;
+            height: 330px;
+            spacing: 10px;
+
+            SectionTitle { label: root.is-zh ? "\u{53d7}\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}" : "Protected Objects"; }
+            InfoRow {
+                name: root.is-zh ? "\u{5f53}\u{524d}\u{7ea7}\u{522b}" : "Current Level";
+                value: root.resource-group == "normal" ? (root.is-zh ? "\u{666e}\u{901a}\u{5bf9}\u{8c61}" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "\u{79c1}\u{5bc6}\u{5bf9}\u{8c61}" : "Private Objects") : (root.is-zh ? "\u{673a}\u{5bc6}\u{5bf9}\u{8c61}" : "Secret Objects");
+            }
+            ProtectedObjectTableRow {
+                is-header: true;
+                name: "URI";
+                username: root.is-zh ? "\u{7528}\u{6237}\u{540d}" : "Username";
+                usage: root.is-zh ? "\u{7c7b}\u{578b}" : "Type";
+                level: root.is-zh ? "\u{7ea7}\u{522b}" : "Level";
+                id: root.is-zh ? "\u{7f16}\u{53f7}" : "ID";
+            }
+            ScrollView {
+                width: 668px;
+                height: 246px;
+                vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
+                horizontal-scrollbar-policy: ScrollBarPolicy.always-off;
+                viewport-width: 668px;
+                viewport-height: 264px;
+                VerticalBox {
+                    width: 668px;
+                    height: 264px;
+                    spacing: 1px;
+                    ProtectedObjectTableRow { id: root.object-1-id; name: root.object-1-name; username: root.object-1-secret; usage: root.object-1-usage; level: root.object-1-level; selected(value) => { root.select-object(value); } }
+                    ProtectedObjectTableRow { id: root.object-2-id; name: root.object-2-name; username: root.object-2-secret; usage: root.object-2-usage; level: root.object-2-level; selected(value) => { root.select-object(value); } }
+                    ProtectedObjectTableRow { id: root.object-3-id; name: root.object-3-name; username: root.object-3-secret; usage: root.object-3-usage; level: root.object-3-level; selected(value) => { root.select-object(value); } }
+                    ProtectedObjectTableRow { id: root.object-4-id; name: root.object-4-name; username: root.object-4-secret; usage: root.object-4-usage; level: root.object-4-level; selected(value) => { root.select-object(value); } }
+                    ProtectedObjectTableRow { id: root.object-5-id; name: root.object-5-name; username: root.object-5-secret; usage: root.object-5-usage; level: root.object-5-level; selected(value) => { root.select-object(value); } }
+                    ProtectedObjectTableRow { id: root.object-6-id; name: root.object-6-name; username: root.object-6-secret; usage: root.object-6-usage; level: root.object-6-level; selected(value) => { root.select-object(value); } }
+                    ProtectedObjectTableRow { id: root.object-7-id; name: root.object-7-name; username: root.object-7-secret; usage: root.object-7-usage; level: root.object-7-level; selected(value) => { root.select-object(value); } }
+                    ProtectedObjectTableRow { id: root.object-8-id; name: root.object-8-name; username: root.object-8-secret; usage: root.object-8-usage; level: root.object-8-level; selected(value) => { root.select-object(value); } }
+                }
+            }
         }
     }
 }

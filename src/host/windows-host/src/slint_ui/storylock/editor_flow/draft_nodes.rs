@@ -6,8 +6,8 @@ pub(crate) fn reset_learning_gate(
     learning_passed: &Rc<RefCell<LearningProgress>>,
     message: &str,
 ) {
-    let changed = clear_learning_completed_state_if_answer_config_changed(package_dir)
-        .unwrap_or(false);
+    let changed =
+        clear_learning_completed_state_if_answer_config_changed(package_dir).unwrap_or(false);
     core.set_export_ready(has_current_learning_completed_state(package_dir));
     *learning_passed.borrow_mut() = LearningProgress::new();
     if changed {

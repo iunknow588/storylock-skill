@@ -123,10 +123,7 @@ pub(crate) fn normalize_storylock_export_dir_path(
     let resolved = std::path::PathBuf::from(trimmed);
     let resolved = resolve_storylock_core_package_path(&resolved);
     if resolved.file_name().and_then(|value| value.to_str()) == Some("vault.stlk") {
-        return resolved
-            .parent()
-            .map(Path::to_path_buf)
-            .unwrap_or(resolved);
+        return resolved.parent().map(Path::to_path_buf).unwrap_or(resolved);
     }
     if resolved == default_storylock_export_dir(package_dir) {
         return resolved;
@@ -174,7 +171,9 @@ pub(crate) fn export_storylock_package_to(
         );
     }
     promote_pending_author_draft(package_dir)?;
-    let package_dir = package_dir.canonicalize().unwrap_or_else(|_| package_dir.to_path_buf());
+    let package_dir = package_dir
+        .canonicalize()
+        .unwrap_or_else(|_| package_dir.to_path_buf());
     let export_dir_canonical = export_dir
         .canonicalize()
         .unwrap_or_else(|_| export_dir.to_path_buf());

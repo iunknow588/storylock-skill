@@ -161,7 +161,12 @@ fn snapshot_window(window: &Rc<MinimalSoftwareWindow>, path: &Path) -> Result<()
         .window()
         .take_snapshot()
         .map_err(|error| anyhow::anyhow!("{error}"))?;
-    write_png_rgba(path, snapshot.width(), snapshot.height(), pixels_to_rgba_bytes(&snapshot))
+    write_png_rgba(
+        path,
+        snapshot.width(),
+        snapshot.height(),
+        pixels_to_rgba_bytes(&snapshot),
+    )
 }
 
 fn fill_host_common(app: &HostDashboard) {
@@ -174,8 +179,11 @@ fn fill_host_common(app: &HostDashboard) {
     app.set_storylock_data_dir(package_path().into());
     app.set_connection_test_status("No connection test has run yet.".into());
     app.set_status_summary(
-        format!("Local only | local API http://127.0.0.1:8787/health | package {}", package_path())
-            .into(),
+        format!(
+            "Local only | local API http://127.0.0.1:8787/health | package {}",
+            package_path()
+        )
+        .into(),
     );
     app.set_package_self_check(
         "package directory: identity-package\nvault.stlk: exists\nlearning state: locked\nexport state: save current package"
@@ -224,7 +232,9 @@ fn fill_storylock_empty(app: &StoryLockCoreApp) {
     app.set_question_23("待解锁 Q23".into());
     app.set_question_24("待解锁 Q24".into());
     app.set_node_overview("当前包未解锁；24 个问题内容暂不读取。".into());
-    app.set_config_status("当前为空模式；解锁当前包后加载包内容并启用保存、学习策略和导出。".into());
+    app.set_config_status(
+        "当前为空模式；解锁当前包后加载包内容并启用保存、学习策略和导出。".into(),
+    );
     app.set_learning_status("解锁当前包后再开始学习。".into());
     app.set_protected_object_list("未解锁状态不加载受保护对象。".into());
 }
@@ -235,7 +245,9 @@ fn fill_storylock_unlocked(app: &StoryLockCoreApp) {
     app.set_core_data_dir(package_path().into());
     app.set_story_title("守株待兔".into());
     app.set_story_summary("农夫看见兔子撞上树桩，于是每天等在树桩旁。".into());
-    app.set_story_plot("挑战通过后，StoryLock 从当前 vault.stlk 加载故事详情、故事答案和受保护对象。".into());
+    app.set_story_plot(
+        "挑战通过后，StoryLock 从当前 vault.stlk 加载故事详情、故事答案和受保护对象。".into(),
+    );
     app.set_node_overview("24 个问题已从当前包加载。".into());
     app.set_question_1("故事发生在什么时间？".into());
     app.set_question_2("农夫在哪里等待？".into());

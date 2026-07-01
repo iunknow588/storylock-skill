@@ -34,8 +34,19 @@ export component RequestConfirmation inherits Window {
             HorizontalBox {
                 alignment: end;
                 spacing: 10px;
-                Button { text: "Deny"; clicked => { root.deny-requested(); } }
-                Button { text: "Approve"; clicked => { root.approve-requested(); } }
+                ActionButton {
+                    label: "Deny";
+                    primary: false;
+                    danger: true;
+                    button-width: 116px;
+                    clicked => { root.deny-requested(); }
+                }
+                ActionButton {
+                    label: "Approve";
+                    primary: true;
+                    button-width: 116px;
+                    clicked => { root.approve-requested(); }
+                }
             }
         }
     }

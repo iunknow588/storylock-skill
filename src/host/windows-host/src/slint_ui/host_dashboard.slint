@@ -1,5 +1,5 @@
 ﻿import { Button, ComboBox, LineEdit, ScrollView, TextEdit, VerticalBox, HorizontalBox } from "std-widgets.slint";
-import { MenuButton, SideActionButton, SubMenuButton, InfoRow, FormRow, EditableRow, PathBrowseRow, LargeEditableText, QuestionTableRow, QuestionIdTableRow, QuestionOverviewGrid, QuestionConfigPanel, ActionButton, SettingsIconButton, StaticRow, LogPanel, LearningAnswerGrid } from "common.slint";
+import { MenuButton, SideActionButton, SubMenuButton, InfoRow, FormRow, EditableRow, PathBrowseRow, LargeEditableText, QuestionTableRow, QuestionIdTableRow, QuestionOverviewGrid, QuestionConfigPanel, ActionButton, SettingsIconButton, SectionPanel, SectionTitle, StaticRow, LogPanel, LearningAnswerGrid } from "common.slint";
 export component HostDashboard inherits Window {
         in-out property <int> active-page: 0;
         in-out property <string> language: "zh";
@@ -40,14 +40,47 @@ export component HostDashboard inherits Window {
             Rectangle {
                 min-width: 180px;
                 max-width: 180px;
-                background: #eef3f5;
+                background: #dfe9ec;
+                Rectangle {
+                    x: parent.width - 1px;
+                    y: 0px;
+                    width: 1px;
+                    height: parent.height;
+                    background: #c9d5da;
+                }
 
                 VerticalBox {
                     x: 18px;
-                    y: 48px;
+                    y: 32px;
                     width: 144px;
-                    height: 330px;
-                    spacing: 14px;
+                    height: 372px;
+                    spacing: 12px;
+
+                    Text {
+                        text: "Yian";
+                        width: 144px;
+                        height: 28px;
+                        color: #17252f;
+                        font-size: 20px;
+                        font-weight: 800;
+                        vertical-alignment: center;
+                    }
+
+                    Text {
+                        text: "StoryLock Host";
+                        width: 144px;
+                        height: 18px;
+                        color: #5a6b75;
+                        font-size: 12px;
+                        font-weight: 600;
+                        vertical-alignment: center;
+                    }
+
+                    Rectangle {
+                        width: 144px;
+                        height: 1px;
+                        background: #c9d5da;
+                    }
 
                     MenuButton {
                         label: root.is-zh ? "\u{8fdc}\u{7aef} Web" : "Remote Web";
@@ -78,11 +111,11 @@ export component HostDashboard inherits Window {
 
             Rectangle {
                 min-width: 640px;
-                background: #eef3f5;
+                background: #f7fafb;
                 Rectangle {
                     width: 640px;
                     height: 540px;
-                    background: transparent;
+                    background: #ffffff;
                     VerticalBox {
                         padding: 38px;
                         spacing: 16px;
@@ -99,13 +132,24 @@ export component HostDashboard inherits Window {
                             }
                             Text {
                                 x: 38px;
-                                y: 12px;
+                                y: 6px;
                                 width: 480px;
-                                height: 28px;
+                                height: 22px;
                                 text: "Yian: StoryLock - " + root.current-title;
-                                font-size: 16px;
-                                font-weight: 800;
+                                font-size: 18px;
+                                font-weight: 700;
                                 color: #17252f;
+                                overflow: elide;
+                            }
+                            Text {
+                                x: 38px;
+                                y: 30px;
+                                width: 480px;
+                                height: 16px;
+                                text: root.is-zh ? "\u{672c}\u{673a}\u{6388}\u{6743}\u{3001}\u{72b6}\u{6001}\u{89c2}\u{5bdf}\u{4e0e} StoryLock \u{5165}\u{53e3}" : "Local authorization, status observation, and StoryLock entry";
+                                font-size: 12px;
+                                font-weight: 500;
+                                color: #5a6b75;
                                 overflow: elide;
                             }
                             SettingsIconButton {
@@ -124,26 +168,89 @@ export component HostDashboard inherits Window {
                         Rectangle {
                             width: 600px;
                             height: 360px;
-                            background: transparent;
+                            border-radius: 6px;
+                            border-width: 1px;
+                            border-color: #d7e1e6;
+                            background: #f7fafb;
 
                             if root.active-page == 0: VerticalBox {
-                                x: 0px;
-                                y: 0px;
-                                width: 600px;
-                                height: 360px;
-                                spacing: 12px;
-                                FormRow { name: root.is-zh ? "\u{8eab}\u{4efd}" : "Identity"; value: root.identity-id; }
-                                FormRow { name: root.is-zh ? "\u{8bbe}\u{5907}" : "Device"; value: root.device-id; }
-                                StaticRow { name: root.is-zh ? "\u{6a21}\u{5f0f}" : "Mode"; value: root.mode; }
-                                StaticRow { name: root.is-zh ? "\u{8fdc}\u{7a0b}\u{8bbf}\u{95ee}" : "Remote Access"; value: root.is-zh ? "\u{9ed8}\u{8ba4}\u{5173}\u{95ed}" : "Disabled by default"; }
-                                StaticRow { name: root.is-zh ? "\u{8fde}\u{63a5}\u{6d4b}\u{8bd5}" : "Connection Test"; value: root.connection-test-status; }
-                                StaticRow { name: root.is-zh ? "\u{72b6}\u{6001}" : "Status"; value: root.status-summary; }
-                                LogPanel { value: root.package-self-check; panel-height: 96px; }
+                                x: 18px;
+                                y: 14px;
+                                width: 564px;
+                                height: 332px;
+                                spacing: 6px;
+                                Text {
+                                    text: root.is-zh ? "\u{8fdc}\u{7aef}\u{8fde}\u{63a5}\u{548c}\u{672c}\u{673a}\u{72b6}\u{6001}" : "Remote Connection And Local Status";
+                                    height: 20px;
+                                    color: #17252f;
+                                    font-size: 15px;
+                                    font-weight: 700;
+                                    vertical-alignment: center;
+                                    overflow: elide;
+                                }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 86px;
+                                    VerticalBox {
+                                        x: 14px;
+                                        y: 8px;
+                                        width: 536px;
+                                        height: 70px;
+                                        spacing: 5px;
+                                        SectionTitle { label: root.is-zh ? "\u{8eab}\u{4efd}\u{4e0e}\u{8bbe}\u{5907}" : "Identity And Device"; }
+                                        FormRow { name: root.is-zh ? "\u{8eab}\u{4efd}" : "Identity"; value: root.identity-id; editor-width: 372px; row-height: 24px; }
+                                        FormRow { name: root.is-zh ? "\u{8bbe}\u{5907}" : "Device"; value: root.device-id; editor-width: 372px; row-height: 24px; }
+                                    }
+                                }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 96px;
+                                    VerticalBox {
+                                        x: 14px;
+                                        y: 8px;
+                                        width: 536px;
+                                        height: 80px;
+                                        spacing: 4px;
+                                        SectionTitle { label: root.is-zh ? "\u{8fde}\u{63a5}\u{4e0e}\u{8fd0}\u{884c}\u{72b6}\u{6001}" : "Connection And Runtime"; }
+                                        StaticRow { name: root.is-zh ? "\u{6a21}\u{5f0f}" : "Mode"; value: root.mode; value-width: 372px; row-height: 22px; }
+                                        StaticRow { name: root.is-zh ? "\u{8fdc}\u{7a0b}\u{8bbf}\u{95ee}" : "Remote Access"; value: root.is-zh ? "\u{9ed8}\u{8ba4}\u{5173}\u{95ed}" : "Disabled by default"; value-width: 372px; row-height: 22px; }
+                                        StaticRow { name: root.is-zh ? "\u{8fde}\u{63a5}\u{6d4b}\u{8bd5}" : "Connection Test"; value: root.connection-test-status; value-width: 372px; row-height: 22px; }
+                                    }
+                                }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 74px;
+                                    Rectangle {
+                                        x: 14px;
+                                        y: 8px;
+                                        width: 536px;
+                                        height: 58px;
+                                        background: transparent;
+                                        SectionTitle {
+                                            x: 0px;
+                                            y: 0px;
+                                            width: 536px;
+                                            label: root.is-zh ? "\u{672c}\u{673a}\u{5305}\u{72b6}\u{6001}" : "Local Package Status";
+                                        }
+                                        Text {
+                                            x: 0px;
+                                            y: 22px;
+                                            width: 536px;
+                                            height: 36px;
+                                            text: root.package-self-check;
+                                            color: #17252f;
+                                            font-size: 12px;
+                                            wrap: word-wrap;
+                                            overflow: elide;
+                                        }
+                                    }
+                                }
                                 HorizontalBox {
                                     spacing: 12px;
                                     ActionButton {
                                         label: root.is-zh ? "\u{6d4b}\u{8bd5}\u{672c}\u{5730} Host" : "Test Local Host";
                                         primary: true;
+                                        button-height: 30px;
                                         clicked => {
                                             root.connection-test-status = root.test-local-host();
                                         }
@@ -151,6 +258,7 @@ export component HostDashboard inherits Window {
                                     ActionButton {
                                         label: root.is-zh ? "\u{6d4b}\u{8bd5}\u{8fdc}\u{7a0b} Web" : "Test Remote";
                                         primary: false;
+                                        button-height: 30px;
                                         clicked => {
                                             root.connection-test-status = root.test-remote-connection();
                                         }
@@ -159,29 +267,76 @@ export component HostDashboard inherits Window {
                             }
 
                             if root.active-page == 1: VerticalBox {
-                                x: 0px;
-                                y: 0px;
-                                width: 600px;
-                                height: 360px;
-                                spacing: 10px;
-                                PathBrowseRow {
-                                    name: root.is-zh ? "StoryLock \u{52a0}\u{5bc6}\u{5305}" : "StoryLock Package";
-                                    value <=> root.storylock-data-dir;
-                                    is-zh: root.is-zh;
-                                    browse => { root.browse-storylock-data-dir(); }
+                                x: 18px;
+                                y: 14px;
+                                width: 564px;
+                                height: 332px;
+                                spacing: 6px;
+                                Text {
+                                    text: root.is-zh ? "StoryLock \u{672c}\u{673a}\u{5305}\u{4e0e}\u{6388}\u{6743}\u{6d4b}\u{8bd5}" : "StoryLock Local Package And Authorization Tests";
+                                    height: 20px;
+                                    color: #17252f;
+                                    font-size: 15px;
+                                    font-weight: 700;
+                                    vertical-alignment: center;
+                                    overflow: elide;
                                 }
-                                StaticRow { name: root.is-zh ? "StoryLock \u{72b6}\u{6001}" : "StoryLock Status"; value: root.core-launch-status; }
-                                StaticRow { name: root.is-zh ? "\u{6570}\u{636e}\u{8fb9}\u{754c}" : "Data Boundary"; value: root.is-zh ? "Host \u{53ea}\u{89e6}\u{53d1}\u{6d4b}\u{8bd5}\u{4e0e}\u{6388}\u{6743}" : "Host triggers tests and authorization only"; }
-                                StaticRow { name: root.is-zh ? "\u{5355}\u{9879}\u{8bfb}\u{53d6}" : "Single Read"; value: root.is-zh ? "\u{89e3}\u{9501} 9 \u{683c}\u{4e2d}\u{7684} 6 \u{683c}\u{ff0c}\u{4e2d}\u{7b49}\u{5f3a}\u{5ea6}" : "6 of 9 cells, medium strength"; }
-                                StaticRow { name: root.is-zh ? "\u{6279}\u{91cf}\u{8bfb}\u{53d6}" : "Batch Read"; value: root.is-zh ? "\u{89e3}\u{9501} 12 \u{683c}\u{4e2d}\u{7684} 12 \u{683c}\u{ff0c}\u{9ad8}\u{5f3a}\u{5ea6}" : "12 of 12 cells, high strength"; }
-                                StaticRow { name: root.is-zh ? "\u{6545}\u{4e8b}\u{7f16}\u{8f91}" : "Story Edit"; value: root.is-zh ? "\u{6253}\u{5f00} StoryLock \u{5148}\u{8fdb}\u{5165}\u{7a7a}\u{6a21}\u{5f0f}\u{ff0c}\u{89e3}\u{9501}\u{540e}\u{52a0}\u{8f7d}\u{5f53}\u{524d}\u{5305}\u{5185}\u{5bb9}" : "Opening StoryLock starts in empty mode. Unlock the current package to load package content."; }
-                                StaticRow { name: root.is-zh ? "\u{4e5d}\u{5bab}\u{683c}\u{6d4b}\u{8bd5}" : "Nine-Grid Test"; value: root.nine-grid-status; }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 82px;
+                                    VerticalBox {
+                                        x: 14px;
+                                        y: 8px;
+                                        width: 536px;
+                                        height: 66px;
+                                        spacing: 4px;
+                                        SectionTitle { label: root.is-zh ? "\u{5f53}\u{524d}\u{5305}" : "Current Package"; }
+                                        PathBrowseRow {
+                                            name: root.is-zh ? "StoryLock \u{52a0}\u{5bc6}\u{5305}" : "StoryLock Package";
+                                            value <=> root.storylock-data-dir;
+                                            is-zh: root.is-zh;
+                                            editor-width: 348px;
+                                            row-height: 23px;
+                                            browse => { root.browse-storylock-data-dir(); }
+                                        }
+                                        StaticRow { name: root.is-zh ? "StoryLock \u{72b6}\u{6001}" : "StoryLock Status"; value: root.core-launch-status; value-width: 372px; row-height: 21px; }
+                                    }
+                                }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 92px;
+                                    VerticalBox {
+                                        x: 14px;
+                                        y: 8px;
+                                        width: 536px;
+                                        height: 76px;
+                                        spacing: 3px;
+                                        SectionTitle { label: root.is-zh ? "\u{8fb9}\u{754c}\u{4e0e}\u{5f3a}\u{5ea6}\u{89c4}\u{5219}" : "Boundary And Strength Rules"; }
+                                        StaticRow { name: root.is-zh ? "\u{6570}\u{636e}\u{8fb9}\u{754c}" : "Data Boundary"; value: root.is-zh ? "Host \u{53ea}\u{89e6}\u{53d1}\u{6d4b}\u{8bd5}\u{4e0e}\u{6388}\u{6743}" : "Host triggers tests and authorization only"; value-width: 372px; row-height: 18px; }
+                                        StaticRow { name: root.is-zh ? "\u{5355}\u{9879}\u{8bfb}\u{53d6}" : "Single Read"; value: root.is-zh ? "\u{89e3}\u{9501} 9 \u{683c}\u{4e2d}\u{7684} 6 \u{683c}\u{ff0c}\u{4e2d}\u{7b49}\u{5f3a}\u{5ea6}" : "6 of 9 cells, medium strength"; value-width: 372px; row-height: 18px; }
+                                        StaticRow { name: root.is-zh ? "\u{6279}\u{91cf}\u{8bfb}\u{53d6}" : "Batch Read"; value: root.is-zh ? "\u{89e3}\u{9501} 12 \u{683c}\u{4e2d}\u{7684} 12 \u{683c}\u{ff0c}\u{9ad8}\u{5f3a}\u{5ea6}" : "12 of 12 cells, high strength"; value-width: 372px; row-height: 18px; }
+                                    }
+                                }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 58px;
+                                    VerticalBox {
+                                        x: 14px;
+                                        y: 7px;
+                                        width: 536px;
+                                        height: 44px;
+                                        spacing: 2px;
+                                        SectionTitle { label: root.is-zh ? "\u{4e5d}\u{5bab}\u{683c}\u{6d4b}\u{8bd5}" : "Nine-Grid Test"; }
+                                        StaticRow { name: root.is-zh ? "\u{72b6}\u{6001}" : "Status"; value: root.nine-grid-status; value-width: 372px; row-height: 20px; }
+                                    }
+                                }
                                 HorizontalBox {
                                     spacing: 8px;
                                     ActionButton {
                                         label: root.is-zh ? "6 \u{683c}\u{5bf9}\u{8c61}" : "6-cell Object";
                                         primary: true;
                                         button-width: 128px;
+                                        button-height: 28px;
                                         clicked => {
                                             root.nine-grid-status = root.test-managed-object-nine-grid("normal");
                                             root.nine-grid-summary = root.nine-grid-status;
@@ -191,6 +346,7 @@ export component HostDashboard inherits Window {
                                         label: root.is-zh ? "12 \u{683c}\u{5bf9}\u{8c61}" : "12-cell Object";
                                         primary: false;
                                         button-width: 128px;
+                                        button-height: 28px;
                                         clicked => {
                                             root.nine-grid-status = root.test-managed-object-nine-grid("confidential");
                                             root.nine-grid-summary = root.nine-grid-status;
@@ -200,25 +356,87 @@ export component HostDashboard inherits Window {
                                         label: root.is-zh ? "22 \u{683c}\u{5bf9}\u{8c61}" : "22-cell Object";
                                         primary: false;
                                         button-width: 128px;
+                                        button-height: 28px;
                                         clicked => {
                                             root.nine-grid-status = root.test-managed-object-nine-grid("top-secret");
                                             root.nine-grid-summary = root.nine-grid-status;
                                         }
                                     }
                                 }
-                                StaticRow { name: root.is-zh ? "\u{6d4b}\u{8bd5}\u{5bf9}\u{8c61}" : "Test Object"; value: root.nine-grid-summary; }
+                                StaticRow { name: root.is-zh ? "\u{6d4b}\u{8bd5}\u{5bf9}\u{8c61}" : "Test Object"; value: root.nine-grid-summary; value-width: 372px; row-height: 24px; }
                             }
 
                             if root.active-page == 2: VerticalBox {
-                                x: 0px;
-                                y: 0px;
-                                width: 600px;
-                                height: 360px;
-                                spacing: 12px;
-                                StaticRow { name: root.is-zh ? "\u{7ba1}\u{7406}\u{7edf}\u{8ba1}" : "Stats"; value: root.is-zh ? "\u{53ea}\u{8bfb}\u{89c2}\u{5bdf}" : "Read-only observation"; }
-                                LogPanel { value: root.management-stats; panel-height: 136px; }
-                                StaticRow { name: root.is-zh ? "\u{8bca}\u{65ad}" : "Diagnostics"; value: root.is-zh ? "\u{8fb9}\u{754c}\u{4e0e}\u{9519}\u{8bef}\u{4fe1}\u{606f}" : "Boundary and error details"; }
-                                LogPanel { value: root.diagnostics; panel-height: 136px; }
+                                x: 18px;
+                                y: 16px;
+                                width: 564px;
+                                height: 328px;
+                                spacing: 10px;
+                                Text {
+                                    text: root.is-zh ? "\u{53ea}\u{8bfb}\u{89c2}\u{5bdf}\u{548c}\u{8bca}\u{65ad}" : "Read-Only Observation And Diagnostics";
+                                    height: 22px;
+                                    color: #17252f;
+                                    font-size: 16px;
+                                    font-weight: 700;
+                                    vertical-alignment: center;
+                                    overflow: elide;
+                                }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 136px;
+                                    Rectangle {
+                                        x: 14px;
+                                        y: 10px;
+                                        width: 536px;
+                                        height: 116px;
+                                        background: transparent;
+                                        SectionTitle {
+                                            x: 0px;
+                                            y: 0px;
+                                            width: 536px;
+                                            label: root.is-zh ? "\u{7ba1}\u{7406}\u{7edf}\u{8ba1}" : "Management Statistics";
+                                        }
+                                        Text {
+                                            x: 0px;
+                                            y: 26px;
+                                            width: 536px;
+                                            height: 90px;
+                                            text: root.management-stats;
+                                            color: #17252f;
+                                            font-size: 12px;
+                                            wrap: word-wrap;
+                                            overflow: elide;
+                                        }
+                                    }
+                                }
+                                SectionPanel {
+                                    panel-width: 564px;
+                                    panel-height: 136px;
+                                    Rectangle {
+                                        x: 14px;
+                                        y: 10px;
+                                        width: 536px;
+                                        height: 116px;
+                                        background: transparent;
+                                        SectionTitle {
+                                            x: 0px;
+                                            y: 0px;
+                                            width: 536px;
+                                            label: root.is-zh ? "\u{8bca}\u{65ad}\u{4e0e}\u{8fb9}\u{754c}" : "Diagnostics And Boundaries";
+                                        }
+                                        Text {
+                                            x: 0px;
+                                            y: 26px;
+                                            width: 536px;
+                                            height: 90px;
+                                            text: root.diagnostics;
+                                            color: #17252f;
+                                            font-size: 12px;
+                                            wrap: word-wrap;
+                                            overflow: elide;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -260,35 +478,72 @@ export component SettingsDialog inherits Window {
                     overflow: elide;
                 }
             }
-            HorizontalBox {
-                spacing: 14px;
-                Text {
-                    text: is-zh ? "\u{754c}\u{9762}\u{8bed}\u{8a00}" : "UI Language";
-                    width: 150px;
-                    color: #62727d;
-                    font-size: 13px;
-                    vertical-alignment: center;
-                }
-                ComboBox {
-                    width: 294px;
-                    height: 32px;
-                    model: ["\u{4e2d}\u{6587}", "English"];
-                    current-value: is-zh ? "\u{4e2d}\u{6587}" : "English";
-                    selected(value) => {
-                        root.language = value == "\u{4e2d}\u{6587}" ? "zh" : "en";
-                        root.language-changed(value == "\u{4e2d}\u{6587}" ? "zh" : "en");
+            SectionPanel {
+                panel-width: 712px;
+                panel-height: 76px;
+                VerticalBox {
+                    x: 14px;
+                    y: 10px;
+                    width: 684px;
+                    height: 56px;
+                    spacing: 8px;
+                    SectionTitle { label: is-zh ? "\u{901a}\u{7528}\u{8bbe}\u{7f6e}" : "General"; }
+                    HorizontalBox {
+                        spacing: 14px;
+                        Text {
+                            text: is-zh ? "\u{754c}\u{9762}\u{8bed}\u{8a00}" : "UI Language";
+                            width: 150px;
+                            color: #62727d;
+                            font-size: 13px;
+                            vertical-alignment: center;
+                        }
+                        ComboBox {
+                            width: 294px;
+                            height: 32px;
+                            model: ["\u{4e2d}\u{6587}", "English"];
+                            current-value: is-zh ? "\u{4e2d}\u{6587}" : "English";
+                            selected(value) => {
+                                root.language = value == "\u{4e2d}\u{6587}" ? "zh" : "en";
+                                root.language-changed(value == "\u{4e2d}\u{6587}" ? "zh" : "en");
+                            }
+                        }
                     }
                 }
             }
-            PathBrowseRow {
-                name: is-zh ? "StoryLock \u{52a0}\u{5bc6}\u{5305}\u{76ee}\u{5f55}\u{6216}\u{6587}\u{4ef6}" : "StoryLock Package Dir/File";
-                value <=> root.encrypted-data-dir;
-                is-zh: root.is-zh;
-                browse => { root.browse-encrypted-data-dir(); }
+            SectionPanel {
+                panel-width: 712px;
+                panel-height: 112px;
+                VerticalBox {
+                    x: 14px;
+                    y: 10px;
+                    width: 684px;
+                    height: 92px;
+                    spacing: 8px;
+                    SectionTitle { label: is-zh ? "\u{8def}\u{5f84}\u{914d}\u{7f6e}" : "Package Path"; }
+                    PathBrowseRow {
+                        name: is-zh ? "StoryLock \u{52a0}\u{5bc6}\u{5305}\u{76ee}\u{5f55}\u{6216}\u{6587}\u{4ef6}" : "StoryLock Package Dir/File";
+                        value <=> root.encrypted-data-dir;
+                        is-zh: root.is-zh;
+                        editor-width: 486px;
+                        browse => { root.browse-encrypted-data-dir(); }
+                    }
+                    StaticRow { name: is-zh ? "StoryLock \u{72b6}\u{6001}" : "StoryLock Status"; value: root.core-launch-status; value-width: 500px; }
+                }
             }
-            StaticRow { name: is-zh ? "StoryLock \u{72b6}\u{6001}" : "StoryLock Status"; value: root.core-launch-status; }
-            StaticRow { name: is-zh ? "\u{89e6}\u{53d1}\u{65b9}\u{5f0f}" : "Trigger"; value: is-zh ? "\u{8bf7}\u{4ece}\u{4e3b}\u{754c}\u{9762}\u{6253}\u{5f00} StoryLock\u{ff0c}\u{5148}\u{8fdb}\u{5165}\u{7a7a}\u{6a21}\u{5f0f}\u{3002}" : "Open StoryLock from the main Host page. It starts in empty mode first."; }
-            StaticRow { name: is-zh ? "\u{8bf4}\u{660e}" : "Note"; value: is-zh ? "\u{9009}\u{4e2d}\u{5305}\u{76ee}\u{5f55}\u{6216} vault.stlk \u{540e}\u{ff0c}\u{9700}\u{89e3}\u{9501}\u{5f53}\u{524d}\u{5305}\u{624d}\u{52a0}\u{8f7d}\u{5305}\u{5185}\u{6545}\u{4e8b}\u{3001}\u{7b54}\u{6848}\u{548c}\u{53d7}\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}\u{3002}" : "After selecting a package directory or vault.stlk, unlock the current package before loading stories, answers, or protected objects."; }
+            SectionPanel {
+                panel-width: 712px;
+                panel-height: 112px;
+                VerticalBox {
+                    x: 14px;
+                    y: 10px;
+                    width: 684px;
+                    height: 92px;
+                    spacing: 8px;
+                    SectionTitle { label: is-zh ? "\u{6253}\u{5f00}\u{4e0e}\u{89e3}\u{9501}" : "Open And Unlock"; }
+                    StaticRow { name: is-zh ? "\u{89e6}\u{53d1}\u{65b9}\u{5f0f}" : "Trigger"; value: is-zh ? "\u{8bf7}\u{4ece}\u{4e3b}\u{754c}\u{9762}\u{6253}\u{5f00} StoryLock\u{ff0c}\u{5148}\u{8fdb}\u{5165}\u{7a7a}\u{6a21}\u{5f0f}\u{3002}" : "Open StoryLock from the main Host page. It starts in empty mode first."; value-width: 500px; }
+                    StaticRow { name: is-zh ? "\u{8bf4}\u{660e}" : "Note"; value: is-zh ? "\u{9009}\u{4e2d}\u{5305}\u{76ee}\u{5f55}\u{6216} vault.stlk \u{540e}\u{ff0c}\u{9700}\u{89e3}\u{9501}\u{5f53}\u{524d}\u{5305}\u{624d}\u{52a0}\u{8f7d}\u{5305}\u{5185}\u{6545}\u{4e8b}\u{3001}\u{7b54}\u{6848}\u{548c}\u{53d7}\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}\u{3002}" : "After selecting a package directory or vault.stlk, unlock the current package before loading stories, answers, or protected objects."; value-width: 500px; }
+                }
+            }
         }
     }
 
@@ -406,7 +661,7 @@ export component StoryLockAuthorizationDialog inherits Window {
                 }
                 Rectangle {
                     width: 180px;
-                    height: 210px;
+                    height: 150px;
                     border-width: 1px;
                     border-color: #d7e1e6;
                     border-radius: 6px;
@@ -424,11 +679,25 @@ export component StoryLockAuthorizationDialog inherits Window {
                         vertical-alignment: center;
                         overflow: elide;
                     }
-                    ActionButton { x: 12px; y: 38px; label: root.is-zh ? "\u{4e0a}\u{4e00}\u{9898}" : "Previous"; primary: false; enabled: root.can-previous; button-width: 156px; clicked => { root.previous-requested(); } }
-                    ActionButton { x: 12px; y: 76px; label: root.is-zh ? "\u{4e0b}\u{4e00}\u{9898}" : "Next"; primary: false; enabled: root.can-next; button-width: 156px; clicked => { root.next-requested(); } }
-                    Rectangle { x: 20px; y: 118px; width: 140px; height: 1px; background: #d7e1e6; }
-                    ActionButton { x: 12px; y: 130px; label: root.is-zh ? "\u{6388}\u{6743}" : "Authorize"; primary: true; button-width: 156px; clicked => { root.authorize-requested(); } }
-                    ActionButton { x: 12px; y: 168px; label: root.is-zh ? "\u{53d6}\u{6d88}" : "Cancel"; primary: false; button-width: 156px; clicked => { root.cancel-requested(); } }
+                    HorizontalBox {
+                        x: 12px;
+                        y: 38px;
+                        width: 156px;
+                        height: 34px;
+                        spacing: 8px;
+                        ActionButton { label: root.is-zh ? "\u{4e0a}\u{9898}" : "Prev"; primary: false; enabled: root.can-previous; button-width: 74px; clicked => { root.previous-requested(); } }
+                        ActionButton { label: root.is-zh ? "\u{4e0b}\u{9898}" : "Next"; primary: false; enabled: root.can-next; button-width: 74px; clicked => { root.next-requested(); } }
+                    }
+                    Rectangle { x: 20px; y: 84px; width: 140px; height: 1px; background: #d7e1e6; }
+                    HorizontalBox {
+                        x: 12px;
+                        y: 98px;
+                        width: 156px;
+                        height: 34px;
+                        spacing: 8px;
+                        ActionButton { label: root.is-zh ? "\u{6388}\u{6743}" : "Authorize"; primary: true; button-width: 92px; clicked => { root.authorize-requested(); } }
+                        ActionButton { label: root.is-zh ? "\u{53d6}\u{6d88}" : "Cancel"; primary: false; danger: true; button-width: 56px; clicked => { root.cancel-requested(); } }
+                    }
                 }
             }
         }

@@ -59,7 +59,8 @@ pub(crate) fn ensure_storylock_vault_with_optional_author_draft(
                 &storylock_core_catalog_path(package_dir),
                 default_protected_resources_catalog_json(),
             );
-            vault["protectedResources"] = protected_resources_from_legacy_catalog_or_default(&legacy_catalog);
+            vault["protectedResources"] =
+                protected_resources_from_legacy_catalog_or_default(&legacy_catalog);
         }
         normalize_builtin_protected_resources_and_templates(&mut vault);
         refresh_placeholder_author_draft_nodes(&mut vault);
@@ -121,9 +122,9 @@ pub(crate) fn normalize_builtin_protected_resources_and_templates(vault: &mut Va
             .and_then(Value::as_str)
             .unwrap_or_default();
         if !resource_id.is_empty()
-            && !resources
-                .iter()
-                .any(|resource| resource.get("resourceId").and_then(Value::as_str) == Some(resource_id))
+            && !resources.iter().any(|resource| {
+                resource.get("resourceId").and_then(Value::as_str) == Some(resource_id)
+            })
         {
             resources.push(default_resource);
         }
@@ -163,7 +164,10 @@ fn remove_template_items_with_missing_resource_roles(templates: &mut Value, prot
         .unwrap_or_default()
         .into_iter()
         .filter_map(|resource| {
-            let resource_id = resource.get("resourceId").and_then(Value::as_str)?.to_string();
+            let resource_id = resource
+                .get("resourceId")
+                .and_then(Value::as_str)?
+                .to_string();
             let roles = resource
                 .get("bindings")
                 .and_then(Value::as_array)

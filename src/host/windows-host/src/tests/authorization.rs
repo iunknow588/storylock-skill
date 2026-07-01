@@ -196,7 +196,10 @@ fn story_edit_authorization_enforces_twenty_two_cell_threshold() {
             "answers": twenty_one_answers
         }),
     );
-    assert_eq!(rejected.get("status").and_then(Value::as_str), Some("error"));
+    assert_eq!(
+        rejected.get("status").and_then(Value::as_str),
+        Some("error")
+    );
     assert_eq!(
         rejected
             .get("error")
@@ -212,8 +215,7 @@ fn story_edit_authorization_enforces_twenty_two_cell_threshold() {
     let failed_event = events
         .iter()
         .find(|event| {
-            event.get("request_id").and_then(Value::as_str)
-                == Some("req-story-edit-threshold-21")
+            event.get("request_id").and_then(Value::as_str) == Some("req-story-edit-threshold-21")
         })
         .expect("threshold failure audit event");
     assert_eq!(

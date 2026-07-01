@@ -1,5 +1,5 @@
 ﻿import { VerticalBox, HorizontalBox } from "std-widgets.slint";
-import { EditableRow, LargeEditableText, QuestionOverviewGrid, QuestionConfigPanel, ActionButton } from "../common.slint";
+import { EditableRow, LargeEditableText, QuestionOverviewGrid, QuestionConfigPanel, ActionButton, SectionPanel, SectionTitle } from "../common.slint";
 
 export component StoryDraftPage inherits VerticalBox {
     in property <bool> is-zh;
@@ -11,24 +11,40 @@ export component StoryDraftPage inherits VerticalBox {
     y: 0px;
     width: 720px;
     height: 374px;
-    spacing: 12px;
+    spacing: 0px;
 
-    EditableRow {
-        name: root.is-zh ? "故事标题" : "Story Title";
-        value <=> root.story-title;
-        editor-width: 556px;
-    }
-    LargeEditableText {
-        name: root.is-zh ? "摘要" : "Summary";
-        value <=> root.story-summary;
-        editor-height: 86px;
-        content-height: 86px;
-    }
-    LargeEditableText {
-        name: root.is-zh ? "完整故事情节" : "Full Story Plot";
-        value <=> root.story-plot;
-        editor-height: 232px;
-        content-height: 620px;
+    SectionPanel {
+        x: 12px;
+        panel-width: 696px;
+        panel-height: 350px;
+        VerticalBox {
+            x: 14px;
+            y: 10px;
+            width: 668px;
+            height: 330px;
+            spacing: 8px;
+            SectionTitle { label: root.is-zh ? "\u{6545}\u{4e8b}\u{8349}\u{7a3f}" : "Story Draft"; }
+            EditableRow {
+                name: root.is-zh ? "故事标题" : "Story Title";
+                value <=> root.story-title;
+                editor-width: 504px;
+                row-height: 28px;
+            }
+            LargeEditableText {
+                name: root.is-zh ? "摘要" : "Summary";
+                value <=> root.story-summary;
+                editor-height: 72px;
+                content-height: 72px;
+                width: 668px;
+            }
+            LargeEditableText {
+                name: root.is-zh ? "完整故事情节" : "Full Story Plot";
+                value <=> root.story-plot;
+                editor-height: 194px;
+                content-height: 620px;
+                width: 668px;
+            }
+        }
     }
 }
 
@@ -66,46 +82,59 @@ export component QuestionOverviewPage inherits VerticalBox {
     y: 0px;
     width: 720px;
     height: 374px;
-    spacing: 12px;
+    spacing: 0px;
 
-    Text {
-        height: 24px;
-        text: root.is-zh ? "点击任意问题进入答案编辑。每个卡片显示实际题目文本。" : "Click a question to edit its answers. Each tile shows the actual question text.";
-        color: #62727d;
-        font-size: 12px;
-        overflow: elide;
-    }
-
-    QuestionOverviewGrid {
-        height: 338px;
-        selected-question <=> root.selected-question;
-        selection-enabled: root.selection-enabled;
-        question-1: root.question-1;
-        question-2: root.question-2;
-        question-3: root.question-3;
-        question-4: root.question-4;
-        question-5: root.question-5;
-        question-6: root.question-6;
-        question-7: root.question-7;
-        question-8: root.question-8;
-        question-9: root.question-9;
-        question-10: root.question-10;
-        question-11: root.question-11;
-        question-12: root.question-12;
-        question-13: root.question-13;
-        question-14: root.question-14;
-        question-15: root.question-15;
-        question-16: root.question-16;
-        question-17: root.question-17;
-        question-18: root.question-18;
-        question-19: root.question-19;
-        question-20: root.question-20;
-        question-21: root.question-21;
-        question-22: root.question-22;
-        question-23: root.question-23;
-        question-24: root.question-24;
-        select-node(value) => {
-            root.select-node(value);
+    SectionPanel {
+        x: 12px;
+        panel-width: 696px;
+        panel-height: 350px;
+        VerticalBox {
+            x: 14px;
+            y: 10px;
+            width: 668px;
+            height: 330px;
+            spacing: 8px;
+            SectionTitle { label: root.is-zh ? "24 个问题" : "24 Questions"; }
+            Text {
+                height: 18px;
+                text: root.is-zh ? "点击任意问题进入答案编辑。每个卡片显示实际题目文本。" : "Click a question to edit its answers. Each tile shows the actual question text.";
+                color: #62727d;
+                font-size: 12px;
+                overflow: elide;
+            }
+            QuestionOverviewGrid {
+                width: 668px;
+                height: 294px;
+                selected-question <=> root.selected-question;
+                selection-enabled: root.selection-enabled;
+                question-1: root.question-1;
+                question-2: root.question-2;
+                question-3: root.question-3;
+                question-4: root.question-4;
+                question-5: root.question-5;
+                question-6: root.question-6;
+                question-7: root.question-7;
+                question-8: root.question-8;
+                question-9: root.question-9;
+                question-10: root.question-10;
+                question-11: root.question-11;
+                question-12: root.question-12;
+                question-13: root.question-13;
+                question-14: root.question-14;
+                question-15: root.question-15;
+                question-16: root.question-16;
+                question-17: root.question-17;
+                question-18: root.question-18;
+                question-19: root.question-19;
+                question-20: root.question-20;
+                question-21: root.question-21;
+                question-22: root.question-22;
+                question-23: root.question-23;
+                question-24: root.question-24;
+                select-node(value) => {
+                    root.select-node(value);
+                }
+            }
         }
     }
 }
@@ -141,42 +170,57 @@ export component QuestionEditorPage inherits VerticalBox {
     y: 0px;
     width: 720px;
     height: 374px;
-    spacing: 8px;
+    spacing: 0px;
 
-    QuestionConfigPanel {
-        panel-height: 330px;
-        selected-question <=> root.selected-question;
-        question-text <=> root.question-text;
-        answer-1 <=> root.answer-1;
-        answer-1-state <=> root.answer-1-state;
-        answer-2 <=> root.answer-2;
-        answer-2-state <=> root.answer-2-state;
-        answer-3 <=> root.answer-3;
-        answer-3-state <=> root.answer-3-state;
-        answer-4 <=> root.answer-4;
-        answer-4-state <=> root.answer-4-state;
-        answer-5 <=> root.answer-5;
-        answer-5-state <=> root.answer-5-state;
-        answer-6 <=> root.answer-6;
-        answer-6-state <=> root.answer-6-state;
-        answer-7 <=> root.answer-7;
-        answer-7-state <=> root.answer-7-state;
-        answer-8 <=> root.answer-8;
-        answer-8-state <=> root.answer-8-state;
-        answer-9 <=> root.answer-9;
-        answer-9-state <=> root.answer-9-state;
-        previous-node => { root.previous-node(); }
-        next-node => { root.next-node(); }
-        select-node(value) => { root.select-node(value); }
-    }
-    HorizontalBox {
-        spacing: 10px;
-        Rectangle { width: 164px; height: 1px; background: transparent; }
-        ActionButton {
-            label: root.is-zh ? "返回总览" : "Back to Overview";
-            primary: false;
-            button-width: 150px;
-            clicked => { root.back-to-overview(); }
+    SectionPanel {
+        x: 12px;
+        panel-width: 696px;
+        panel-height: 350px;
+        VerticalBox {
+            x: 14px;
+            y: 10px;
+            width: 668px;
+            height: 330px;
+            spacing: 8px;
+            SectionTitle { label: root.is-zh ? "\u{7b54}\u{6848}\u{7f16}\u{8f91}" : "Answer Editor"; }
+            QuestionConfigPanel {
+                width: 668px;
+                panel-height: 274px;
+                selected-question <=> root.selected-question;
+                question-text <=> root.question-text;
+                answer-1 <=> root.answer-1;
+                answer-1-state <=> root.answer-1-state;
+                answer-2 <=> root.answer-2;
+                answer-2-state <=> root.answer-2-state;
+                answer-3 <=> root.answer-3;
+                answer-3-state <=> root.answer-3-state;
+                answer-4 <=> root.answer-4;
+                answer-4-state <=> root.answer-4-state;
+                answer-5 <=> root.answer-5;
+                answer-5-state <=> root.answer-5-state;
+                answer-6 <=> root.answer-6;
+                answer-6-state <=> root.answer-6-state;
+                answer-7 <=> root.answer-7;
+                answer-7-state <=> root.answer-7-state;
+                answer-8 <=> root.answer-8;
+                answer-8-state <=> root.answer-8-state;
+                answer-9 <=> root.answer-9;
+                answer-9-state <=> root.answer-9-state;
+                previous-node => { root.previous-node(); }
+                next-node => { root.next-node(); }
+                select-node(value) => { root.select-node(value); }
+            }
+            HorizontalBox {
+                spacing: 10px;
+                Rectangle { width: 164px; height: 1px; background: transparent; }
+                ActionButton {
+                    label: root.is-zh ? "返回总览" : "Back to Overview";
+                    primary: false;
+                    button-width: 150px;
+                    button-height: 30px;
+                    clicked => { root.back-to-overview(); }
+                }
+            }
         }
     }
 }

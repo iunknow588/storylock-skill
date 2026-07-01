@@ -229,9 +229,7 @@ fn register_resource_and_template_callbacks(
     let select_object_suppressed_until = Rc::clone(&object_select_suppressed_until);
     core.on_select_object(move |resource_id| {
         if let Some(core) = weak.upgrade() {
-            if let Err(error) =
-                ensure_storylock_package_unlocked(&core, "Managed object editing")
-            {
+            if let Err(error) = ensure_storylock_package_unlocked(&core, "Managed object editing") {
                 core.set_config_status(SharedString::from(error.to_string()));
                 return;
             }

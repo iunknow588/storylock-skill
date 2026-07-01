@@ -26,7 +26,8 @@ pub(crate) fn storylock_ui_settings_path() -> PathBuf {
 }
 
 pub(crate) fn load_storylock_ui_settings() -> StoryLockUiSettings {
-    let mut settings = read_storylock_ui_settings(&storylock_ui_settings_path()).unwrap_or_default();
+    let mut settings =
+        read_storylock_ui_settings(&storylock_ui_settings_path()).unwrap_or_default();
     normalize_storylock_ui_settings(&mut settings);
     settings
 }
@@ -143,7 +144,9 @@ pub(crate) fn pick_storylock_core_package_path(initial_dir: &Path) -> Option<Pat
     if initial_dir.exists() {
         file_dialog = file_dialog.set_directory(initial_dir);
     }
-    let selected_file = file_dialog.add_filter("StoryLock vault", &["stlk"]).pick_file();
+    let selected_file = file_dialog
+        .add_filter("StoryLock vault", &["stlk"])
+        .pick_file();
     if selected_file.is_some() {
         return selected_file;
     }
@@ -176,7 +179,9 @@ pub(crate) fn resolve_storylock_core_package_with_conflict_prompt(
 pub(crate) fn resolve_storylock_core_package_path(path: impl AsRef<Path>) -> PathBuf {
     let path = path.as_ref();
     let candidate = if path.file_name().and_then(|value| value.to_str()) == Some("vault.stlk") {
-        path.parent().map(Path::to_path_buf).unwrap_or_else(|| path.to_path_buf())
+        path.parent()
+            .map(Path::to_path_buf)
+            .unwrap_or_else(|| path.to_path_buf())
     } else {
         path.to_path_buf()
     };
@@ -246,7 +251,11 @@ pub(crate) fn normalize_storylock_ui_settings(settings: &mut StoryLockUiSettings
         .as_deref()
         .map(str::trim)
         .filter(|value| !value.is_empty())
-        .map(|value| resolve_storylock_core_package_path(value).display().to_string());
+        .map(|value| {
+            resolve_storylock_core_package_path(value)
+                .display()
+                .to_string()
+        });
     settings.export_package_dir = settings
         .export_package_dir
         .as_deref()

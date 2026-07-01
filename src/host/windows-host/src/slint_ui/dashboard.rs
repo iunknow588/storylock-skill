@@ -73,7 +73,9 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     )?;
     let _ = ensure_storylock_core_package(&core_package_dir);
     app.set_storylock_data_dir(SharedString::from(core_package_dir.display().to_string()));
-    app.set_package_self_check(SharedString::from(package_dir_status_report(&core_package_dir)));
+    app.set_package_self_check(SharedString::from(package_dir_status_report(
+        &core_package_dir,
+    )));
     app.set_status_summary(SharedString::from(if config.remote_enabled {
         format!(
             "Remote relay enabled | local API {} | gateway {} | package {}",
@@ -112,7 +114,8 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     let core_window_for_main_browse = Rc::clone(&core_window);
 
     app.on_browse_storylock_data_dir(move || {
-        let current_dir = initial_storylock_core_package_dir(&saved_settings_for_main_browse.borrow());
+        let current_dir =
+            initial_storylock_core_package_dir(&saved_settings_for_main_browse.borrow());
         let Some(selected_path) = pick_storylock_core_package_path(current_dir.as_path()) else {
             return;
         };
@@ -142,9 +145,9 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                     host.set_storylock_data_dir(SharedString::from(
                         package_dir.display().to_string(),
                     ));
-                    host.set_package_self_check(SharedString::from(
-                        package_dir_status_report(&package_dir),
-                    ));
+                    host.set_package_self_check(SharedString::from(package_dir_status_report(
+                        &package_dir,
+                    )));
                     host.set_connection_test_status(SharedString::from(
                         "StoryLock package directory selected.",
                     ));
@@ -608,7 +611,9 @@ fn begin_storylock_open_authorization(
     if let Some(show_result) = existing_show_result {
         if let Err(error) = show_result {
             *auth_window.borrow_mut() = None;
-            return Err(anyhow::anyhow!("authorization window reopen failed: {error}"));
+            return Err(anyhow::anyhow!(
+                "authorization window reopen failed: {error}"
+            ));
         }
         return Ok(());
     }
@@ -885,7 +890,10 @@ pub(super) fn create_storylock_open_challenge(
         .collect::<Vec<_>>();
     if cells.iter().any(|cell| {
         cell.prompt_text.trim().is_empty()
-            || cell.answer_options.iter().all(|answer| answer.trim().is_empty())
+            || cell
+                .answer_options
+                .iter()
+                .all(|answer| answer.trim().is_empty())
             || cell.expected_answers.is_empty()
     }) {
         return Err(anyhow::anyhow!(
@@ -991,18 +999,13 @@ fn set_storylock_challenge_question(
     let cell = cells.get(index);
     let option = |option_index: usize| -> SharedString {
         SharedString::from(
-            cell
-                .and_then(|cell| cell.answer_options.get(option_index))
+            cell.and_then(|cell| cell.answer_options.get(option_index))
                 .map(String::as_str)
                 .unwrap_or(""),
         )
     };
-    let prompt = cell
-        .map(|cell| cell.prompt_text.as_str())
-        .unwrap_or("");
-    let cell_id = cell
-        .map(|cell| cell.cell_id.as_str())
-        .unwrap_or("");
+    let prompt = cell.map(|cell| cell.prompt_text.as_str()).unwrap_or("");
+    let cell_id = cell.map(|cell| cell.cell_id.as_str()).unwrap_or("");
     dialog.set_current_index(index as i32);
     let selected_count = selections.get(index).map(Vec::len).unwrap_or_default();
     let expected_count = cell.map(|cell| cell.expected_count).unwrap_or_default();
@@ -1016,7 +1019,12 @@ fn set_storylock_challenge_question(
     let missing = cells
         .iter()
         .enumerate()
-        .filter(|(cell_index, _)| selections.get(*cell_index).map(Vec::is_empty).unwrap_or(true))
+        .filter(|(cell_index, _)| {
+            selections
+                .get(*cell_index)
+                .map(Vec::is_empty)
+                .unwrap_or(true)
+        })
         .map(|(cell_index, _)| (cell_index + 1).to_string())
         .collect::<Vec<_>>()
         .join(", ");
@@ -1051,13 +1059,11 @@ fn set_storylock_challenge_question(
             .map(String::as_str)
             .unwrap_or("");
         let option_normalized = normalize_challenge_answer(option_value);
-        let selected = selections
-            .get(index)
-            .is_some_and(|answers| {
-                answers
-                    .iter()
-                    .any(|answer| normalize_challenge_answer(answer) == option_normalized)
-            });
+        let selected = selections.get(index).is_some_and(|answers| {
+            answers
+                .iter()
+                .any(|answer| normalize_challenge_answer(answer) == option_normalized)
+        });
         SharedString::from(if selected && !option_normalized.is_empty() {
             "correct"
         } else {

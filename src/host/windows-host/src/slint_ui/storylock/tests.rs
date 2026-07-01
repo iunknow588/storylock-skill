@@ -1,4 +1,4 @@
-﻿use super::*;
+use super::*;
 use crate::host_runtime::resolve_data_dir;
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 use std::path::PathBuf;
@@ -109,7 +109,10 @@ fn default_policy_catalog_has_no_user_protected_objects() {
         .and_then(Value::as_array)
         .expect("default resources");
     assert!(resources.is_empty());
-    assert!(catalog.get("accessLevels").and_then(Value::as_object).is_some());
+    assert!(catalog
+        .get("accessLevels")
+        .and_then(Value::as_object)
+        .is_some());
     assert!(catalog
         .get("operationTemplates")
         .and_then(Value::as_array)
@@ -136,7 +139,9 @@ fn host_storylock_open_uses_twenty_two_question_authorization() {
     assert!(host_source.contains("callback select-answer(int);"));
     assert!(host_source.contains("toggle-answer(index) => { root.select-answer(index); }"));
     assert!(host_source.contains("in property <bool> can-previous: current-index > 0;"));
-    assert!(host_source.contains("in property <bool> can-next: current-index + 1 < challenge-count;"));
+    assert!(
+        host_source.contains("in property <bool> can-next: current-index + 1 < challenge-count;")
+    );
     assert!(host_source.contains("enabled: root.can-next;"));
     assert!(!host_source.contains("component ChallengeAnswerTile"));
     assert!(!host_source.contains("component ChallengeAnswerGrid"));
@@ -170,9 +175,7 @@ fn storylock_open_challenge_uses_selected_story_draft_not_host_question_bank() {
         .expect("create storylock challenge");
 
     assert_eq!(cells.len(), 22);
-    assert!(cells
-        .iter()
-        .all(|cell| cell.answer_options.len() == 9));
+    assert!(cells.iter().all(|cell| cell.answer_options.len() == 9));
     assert!(cells.iter().all(|cell| !cell.expected_answers.is_empty()));
     assert!(cells.iter().any(|cell| {
         cell.prompt_text.contains('\u{6545}') || cell.prompt_text.contains('\u{4ec0}')
@@ -1233,7 +1236,8 @@ fn final_learning_pass_enables_manual_export_and_reports_success() {
             core.get_learning_result()
         );
         assert!(
-            core.get_config_status().contains("\u{5bfc}\u{51fa}\u{6210}\u{529f}")
+            core.get_config_status()
+                .contains("\u{5bfc}\u{51fa}\u{6210}\u{529f}")
                 || core.get_config_status().contains("Export complete"),
             "manual export should report export success only in export/config status, got {}",
             core.get_config_status()
@@ -1258,7 +1262,8 @@ fn completed_learning_unlocks_export_even_with_recorded_errors() {
         let mut report = String::new();
         for _ in 0..48 {
             set_learning_answer_states_into_window(&core, &[false; 9]);
-            report = check_learning_current(&core, &dir, &progress).expect("record learning prompt");
+            report =
+                check_learning_current(&core, &dir, &progress).expect("record learning prompt");
         }
 
         assert_eq!(core.get_learning_checked_prompts(), 48);
@@ -1376,7 +1381,10 @@ fn completed_learning_state_survives_policy_save_and_unchanged_draft_save() {
         core.set_pre_learning_prompts_per_question(SharedString::from("3"));
         save_learning_policy_from_window(&core, &dir).expect("save policy");
         assert!(has_current_learning_completed_state(&dir));
-        assert_eq!(stored_learning_state_fingerprint(&dir).as_deref(), Some(before.as_str()));
+        assert_eq!(
+            stored_learning_state_fingerprint(&dir).as_deref(),
+            Some(before.as_str())
+        );
 
         let bad_export_dir = dir.join("missing-parent").join("blocked-export");
         core.set_export_package_dir(SharedString::from(bad_export_dir.display().to_string()));
@@ -1428,11 +1436,16 @@ fn export_failure_does_not_reset_completed_learning_state() {
 
         assert!(core.get_export_ready());
         assert!(has_current_learning_completed_state(&dir));
-        assert_eq!(core.get_learning_status().as_str(), "Learning already passed.");
+        assert_eq!(
+            core.get_learning_status().as_str(),
+            "Learning already passed."
+        );
         assert_eq!(core.get_learning_result().as_str(), "Training complete.");
         assert!(
             core.get_config_status().contains("Export failed")
-                || core.get_config_status().contains("\u{5bfc}\u{51fa}\u{5931}\u{8d25}"),
+                || core
+                    .get_config_status()
+                    .contains("\u{5bfc}\u{51fa}\u{5931}\u{8d25}"),
             "export failure should be reported only as export status, got {}",
             core.get_config_status()
         );
@@ -1458,7 +1471,8 @@ fn export_normalizes_legacy_builtin_template_resources() {
         "test setup should reproduce the legacy template/resource mismatch"
     );
 
-    export_storylock_package_to(&dir, &export_dir).expect("export should normalize builtin resources");
+    export_storylock_package_to(&dir, &export_dir)
+        .expect("export should normalize builtin resources");
 
     assert!(export_dir.join("vault.stlk").exists());
     assert!(preflight_storylock_core_package(&dir).errors.is_empty());
@@ -1499,7 +1513,10 @@ fn restart_learning_releases_current_modal_before_rerun() {
             .expect("learning dialog should still exist")
             .invoke_restart_learning();
 
-        assert!(*restarted.borrow(), "restart should invoke a fresh learning run");
+        assert!(
+            *restarted.borrow(),
+            "restart should invoke a fresh learning run"
+        );
         assert!(
             learning_dialog.borrow().is_none(),
             "restart should release the modal dialog so close/exit state is not trapped"
@@ -1914,7 +1931,10 @@ fn encrypted_data_path_resolution_uses_real_storylock_package_directory() {
 
     let template_dir = root.join("templates").join("shouzhudaitu-zh");
     ensure_storylock_core_package(&template_dir).expect("init template package");
-    assert_eq!(resolve_storylock_core_package_path(&template_dir), template_dir);
+    assert_eq!(
+        resolve_storylock_core_package_path(&template_dir),
+        template_dir
+    );
 
     let merged = merge_host_settings(
         &StoryLockUiSettings::default(),
@@ -1945,12 +1965,8 @@ fn storylock_ui_settings_drop_legacy_managed_key_package_paths() {
     let mut settings = StoryLockUiSettings {
         language: Some(String::from("zh")),
         core_data_dir: Some(String::from("E:/storylock/identity-package")),
-        export_package_dir: Some(String::from(
-            "E:/storylock/storylock-managed-key-package",
-        )),
-        managed_key_package_dir: Some(String::from(
-            "E:/storylock/storylock-managed-key-package",
-        )),
+        export_package_dir: Some(String::from("E:/storylock/storylock-managed-key-package")),
+        managed_key_package_dir: Some(String::from("E:/storylock/storylock-managed-key-package")),
     };
 
     normalize_storylock_ui_settings(&mut settings);
@@ -1996,8 +2012,12 @@ fn learning_test_dialog_keeps_sixteen_nine_window_size() {
     assert!(section.contains("max-height: 540px;"));
     assert!(section.contains("learning-answer-1-state: \"wrong\";"));
     assert!(section.contains("learning-answer-9-state: \"wrong\";"));
-    assert!(section.contains("in property <bool> can-learning-previous: learning-checked-prompts > 0;"));
-    assert!(section.contains("in property <bool> can-learning-next: learning-checked-prompts < learning-total-prompts;"));
+    assert!(
+        section.contains("in property <bool> can-learning-previous: learning-checked-prompts > 0;")
+    );
+    assert!(section.contains(
+        "in property <bool> can-learning-next: learning-checked-prompts < learning-total-prompts;"
+    ));
     assert!(section.contains("text: root.learning-position;"));
     assert!(section.contains("text: root.learning-question;"));
     assert!(section.contains("text: root.learning-action-hint;"));
@@ -2084,6 +2104,3 @@ fn learning_test_dialog_keeps_sixteen_nine_window_size() {
     assert!(template_shell.contains("pub(crate) fn template_bundle_item_from_resource("));
     assert!(template_shell.contains("pub(crate) fn sync_template_children_for_resource("));
 }
-
-
-

@@ -241,6 +241,9 @@ try {
     assert.equal(registration.registration.identityId, 'android-demo-001');
     assert.equal(registration.registration.deviceId, deviceId);
     assert.match(registration.relay.pollUrl, /\/local-host\/relay\/poll$/);
+    assert.equal(registration.relay.pollPolicy.transport, 'long_poll');
+    assert.equal(registration.relay.pollPolicy.waitMs, 25_000);
+    assert.equal(registration.relay.pollPolicy.clientTimeoutMs, 35_000);
 
     const legacyRegistration = await fetch(`${webApiBaseUrl}/android-host/register`, {
       method: 'POST',
@@ -279,6 +282,12 @@ try {
     assert.equal(status.onlineStatus.bindingEntryUrl, `${webApiBaseUrl}/app/bind`);
     assert.equal(status.onlineStatus.activeConnectionMode, 'relay_url');
     assert.equal(status.onlineStatus.activeHostCount, 2);
+    assert.equal(status.relayPolicy.transport, 'long_poll_respond');
+    assert.equal(status.relayPolicy.coordination, 'file_backed_host_registry_in_memory_relay');
+    assert.equal(status.relayPolicy.productionExternalCoordinatorRequired, true);
+    assert.equal(status.relayPolicy.readiness.singleInstance, true);
+    assert.equal(status.relayPolicy.readiness.multiInstance, false);
+    assert.equal(status.relayPolicy.readiness.recommendedCoordinator, 'redis_or_kv_with_pubsub');
     assert.equal(status.hostRegistry.activeHostCount, 2);
     assert.equal(status.appDistribution.androidAppDownloadUrl, `${webApiBaseUrl}/app/download/android`);
     assert.equal(status.appDistribution.artifact.available, true);
@@ -350,6 +359,147 @@ try {
     assert.equal(passwordResult.executionLocation, 'remote_gateway');
     assert.equal(passwordResult.result.password, '[redacted]');
     assert.equal(passwordResult.result.username, 'android-user');
+
+    relayWorkerRunning = false;
+    await relayWorker;
+
+    const longPollHost = {
+      deviceId: `${deviceId}-long-poll`,
+      appInstanceId: `${appInstanceId}-long-poll`,
+      identityId: 'android-demo-001',
+    };
+    const longPollRegistration = await fetch(`${webApiBaseUrl}/local-host/register`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        identityId: longPollHost.identityId,
+        deviceId: longPollHost.deviceId,
+        appInstanceId: longPollHost.appInstanceId,
+        preferredMode: 'relay_url',
+        host: {
+          healthUrl: androidInfo.healthUrl,
+          executeUrl: androidInfo.executeUrl,
+        },
+        reachability: {
+          localHttp: true,
+          relayPolling: true,
+          relayTransport: 'long_poll',
+        },
+      }),
+    }).then((response) => response.json());
+    assert.equal(longPollRegistration.status, 'ok');
+
+    const idleLongPollStartedAt = Date.now();
+    const idleLongPoll = await fetch(`${webApiBaseUrl}/local-host/relay/poll`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        ...longPollHost,
+        transport: 'long_poll',
+        waitMs: 75,
+      }),
+    }).then((response) => response.json());
+    assert.equal(idleLongPoll.status, 'idle');
+    assert.equal(idleLongPoll.transport, 'long_poll');
+    assert.ok(Date.now() - idleLongPollStartedAt >= 40);
+
+    const replacedStartedAt = Date.now();
+    const replacedPoll = fetch(`${webApiBaseUrl}/local-host/relay/poll`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        ...longPollHost,
+        transport: 'long_poll',
+        waitMs: 3_000,
+      }),
+    }).then((response) => response.json());
+    await sleep(20);
+    const replacingPoll = fetch(`${webApiBaseUrl}/local-host/relay/poll`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        ...longPollHost,
+        transport: 'long_poll',
+        waitMs: 75,
+      }),
+    }).then((response) => response.json());
+    const replacedResult = await replacedPoll;
+    assert.equal(replacedResult.status, 'idle');
+    assert.equal(replacedResult.reason, 'replaced_by_new_poll');
+    assert.ok(Date.now() - replacedStartedAt < 2_500);
+    const replacingResult = await replacingPoll;
+    assert.equal(replacingResult.status, 'idle');
+    assert.equal(replacingResult.reason, undefined);
+
+    const waitingPoll = fetch(`${webApiBaseUrl}/local-host/relay/poll`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        ...longPollHost,
+        transport: 'long_poll',
+        waitMs: 3_000,
+      }),
+    }).then((response) => response.json());
+    await sleep(30);
+    const waitingRequestStartedAt = Date.now();
+    const waitingGatewayRequest = clientGateway.requestPasswordFill({
+      requestId: 'req-web-api-long-poll-password',
+      nonce: '20003',
+      expiry: Date.now() + 60_000,
+      identityId: longPollHost.identityId,
+      credentialRef: 'site/example',
+      targetOrigin: 'https://example.com',
+    });
+    const longPollDispatch = await waitingPoll;
+    assert.equal(longPollDispatch.status, 'ok');
+    assert.equal(longPollDispatch.transport, 'long_poll');
+    assert.equal(longPollDispatch.request.capability, 'requestPasswordFill');
+    assert.ok(Date.now() - waitingRequestStartedAt < 1_000);
+
+    const longPollResponse = await executeAgainstAndroidBody(
+      androidInfo.executeUrl,
+      sharedSecret,
+      longPollDispatch.request,
+    );
+    await fetch(`${webApiBaseUrl}/local-host/relay/respond`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'x-storylock-shared-secret': sharedSecret,
+      },
+      body: JSON.stringify({
+        relayRequestId: longPollDispatch.relayRequestId,
+        response: longPollResponse,
+      }),
+    });
+    const longPollResult = await waitingGatewayRequest;
+    assert.equal(longPollResult.status, 'success');
+    assert.equal(longPollResult.executionLocation, 'remote_gateway');
+    assert.equal(longPollResult.result.password, '[redacted]');
+
+    const longPollStatus = await fetch(gatewayEndpoint, {
+      headers: {
+        'x-storylock-shared-secret': sharedSecret,
+      },
+    }).then((response) => response.json());
+    assert.ok(longPollStatus.relayPolicy.failureTracking.idleTimeoutCount >= 2);
+    assert.ok(longPollStatus.relayPolicy.failureTracking.replacedPollCount >= 1);
+    assert.equal(longPollStatus.relayPolicy.failureTracking.clientClosedPollCount, 0);
 
     console.log('StoryLock Web API gateway + Android registration/relay/APK selftest passed.');
   } finally {

@@ -1,5 +1,5 @@
 import { VerticalBox, HorizontalBox, ComboBox, LineEdit } from "std-widgets.slint";
-import { PathBrowseRow, StaticRow, ActionButton, QuestionConfigPanel, LearningAnswerGrid } from "../common.slint";
+import { PathBrowseRow, StaticRow, ActionButton, QuestionConfigPanel, LearningAnswerGrid, SectionPanel, SectionTitle } from "../common.slint";
 
 export component StoryLockCoreSettingsDialog inherits Window {
     in-out property <string> language: "zh";
@@ -38,41 +38,72 @@ export component StoryLockCoreSettingsDialog inherits Window {
             }
         }
 
-        VerticalBox {
-            spacing: 14px;
-
-            HorizontalBox {
-                spacing: 14px;
-                Text {
-                    text: root.is-zh ? "\u{754c}\u{9762}\u{8bed}\u{8a00}" : "UI Language";
-                    width: 150px;
-                    color: #62727d;
-                    font-size: 13px;
-                    vertical-alignment: center;
-                }
-                ComboBox {
-                    width: 420px;
-                    height: 32px;
-                    model: root.is-zh ? ["\u{4e2d}\u{6587}", "\u{82f1}\u{6587}"] : ["Chinese", "English"];
-                    current-value: root.is-zh ? "\u{4e2d}\u{6587}" : "English";
-                    selected(value) => {
-                        root.language = (value == "Chinese" || value == "\u{4e2d}\u{6587}") ? "zh" : "en";
-                        root.language-changed(root.language);
+        SectionPanel {
+            panel-width: 760px;
+            panel-height: 76px;
+            VerticalBox {
+                x: 14px;
+                y: 10px;
+                width: 732px;
+                height: 56px;
+                spacing: 8px;
+                SectionTitle { label: root.is-zh ? "\u{901a}\u{7528}\u{8bbe}\u{7f6e}" : "General"; }
+                HorizontalBox {
+                    spacing: 14px;
+                    Text {
+                        text: root.is-zh ? "\u{754c}\u{9762}\u{8bed}\u{8a00}" : "UI Language";
+                        width: 150px;
+                        color: #62727d;
+                        font-size: 13px;
+                        vertical-alignment: center;
+                    }
+                    ComboBox {
+                        width: 420px;
+                        height: 32px;
+                        model: root.is-zh ? ["\u{4e2d}\u{6587}", "\u{82f1}\u{6587}"] : ["Chinese", "English"];
+                        current-value: root.is-zh ? "\u{4e2d}\u{6587}" : "English";
+                        selected(value) => {
+                            root.language = (value == "Chinese" || value == "\u{4e2d}\u{6587}") ? "zh" : "en";
+                            root.language-changed(root.language);
+                        }
                     }
                 }
             }
-
-            PathBrowseRow {
-                name: root.is-zh ? "\u{5de5}\u{4f5c}\u{76ee}\u{5f55}" : "Workspace Dir";
-                value <=> root.core-data-dir;
-                is-zh: root.is-zh;
-                browse => { root.browse-core-data-dir(); }
+        }
+        SectionPanel {
+            panel-width: 760px;
+            panel-height: 92px;
+            VerticalBox {
+                x: 14px;
+                y: 10px;
+                width: 732px;
+                height: 72px;
+                spacing: 8px;
+                SectionTitle { label: root.is-zh ? "\u{5de5}\u{4f5c}\u{533a}" : "Workspace"; }
+                PathBrowseRow {
+                    name: root.is-zh ? "\u{5de5}\u{4f5c}\u{76ee}\u{5f55}" : "Workspace Dir";
+                    value <=> root.core-data-dir;
+                    is-zh: root.is-zh;
+                    editor-width: 526px;
+                    browse => { root.browse-core-data-dir(); }
+                }
             }
-
-            StaticRow { name: root.is-zh ? "\u{4fdd}\u{9669}\u{5e93}\u{6587}\u{4ef6}" : "Vault File"; value: "vault.stlk"; }
-            StaticRow { name: root.is-zh ? "\u{5b66}\u{4e60}\u{7b56}\u{7565}" : "Learning Policy"; value: "learning-policy.json"; }
-            StaticRow { name: root.is-zh ? "\u{5305}\u{6e05}\u{5355}" : "Package Manifest"; value: "package-manifest.json"; }
-            StaticRow { name: root.is-zh ? "\u{8d44}\u{6e90}\u{76ee}\u{5f55}" : "Resource Catalog"; value: "resource-catalog.json"; }
+        }
+        SectionPanel {
+            panel-width: 760px;
+            panel-height: 146px;
+            VerticalBox {
+                x: 14px;
+                y: 10px;
+                width: 732px;
+                height: 126px;
+                spacing: 8px;
+                SectionTitle { label: root.is-zh ? "\u{5305}\u{6587}\u{4ef6}" : "Package Files"; }
+                StaticRow { name: root.is-zh ? "\u{4fdd}\u{9669}\u{5e93}\u{6587}\u{4ef6}" : "Vault File"; value: "vault.stlk"; value-width: 526px; }
+                StaticRow { name: root.is-zh ? "\u{5b66}\u{4e60}\u{7b56}\u{7565}" : "Learning Policy"; value: "learning-policy.json"; value-width: 526px; }
+                StaticRow { name: root.is-zh ? "\u{5305}\u{6e05}\u{5355}" : "Package Manifest"; value: "package-manifest.json"; value-width: 526px; }
+                StaticRow { name: root.is-zh ? "\u{8d44}\u{6e90}\u{76ee}\u{5f55}" : "Resource Catalog"; value: "resource-catalog.json"; value-width: 526px; }
+            }
         }
     }
 }
@@ -133,31 +164,44 @@ export component AnswerEditorDialog inherits Window {
             }
         }
 
-        QuestionConfigPanel {
+        SectionPanel {
+            panel-width: 920px;
             panel-height: 422px;
-            selected-question <=> root.selected-question;
-            question-text <=> root.question-text;
-            answer-1 <=> root.answer-1;
-            answer-1-state <=> root.answer-1-state;
-            answer-2 <=> root.answer-2;
-            answer-2-state <=> root.answer-2-state;
-            answer-3 <=> root.answer-3;
-            answer-3-state <=> root.answer-3-state;
-            answer-4 <=> root.answer-4;
-            answer-4-state <=> root.answer-4-state;
-            answer-5 <=> root.answer-5;
-            answer-5-state <=> root.answer-5-state;
-            answer-6 <=> root.answer-6;
-            answer-6-state <=> root.answer-6-state;
-            answer-7 <=> root.answer-7;
-            answer-7-state <=> root.answer-7-state;
-            answer-8 <=> root.answer-8;
-            answer-8-state <=> root.answer-8-state;
-            answer-9 <=> root.answer-9;
-            answer-9-state <=> root.answer-9-state;
-            previous-node => { root.previous-node(); }
-            next-node => { root.next-node(); }
-            select-node(value) => { root.select-node(value); }
+            VerticalBox {
+                x: 14px;
+                y: 10px;
+                width: 892px;
+                height: 402px;
+                spacing: 8px;
+                SectionTitle { label: root.is-zh ? "\u{9898}\u{76ee}\u{4e0e}\u{7b54}\u{6848}" : "Question And Answers"; }
+                QuestionConfigPanel {
+                    width: 892px;
+                    panel-height: 364px;
+                    selected-question <=> root.selected-question;
+                    question-text <=> root.question-text;
+                    answer-1 <=> root.answer-1;
+                    answer-1-state <=> root.answer-1-state;
+                    answer-2 <=> root.answer-2;
+                    answer-2-state <=> root.answer-2-state;
+                    answer-3 <=> root.answer-3;
+                    answer-3-state <=> root.answer-3-state;
+                    answer-4 <=> root.answer-4;
+                    answer-4-state <=> root.answer-4-state;
+                    answer-5 <=> root.answer-5;
+                    answer-5-state <=> root.answer-5-state;
+                    answer-6 <=> root.answer-6;
+                    answer-6-state <=> root.answer-6-state;
+                    answer-7 <=> root.answer-7;
+                    answer-7-state <=> root.answer-7-state;
+                    answer-8 <=> root.answer-8;
+                    answer-8-state <=> root.answer-8-state;
+                    answer-9 <=> root.answer-9;
+                    answer-9-state <=> root.answer-9-state;
+                    previous-node => { root.previous-node(); }
+                    next-node => { root.next-node(); }
+                    select-node(value) => { root.select-node(value); }
+                }
+            }
         }
     }
 }
@@ -194,51 +238,31 @@ export component ObjectEditorDialog inherits Window {
             overflow: elide;
         }
 
-        HorizontalBox {
-            spacing: 14px;
-            Text {
-                text: "URI";
-                width: 150px;
-                color: #62727d;
-                font-size: 13px;
-                vertical-alignment: center;
-            }
-            LineEdit {
-                text <=> root.uri;
-                width: 556px;
-                height: 32px;
-            }
-        }
-
-        HorizontalBox {
-            spacing: 14px;
-            Text {
-                text: root.is-zh ? "\u{7528}\u{6237}\u{540d}" : "Username";
-                width: 150px;
-                color: #62727d;
-                font-size: 13px;
-                vertical-alignment: center;
-            }
-            LineEdit {
-                text <=> root.username;
-                width: 556px;
-                height: 32px;
-            }
-        }
-
-        HorizontalBox {
-            spacing: 14px;
-            Text {
-                text: root.is-zh ? "\u{5bc6}\u{7801}" : "Password";
-                width: 150px;
-                color: #62727d;
-                font-size: 13px;
-                vertical-alignment: center;
-            }
-            LineEdit {
-                text <=> root.password;
-                width: 556px;
-                height: 32px;
+        SectionPanel {
+            panel-width: 720px;
+            panel-height: 128px;
+            VerticalBox {
+                x: 14px;
+                y: 10px;
+                width: 692px;
+                height: 108px;
+                spacing: 8px;
+                SectionTitle { label: root.is-zh ? "\u{5bf9}\u{8c61}\u{5185}\u{5bb9}" : "Object Details"; }
+                HorizontalBox {
+                    spacing: 14px;
+                    Text { text: "URI"; width: 150px; color: #62727d; font-size: 13px; vertical-alignment: center; }
+                    LineEdit { text <=> root.uri; width: 514px; height: 32px; }
+                }
+                HorizontalBox {
+                    spacing: 14px;
+                    Text { text: root.is-zh ? "\u{7528}\u{6237}\u{540d}" : "Username"; width: 150px; color: #62727d; font-size: 13px; vertical-alignment: center; }
+                    LineEdit { text <=> root.username; width: 514px; height: 32px; }
+                }
+                HorizontalBox {
+                    spacing: 14px;
+                    Text { text: root.is-zh ? "\u{5bc6}\u{7801}" : "Password"; width: 150px; color: #62727d; font-size: 13px; vertical-alignment: center; }
+                    LineEdit { text <=> root.password; width: 514px; height: 32px; }
+                }
             }
         }
 
@@ -456,7 +480,7 @@ export component LearningTestDialog inherits Window {
 
                 Rectangle {
                     width: 180px;
-                    height: 210px;
+                    height: 150px;
                     border-width: 1px;
                     border-color: #d7e1e6;
                     border-radius: 6px;
@@ -476,17 +500,25 @@ export component LearningTestDialog inherits Window {
                         overflow: elide;
                     }
 
-                    ActionButton { x: 12px; y: 20px; label: root.is-zh ? "\u{4e0a}\u{4e00}\u{9898}" : "Previous"; primary: false; enabled: root.can-learning-previous; button-width: 156px; clicked => { root.learning-previous(); } }
-                    ActionButton { x: 12px; y: 58px; label: root.is-zh ? "\u{4e0b}\u{4e00}\u{9898}" : "Next"; primary: false; enabled: root.can-learning-next; button-width: 156px; clicked => { root.learning-next(); } }
-                    Rectangle {
-                        x: 20px;
-                        y: 100px;
-                        width: 140px;
-                        height: 1px;
-                        background: #d7e1e6;
+                    HorizontalBox {
+                        x: 12px;
+                        y: 38px;
+                        width: 156px;
+                        height: 34px;
+                        spacing: 8px;
+                        ActionButton { label: root.is-zh ? "\u{4e0a}\u{9898}" : "Prev"; primary: false; enabled: root.can-learning-previous; button-width: 74px; clicked => { root.learning-previous(); } }
+                        ActionButton { label: root.is-zh ? "\u{4e0b}\u{9898}" : "Next"; primary: false; enabled: root.can-learning-next; button-width: 74px; clicked => { root.learning-next(); } }
                     }
-                    ActionButton { x: 12px; y: 112px; label: root.is-zh ? "\u{91cd}\u{65b0}\u{5f00}\u{59cb}" : "Restart"; primary: true; button-width: 156px; clicked => { root.restart-learning(); } }
-                    ActionButton { x: 12px; y: 150px; label: root.is-zh ? "\u{5173}\u{95ed}" : "Close"; primary: false; button-width: 156px; clicked => { root.close-requested(); } }
+                    Rectangle { x: 20px; y: 84px; width: 140px; height: 1px; background: #d7e1e6; }
+                    HorizontalBox {
+                        x: 12px;
+                        y: 98px;
+                        width: 156px;
+                        height: 34px;
+                        spacing: 8px;
+                        ActionButton { label: root.is-zh ? "\u{91cd}\u{65b0}" : "Restart"; primary: true; button-width: 92px; clicked => { root.restart-learning(); } }
+                        ActionButton { label: root.is-zh ? "\u{5173}\u{95ed}" : "Close"; primary: false; button-width: 56px; clicked => { root.close-requested(); } }
+                    }
                 }
             }
         }

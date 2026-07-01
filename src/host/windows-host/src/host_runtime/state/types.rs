@@ -41,6 +41,16 @@ pub(crate) struct RelayEndpoints {
     pub(crate) poll_url: Option<String>,
     #[serde(rename = "respondUrl")]
     pub(crate) respond_url: Option<String>,
+    #[serde(rename = "pollPolicy")]
+    pub(crate) poll_policy: Option<RelayPollPolicy>,
+}
+
+#[derive(Debug, Deserialize)]
+pub(crate) struct RelayPollPolicy {
+    #[serde(rename = "waitMs")]
+    pub(crate) wait_ms: Option<u64>,
+    #[serde(rename = "clientTimeoutMs")]
+    pub(crate) client_timeout_ms: Option<u64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

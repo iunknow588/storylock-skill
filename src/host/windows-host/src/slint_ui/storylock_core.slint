@@ -195,7 +195,7 @@ export component StoryLockCoreApp inherits Window {
         in-out property <string> export-package-dir: "";
         in-out property <string> temp-draft-label: "Save Draft";
         in-out property <bool> temp-draft-cooling: false;
-        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "受保护对象" : "Protected Objects") : active-page == 3 ? (is-zh ? "学习策略设置" : "Learning Policy Settings") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案编辑" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
+        property <string> current-title: active-page == 0 ? (is-zh ? "故事草稿" : "Story Draft") : active-page == 1 ? (is-zh ? "24 个问题" : "24 Questions") : active-page == 2 ? (is-zh ? "受保护对象" : "Protected Objects") : active-page == 3 ? (is-zh ? "预学习参数" : "Pre-Learning") : active-page == 5 ? (is-zh ? "留存节奏" : "Retention Schedule") : active-page == 4 ? (is-zh ? "导出" : "Export") : active-page == 6 ? (is-zh ? "答案编辑" : "Answer Editor") : active-page == 7 ? (is-zh ? "对象编辑" : "Object Editor") : (is-zh ? "设置" : "Settings");
         callback close-requested();
         callback save-temp-draft();
         callback previous-node();
@@ -234,21 +234,59 @@ export component StoryLockCoreApp inherits Window {
             Rectangle {
                 min-width: 160px;
                 max-width: 160px;
-                background: #eef3f5;
+                background: #dfe9ec;
+                Rectangle {
+                    x: parent.width - 1px;
+                    y: 0px;
+                    width: 1px;
+                    height: parent.height;
+                    background: #c9d5da;
+                }
                 VerticalBox {
                     x: 18px;
                     y: 12px;
                     width: 124px;
                     height: 528px;
-                    spacing: 7px;
+                    spacing: 6px;
+                    Text {
+                        text: "StoryLock";
+                        width: 124px;
+                        height: 24px;
+                        color: #17252f;
+                        font-size: 18px;
+                        font-weight: 800;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: root.is-zh ? "\u{672c}\u{5730}\u{6838}\u{5fc3}" : "Local Core";
+                        width: 124px;
+                        height: 16px;
+                        color: #5a6b75;
+                        font-size: 12px;
+                        font-weight: 600;
+                        vertical-alignment: center;
+                    }
+                    Rectangle { width: 124px; height: 1px; background: #c9d5da; }
+                    Text {
+                        text: root.is-zh ? "\u{5185}\u{5bb9}\u{7ba1}\u{7406}" : "Content";
+                        width: 124px;
+                        height: 14px;
+                        color: #5a6b75;
+                        font-size: 11px;
+                        font-weight: 700;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
                     MenuButton {
                         label: root.is-zh ? "24 个问题" : "24 Questions";
                         selected: root.active-page == 1;
+                        button-height: 32px;
                         clicked => { root.active-page = 1; }
                     }
                     MenuButton {
                         label: root.is-zh ? "故事草稿" : "Story Draft";
                         selected: root.active-page == 0;
+                        button-height: 32px;
                         clicked => { root.active-page = 0; }
                     }
                     MenuButton {
@@ -257,16 +295,30 @@ export component StoryLockCoreApp inherits Window {
                             : (root.is-zh ? "解锁当前包" : "Unlock Package");
                         selected: false;
                         enabled: !root.package-unlocked;
+                        button-height: 32px;
                         clicked => { root.unlock-current-package(); }
+                    }
+                    Rectangle { width: 124px; height: 1px; background: #c9d5da; }
+                    Text {
+                        text: root.is-zh ? "\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}" : "Objects";
+                        width: 124px;
+                        height: 14px;
+                        color: #5a6b75;
+                        font-size: 11px;
+                        font-weight: 700;
+                        vertical-alignment: center;
+                        overflow: elide;
                     }
                     MenuButton {
                         label: root.is-zh ? "受保护对象" : "Protected Objects";
                         selected: root.active-page == 2;
+                        button-height: 32px;
                         clicked => { root.active-page = 2; }
                     }
                     SubMenuButton {
                         label: root.is-zh ? "普通对象" : "Normal Objects";
                         selected: root.active-page == 2 && root.resource-group == "normal";
+                        button-height: 28px;
                         clicked => {
                             root.select-resource-group("normal");
                         }
@@ -274,6 +326,7 @@ export component StoryLockCoreApp inherits Window {
                     SubMenuButton {
                         label: root.is-zh ? "私密对象" : "Private Objects";
                         selected: root.active-page == 2 && root.resource-group == "private";
+                        button-height: 28px;
                         clicked => {
                             root.select-resource-group("private");
                         }
@@ -281,26 +334,48 @@ export component StoryLockCoreApp inherits Window {
                     SubMenuButton {
                         label: root.is-zh ? "机密对象" : "Secret Objects";
                         selected: root.active-page == 2 && root.resource-group == "secret";
+                        button-height: 28px;
                         clicked => {
                             root.select-resource-group("secret");
                         }
+                    }
+                    Rectangle { width: 124px; height: 1px; background: #c9d5da; }
+                    Text {
+                        text: root.is-zh ? "\u{64cd}\u{4f5c}" : "Actions";
+                        width: 124px;
+                        height: 14px;
+                        color: #5a6b75;
+                        font-size: 11px;
+                        font-weight: 700;
+                        vertical-alignment: center;
+                        overflow: elide;
                     }
                     MenuButton {
                         label: root.temp-draft-label;
                         selected: false;
                         enabled: root.package-unlocked && !root.temp-draft-cooling;
+                        button-height: 32px;
                         clicked => { root.save-temp-draft(); }
                     }
                     MenuButton {
-                        label: root.is-zh ? "学习策略设置" : "Learning Policy";
+                        label: root.is-zh ? "预学习参数" : "Pre-Learning";
                         selected: root.active-page == 3;
                         enabled: root.package-unlocked;
+                        button-height: 32px;
                         clicked => { root.active-page = 3; }
+                    }
+                    MenuButton {
+                        label: root.is-zh ? "留存节奏" : "Retention";
+                        selected: root.active-page == 5;
+                        enabled: root.package-unlocked;
+                        button-height: 32px;
+                        clicked => { root.active-page = 5; }
                     }
                     MenuButton {
                         label: root.is-zh ? "导出" : "Export";
                         selected: root.active-page == 4;
                         enabled: root.package-unlocked;
+                        button-height: 32px;
                         clicked => { root.active-page = 4; }
                     }
                 }
@@ -308,7 +383,7 @@ export component StoryLockCoreApp inherits Window {
 
             Rectangle {
                 min-width: 800px;
-                background: #eef3f5;
+                background: #f7fafb;
                 VerticalBox {
                     padding: 24px;
                     spacing: 16px;
@@ -325,13 +400,24 @@ export component StoryLockCoreApp inherits Window {
                         }
                         Text {
                             x: 38px;
-                            y: 4px;
+                            y: 0px;
                             width: 470px;
-                            height: 28px;
+                            height: 20px;
                             text: "StoryLock Core - " + root.current-title;
-                            font-size: 16px;
-                            font-weight: 800;
+                            font-size: 18px;
+                            font-weight: 700;
                             color: #17252f;
+                            overflow: elide;
+                        }
+                        Text {
+                            x: 38px;
+                            y: 22px;
+                            width: 470px;
+                            height: 14px;
+                            text: root.package-unlocked ? (root.is-zh ? "\u{5f53}\u{524d}\u{5305}\u{5df2}\u{89e3}\u{9501}" : "Current package unlocked") : (root.is-zh ? "\u{7a7a}\u{6a21}\u{5f0f}\u{ff1a}\u{89e3}\u{9501}\u{540e}\u{52a0}\u{8f7d}\u{5305}\u{5185}\u{5bb9}" : "Empty mode: unlock to load package content");
+                            font-size: 12px;
+                            font-weight: 500;
+                            color: #5a6b75;
                             overflow: elide;
                         }
                         SettingsIconButton {
@@ -347,7 +433,10 @@ export component StoryLockCoreApp inherits Window {
                     Rectangle {
                         width: 720px;
                         height: 374px;
-                        background: #eef3f5;
+                        border-radius: 6px;
+                        border-width: 1px;
+                        border-color: #d7e1e6;
+                        background: #ffffff;
 
                         if root.active-page == 0: StoryDraftPage {
                             is-zh: root.is-zh;
@@ -473,6 +562,28 @@ export component StoryLockCoreApp inherits Window {
 
                         if root.active-page == 3: LearningPage {
                             is-zh: root.is-zh;
+                            mode: 0;
+                            pre-learning-prompts-per-question <=> root.pre-learning-prompts-per-question;
+                            pre-learning-error-tolerance <=> root.pre-learning-error-tolerance;
+                            weak-item-limit <=> root.weak-item-limit;
+                            initial-days <=> root.initial-days;
+                            initial-frequency-days <=> root.initial-frequency-days;
+                            consolidation-days <=> root.consolidation-days;
+                            consolidation-frequency-days <=> root.consolidation-frequency-days;
+                            adaptation-weeks <=> root.adaptation-weeks;
+                            adaptation-frequency-weeks <=> root.adaptation-frequency-weeks;
+                            stable-months <=> root.stable-months;
+                            stable-frequency-months <=> root.stable-frequency-months;
+                            long-term-years <=> root.long-term-years;
+                            long-term-frequency-years <=> root.long-term-frequency-years;
+                            learning-plan-summary: root.learning-plan-summary;
+                            learning-status: root.learning-status;
+                            save-learning-policy => { root.save-learning-policy(); }
+                        }
+
+                        if root.active-page == 5: LearningPage {
+                            is-zh: root.is-zh;
+                            mode: 1;
                             pre-learning-prompts-per-question <=> root.pre-learning-prompts-per-question;
                             pre-learning-error-tolerance <=> root.pre-learning-error-tolerance;
                             weak-item-limit <=> root.weak-item-limit;
