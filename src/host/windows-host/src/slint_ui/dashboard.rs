@@ -1,24 +1,175 @@
+use super::puzzle_adapter::{
+    set_storylock_challenge_question, show_storylock_authorization_result,
+};
 use super::*;
+use storylock_puzzle_plugin::{create_open_challenge_from_draft, StoryLockChallengeCell};
+
+fn host_language_is_zh(language: &str) -> bool {
+    language == "zh"
+}
+
+fn remote_mode_label(remote_enabled: bool, restart_required: bool, language: &str) -> &'static str {
+    match (
+        host_language_is_zh(language),
+        remote_enabled,
+        restart_required,
+    ) {
+        (true, true, true) => {
+            "\u{8fdc}\u{7a0b}\u{4e2d}\u{7ee7}\u{5df2}\u{6253}\u{5f00}\u{ff08}\u{91cd}\u{65b0}\u{6253}\u{5f00}\u{540e}\u{751f}\u{6548}\u{ff09}"
+        }
+        (true, false, true) => {
+            "\u{672c}\u{673a}\u{6a21}\u{5f0f}\u{ff08}\u{91cd}\u{65b0}\u{6253}\u{5f00}\u{540e}\u{751f}\u{6548}\u{ff09}"
+        }
+        (true, true, false) => {
+            "\u{8fdc}\u{7a0b}\u{4e2d}\u{7ee7}\u{5df2}\u{6253}\u{5f00}"
+        }
+        (true, false, false) => "\u{672c}\u{673a}\u{6a21}\u{5f0f}",
+        (false, true, true) => "Remote relay enabled after restart",
+        (false, false, true) => "Local only after restart",
+        (false, true, false) => "Remote relay enabled",
+        (false, false, false) => "Local only",
+    }
+}
+
+fn remote_config_status(remote_enabled: bool, language: &str) -> String {
+    if host_language_is_zh(language) {
+        format!(
+            "\u{8fdc}\u{7a0b}\u{4e2d}\u{7ee7}\u{5f53}\u{524d}\u{4e3a}{}\u{3002}\u{66f4}\u{6539}\u{4f1a}\u{4fdd}\u{5b58}\u{5230} host-config.json\u{ff0c}\u{5e76}\u{5728}\u{91cd}\u{65b0}\u{6253}\u{5f00} Windows Host \u{540e}\u{751f}\u{6548}\u{3002}",
+            if remote_enabled {
+                "\u{6253}\u{5f00}"
+            } else {
+                "\u{5173}\u{95ed}"
+            }
+        )
+    } else {
+        format!(
+            "Remote relay is {}. Changes are saved to host-config.json and take effect after restart.",
+            if remote_enabled { "enabled" } else { "disabled" }
+        )
+    }
+}
+
+fn remote_status_summary(
+    remote_enabled: bool,
+    health_url: &str,
+    gateway_url: &str,
+    package_dir: Option<&Path>,
+    restart_required: bool,
+    language: &str,
+) -> String {
+    let mode = remote_mode_label(remote_enabled, restart_required, language);
+    let restart_note = if restart_required {
+        if host_language_is_zh(language) {
+            " | \u{9700}\u{8981}\u{91cd}\u{65b0}\u{6253}\u{5f00} Windows Host \u{751f}\u{6548}"
+        } else {
+            " | restart required"
+        }
+    } else {
+        ""
+    };
+    let base = if host_language_is_zh(language) {
+        if remote_enabled {
+            format!(
+                "{mode} | \u{672c}\u{5730} API {health_url} | \u{7f51}\u{5173} {gateway_url}{restart_note}"
+            )
+        } else {
+            format!("{mode} | \u{672c}\u{5730} API {health_url}{restart_note}")
+        }
+    } else if remote_enabled {
+        format!("{mode} | local API {health_url} | gateway {gateway_url}{restart_note}")
+    } else {
+        format!("{mode} | local API {health_url}{restart_note}")
+    };
+
+    if let Some(package_dir) = package_dir {
+        if host_language_is_zh(language) {
+            format!(
+                "{base} | \u{5305} {package}",
+                package = package_dir.display()
+            )
+        } else {
+            format!(
+                "{base} | package {package}",
+                package = package_dir.display()
+            )
+        }
+    } else {
+        base
+    }
+}
+
+fn remote_save_success_message(language: &str) -> &'static str {
+    if host_language_is_zh(language) {
+        "\u{8fdc}\u{7a0b} Web \u{914d}\u{7f6e}\u{5df2}\u{4fdd}\u{5b58}\u{3002}\u{8bf7}\u{91cd}\u{65b0}\u{6253}\u{5f00} Windows Host \u{8ba9}\u{4e2d}\u{7ee7}\u{914d}\u{7f6e}\u{751f}\u{6548}\u{3002}"
+    } else {
+        "Remote Web config saved. Restart Windows Host for relay changes to take effect."
+    }
+}
+
+fn remote_save_error_message(error: &anyhow::Error, language: &str) -> String {
+    if host_language_is_zh(language) {
+        format!(
+            "\u{8fdc}\u{7a0b} Web \u{914d}\u{7f6e}\u{4fdd}\u{5b58}\u{5931}\u{8d25}\u{ff1a}{error}"
+        )
+    } else {
+        format!("Remote Web config save failed: {error}")
+    }
+}
+
+fn connection_test_running_label(language: &str) -> &'static str {
+    if host_language_is_zh(language) {
+        "\u{6d4b}\u{8bd5}\u{4e2d}"
+    } else {
+        "Testing"
+    }
+}
+
+fn connection_test_running_message(target: &str, language: &str) -> String {
+    if host_language_is_zh(language) {
+        format!("\u{6b63}\u{5728}\u{6d4b}\u{8bd5}{target}...")
+    } else {
+        format!("Testing {target}...")
+    }
+}
+
+fn restart_message(language: &str) -> &'static str {
+    if host_language_is_zh(language) {
+        "\u{6b63}\u{5728}\u{91cd}\u{542f} Windows Host..."
+    } else {
+        "Restarting Windows Host..."
+    }
+}
+
+fn restart_error_message(error: &anyhow::Error, language: &str) -> String {
+    if host_language_is_zh(language) {
+        format!("\u{91cd}\u{542f} Windows Host \u{5931}\u{8d25}\u{ff1a}{error}")
+    } else {
+        format!("Windows Host restart failed: {error}")
+    }
+}
+
+fn restart_windows_host_process() -> Result<()> {
+    let current_exe = std::env::current_exe()?;
+    let args = std::env::args_os().skip(1).collect::<Vec<_>>();
+    std::process::Command::new(current_exe)
+        .args(args)
+        .env("YIAN_WINDOWS_HOST_RESTART_DELAY_MS", "700")
+        .spawn()?;
+    std::thread::spawn(|| {
+        std::thread::sleep(std::time::Duration::from_millis(120));
+        std::process::exit(0);
+    });
+    Ok(())
+}
 
 pub fn run(config: WindowsHostConfig) -> Result<()> {
     let app = HostDashboard::new()?;
     app.set_product(SharedString::from(config.product.clone()));
     app.set_version(SharedString::from(config.version.clone()));
-    app.set_mode(SharedString::from(if config.remote_enabled {
-        "Remote relay enabled"
-    } else {
-        "Local only"
-    }));
-    app.set_status_summary(SharedString::from(if config.remote_enabled {
-        format!(
-            "Remote relay enabled | local API {} | gateway {}",
-            config.health_url, config.gateway_base_url
-        )
-    } else {
-        format!("Local only | local API {}", config.health_url)
-    }));
     app.set_identity_id(SharedString::from(config.identity_id.clone()));
     app.set_device_id(SharedString::from(config.device_id.clone()));
+    app.set_remote_relay_enabled(config.remote_enabled);
+    app.set_gateway_url(SharedString::from(config.gateway_base_url.clone()));
     app.set_management_stats(SharedString::from(format!(
         "Live redacted statistics are available at http://127.0.0.1:{}/ui and /ui/status.\n\nYian Host may show authorization modes, required grid cells, managed-object call counts, agent/requester counts, remote-interface access counts, and error-call totals.\n\nStory template candidates can be generated by Host and queued at /story-template/generate; StoryLock must explicitly pull them from /story-template/candidates. Host never invokes StoryLock.\n\nLLM keys are direct-access generator config. Host may show configured/missing, but must not display key values.\n\nIt must not display StoryLock drafts, vault files, package paths, question answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.",
         config.host_port
@@ -34,26 +185,161 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
         .filter(|value| !value.trim().is_empty())
         .unwrap_or_else(|| String::from("zh"));
     app.set_language(SharedString::from(initial_language.clone()));
+    app.set_mode(SharedString::from(remote_mode_label(
+        config.remote_enabled,
+        false,
+        &initial_language,
+    )));
+    app.set_status_summary(SharedString::from(remote_status_summary(
+        config.remote_enabled,
+        &config.health_url,
+        &config.gateway_base_url,
+        None,
+        false,
+        &initial_language,
+    )));
+    app.set_remote_config_status(SharedString::from(remote_config_status(
+        config.remote_enabled,
+        &initial_language,
+    )));
+    let host_language = Rc::new(RefCell::new(initial_language));
+    let remote_restart_required = Rc::new(RefCell::new(false));
 
     let local_health_url = config.health_url.clone();
+    let host_for_local_test = app.as_weak();
+    let host_language_for_local_test = Rc::clone(&host_language);
     app.on_test_local_host(move || {
-        SharedString::from(test_http_endpoint("Local Host", &local_health_url))
+        if let Some(host) = host_for_local_test.upgrade() {
+            if host.get_connection_test_running() {
+                return;
+            }
+            let language = host_language_for_local_test.borrow().clone();
+            host.set_connection_test_running(true);
+            host.set_connection_test_badge_label(SharedString::from(
+                connection_test_running_label(&language),
+            ));
+            host.set_connection_test_badge_tone(SharedString::from("neutral"));
+            host.set_connection_test_status(SharedString::from(
+                connection_test_running_message("Local Host", &language),
+            ));
+            let weak = host.as_weak();
+            let local_health_url = local_health_url.clone();
+            std::thread::spawn(move || {
+                let status = test_http_endpoint("Local Host", &local_health_url);
+                let (label, tone) = connection_badge_for_status(&status);
+                let _ = slint::invoke_from_event_loop(move || {
+                    if let Some(host) = weak.upgrade() {
+                        host.set_connection_test_status(SharedString::from(status));
+                        host.set_connection_test_badge_label(SharedString::from(label));
+                        host.set_connection_test_badge_tone(SharedString::from(tone));
+                        host.set_connection_test_running(false);
+                    }
+                });
+            });
+        }
     });
 
-    let remote_gateway_url = config.gateway_base_url.clone();
+    let host_for_remote_test = app.as_weak();
+    let host_language_for_remote_test = Rc::clone(&host_language);
     app.on_test_remote_connection(move || {
-        SharedString::from(test_http_endpoint("Remote Gateway", &remote_gateway_url))
+        if let Some(host) = host_for_remote_test.upgrade() {
+            if host.get_connection_test_running() {
+                return;
+            }
+            let language = host_language_for_remote_test.borrow().clone();
+            let gateway_url = host
+                .get_gateway_url()
+                .to_string()
+                .trim()
+                .trim_end_matches('/')
+                .to_string();
+            let gateway_url = if gateway_url.is_empty() {
+                "https://yian.cdao.online".to_string()
+            } else {
+                gateway_url
+            };
+            host.set_connection_test_running(true);
+            host.set_connection_test_badge_label(SharedString::from(
+                connection_test_running_label(&language),
+            ));
+            host.set_connection_test_badge_tone(SharedString::from("neutral"));
+            host.set_connection_test_status(SharedString::from(
+                connection_test_running_message("Remote Gateway", &language),
+            ));
+            let weak = host.as_weak();
+            std::thread::spawn(move || {
+                let status = test_http_endpoint("Remote Gateway", &gateway_url);
+                let (label, tone) = connection_badge_for_status(&status);
+                let _ = slint::invoke_from_event_loop(move || {
+                    if let Some(host) = weak.upgrade() {
+                        host.set_connection_test_status(SharedString::from(status));
+                        host.set_connection_test_badge_label(SharedString::from(label));
+                        host.set_connection_test_badge_tone(SharedString::from(tone));
+                        host.set_connection_test_running(false);
+                    }
+                });
+            });
+        }
+    });
+
+    let remote_config_dir = config.data_dir.clone();
+    let remote_health_url = config.health_url.clone();
+    let host_for_remote_save = app.as_weak();
+    let host_language_for_remote_save = Rc::clone(&host_language);
+    let remote_restart_required_for_save = Rc::clone(&remote_restart_required);
+    app.on_save_remote_web_config(move |enabled, gateway_url| {
+        let gateway_url = gateway_url.to_string();
+        let language = host_language_for_remote_save.borrow().clone();
+        match crate::host_runtime::state::save_host_remote_config(
+            &remote_config_dir,
+            enabled,
+            &gateway_url,
+        ) {
+            Ok(()) => {
+                let normalized_gateway = gateway_url.trim().trim_end_matches('/').to_string();
+                *remote_restart_required_for_save.borrow_mut() = true;
+                if let Some(host) = host_for_remote_save.upgrade() {
+                    host.set_remote_restart_required(true);
+                    host.set_gateway_url(SharedString::from(normalized_gateway.clone()));
+                    host.set_mode(SharedString::from(remote_mode_label(
+                        enabled, true, &language,
+                    )));
+                    host.set_status_summary(SharedString::from(remote_status_summary(
+                        enabled,
+                        &remote_health_url,
+                        &normalized_gateway,
+                        None,
+                        true,
+                        &language,
+                    )));
+                }
+                SharedString::from(remote_save_success_message(&language))
+            }
+            Err(error) => SharedString::from(remote_save_error_message(&error, &language)),
+        }
+    });
+
+    let host_language_for_restart = Rc::clone(&host_language);
+    app.on_restart_windows_host(move || {
+        let language = host_language_for_restart.borrow().clone();
+        match restart_windows_host_process() {
+            Ok(()) => SharedString::from(restart_message(&language)),
+            Err(error) => SharedString::from(restart_error_message(&error, &language)),
+        }
     });
 
     let host_port_for_nine_grid = config.host_port;
+    let host_for_nine_grid = app.as_weak();
     app.on_test_managed_object_nine_grid(move |tier| {
-        SharedString::from(test_managed_object_nine_grid(
-            host_port_for_nine_grid,
-            tier.to_string(),
-        ))
+        let status = test_managed_object_nine_grid(host_port_for_nine_grid, tier.to_string());
+        let (label, tone) = nine_grid_badge_for_status(&status);
+        if let Some(host) = host_for_nine_grid.upgrade() {
+            host.set_nine_grid_badge_label(SharedString::from(label));
+            host.set_nine_grid_badge_tone(SharedString::from(tone));
+        }
+        SharedString::from(status)
     });
 
-    let host_language = Rc::new(RefCell::new(initial_language));
     let normalized_settings = {
         let mut settings = saved_settings.borrow().clone();
         normalize_storylock_ui_settings(&mut settings);
@@ -76,20 +362,14 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     app.set_package_self_check(SharedString::from(package_dir_status_report(
         &core_package_dir,
     )));
-    app.set_status_summary(SharedString::from(if config.remote_enabled {
-        format!(
-            "Remote relay enabled | local API {} | gateway {} | package {}",
-            config.health_url,
-            config.gateway_base_url,
-            core_package_dir.display()
-        )
-    } else {
-        format!(
-            "Local only | local API {} | package {}",
-            config.health_url,
-            core_package_dir.display()
-        )
-    }));
+    app.set_status_summary(SharedString::from(remote_status_summary(
+        config.remote_enabled,
+        &config.health_url,
+        &config.gateway_base_url,
+        Some(&core_package_dir),
+        false,
+        &host_language.borrow(),
+    )));
     app.set_management_stats(SharedString::from(format!(
         "Live redacted statistics are available at http://127.0.0.1:{}/ui and /ui/status.\n\n{}\n\nYian Host reads learning-policy.json for retention-learning scheduling, but does not read StoryLock drafts, vault files, question text, answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.",
         config.host_port,
@@ -212,6 +492,9 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 let host_language_for_language = Rc::clone(&host_language_for_settings);
                 let core_window_for_language = Rc::clone(&core_window_for_settings);
                 let saved_settings_for_language = Rc::clone(&saved_settings_for_settings);
+                let remote_restart_required_for_language = Rc::clone(&remote_restart_required);
+                let health_url_for_language = config.health_url.clone();
+                let core_package_dir_for_language = core_package_dir.clone();
 
                 settings.on_language_changed(move |language| {
                     let language_string = language.to_string();
@@ -230,9 +513,33 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                         settings.set_language(SharedString::from(language_string.clone()));
                     }
                     if let Some(host) = host_for_language.upgrade() {
+                        let remote_enabled = host.get_remote_relay_enabled();
+                        let gateway_url = host.get_gateway_url().to_string();
+                        let restart_required = *remote_restart_required_for_language.borrow();
                         host.set_language(SharedString::from(language_string.clone()));
+                        host.set_mode(SharedString::from(remote_mode_label(
+                            remote_enabled,
+                            restart_required,
+                            &language_string,
+                        )));
+                        host.set_status_summary(SharedString::from(remote_status_summary(
+                            remote_enabled,
+                            &health_url_for_language,
+                            &gateway_url,
+                            Some(&core_package_dir_for_language),
+                            restart_required,
+                            &language_string,
+                        )));
+                        host.set_remote_config_status(SharedString::from(remote_config_status(
+                            remote_enabled,
+                            &language_string,
+                        )));
                         host.set_connection_test_status(SharedString::from(
-                            "Language changed, settings stay open",
+                            if host_language_is_zh(&language_string) {
+                                "\u{8bed}\u{8a00}\u{5df2}\u{5207}\u{6362}\u{ff0c}\u{8bbe}\u{7f6e}\u{7a97}\u{53e3}\u{4fdd}\u{6301}\u{6253}\u{5f00}"
+                            } else {
+                                "Language changed, settings stay open"
+                            },
                         ));
                     }
                     if let Some(core) = core_window_for_language.borrow().as_ref() {
@@ -594,6 +901,32 @@ fn test_http_endpoint(label: &str, url: &str) -> String {
     }
 }
 
+fn connection_badge_for_status(status: &str) -> (&'static str, &'static str) {
+    let lower = status.to_ascii_lowercase();
+    if lower.contains(": ok") {
+        ("OK", "success")
+    } else if lower.contains("failed")
+        || lower.contains("error")
+        || lower.contains("blocked")
+        || lower.contains(": http ")
+    {
+        ("Failed", "warning")
+    } else {
+        ("Updated", "neutral")
+    }
+}
+
+fn nine_grid_badge_for_status(status: &str) -> (&'static str, &'static str) {
+    let lower = status.to_ascii_lowercase();
+    if lower.contains("nine-grid ready") {
+        ("Ready", "success")
+    } else if lower.contains("failed") || lower.contains("error") {
+        ("Failed", "warning")
+    } else {
+        ("Updated", "neutral")
+    }
+}
+
 fn begin_storylock_open_authorization(
     host_port: u16,
     host_weak: slint::Weak<HostDashboard>,
@@ -622,6 +955,7 @@ fn begin_storylock_open_authorization(
     let active_package_dir = initial_storylock_core_package_dir(&saved_settings.borrow());
     ensure_storylock_core_package(&active_package_dir)?;
     let cells = create_storylock_open_challenge(&active_package_dir, 22)?;
+    let expected_answers = storylock_open_expected_answers(&active_package_dir, cells.len())?;
 
     let dialog = StoryLockAuthorizationDialog::new()?;
     dialog.set_is_zh(language == "zh");
@@ -633,6 +967,7 @@ fn begin_storylock_open_authorization(
     let dialog_weak = dialog.as_weak();
     let host_for_auth = host_weak.clone();
     let cells_for_auth = cells.clone();
+    let expected_answers_for_auth = expected_answers.clone();
     let core_window_for_auth = Rc::clone(&core_window);
     let settings_window_for_auth = Rc::clone(&settings_window);
     let shared_status_for_auth = Rc::clone(&shared_status);
@@ -659,7 +994,7 @@ fn begin_storylock_open_authorization(
             }
             return;
         }
-        match authorize_storylock_open(&cells_for_auth, &answers) {
+        match authorize_storylock_open(&answers, &expected_answers_for_auth) {
             Ok(()) => {
                 show_storylock_authorization_result(
                     "StoryLock 九宫格挑战",
@@ -811,130 +1146,94 @@ fn begin_storylock_open_authorization(
     Ok(())
 }
 
-#[derive(Clone, Debug)]
-pub(super) struct StoryLockChallengeCell {
-    pub(super) cell_id: String,
-    pub(super) prompt_text: String,
-    pub(super) answer_options: Vec<String>,
-    pub(super) expected_answers: Vec<String>,
-    pub(super) expected_count: usize,
-}
-
 pub(super) fn create_storylock_open_challenge(
     package_dir: &Path,
     required_cells: usize,
 ) -> Result<Vec<StoryLockChallengeCell>> {
+    let draft = read_effective_author_draft(package_dir);
+    create_open_challenge_from_draft(&draft, required_cells)
+}
+
+pub(super) fn authorize_storylock_open(
+    answers: &[Vec<String>],
+    expected_answers: &[Vec<String>],
+) -> Result<()> {
+    if answers.len() != expected_answers.len() {
+        anyhow::bail!(
+            "challenge answer count mismatch: expected {}, got {}",
+            expected_answers.len(),
+            answers.len()
+        );
+    }
+
+    for (index, (answer, expected_answer)) in
+        answers.iter().zip(expected_answers.iter()).enumerate()
+    {
+        let selected = answer
+            .iter()
+            .map(|item| storylock_puzzle_plugin::normalize_answer(item))
+            .filter(|item| !item.is_empty())
+            .collect::<HashSet<_>>();
+        let expected = expected_answer
+            .iter()
+            .map(|item| storylock_puzzle_plugin::normalize_answer(item))
+            .filter(|item| !item.is_empty())
+            .collect::<HashSet<_>>();
+        if selected != expected {
+            anyhow::bail!(
+                "challenge cell {} mismatch: selected {}, expected {}",
+                index + 1,
+                selected.len(),
+                expected.len()
+            );
+        }
+    }
+
+    Ok(())
+}
+
+pub(super) fn storylock_open_expected_answers(
+    package_dir: &Path,
+    required_cells: usize,
+) -> Result<Vec<Vec<String>>> {
     let draft = read_effective_author_draft(package_dir);
     let nodes = draft
         .get("nodes")
         .and_then(Value::as_array)
         .ok_or_else(|| anyhow::anyhow!("StoryLock draft has no question nodes"))?;
     if nodes.len() < required_cells {
-        return Err(anyhow::anyhow!(
-            "StoryLock draft has fewer than {required_cells} questions"
-        ));
+        anyhow::bail!("StoryLock draft has fewer than {required_cells} questions");
     }
-    let cells = nodes
+
+    let expected_answers = nodes
         .iter()
         .take(required_cells)
-        .enumerate()
-        .map(|(index, node)| {
-            let options = node
-                .get("answerOptionsLocalOnly")
+        .map(|node| {
+            node.get("answerOptionsLocalOnly")
                 .and_then(Value::as_array)
-                .cloned()
-                .unwrap_or_default();
-            let mut answer_options = options
-                .iter()
-                .take(9)
-                .map(|option| {
-                    option
-                        .get("text")
-                        .and_then(Value::as_str)
-                        .unwrap_or("")
-                        .to_string()
+                .map(|options| {
+                    options
+                        .iter()
+                        .filter(|option| {
+                            option
+                                .get("isCorrect")
+                                .and_then(Value::as_bool)
+                                .unwrap_or(false)
+                        })
+                        .filter_map(|option| option.get("text").and_then(Value::as_str))
+                        .map(storylock_puzzle_plugin::normalize_answer)
+                        .filter(|answer| !answer.is_empty())
+                        .collect::<Vec<_>>()
                 })
-                .collect::<Vec<_>>();
-            while answer_options.len() < 9 {
-                answer_options.push(String::new());
-            }
-            let expected_answers = options
-                .iter()
-                .filter(|option| {
-                    option
-                        .get("isCorrect")
-                        .and_then(Value::as_bool)
-                        .unwrap_or(false)
-                })
-                .filter_map(|option| option.get("text").and_then(Value::as_str))
-                .map(normalize_challenge_answer)
-                .filter(|answer| !answer.is_empty())
-                .collect::<Vec<_>>();
-            let expected_count = expected_answers.len();
-            StoryLockChallengeCell {
-                cell_id: node
-                    .get("nodeId")
-                    .and_then(Value::as_str)
-                    .map(ToOwned::to_owned)
-                    .unwrap_or_else(|| format!("node-{:02}", index + 1)),
-                prompt_text: node
-                    .get("question")
-                    .and_then(Value::as_str)
-                    .unwrap_or("")
-                    .to_string(),
-                answer_options,
-                expected_answers,
-                expected_count,
-            }
+                .unwrap_or_default()
         })
         .collect::<Vec<_>>();
-    if cells.iter().any(|cell| {
-        cell.prompt_text.trim().is_empty()
-            || cell
-                .answer_options
-                .iter()
-                .all(|answer| answer.trim().is_empty())
-            || cell.expected_answers.is_empty()
-    }) {
-        return Err(anyhow::anyhow!(
-            "StoryLock challenge contains incomplete question or answer data"
-        ));
-    }
-    Ok(cells)
-}
 
-pub(super) fn authorize_storylock_open(
-    cells: &[StoryLockChallengeCell],
-    answers: &[Vec<String>],
-) -> Result<()> {
-    if answers.len() != cells.len() {
-        return Err(anyhow::anyhow!(
-            "challenge answer count mismatch: expected {}, got {}",
-            cells.len(),
-            answers.len()
-        ));
+    if expected_answers.iter().any(Vec::is_empty) {
+        anyhow::bail!("StoryLock challenge contains incomplete verification data");
     }
-    for (index, (cell, answer)) in cells.iter().zip(answers.iter()).enumerate() {
-        let selected = answer
-            .iter()
-            .map(|answer| normalize_challenge_answer(answer))
-            .filter(|answer| !answer.is_empty())
-            .collect::<HashSet<_>>();
-        let expected = cell
-            .expected_answers
-            .iter()
-            .cloned()
-            .collect::<HashSet<_>>();
-        if selected != expected {
-            return Err(anyhow::anyhow!(
-                "第 {} 题不匹配，已选 {}/应选 {}",
-                index + 1,
-                selected.len(),
-                expected.len()
-            ));
-        }
-    }
-    Ok(())
+
+    Ok(expected_answers)
 }
 
 pub(super) fn toggle_storylock_challenge_selection(
@@ -943,142 +1242,7 @@ pub(super) fn toggle_storylock_challenge_selection(
     current_index: usize,
     answer_index: usize,
 ) {
-    let selected = cells
-        .get(current_index)
-        .and_then(|cell| cell.answer_options.get(answer_index))
-        .cloned()
-        .unwrap_or_default();
-    if selected.trim().is_empty() {
-        return;
-    }
-    if let Some(slot) = selections.get_mut(current_index) {
-        let normalized = normalize_challenge_answer(&selected);
-        if let Some(existing_index) = slot
-            .iter()
-            .position(|answer| normalize_challenge_answer(answer) == normalized)
-        {
-            slot.remove(existing_index);
-        } else {
-            slot.push(selected);
-        }
-    }
-}
-
-pub(super) fn normalize_challenge_answer(answer: &str) -> String {
-    answer.trim().to_lowercase()
-}
-
-fn show_storylock_authorization_result(title: &str, message: &str, success: bool) {
-    let title = wide_null(title);
-    let message = wide_null(message);
-    let icon = if success {
-        MB_ICONINFORMATION
-    } else {
-        MB_ICONERROR
-    };
-    unsafe {
-        MessageBoxW(
-            std::ptr::null_mut(),
-            message.as_ptr(),
-            title.as_ptr(),
-            MB_OK | icon,
-        );
-    }
-}
-
-fn wide_null(value: &str) -> Vec<u16> {
-    value.encode_utf16().chain(std::iter::once(0)).collect()
-}
-
-fn set_storylock_challenge_question(
-    dialog: &StoryLockAuthorizationDialog,
-    cells: &[StoryLockChallengeCell],
-    selections: &[Vec<String>],
-    index: usize,
-) {
-    let cell = cells.get(index);
-    let option = |option_index: usize| -> SharedString {
-        SharedString::from(
-            cell.and_then(|cell| cell.answer_options.get(option_index))
-                .map(String::as_str)
-                .unwrap_or(""),
-        )
-    };
-    let prompt = cell.map(|cell| cell.prompt_text.as_str()).unwrap_or("");
-    let cell_id = cell.map(|cell| cell.cell_id.as_str()).unwrap_or("");
-    dialog.set_current_index(index as i32);
-    let selected_count = selections.get(index).map(Vec::len).unwrap_or_default();
-    let expected_count = cell.map(|cell| cell.expected_count).unwrap_or_default();
-    dialog.set_current_position(SharedString::from(format!(
-        "{}/{} - 已选 {}/应选 {}",
-        index + 1,
-        cells.len(),
-        selected_count,
-        expected_count
-    )));
-    let missing = cells
-        .iter()
-        .enumerate()
-        .filter(|(cell_index, _)| {
-            selections
-                .get(*cell_index)
-                .map(Vec::is_empty)
-                .unwrap_or(true)
-        })
-        .map(|(cell_index, _)| (cell_index + 1).to_string())
-        .collect::<Vec<_>>()
-        .join(", ");
-    let prompt_text = if missing.is_empty() {
-        prompt.to_string()
-    } else {
-        format!("{prompt} | 未完成题号: {missing}")
-    };
-    dialog.set_current_prompt(SharedString::from(if cell_id.is_empty() {
-        prompt_text
-    } else {
-        prompt_text
-    }));
-    dialog.set_selected_answer(SharedString::from(
-        selections
-            .get(index)
-            .map(|answers| answers.join("; "))
-            .unwrap_or_default(),
-    ));
-    dialog.set_option_1(option(0));
-    dialog.set_option_2(option(1));
-    dialog.set_option_3(option(2));
-    dialog.set_option_4(option(3));
-    dialog.set_option_5(option(4));
-    dialog.set_option_6(option(5));
-    dialog.set_option_7(option(6));
-    dialog.set_option_8(option(7));
-    dialog.set_option_9(option(8));
-    let state = |option_index: usize| -> SharedString {
-        let option_value = cell
-            .and_then(|cell| cell.answer_options.get(option_index))
-            .map(String::as_str)
-            .unwrap_or("");
-        let option_normalized = normalize_challenge_answer(option_value);
-        let selected = selections.get(index).is_some_and(|answers| {
-            answers
-                .iter()
-                .any(|answer| normalize_challenge_answer(answer) == option_normalized)
-        });
-        SharedString::from(if selected && !option_normalized.is_empty() {
-            "correct"
-        } else {
-            "wrong"
-        })
-    };
-    dialog.set_option_1_state(state(0));
-    dialog.set_option_2_state(state(1));
-    dialog.set_option_3_state(state(2));
-    dialog.set_option_4_state(state(3));
-    dialog.set_option_5_state(state(4));
-    dialog.set_option_6_state(state(5));
-    dialog.set_option_7_state(state(6));
-    dialog.set_option_8_state(state(7));
-    dialog.set_option_9_state(state(8));
+    storylock_puzzle_plugin::toggle_selection(cells, selections, current_index, answer_index)
 }
 
 fn test_managed_object_nine_grid(host_port: u16, tier: String) -> String {

@@ -807,6 +807,76 @@ export component ActionButton inherits Rectangle {
         }
     }
 
+export component ToggleSwitch inherits Rectangle {
+        in-out property <bool> checked: false;
+        in property <bool> is-zh: true;
+        callback toggled(bool);
+
+        width: 120px;
+        height: 32px;
+        border-radius: 16px;
+        border-width: 1px;
+        border-color: root.checked ? #45606b : #c9d5da;
+        background: root.checked ? #dbe8eb : #f7fafb;
+
+        touch := TouchArea {
+            clicked => {
+                root.checked = !root.checked;
+                root.toggled(root.checked);
+            }
+        }
+
+        Text {
+            x: root.checked ? 12px : 42px;
+            y: 0px;
+            width: 66px;
+            height: parent.height;
+            text: root.checked ? (root.is-zh ? "\u{6253}\u{5f00}" : "On") : (root.is-zh ? "\u{5173}\u{95ed}" : "Off");
+            color: #17252f;
+            font-size: 13px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        Rectangle {
+            x: root.checked ? parent.width - 28px : 4px;
+            y: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            border-width: 1px;
+            border-color: root.checked ? #45606b : #c9d5da;
+            background: root.checked ? #45606b : #ffffff;
+        }
+    }
+
+export component StatusBadge inherits Rectangle {
+        in property <string> label;
+        in property <string> tone: "neutral";
+
+        width: 112px;
+        height: 24px;
+        border-radius: 12px;
+        border-width: 1px;
+        border-color: tone == "success" ? #7fb38d : (tone == "warning" ? #c4a85c : #c9d5da);
+        background: tone == "success" ? #edf7f0 : (tone == "warning" ? #fbf6df : #f7fafb);
+
+        Text {
+            x: 10px;
+            y: 0px;
+            width: parent.width - 20px;
+            height: parent.height;
+            text: root.label;
+            color: tone == "success" ? #246b3d : (tone == "warning" ? #7a5d00 : #5a6b75);
+            font-size: 12px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+    }
+
 export component SettingsIconButton inherits Rectangle {
         in property <bool> selected;
         callback clicked();
@@ -860,31 +930,37 @@ export component StaticRow inherits HorizontalLayout {
         in property <string> value;
         in property <length> value-width: 390px;
         in property <length> row-height: 32px;
+        in property <bool> wrap-value: false;
+        in property <length> value-height: root.row-height;
+        property <length> content-height: root.value-height > root.row-height ? root.value-height : root.row-height;
+        height: root.content-height;
         spacing: 14px;
         Text {
             text: root.name;
             width: 150px;
-            height: root.row-height;
+            height: root.content-height;
             color: #62727d;
             font-size: 13px;
-            vertical-alignment: center;
+            vertical-alignment: root.wrap-value ? top : center;
         }
         Rectangle {
             width: root.value-width;
-            height: root.row-height;
+            height: root.content-height;
             border-radius: 4px;
             border-width: 1px;
             border-color: #d7e1e6;
             background: #ffffff;
             Text {
                 x: 10px;
+                y: root.wrap-value ? 6px : 0px;
                 width: parent.width - 20px;
-                height: parent.height;
+                height: root.wrap-value ? parent.height - 12px : parent.height;
                 text: root.value;
                 color: #17252f;
                 font-size: 13px;
-                vertical-alignment: center;
-                overflow: elide;
+                vertical-alignment: root.wrap-value ? top : center;
+                wrap: root.wrap-value ? word-wrap : no-wrap;
+                overflow: root.wrap-value ? clip : elide;
             }
         }
     }

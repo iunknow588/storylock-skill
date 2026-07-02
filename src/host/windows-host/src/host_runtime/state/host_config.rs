@@ -2,7 +2,15 @@ use super::*;
 
 impl WindowsHostConfig {
     pub(crate) fn from_env() -> Self {
-        let gateway_base_url = env_or("STORYLOCK_GATEWAY_URL", "https://yian.cdao.online");
+        let data_dir = resolve_data_dir();
+        let stored_remote = load_host_remote_config(&data_dir).unwrap_or_default();
+        let stored_gateway = stored_remote
+            .gateway_base_url
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .unwrap_or("https://yian.cdao.online");
+        let gateway_base_url = env_or("STORYLOCK_GATEWAY_URL", stored_gateway);
         let identity_id = env_or("STORYLOCK_IDENTITY_ID", "windows-demo-001");
         let device_id = env_or(
             "STORYLOCK_DEVICE_ID",
@@ -17,8 +25,11 @@ impl WindowsHostConfig {
             .parse::<u16>()
             .unwrap_or(4510);
         let approval_mode = env_or("STORYLOCK_WINDOWS_APPROVAL_MODE", "windows_dialog");
-        let remote_enabled = truthy_env("STORYLOCK_WINDOWS_REMOTE_ENABLED", false);
-        let data_dir = resolve_data_dir();
+        let remote_enabled = if std::env::var("STORYLOCK_WINDOWS_REMOTE_ENABLED").is_ok() {
+            truthy_env("STORYLOCK_WINDOWS_REMOTE_ENABLED", false)
+        } else {
+            stored_remote.remote_enabled.unwrap_or(false)
+        };
 
         Self {
             product: "Yian Windows Host".to_string(),
@@ -80,4 +91,46 @@ impl WindowsHostConfig {
             }
         })
     }
+}
+
+pub(crate) fn host_remote_config_path(data_dir: &Path) -> PathBuf {
+    data_dir.join("host-config.json")
+}
+
+pub(crate) fn load_host_remote_config(data_dir: &Path) -> Result<StoredHostRemoteConfig> {
+    let path = host_remote_config_path(data_dir);
+    if !path.exists() {
+        return Ok(StoredHostRemoteConfig::default());
+    }
+    let content =
+        fs::read_to_string(&path).with_context(|| format!("failed to read {}", path.display()))?;
+    let config =
+        serde_json::from_str::<StoredHostRemoteConfig>(content.trim_start_matches('\u{feff}'))
+            .with_context(|| format!("failed to parse {}", path.display()))?;
+    Ok(config)
+}
+
+pub(crate) fn save_host_remote_config(
+    data_dir: &Path,
+    remote_enabled: bool,
+    gateway_base_url: &str,
+) -> Result<()> {
+    let gateway_base_url = gateway_base_url.trim().trim_end_matches('/').to_string();
+    if gateway_base_url.is_empty() {
+        anyhow::bail!("Gateway URL cannot be empty");
+    }
+    if !gateway_base_url.starts_with("https://") && !gateway_base_url.starts_with("http://") {
+        anyhow::bail!("Gateway URL must start with http:// or https://");
+    }
+    fs::create_dir_all(data_dir)
+        .with_context(|| format!("failed to create {}", data_dir.display()))?;
+    let config = StoredHostRemoteConfig {
+        schema_version: "windows-host-remote-config-v1".to_string(),
+        remote_enabled: Some(remote_enabled),
+        gateway_base_url: Some(gateway_base_url),
+    };
+    let path = host_remote_config_path(data_dir);
+    fs::write(&path, serde_json::to_string_pretty(&config)?)
+        .with_context(|| format!("failed to write {}", path.display()))?;
+    Ok(())
 }

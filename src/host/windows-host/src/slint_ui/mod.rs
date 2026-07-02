@@ -31,6 +31,7 @@ use self::storylock::{
 
 mod confirmation;
 mod dashboard;
+mod puzzle_adapter;
 mod storylock;
 
 pub use confirmation::confirm_request;

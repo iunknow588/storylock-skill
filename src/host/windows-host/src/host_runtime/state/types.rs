@@ -22,6 +22,16 @@ pub(crate) struct WindowsHostConfig {
     pub(crate) data_dir: PathBuf,
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub(crate) struct StoredHostRemoteConfig {
+    #[serde(default, rename = "schemaVersion")]
+    pub(crate) schema_version: String,
+    #[serde(default, rename = "remoteEnabled")]
+    pub(crate) remote_enabled: Option<bool>,
+    #[serde(default, rename = "gatewayBaseUrl")]
+    pub(crate) gateway_base_url: Option<String>,
+}
+
 #[derive(Clone, Debug)]
 pub(crate) struct StoryLlmConfig {
     pub(crate) provider: String,

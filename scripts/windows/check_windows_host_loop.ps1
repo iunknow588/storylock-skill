@@ -251,24 +251,26 @@ try {
     requester = "windows-host-loop"
     origin = "http://127.0.0.1:$Port"
   }
-  Assert-Success $directExecute "direct-execute-for-ui-confirmation"
-  Assert-Value $directExecute.result.signature "direct-execute-for-ui-confirmation.result.signature"
-  Add-Result $rows "direct-execute-ui-confirmation" "ok" ("signature={0}" -f $directExecute.result.signature)
+  if ($directExecute.status -ne "error" -or $directExecute.error.code -ne "SLG-003") {
+    throw "direct execute without authorization should be rejected with SLG-003"
+  }
+  if ($directExecute.error.message -notmatch "grid authorization is required") {
+    throw "direct execute rejection did not explain the grid authorization requirement"
+  }
+  Add-Result $rows "direct-execute-requires-authorization" "ok" $directExecute.error.message
 
   $uiStatusAfterExecute = Invoke-RestMethod -Method Get -Uri "$baseUrl/ui/status"
-  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.requestId "ui-status-after-execute.result.lastConfirmation.requestId"
-  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.capability "ui-status-after-execute.result.lastConfirmation.capability"
-  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.requiredStrength "ui-status-after-execute.result.lastConfirmation.requiredStrength"
-  Assert-Value $uiStatusAfterExecute.result.lastConfirmation.risk "ui-status-after-execute.result.lastConfirmation.risk"
-  if ($uiStatusAfterExecute.result.lastConfirmation.requestId -ne "req-ui-confirm-loop-001") {
-    throw "ui lastConfirmation did not track the latest execute request"
-  }
   Assert-Value $uiStatusAfterExecute.result.lastExecution.requestId "ui-status-after-execute.result.lastExecution.requestId"
   if ($uiStatusAfterExecute.result.lastExecution.requestId -ne "req-ui-confirm-loop-001") {
-    throw "ui lastExecution did not track the latest execute request"
+    throw "ui lastExecution did not track the latest execute attempt"
   }
-  Add-Result $rows "ui-confirmation" "ok" ("requestId={0}; strength={1}" -f $uiStatusAfterExecute.result.lastConfirmation.requestId, $uiStatusAfterExecute.result.lastConfirmation.requiredStrength)
-  Add-Result $rows "ui-last-execution" "ok" ("requestId={0}; capability={1}" -f $uiStatusAfterExecute.result.lastExecution.requestId, $uiStatusAfterExecute.result.lastExecution.capability)
+  if ($uiStatusAfterExecute.result.lastExecution.status -ne "error") {
+    throw "ui lastExecution did not preserve the latest rejected execute status"
+  }
+  if ($uiStatusAfterExecute.result.lastExecution.errorType -ne "authorization_required") {
+    throw "ui lastExecution did not summarize the authorization_required error"
+  }
+  Add-Result $rows "ui-last-execution" "ok" ("requestId={0}; status={1}; errorType={2}" -f $uiStatusAfterExecute.result.lastExecution.requestId, $uiStatusAfterExecute.result.lastExecution.status, $uiStatusAfterExecute.result.lastExecution.errorType)
 
   $revoke = Invoke-JsonPost -Uri "$baseUrl/revoke" -Body @{
     requestId = "req-revoke-loop-001"

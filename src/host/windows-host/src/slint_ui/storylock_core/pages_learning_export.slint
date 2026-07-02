@@ -19,6 +19,9 @@ export component LearningPage inherits Rectangle {
     in-out property <string> long-term-frequency-years;
     in property <string> learning-plan-summary;
     in property <string> learning-status;
+    in property <string> learning-progress-summary;
+    in property <int> learning-progress-percent: 0;
+    in property <string> learning-progress-headline;
     callback save-learning-policy();
 
     x: 0px;
@@ -50,16 +53,42 @@ export component LearningPage inherits Rectangle {
         }
         SectionPanel {
             panel-width: 696px;
-            panel-height: 92px;
+            panel-height: 144px;
             VerticalBox {
                 x: 14px;
                 y: 10px;
                 width: 668px;
-                height: 72px;
+                height: 124px;
                 spacing: 6px;
                 SectionTitle { label: root.is-zh ? "\u{72b6}\u{6001}" : "Status"; }
                 StaticRow { name: root.is-zh ? "\u{8bad}\u{7ec3}\u{6458}\u{8981}" : "Training Summary"; value: root.learning-plan-summary; value-width: 504px; row-height: 22px; }
                 StaticRow { name: root.is-zh ? "\u{5f53}\u{524d}\u{72b6}\u{6001}" : "Status"; value: root.learning-status; value-width: 504px; row-height: 22px; }
+                Text {
+                    text: root.learning-progress-headline;
+                    height: 28px;
+                    color: #5a6b75;
+                    font-size: 12px;
+                    wrap: word-wrap;
+                }
+                Rectangle {
+                    width: 668px;
+                    height: 10px;
+                    border-radius: 5px;
+                    background: #dfe7eb;
+                    Rectangle {
+                        width: parent.width * root.learning-progress-percent / 100;
+                        height: 10px;
+                        border-radius: 5px;
+                        background: #7fb38d;
+                    }
+                }
+                Text {
+                    text: (root.is-zh ? "\u{8bad}\u{7ec3}\u{8fdb}\u{5ea6}: " : "Progress: ") + root.learning-progress-summary;
+                    height: 28px;
+                    color: #17252f;
+                    font-size: 12px;
+                    wrap: word-wrap;
+                }
             }
         }
         HorizontalBox {
@@ -112,14 +141,45 @@ export component LearningPage inherits Rectangle {
         }
         SectionPanel {
             panel-width: 696px;
-            panel-height: 52px;
-            StaticRow {
+            panel-height: 116px;
+            VerticalBox {
                 x: 14px;
-                y: 12px;
-                name: root.is-zh ? "\u{5f53}\u{524d}\u{72b6}\u{6001}" : "Status";
-                value: root.learning-status;
-                value-width: 504px;
-                row-height: 26px;
+                y: 10px;
+                width: 668px;
+                height: 96px;
+                spacing: 6px;
+                StaticRow {
+                    name: root.is-zh ? "\u{5f53}\u{524d}\u{72b6}\u{6001}" : "Status";
+                    value: root.learning-status;
+                    value-width: 504px;
+                    row-height: 22px;
+                }
+                Text {
+                    text: root.learning-progress-headline;
+                    height: 28px;
+                    color: #5a6b75;
+                    font-size: 12px;
+                    wrap: word-wrap;
+                }
+                Rectangle {
+                    width: 668px;
+                    height: 10px;
+                    border-radius: 5px;
+                    background: #dfe7eb;
+                    Rectangle {
+                        width: parent.width * root.learning-progress-percent / 100;
+                        height: 10px;
+                        border-radius: 5px;
+                        background: #7fb38d;
+                    }
+                }
+                Text {
+                    text: (root.is-zh ? "\u{8bad}\u{7ec3}\u{8fdb}\u{5ea6}: " : "Progress: ") + root.learning-progress-summary;
+                    height: 28px;
+                    color: #17252f;
+                    font-size: 12px;
+                    wrap: word-wrap;
+                }
             }
         }
         HorizontalBox {
@@ -135,6 +195,8 @@ export component ExportPage inherits VerticalBox {
     in property <string> learning-plan-summary;
     in property <string> learning-status;
     in property <string> learning-progress-summary;
+    in property <int> learning-progress-percent: 0;
+    in property <string> learning-progress-headline;
     in property <string> learning-action-hint;
     in property <string> learning-result;
     in property <string> config-status;
@@ -154,25 +216,48 @@ export component ExportPage inherits VerticalBox {
         spacing: 8px;
         SectionPanel {
             panel-width: 696px;
-            panel-height: 116px;
+            panel-height: 156px;
             VerticalBox {
                 x: 14px;
                 y: 10px;
                 width: 668px;
-                height: 96px;
+                height: 136px;
                 spacing: 6px;
                 SectionTitle { label: root.is-zh ? "\u{5b66}\u{4e60}\u{95e8}\u{7981}" : "Learning Gate"; }
                 StaticTextPanel {
                     width: 668px;
-                    panel-height: 66px;
+                    panel-height: 44px;
                     value: (root.is-zh ? "\u{8bad}\u{7ec3}\u{89c4}\u{5219}: " : "Rule: ")
                         + root.learning-plan-summary
                         + "\n"
                         + (root.is-zh ? "\u{8bad}\u{7ec3}\u{72b6}\u{6001}: " : "Status: ")
-                        + root.learning-status
-                        + "\n"
-                        + (root.is-zh ? "\u{8bad}\u{7ec3}\u{8fdb}\u{5ea6}: " : "Progress: ")
-                        + root.learning-progress-summary;
+                        + root.learning-status;
+                }
+                Text {
+                    text: root.learning-progress-headline;
+                    height: 28px;
+                    color: #5a6b75;
+                    font-size: 12px;
+                    wrap: word-wrap;
+                }
+                Rectangle {
+                    width: 668px;
+                    height: 10px;
+                    border-radius: 5px;
+                    background: #dfe7eb;
+                    Rectangle {
+                        width: parent.width * root.learning-progress-percent / 100;
+                        height: 10px;
+                        border-radius: 5px;
+                        background: #7fb38d;
+                    }
+                }
+                Text {
+                    text: (root.is-zh ? "\u{8bad}\u{7ec3}\u{8fdb}\u{5ea6}: " : "Progress: ") + root.learning-progress-summary;
+                    height: 28px;
+                    color: #17252f;
+                    font-size: 12px;
+                    wrap: word-wrap;
                 }
             }
         }

@@ -1,0 +1,14 @@
+E:\2026OPC大赛\skill\src\plugins\storylock-puzzle-plugin\target\debug\deps\serde-7b28ae9fe6429eb6.d: C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs E:\2026OPC大赛\skill\src\plugins\storylock-puzzle-plugin\target\debug\build\serde-38142dd3d0018dab\out/private.rs
+
+E:\2026OPC大赛\skill\src\plugins\storylock-puzzle-plugin\target\debug\deps\libserde-7b28ae9fe6429eb6.rlib: C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs E:\2026OPC大赛\skill\src\plugins\storylock-puzzle-plugin\target\debug\build\serde-38142dd3d0018dab\out/private.rs
+
+E:\2026OPC大赛\skill\src\plugins\storylock-puzzle-plugin\target\debug\deps\libserde-7b28ae9fe6429eb6.rmeta: C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs E:\2026OPC大赛\skill\src\plugins\storylock-puzzle-plugin\target\debug\build\serde-38142dd3d0018dab\out/private.rs
+
+C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\iunkn\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+E:\2026OPC大赛\skill\src\plugins\storylock-puzzle-plugin\target\debug\build\serde-38142dd3d0018dab\out/private.rs:
+
+# env-dep:OUT_DIR=E:\\2026OPC大赛\\skill\\src\\plugins\\storylock-puzzle-plugin\\target\\debug\\build\\serde-38142dd3d0018dab\\out

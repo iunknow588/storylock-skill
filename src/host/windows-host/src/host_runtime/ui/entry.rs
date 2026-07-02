@@ -1,6 +1,13 @@
 use super::*;
 
 pub(crate) fn main() -> Result<()> {
+    if let Ok(delay_ms) = std::env::var("YIAN_WINDOWS_HOST_RESTART_DELAY_MS") {
+        if let Ok(delay_ms) = delay_ms.parse::<u64>() {
+            thread::sleep(Duration::from_millis(delay_ms));
+        }
+        std::env::remove_var("YIAN_WINDOWS_HOST_RESTART_DELAY_MS");
+    }
+
     let config = WindowsHostConfig::from_env();
     let args: Vec<String> = std::env::args().collect();
     let start_mode = std::env::var("STORYLOCK_WINDOWS_START_MODE")

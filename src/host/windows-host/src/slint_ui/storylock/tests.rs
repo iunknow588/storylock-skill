@@ -125,6 +125,7 @@ fn default_policy_catalog_has_no_user_protected_objects() {
 #[test]
 fn host_storylock_open_uses_twenty_two_question_authorization() {
     let dashboard_source = include_str!("../dashboard.rs");
+    let puzzle_adapter_source = include_str!("../puzzle_adapter.rs");
     let host_source = include_str!("../host_dashboard.slint");
     let policy_source = include_str!("../../host_runtime/request_support/authorization.rs");
     let verification_source = include_str!("../../host_runtime/local_core/verification.rs");
@@ -133,7 +134,71 @@ fn host_storylock_open_uses_twenty_two_question_authorization() {
     assert!(host_source.contains("SideActionButton"));
     assert!(host_source.contains("Remote Web"));
     assert!(host_source.contains("StoryLock Core"));
-    assert!(host_source.contains("Observation"));
+    assert!(host_source.contains("Debug And Tests"));
+    let remote_page = host_source
+        .split("if root.active-page == 0: VerticalBox {")
+        .nth(1)
+        .and_then(|source| {
+            source
+                .split("if root.active-page == 1: VerticalBox {")
+                .next()
+        })
+        .expect("remote web page source");
+    let debug_overview_page = host_source
+        .split("if root.active-page == 2: VerticalBox {")
+        .nth(1)
+        .and_then(|source| source.split("if root.active-page == 3: VerticalBox {").next())
+        .expect("debug overview page source");
+    let connection_test_page = host_source
+        .split("if root.active-page == 3: VerticalBox {")
+        .nth(1)
+        .and_then(|source| source.split("if root.active-page == 4: VerticalBox {").next())
+        .expect("connection test page source");
+    let nine_grid_page = host_source
+        .split("if root.active-page == 4: VerticalBox {")
+        .nth(1)
+        .and_then(|source| source.split("export component SettingsDialog").next())
+        .expect("nine-grid page source");
+    assert!(!remote_page.contains("Test Local Host"));
+    assert!(!remote_page.contains("Test Remote"));
+    assert!(!remote_page.contains("Identity And Device"));
+    assert!(!remote_page.contains("Disabled by default"));
+    assert!(debug_overview_page.contains("Host Identity And Device"));
+    assert!(debug_overview_page.contains("Runtime Summary"));
+    assert!(debug_overview_page.contains("Diagnostics Notes"));
+    assert!(debug_overview_page.contains("value-width: 374px;"));
+    assert!(debug_overview_page.contains("root.identity-id"));
+    assert!(debug_overview_page.contains("root.device-id"));
+    assert!(!debug_overview_page.contains("Test Local Host"));
+    assert!(!debug_overview_page.contains("Nine-Grid Authorization Tests"));
+    assert!(connection_test_page.contains("Host And Web Tests"));
+    assert!(connection_test_page.contains("Run Connection Tests"));
+    assert!(connection_test_page.contains("Test Local Host"));
+    assert!(connection_test_page.contains("Test Remote"));
+    assert!(connection_test_page.contains("connection-test-running"));
+    assert!(connection_test_page.contains("enabled: !root.connection-test-running;"));
+    assert!(connection_test_page.contains("connection-test-badge-label"));
+    assert!(connection_test_page.contains("connection-test-badge-tone"));
+    assert!(nine_grid_page.contains("Nine-Grid Authorization Tests"));
+    assert!(nine_grid_page.contains("Run Authorization Tests"));
+    assert!(nine_grid_page.contains("6-cell Object"));
+    assert!(nine_grid_page.contains("22-cell Object"));
+    assert!(!nine_grid_page.contains("Test Local Host"));
+    assert!(remote_page.contains("ToggleSwitch"));
+    assert!(remote_page.contains("remote-relay-enabled"));
+    assert!(remote_page.contains("Gateway URL"));
+    assert!(remote_page.contains("gateway-url"));
+    assert!(remote_page.contains("save-remote-web-config"));
+    assert!(host_source.contains("storylock-badge-label"));
+    assert!(host_source.contains("nine-grid-badge-label"));
+    assert!(dashboard_source.contains("connection_badge_for_status"));
+    assert!(dashboard_source.contains("connection_test_running_label"));
+    assert!(dashboard_source.contains("connection_test_running_message"));
+    assert!(dashboard_source.contains("host.set_connection_test_running(true);"));
+    assert!(dashboard_source.contains("host.set_connection_test_running(false);"));
+    assert!(dashboard_source.contains("std::thread::spawn(move || {"));
+    assert!(dashboard_source.contains("slint::invoke_from_event_loop(move || {"));
+    assert!(dashboard_source.contains("nine_grid_badge_for_status"));
     assert!(host_source.contains("browse-storylock-data-dir"));
     assert!(host_source.contains("LearningAnswerGrid"));
     assert!(host_source.contains("callback select-answer(int);"));
@@ -151,13 +216,16 @@ fn host_storylock_open_uses_twenty_two_question_authorization() {
     assert!(dashboard_source.contains("read_effective_author_draft(package_dir)"));
     assert!(dashboard_source.contains("set_storylock_challenge_question"));
     assert!(dashboard_source.contains("if current_index_for_next.get() >= max_index"));
-    assert!(dashboard_source.contains("set_option_1_state"));
+    assert!(puzzle_adapter_source.contains("set_option_1_state"));
+    assert!(puzzle_adapter_source.contains("set_option_9_state"));
     assert!(dashboard_source.contains("vec![Vec::<String>::new(); cells.len()]"));
-    assert!(dashboard_source.contains("selected != expected"));
+    assert!(dashboard_source.contains("storylock_open_expected_answers(&active_package_dir"));
+    assert!(
+        dashboard_source.contains("authorize_storylock_open(&answers, &expected_answers_for_auth)")
+    );
     assert!(dashboard_source.contains("show_storylock_authorization_result"));
     assert!(dashboard_source.contains("挑战通过，即将进入 StoryLock 编辑界面。"));
     assert!(dashboard_source.contains("挑战失败：{error}"));
-    assert!(dashboard_source.contains("第 {} 题不匹配，已选 {}/应选 {}"));
     assert!(dashboard_source.contains("selection.clear();"));
     assert!(dashboard_source.contains("current_index_for_auth.set(0);"));
     assert!(!dashboard_source.contains("create_storylock_open_verification"));
@@ -176,7 +244,10 @@ fn storylock_open_challenge_uses_selected_story_draft_not_host_question_bank() {
 
     assert_eq!(cells.len(), 22);
     assert!(cells.iter().all(|cell| cell.answer_options.len() == 9));
-    assert!(cells.iter().all(|cell| !cell.expected_answers.is_empty()));
+    assert!(!cells
+        .iter()
+        .flat_map(|cell| cell.answer_options.iter())
+        .any(|option| option.eq_ignore_ascii_case("true") || option.eq_ignore_ascii_case("false")));
     assert!(cells.iter().any(|cell| {
         cell.prompt_text.contains('\u{6545}') || cell.prompt_text.contains('\u{4ec0}')
     }));
@@ -190,26 +261,27 @@ fn storylock_open_challenge_uses_selected_story_draft_not_host_question_bank() {
             || cell.prompt_text.contains("Which memory")
     }));
 
-    let all_correct_answers = cells
-        .iter()
-        .map(|cell| cell.expected_answers.clone())
-        .collect::<Vec<_>>();
-    super::super::dashboard::authorize_storylock_open(&cells, &all_correct_answers)
+    let all_correct_answers =
+        super::super::dashboard::storylock_open_expected_answers(&package_dir, 22)
+            .expect("external expected answers");
+    super::super::dashboard::authorize_storylock_open(&all_correct_answers, &all_correct_answers)
         .expect("all correct story draft answers authorize");
 
     assert!(
-        cells.iter().any(|cell| cell.expected_count > 1),
+        all_correct_answers.iter().any(|answers| answers.len() > 1),
         "bundled StoryLock challenges must exercise multi-select authorization"
     );
     let mut ui_click_answers = vec![Vec::<String>::new(); cells.len()];
-    for (cell_index, cell) in cells.iter().enumerate() {
-        for expected in &cell.expected_answers {
+    for (cell_index, (cell, expected_answers)) in
+        cells.iter().zip(all_correct_answers.iter()).enumerate()
+    {
+        for expected in expected_answers {
             let option_index = cell
                 .answer_options
                 .iter()
                 .position(|option| {
-                    super::super::dashboard::normalize_challenge_answer(option)
-                        == super::super::dashboard::normalize_challenge_answer(expected)
+                    storylock_puzzle_plugin::normalize_answer(option)
+                        == storylock_puzzle_plugin::normalize_answer(expected)
                 })
                 .expect("expected answer is present in the visible answer grid");
             super::super::dashboard::toggle_storylock_challenge_selection(
@@ -220,14 +292,18 @@ fn storylock_open_challenge_uses_selected_story_draft_not_host_question_bank() {
             );
         }
     }
-    super::super::dashboard::authorize_storylock_open(&cells, &ui_click_answers)
+    super::super::dashboard::authorize_storylock_open(&ui_click_answers, &all_correct_answers)
         .expect("selecting each visible correct grid option authorizes");
 
     let mut twenty_four_answers = all_correct_answers.clone();
     twenty_four_answers.push(vec!["extra answer 23".to_string()]);
     twenty_four_answers.push(vec!["extra answer 24".to_string()]);
     assert!(
-        super::super::dashboard::authorize_storylock_open(&cells, &twenty_four_answers).is_err(),
+        super::super::dashboard::authorize_storylock_open(
+            &twenty_four_answers,
+            &all_correct_answers
+        )
+        .is_err(),
         "StoryLock open authorization must compare exactly the 22 challenged cells, not accept a 24-cell answer set"
     );
 
@@ -237,19 +313,30 @@ fn storylock_open_challenge_uses_selected_story_draft_not_host_question_bank() {
         .cloned()
         .collect::<Vec<_>>();
     assert!(
-        super::super::dashboard::authorize_storylock_open(&cells, &twenty_one_answers).is_err(),
+        super::super::dashboard::authorize_storylock_open(
+            &twenty_one_answers,
+            &all_correct_answers
+        )
+        .is_err(),
         "StoryLock open authorization must reject truncated answer sets instead of zip-truncating"
     );
 
-    let partial_answers = cells
+    let partial_answers = all_correct_answers
         .iter()
-        .map(|cell| vec![cell.expected_answers[0].clone()])
+        .map(|answers| vec![answers[0].clone()])
         .collect::<Vec<_>>();
-    assert!(super::super::dashboard::authorize_storylock_open(&cells, &partial_answers).is_err());
+    assert!(super::super::dashboard::authorize_storylock_open(
+        &partial_answers,
+        &all_correct_answers
+    )
+    .is_err());
 
     let mut wrong_answers = all_correct_answers;
     wrong_answers[0].push("definitely wrong".to_string());
-    assert!(super::super::dashboard::authorize_storylock_open(&cells, &wrong_answers).is_err());
+    assert!(
+        super::super::dashboard::authorize_storylock_open(&wrong_answers, &ui_click_answers)
+            .is_err()
+    );
 }
 
 #[test]
@@ -1992,6 +2079,17 @@ fn package_self_check_report_exposes_vault_mtime_and_statuses() {
 }
 
 #[test]
+fn storylock_core_objects_sidebar_defaults_to_collapsed_submenu() {
+    let core_shell = include_str!("../storylock_core.slint");
+
+    assert!(core_shell.contains("in-out property <bool> objects-menu-expanded: false;"));
+    assert!(core_shell.contains("Protected Objects >"));
+    assert!(core_shell.contains("if root.objects-menu-expanded: SubMenuButton {"));
+    assert!(core_shell.contains("root.objects-menu-expanded = !root.objects-menu-expanded;"));
+    assert!(core_shell.contains("root.objects-menu-expanded = true;"));
+}
+
+#[test]
 fn learning_test_dialog_keeps_sixteen_nine_window_size() {
     let dialogs = include_str!("../storylock_core/dialogs.slint");
     let common = include_str!("../common.slint");
@@ -2026,33 +2124,45 @@ fn learning_test_dialog_keeps_sixteen_nine_window_size() {
     assert!(!section.contains("StaticTextPanel {"));
     assert!(section.contains("toggle-answer(index) => { root.learning-toggle-answer(index); }"));
     assert!(common.contains("callback toggle-requested();"));
-    assert!(section.contains("label: root.is-zh ? \"\\u{4e0a}\\u{4e00}\\u{9898}\" : \"Previous\";"));
-    assert!(section.contains("label: root.is-zh ? \"\\u{4e0b}\\u{4e00}\\u{9898}\" : \"Next\";"));
+    assert!(section.contains("label: root.is-zh ? \"\\u{4e0a}\\u{9898}\" : \"Prev\";"));
+    assert!(section.contains("label: root.is-zh ? \"\\u{4e0b}\\u{9898}\" : \"Next\";"));
     assert!(!section.contains("StatusStrip {"));
-    assert!(section.contains("ActionButton { x: 12px; y: 20px; label: root.is-zh ? \"\\u{4e0a}\\u{4e00}\\u{9898}\" : \"Previous\"; primary: false; enabled: root.can-learning-previous; button-width: 156px; clicked => { root.learning-previous(); } }"));
-    assert!(section.contains("ActionButton { x: 12px; y: 58px; label: root.is-zh ? \"\\u{4e0b}\\u{4e00}\\u{9898}\" : \"Next\"; primary: false; enabled: root.can-learning-next; button-width: 156px; clicked => { root.learning-next(); } }"));
-    assert!(section.contains("y: 100px;"));
-    assert!(section.contains("ActionButton { x: 12px; y: 112px; label: root.is-zh ? \"\\u{91cd}\\u{65b0}\\u{5f00}\\u{59cb}\" : \"Restart\"; primary: true; button-width: 156px; clicked => { root.restart-learning(); } }"));
-    assert!(section.contains("ActionButton { x: 12px; y: 150px; label: root.is-zh ? \"\\u{5173}\\u{95ed}\" : \"Close\"; primary: false; button-width: 156px; clicked => { root.close-requested(); } }"));
+    assert!(section.contains(
+        "HorizontalBox {\n                        x: 12px;\n                        y: 38px;"
+    ));
+    assert!(section.contains("ActionButton { label: root.is-zh ? \"\\u{4e0a}\\u{9898}\" : \"Prev\"; primary: false; enabled: root.can-learning-previous; button-width: 74px; clicked => { root.learning-previous(); } }"));
+    assert!(section.contains("ActionButton { label: root.is-zh ? \"\\u{4e0b}\\u{9898}\" : \"Next\"; primary: false; enabled: root.can-learning-next; button-width: 74px; clicked => { root.learning-next(); } }"));
+    assert!(section.contains(
+        "Rectangle { x: 20px; y: 84px; width: 140px; height: 1px; background: #d7e1e6; }"
+    ));
+    assert!(section.contains(
+        "HorizontalBox {\n                        x: 12px;\n                        y: 98px;"
+    ));
+    assert!(section.contains("ActionButton { label: root.is-zh ? \"\\u{91cd}\\u{65b0}\" : \"Restart\"; primary: true; button-width: 92px; clicked => { root.restart-learning(); } }"));
+    assert!(section.contains("ActionButton { label: root.is-zh ? \"\\u{5173}\\u{95ed}\" : \"Close\"; primary: false; button-width: 56px; clicked => { root.close-requested(); } }"));
     assert!(common.contains("export component BinaryStateMark inherits Rectangle {"));
     assert!(common.contains("export component BinaryStateCheckBox inherits Rectangle {"));
     assert!(common.contains("in property <bool> enabled: true;"));
     assert!(common.contains("enabled: root.enabled;"));
-    assert!(core_shell.contains("学习策略设置"));
-    assert!(core_shell.contains("Learning Policy Settings"));
-    assert!(core_shell.contains("Learning Policy"));
+    assert!(core_shell.contains("预学习参数"));
+    assert!(core_shell.contains("Pre-Learning"));
+    assert!(core_shell.contains("Retention Schedule"));
     assert!(learning_export.contains("enabled: root.export-ready;"));
     assert!(learning_export.contains("Export Locked"));
     assert!(learning_export.contains("in property <string> config-status;"));
+    assert!(learning_export.contains("in property <int> learning-progress-percent: 0;"));
+    assert!(learning_export.contains("in property <string> learning-progress-headline;"));
+    assert!(learning_export.contains("width: parent.width * root.learning-progress-percent / 100;"));
     assert!(learning_export.contains("Test Status: "));
     assert!(learning_export.contains("Export Status: "));
     assert!(learning_export.contains("CopyableLogPanel {"));
     assert_eq!(learning_export.matches("CopyableLogPanel {").count(), 1);
     assert!(!learning_export.contains("        LogPanel {"));
-    assert!(!learning_export.contains("LogPanel,"));
     assert!(common.contains("export component CopyableLogPanel inherits Rectangle {"));
     assert!(common.contains("read-only: true;"));
     assert!(core_shell.contains("config-status: root.config-status;"));
+    assert!(core_shell.contains("learning-progress-percent: root.learning-progress-percent;"));
+    assert!(core_shell.contains("learning-progress-headline: root.learning-progress-headline;"));
     assert!(learning_callbacks.contains("Export blocked. Run and pass the nine-grid test first."));
     assert!(learning_callbacks.contains("Exporting encrypted package..."));
     let export_callback = learning_callbacks
@@ -2103,4 +2213,25 @@ fn learning_test_dialog_keeps_sixteen_nine_window_size() {
         .contains("pub(crate) const TEMPLATE_CHILD_SPECS: [TemplateChildSpec; 3] = ["));
     assert!(template_shell.contains("pub(crate) fn template_bundle_item_from_resource("));
     assert!(template_shell.contains("pub(crate) fn sync_template_children_for_resource("));
+}
+
+#[test]
+fn static_rows_support_wrapped_values_for_long_status_text() {
+    let common = include_str!("../common.slint");
+    let host_source = include_str!("../host_dashboard.slint");
+    let learning_export = include_str!("../storylock_core/pages_learning_export.slint");
+
+    assert!(common.contains("in property <bool> wrap-value: false;"));
+    assert!(common.contains("in property <length> value-height: root.row-height;"));
+    assert!(common.contains("wrap: root.wrap-value ? word-wrap : no-wrap;"));
+    assert!(common.contains("overflow: root.wrap-value ? clip : elide;"));
+
+    assert!(host_source.contains("value: root.core-launch-status; value-width: 500px; wrap-value: true; value-height: 40px;"));
+    assert!(host_source.contains("value: root.identity-id;"));
+    assert!(host_source.contains("value: root.device-id;"));
+    assert!(host_source.contains("wrap-value: true;"));
+    assert!(host_source.contains("value-height: 32px;"));
+
+    assert!(learning_export.contains("height: 28px;"));
+    assert!(learning_export.contains("wrap: word-wrap;"));
 }

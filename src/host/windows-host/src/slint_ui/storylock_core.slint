@@ -8,6 +8,7 @@ export component StoryLockCoreApp inherits Window {
         in-out property <int> active-page: 1;
         in-out property <string> language: "zh";
         property <bool> is-zh: language == "zh";
+        in-out property <bool> objects-menu-expanded: false;
         in-out property <string> story-title: "Guarding the Tree Stump";
         in-out property <string> story-summary: "A farmer sees a rabbit crash into a tree stump and waits there instead of working.";
         in-out property <string> story-plot: "A farmer was working in the field when a rabbit ran into a tree stump and died. He then waited by the stump every day instead of farming, but no second rabbit ever came. This sample story links 24 questions into one repeatable memory draft.";
@@ -310,32 +311,47 @@ export component StoryLockCoreApp inherits Window {
                         overflow: elide;
                     }
                     MenuButton {
-                        label: root.is-zh ? "受保护对象" : "Protected Objects";
+                        label: root.objects-menu-expanded
+                            ? (root.is-zh ? "受保护对象 ▼" : "Protected Objects v")
+                            : (root.is-zh ? "受保护对象 >" : "Protected Objects >");
                         selected: root.active-page == 2;
                         button-height: 32px;
-                        clicked => { root.active-page = 2; }
+                        clicked => {
+                            if root.active-page == 2 {
+                                root.objects-menu-expanded = !root.objects-menu-expanded;
+                            } else {
+                                root.active-page = 2;
+                                root.objects-menu-expanded = true;
+                            }
+                        }
                     }
-                    SubMenuButton {
+                    if root.objects-menu-expanded: SubMenuButton {
                         label: root.is-zh ? "普通对象" : "Normal Objects";
                         selected: root.active-page == 2 && root.resource-group == "normal";
                         button-height: 28px;
                         clicked => {
+                            root.active-page = 2;
+                            root.objects-menu-expanded = true;
                             root.select-resource-group("normal");
                         }
                     }
-                    SubMenuButton {
+                    if root.objects-menu-expanded: SubMenuButton {
                         label: root.is-zh ? "私密对象" : "Private Objects";
                         selected: root.active-page == 2 && root.resource-group == "private";
                         button-height: 28px;
                         clicked => {
+                            root.active-page = 2;
+                            root.objects-menu-expanded = true;
                             root.select-resource-group("private");
                         }
                     }
-                    SubMenuButton {
+                    if root.objects-menu-expanded: SubMenuButton {
                         label: root.is-zh ? "机密对象" : "Secret Objects";
                         selected: root.active-page == 2 && root.resource-group == "secret";
                         button-height: 28px;
                         clicked => {
+                            root.active-page = 2;
+                            root.objects-menu-expanded = true;
                             root.select-resource-group("secret");
                         }
                     }
@@ -578,6 +594,9 @@ export component StoryLockCoreApp inherits Window {
                             long-term-frequency-years <=> root.long-term-frequency-years;
                             learning-plan-summary: root.learning-plan-summary;
                             learning-status: root.learning-status;
+                            learning-progress-summary: root.learning-progress-summary;
+                            learning-progress-percent: root.learning-progress-percent;
+                            learning-progress-headline: root.learning-progress-headline;
                             save-learning-policy => { root.save-learning-policy(); }
                         }
 
@@ -599,6 +618,9 @@ export component StoryLockCoreApp inherits Window {
                             long-term-frequency-years <=> root.long-term-frequency-years;
                             learning-plan-summary: root.learning-plan-summary;
                             learning-status: root.learning-status;
+                            learning-progress-summary: root.learning-progress-summary;
+                            learning-progress-percent: root.learning-progress-percent;
+                            learning-progress-headline: root.learning-progress-headline;
                             save-learning-policy => { root.save-learning-policy(); }
                         }
 
@@ -607,6 +629,8 @@ export component StoryLockCoreApp inherits Window {
                             learning-plan-summary: root.learning-plan-summary;
                             learning-status: root.learning-status;
                             learning-progress-summary: root.learning-progress-summary;
+                            learning-progress-percent: root.learning-progress-percent;
+                            learning-progress-headline: root.learning-progress-headline;
                             learning-action-hint: root.learning-action-hint;
                             learning-result: root.learning-result;
                             config-status: root.config-status;
