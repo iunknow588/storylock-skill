@@ -174,21 +174,24 @@
 
 ### 7. 截图验收噪声与乱码链路彻底清理
 
-**状态：未完成**
+**状态：已完成**
 
 原因：
 
-1. 历史记录里多次提到截图工具仍有 `ICU4X data error: No segmentation model for language: ja` 警告。
-2. 文档链路里也反复提到乱码样本文案问题，尚无彻底关闭项。
+1. `skill/tools/render-storylock-ui-docs` 已完成迁移后的路径清理、样例文本清理和文档同步。
+2. 已重新生成 `docs/management/流程图/ui-screenshots` 下的 01-07 截图，并清理旧的 `skill/src/docs/...` 影子输出目录。
+3. 本轮 `cargo run` 与截图刷新过程中未再出现此前文档里记录的 ICU4X 警告。
 
 ### 8. MSI 打包链路专项验证
 
-**状态：未完成**
+**状态：已完成验证，阻塞点已明确**
 
 原因：
 
 1. 当前记录已明确 zip 构建与产物校验通过。
-2. 但 `-BuildMsi` 验证仍停留在“建议下一步处理”，没有完成结论。
+2. 已于 2026-07-02 实际执行 `.\scripts\release\windows\build_windows_host.ps1 -BuildMsi -Version 0.1.0 -VersionCode 2 -ReleaseChannel prototype-ui`。
+3. 构建脚本成功产出 zip：`release/app/windows/yian-windows-host-0.1.0-2-prototype-ui.zip`，SHA-256 为 `4896a9d6a99d5c3b6d499d9d2a0cd3741c6895667245a4bef23ad41e726b385e`。
+4. MSI 未产出，直接原因已确认是当前环境缺少 `wix` CLI，脚本输出为 `WiX CLI was not found. Skipping MSI build.`，这属于打包工具链缺失，不是当前 UI 代码变更导致的失败。
 
 ## 五、完成度判断
 
@@ -214,7 +217,7 @@
 建议完成度口径：
 
 - **主线完成度：约 88% - 92%**
-- **未完成部分集中在更广义的 Spinner 体系、响应式/可访问性细化、截图验收噪声和 MSI 验证**
+- **未完成部分集中在更广义的 Spinner 体系、响应式/可访问性细化，以及 MSI 工具链补齐**
 
 ## 六、后续建议
 
@@ -361,6 +364,8 @@
 
 ### 任务 5：截图验收链路清理
 
+状态：已完成（2026-07-02）
+
 目标：
 
 1. 清理乱码样本。
@@ -376,7 +381,17 @@
 1. 截图工具输出更干净。
 2. 验收截图不再混入明显伪数据或乱码噪声。
 
+完成记录：
+
+1. `skill/tools/render-storylock-ui-docs` 已迁移并完成路径清理，旧的 `src/tools/...` 引用已全部收口。
+2. 截图样例文本与工具文档已清理，`render-storylock-ui-docs` 已恢复可编译、可出图状态。
+3. 已执行 `cargo check` 与 `cargo run`，成功生成并刷新 `docs/management/流程图/ui-screenshots` 下的 01-07 截图。
+4. 旧的 `skill/src/docs/management/流程图/ui-screenshots` 影子输出目录已清理。
+5. 本轮工具运行未再出现此前文档中记录的 ICU4X 警告。
+
 ### 任务 6：MSI 打包验证
+
+状态：已完成（2026-07-02）
 
 目标：
 
@@ -394,6 +409,25 @@ cd E:\2026OPC大赛\skill
 1. MSI 构建通过。
 2. 产物路径明确。
 3. 如失败，记录失败点和是否与当前 UI 变更相关。
+
+完成记录：
+
+1. 已执行底层打包脚本：
+   - `.\scripts\release\windows\build_windows_host.ps1 -BuildMsi -Version 0.1.0 -VersionCode 2 -ReleaseChannel prototype-ui`
+2. 验证结论：
+   - release 编译通过
+   - zip 产物成功生成
+   - MSI 分支被实际执行，但当前环境缺少 `wix` CLI，因此脚本输出 `WiX CLI was not found. Skipping MSI build.`
+   - 该阻塞点属于本机 MSI 工具链缺失，不是当前 UI 代码变更导致
+3. 已进一步执行上层 release 包装脚本：
+   - `.\scripts\release\windows\release_windows_host.ps1 -Version 0.1.0 -VersionCode 2 -ReleaseChannel prototype-ui`
+4. 上层脚本验证结果：
+   - 会再次调用底层 `build_windows_host.ps1`
+   - 会补充生成 `release-manifest-0.1.0-2-prototype-ui.json`
+   - 当前适合作为“正式 release 流程验证”，但不应替代底层打包能力验证
+5. 当前可确认的有效发布产物：
+   - `release/app/windows/yian-windows-host-0.1.0-2-prototype-ui.zip`
+   - 最近一次 release 包装脚本生成的 SHA-256：`77389719244fd80f667dc951d639e198b61ef7f8751801ba905e42fbe1adb4da`
 
 ## 九、完成判定规则
 
@@ -423,3 +457,28 @@ cd E:\2026OPC大赛\skill
 1. `windows-host_ui_optimization_suggestions_20250630.md`
 2. `windows-host_ui_deployment_feasibility_20250630.md`
 3. `windows-host_debug_test_refactor_task_list_20250702.md`
+
+## 十一、发布一致性验证补充（2026-07-02）
+
+为避免将 Host UI 中的“调试测试”与发行链路校验混为一谈，补充如下口径：
+
+1. `Debug And Tests` 页签负责运行时联调与功能测试，例如本地 Host、Remote Relay、九宫格授权等。
+2. `scripts/release/windows/build_windows_host.ps1` 负责底层构建与打包能力验证。
+3. `scripts/release/windows/release_windows_host.ps1` 负责正式 release 清单生成。
+4. `scripts/release/windows/verify_windows_release_consistency.ps1` 负责“当前本地产物是否已经与线上发行版一致”的最终比对。
+
+建议命令：
+
+```powershell
+cd E:\2026OPC大赛\skill
+.\scripts\release\windows\verify_windows_release_consistency.ps1 `
+  -ManifestPath .\release\app\windows\release-manifest-0.1.0-2-prototype-ui.json `
+  -BaseUrl https://yian.cdao.online
+```
+
+本轮实际结论：
+
+1. 本地最新 Windows 包为 `0.1.0 / versionCode 2 / prototype-ui`。
+2. 2026-07-02 在线发行页 `https://yian.cdao.online/app/download` 仍返回 Windows 包 `0.1.0 / versionCode 1 / prototype`。
+3. 差异字段包括 `versionCode`、`releaseChannel`、`fileName`、`fileSizeBytes`、`checksum`。
+4. 因此当前状态不是“Host UI 缺少验证能力”，而是“线上发行站点尚未同步到本地刚生成的 Windows 发布包”。

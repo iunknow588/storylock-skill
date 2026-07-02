@@ -1,5 +1,5 @@
 import { VerticalBox, ScrollView } from "std-widgets.slint";
-import { InfoRow, SectionPanel, SectionTitle } from "../common.slint";
+import { InfoRow, SectionPanel, SectionTitle, StaticTextPanel } from "../common.slint";
 
 export component ProtectedObjectTableRow inherits Rectangle {
     in property <bool> is-header;
@@ -86,25 +86,30 @@ export component ProtectedObjectsPage inherits VerticalBox {
 
     x: 0px;
     y: 0px;
-    width: 720px;
-    height: 374px;
+    width: 736px;
+    height: 382px;
     spacing: 0px;
 
     SectionPanel {
-        x: 12px;
-        panel-width: 696px;
+        x: 18px;
+        panel-width: 700px;
         panel-height: 350px;
         VerticalBox {
-            x: 14px;
-            y: 10px;
-            width: 668px;
-            height: 330px;
+            x: 18px;
+            y: 16px;
+            width: 664px;
+            height: 316px;
             spacing: 10px;
 
             SectionTitle { label: root.is-zh ? "\u{53d7}\u{4fdd}\u{62a4}\u{5bf9}\u{8c61}" : "Protected Objects"; }
             InfoRow {
                 name: root.is-zh ? "\u{5f53}\u{524d}\u{7ea7}\u{522b}" : "Current Level";
                 value: root.resource-group == "normal" ? (root.is-zh ? "\u{666e}\u{901a}\u{5bf9}\u{8c61}" : "Normal Objects") : root.resource-group == "private" ? (root.is-zh ? "\u{79c1}\u{5bc6}\u{5bf9}\u{8c61}" : "Private Objects") : (root.is-zh ? "\u{673a}\u{5bc6}\u{5bf9}\u{8c61}" : "Secret Objects");
+            }
+            StaticTextPanel {
+                width: 664px;
+                panel-height: 52px;
+                value: root.protected-object-list;
             }
             ProtectedObjectTableRow {
                 is-header: true;
@@ -115,14 +120,14 @@ export component ProtectedObjectsPage inherits VerticalBox {
                 id: root.is-zh ? "\u{7f16}\u{53f7}" : "ID";
             }
             ScrollView {
-                width: 668px;
-                height: 246px;
+                width: 664px;
+                height: 184px;
                 vertical-scrollbar-policy: ScrollBarPolicy.as-needed;
                 horizontal-scrollbar-policy: ScrollBarPolicy.always-off;
-                viewport-width: 668px;
+                viewport-width: 664px;
                 viewport-height: 264px;
                 VerticalBox {
-                    width: 668px;
+                    width: 664px;
                     height: 264px;
                     spacing: 1px;
                     ProtectedObjectTableRow { id: root.object-1-id; name: root.object-1-name; username: root.object-1-secret; usage: root.object-1-usage; level: root.object-1-level; selected(value) => { root.select-object(value); } }

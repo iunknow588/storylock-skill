@@ -55,6 +55,7 @@ scripts\release\android\build_apk.cmd -Variant debug
 node scripts\android\validate_android_question_set.mjs
 scripts\release\windows\release_windows_host.cmd
 scripts\release\windows\publish_windows_release.cmd -ManifestPath E:\path\to\release-manifest.json -CopyArtifacts
+scripts\release\windows\verify_windows_release_consistency.ps1 -ManifestPath release\app\windows\release-manifest-0.1.0-2-prototype-ui.json -BaseUrl https://yian.cdao.online
 scripts\release\windows\upload_windows_release_to_object_storage.cmd -UploadManifestPath E:\path\to\upload-manifest.json
 python scripts\text\normalize_text_files.py --root . --dry-run
 python scripts\text\normalize_text_files.py --root . --dry-run --fail-on-change
@@ -78,6 +79,7 @@ scripts\verify\encoding-check.ps1
 - `scripts\vercel\publish_site_release.ps1` supports two skeleton targets: `vercel` for CLI deployment planning or execution and `static` for copying the built `release/web/public/` directory into a release folder. Add `-SiteHttpSmoke` before Vercel deployment to run the local rewrite-equivalent HTTP check for `/`, `/api/storylock-gateway`, `/app/download`, platform downloads, binding, and registrations. Add `-Preflight` to run local env/project checks before deploy and online HTTP checks after deploy, so stale production 404s do not block the first corrective deployment.
 - `scripts\vercel\sync_env_file_to_vercel.ps1` converts a local env fragment into a Vercel env sync plan and can optionally execute `vercel env update` with `add` fallback for `preview` and `production`.
 - `scripts\release\windows\upload_windows_release_to_object_storage.ps1` defaults to generating an upload plan and only executes uploads when `-Execute` is supplied.
+- `scripts\release\windows\verify_windows_release_consistency.ps1` compares a local Windows release manifest or env fragment with the online `/app/download` status and the public metadata JSON under `/downloads/`. Use it to answer the release question "is the current published Windows package the same as the one I just built?"
 - `release\app\` is the unified local source for downloadable app packages. Android packages go under `release\app\android\`, Windows packages under `release\app\windows\`, and Linux packages under `release\app\linux\`. The site build copies these packages into `release\web\public\downloads\` before deployment.
 - App package build/release/upload scripts live under `scripts\release\`; `scripts\android\` and `scripts\windows\` are reserved for local loop checks.
 - `node scripts\android\validate_android_question_set.mjs` verifies that the Android asset-backed question set has non-empty identity/version fields, at least 24 active questions, and no duplicate active `questionId`.

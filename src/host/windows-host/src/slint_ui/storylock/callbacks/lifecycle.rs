@@ -94,17 +94,17 @@ pub(crate) fn register_lifecycle_callbacks(
         if let Some(core) = weak.upgrade() {
             let current = core.get_export_package_dir();
             let current_trimmed = current.as_str().trim();
-            let mut dialog = rfd::FileDialog::new();
-            if !current_trimmed.is_empty() {
+            let initial_dir = if !current_trimmed.is_empty() {
                 let current_path = std::path::PathBuf::from(current_trimmed);
                 if current_path.exists() {
-                    dialog = dialog.set_directory(current_path);
+                    current_path
+                } else {
+                    default_storylock_export_dir(&export_browse_fallback_dir)
                 }
             } else {
-                dialog =
-                    dialog.set_directory(default_storylock_export_dir(&export_browse_fallback_dir));
-            }
-            if let Some(selected_dir) = dialog.pick_folder() {
+                default_storylock_export_dir(&export_browse_fallback_dir)
+            };
+            if let Some(selected_dir) = pick_storylock_folder_once(&initial_dir, |dialog| dialog) {
                 let normalized = normalize_storylock_export_dir_path(
                     &core,
                     &export_browse_fallback_dir,

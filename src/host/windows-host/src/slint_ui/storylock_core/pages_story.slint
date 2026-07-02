@@ -9,20 +9,20 @@ export component StoryDraftPage inherits VerticalBox {
 
     x: 0px;
     y: 0px;
-    width: 720px;
-    height: 374px;
+    width: 736px;
+    height: 382px;
     spacing: 0px;
 
     SectionPanel {
-        x: 12px;
-        panel-width: 696px;
+        x: 18px;
+        panel-width: 700px;
         panel-height: 350px;
         VerticalBox {
-            x: 14px;
-            y: 10px;
-            width: 668px;
-            height: 330px;
-            spacing: 8px;
+            x: 18px;
+            y: 16px;
+            width: 664px;
+            height: 316px;
+            spacing: 10px;
             SectionTitle { label: root.is-zh ? "\u{6545}\u{4e8b}\u{8349}\u{7a3f}" : "Story Draft"; }
             EditableRow {
                 name: root.is-zh ? "故事标题" : "Story Title";
@@ -30,19 +30,27 @@ export component StoryDraftPage inherits VerticalBox {
                 editor-width: 504px;
                 row-height: 28px;
             }
+            Text {
+                width: 664px;
+                height: 28px;
+                text: root.is-zh ? "摘要用于快速预览，完整故事用于后续 24 题联想。长文本会保留滚动，不再挤压主布局。" : "Use the summary for quick review and the full story for the 24-question memory chain. Long text stays scrollable instead of squeezing the layout.";
+                color: #62727d;
+                font-size: 12px;
+                wrap: word-wrap;
+            }
             LargeEditableText {
                 name: root.is-zh ? "摘要" : "Summary";
                 value <=> root.story-summary;
                 editor-height: 72px;
-                content-height: 72px;
-                width: 668px;
+                content-height: 132px;
+                width: 664px;
             }
             LargeEditableText {
                 name: root.is-zh ? "完整故事情节" : "Full Story Plot";
                 value <=> root.story-plot;
-                editor-height: 194px;
+                editor-height: 166px;
                 content-height: 620px;
-                width: 668px;
+                width: 664px;
             }
         }
     }
@@ -80,31 +88,31 @@ export component QuestionOverviewPage inherits VerticalBox {
 
     x: 0px;
     y: 0px;
-    width: 720px;
-    height: 374px;
+    width: 736px;
+    height: 382px;
     spacing: 0px;
 
     SectionPanel {
-        x: 12px;
-        panel-width: 696px;
+        x: 18px;
+        panel-width: 700px;
         panel-height: 350px;
         VerticalBox {
-            x: 14px;
-            y: 10px;
-            width: 668px;
-            height: 330px;
-            spacing: 8px;
+            x: 18px;
+            y: 16px;
+            width: 664px;
+            height: 316px;
+            spacing: 10px;
             SectionTitle { label: root.is-zh ? "24 个问题" : "24 Questions"; }
             Text {
-                height: 18px;
+                height: 30px;
                 text: root.is-zh ? "点击任意问题进入答案编辑。每个卡片显示实际题目文本。" : "Click a question to edit its answers. Each tile shows the actual question text.";
                 color: #62727d;
                 font-size: 12px;
-                overflow: elide;
+                wrap: word-wrap;
             }
             QuestionOverviewGrid {
-                width: 668px;
-                height: 294px;
+                width: 664px;
+                height: 276px;
                 selected-question <=> root.selected-question;
                 selection-enabled: root.selection-enabled;
                 question-1: root.question-1;
@@ -168,24 +176,24 @@ export component QuestionEditorPage inherits VerticalBox {
 
     x: 0px;
     y: 0px;
-    width: 720px;
-    height: 374px;
+    width: 736px;
+    height: 382px;
     spacing: 0px;
 
     SectionPanel {
-        x: 12px;
-        panel-width: 696px;
+        x: 18px;
+        panel-width: 700px;
         panel-height: 350px;
         VerticalBox {
-            x: 14px;
-            y: 10px;
-            width: 668px;
-            height: 330px;
-            spacing: 8px;
+            x: 18px;
+            y: 16px;
+            width: 664px;
+            height: 316px;
+            spacing: 10px;
             SectionTitle { label: root.is-zh ? "\u{7b54}\u{6848}\u{7f16}\u{8f91}" : "Answer Editor"; }
             QuestionConfigPanel {
-                width: 668px;
-                panel-height: 274px;
+                width: 664px;
+                panel-height: 258px;
                 selected-question <=> root.selected-question;
                 question-text <=> root.question-text;
                 answer-1 <=> root.answer-1;
@@ -211,8 +219,8 @@ export component QuestionEditorPage inherits VerticalBox {
                 select-node(value) => { root.select-node(value); }
             }
             HorizontalBox {
-                spacing: 10px;
-                Rectangle { width: 164px; height: 1px; background: transparent; }
+                spacing: 12px;
+                Rectangle { width: 170px; height: 1px; background: transparent; }
                 ActionButton {
                     label: root.is-zh ? "返回总览" : "Back to Overview";
                     primary: false;

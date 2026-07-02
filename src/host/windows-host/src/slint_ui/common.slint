@@ -182,12 +182,45 @@ export component EditableRow inherits HorizontalLayout {
         }
     }
 
+export component PathBrowseButton inherits Rectangle {
+        in property <bool> enabled: true;
+        in property <length> button-width: 40px;
+        in property <length> button-height: 32px;
+        callback clicked();
+
+        width: root.button-width;
+        height: root.button-height;
+        border-radius: 6px;
+        border-width: 1px;
+        border-color: root.enabled ? #45606b : #aebbc1;
+        background: !root.enabled ? #d8e0e4 : (touch.pressed ? #344b54 : (touch.has-hover ? #3a5a66 : #45606b));
+        touch := TouchArea {
+            clicked => {
+                if root.enabled {
+                    root.clicked();
+                }
+            }
+        }
+        Text {
+            text: "\u{22ef}";
+            color: root.enabled ? white : #7d8b93;
+            font-size: 16px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            width: parent.width;
+            height: parent.height;
+        }
+    }
+
 export component PathBrowseRow inherits HorizontalLayout {
         in property <string> name;
         in-out property <string> value;
         in property <bool> is-zh: true;
         in property <length> editor-width: 358px;
         in property <length> row-height: 32px;
+        in property <bool> browse-enabled: true;
+        in property <bool> read-only: false;
         callback browse();
 
         spacing: 14px;
@@ -203,27 +236,12 @@ export component PathBrowseRow inherits HorizontalLayout {
             text <=> root.value;
             width: root.editor-width;
             height: root.row-height;
+            read-only: root.read-only;
         }
-        Rectangle {
-            width: 40px;
-            height: root.row-height;
-            border-radius: 6px;
-            border-width: 1px;
-            border-color: #45606b;
-            background: touch.pressed ? #344b54 : (touch.has-hover ? #3a5a66 : #45606b);
-            touch := TouchArea {
-                clicked => { root.browse(); }
-            }
-            Text {
-                text: "\u{22ef}";
-                color: white;
-                font-size: 16px;
-                font-weight: 700;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-                width: parent.width;
-                height: parent.height;
-            }
+        PathBrowseButton {
+            button-height: root.row-height;
+            enabled: root.browse-enabled;
+            clicked => { root.browse(); }
         }
     }
 

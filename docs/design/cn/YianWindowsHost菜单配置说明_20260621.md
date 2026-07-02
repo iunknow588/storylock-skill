@@ -180,6 +180,8 @@ $env:STORYLOCK_WINDOWS_DATA_DIR="E:\2026OPC大赛\skill\.temp\runtime\windows-ho
 3. 所需强度等级。
 4. 对应九宫格数量。
 
+Host 主窗口中的“管控边界与授权强度”区域仅做只读摘要展示，不提供输入框、下拉框或保存按钮；真正的策略编辑和对象配置只能在 `StoryLock Core` 内完成。
+
 外部 Host 不能读取或修改：
 
 1. 故事原文。

@@ -54,10 +54,7 @@ pub(crate) fn storylock_core_learning_policy_path(package_dir: &Path) -> std::pa
 }
 
 pub(crate) fn storylock_core_templates_dir(package_dir: &Path) -> std::path::PathBuf {
-    if package_dir.join("story-template.json").exists() {
-        return package_dir.join("templates");
-    }
-    storylock_runtime_config_dir(package_dir)
+    package_dir.join("templates")
 }
 
 pub(crate) fn storylock_core_story_template_directories_dir(
@@ -87,9 +84,9 @@ pub(crate) fn required_storylock_package_files() -> [&'static str; 7] {
         "resource-catalog.json",
         "vault.stlk",
         "learning-policy.json",
-        "../config/login-sites.json",
-        "../config/signing-actions.json",
-        "../config/agent-tasks.json",
+        "templates/login-sites.json",
+        "templates/signing-actions.json",
+        "templates/agent-tasks.json",
     ]
 }
 
@@ -105,6 +102,21 @@ pub(crate) fn cleanup_legacy_storylock_package_files(package_dir: &Path) -> Resu
     let tmp_dir = package_dir.join(".tmp");
     if tmp_dir.exists() && tmp_dir.is_dir() && fs::read_dir(&tmp_dir)?.next().is_none() {
         fs::remove_dir(&tmp_dir)?;
+    }
+    Ok(())
+}
+
+pub(crate) fn cleanup_legacy_runtime_config_template_files(package_dir: &Path) -> Result<()> {
+    let legacy_config_dir = storylock_runtime_config_dir(package_dir);
+    for file_name in [
+        "login-sites.json",
+        "signing-actions.json",
+        "agent-tasks.json",
+    ] {
+        let path = legacy_config_dir.join(file_name);
+        if path.exists() {
+            fs::remove_file(path)?;
+        }
     }
     Ok(())
 }
@@ -138,6 +150,7 @@ pub(crate) fn ensure_storylock_core_package(package_dir: &Path) -> Result<()> {
     cleanup_redundant_storylock_template_files(package_dir)?;
     cleanup_legacy_nested_storylock_template_package_files(package_dir)?;
     cleanup_legacy_storylock_package_files(package_dir)?;
+    cleanup_legacy_runtime_config_template_files(package_dir)?;
     Ok(())
 }
 
@@ -292,7 +305,6 @@ pub(crate) fn cleanup_redundant_storylock_template_files(package_dir: &Path) -> 
     if !is_standalone_story_template {
         paths.push(package_dir.join("story-drafts"));
         paths.push(package_dir.join("story-template-directories"));
-        paths.push(package_dir.join("templates"));
         paths.push(storylock_runtime_root_dir(package_dir).join("story-template-directories"));
         for file_name in [
             "login-sites.json",
@@ -356,6 +368,14 @@ pub(crate) fn ensure_manifest_lists_required_files(package_dir: &Path) -> Result
         .and_then(Value::as_array)
         .cloned()
         .unwrap_or_default();
+    files.retain(|item| {
+        !matches!(
+            item.as_str(),
+            Some("../config/login-sites.json")
+                | Some("../config/signing-actions.json")
+                | Some("../config/agent-tasks.json")
+        )
+    });
     for required_file in required_storylock_package_files() {
         if !files
             .iter()

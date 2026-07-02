@@ -2,10 +2,19 @@ use super::puzzle_adapter::{
     set_storylock_challenge_question, show_storylock_authorization_result,
 };
 use super::*;
+use std::path::PathBuf;
 use storylock_puzzle_plugin::{create_open_challenge_from_draft, StoryLockChallengeCell};
 
 fn host_language_is_zh(language: &str) -> bool {
     language == "zh"
+}
+
+fn browse_host_config_file_path() -> Result<Option<PathBuf>> {
+    let config_path = host_ui_settings_path();
+    if let Some(parent) = config_path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    Ok(pick_host_config_file_once(&config_path))
 }
 
 fn remote_mode_label(remote_enabled: bool, restart_required: bool, language: &str) -> &'static str {
@@ -132,6 +141,45 @@ fn connection_test_running_message(target: &str, language: &str) -> String {
     }
 }
 
+fn nine_grid_running_label(language: &str) -> &'static str {
+    if host_language_is_zh(language) {
+        "\u{6d4b}\u{8bd5}\u{4e2d}"
+    } else {
+        "Testing"
+    }
+}
+
+fn nine_grid_running_message(tier: &str, language: &str) -> String {
+    let label = match tier {
+        "confidential" => {
+            if host_language_is_zh(language) {
+                "\u{6536}\u{96c6} 12 \u{683c}\u{5bf9}\u{8c61}"
+            } else {
+                "12-cell Object"
+            }
+        }
+        "top-secret" => {
+            if host_language_is_zh(language) {
+                "\u{6536}\u{96c6} 22 \u{683c}\u{5bf9}\u{8c61}"
+            } else {
+                "22-cell Object"
+            }
+        }
+        _ => {
+            if host_language_is_zh(language) {
+                "\u{6536}\u{96c6} 6 \u{683c}\u{5bf9}\u{8c61}"
+            } else {
+                "6-cell Object"
+            }
+        }
+    };
+    if host_language_is_zh(language) {
+        format!("\u{6b63}\u{5728}\u{6d4b}\u{8bd5}{label}...")
+    } else {
+        format!("Testing {label}...")
+    }
+}
+
 fn restart_message(language: &str) -> &'static str {
     if host_language_is_zh(language) {
         "\u{6b63}\u{5728}\u{91cd}\u{542f} Windows Host..."
@@ -177,8 +225,9 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     app.set_diagnostics(SharedString::from(
         "Yian Host is storage-blind. It does not read or display StoryLock drafts, vault files, manifests, catalogs, templates, package paths, question answers, passwords, private keys, signing key bytes, shared secrets, or raw story text.\n\nThe local API exists for loopback health checks and diagnostics only. Remote capability names and call chains are surfaced in observation mode, not as user workflow steps.",
     ));
+    let saved_host_settings = Rc::new(RefCell::new(load_host_ui_settings()));
     let saved_settings = Rc::new(RefCell::new(load_storylock_ui_settings()));
-    let initial_language = saved_settings
+    let initial_language = saved_host_settings
         .borrow()
         .language
         .clone()
@@ -219,9 +268,10 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 connection_test_running_label(&language),
             ));
             host.set_connection_test_badge_tone(SharedString::from("neutral"));
-            host.set_connection_test_status(SharedString::from(
-                connection_test_running_message("Local Host", &language),
-            ));
+            host.set_connection_test_status(SharedString::from(connection_test_running_message(
+                "Local Host",
+                &language,
+            )));
             let weak = host.as_weak();
             let local_health_url = local_health_url.clone();
             std::thread::spawn(move || {
@@ -263,9 +313,10 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 connection_test_running_label(&language),
             ));
             host.set_connection_test_badge_tone(SharedString::from("neutral"));
-            host.set_connection_test_status(SharedString::from(
-                connection_test_running_message("Remote Gateway", &language),
-            ));
+            host.set_connection_test_status(SharedString::from(connection_test_running_message(
+                "Remote Gateway",
+                &language,
+            )));
             let weak = host.as_weak();
             std::thread::spawn(move || {
                 let status = test_http_endpoint("Remote Gateway", &gateway_url);
@@ -330,12 +381,24 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
 
     let host_port_for_nine_grid = config.host_port;
     let host_for_nine_grid = app.as_weak();
+    let host_language_for_nine_grid = Rc::clone(&host_language);
     app.on_test_managed_object_nine_grid(move |tier| {
+        let language = host_language_for_nine_grid.borrow().clone();
+        if let Some(host) = host_for_nine_grid.upgrade() {
+            host.set_nine_grid_running(true);
+            host.set_nine_grid_badge_label(SharedString::from(nine_grid_running_label(&language)));
+            host.set_nine_grid_badge_tone(SharedString::from("neutral"));
+            host.set_nine_grid_status(SharedString::from(nine_grid_running_message(
+                &tier, &language,
+            )));
+        }
         let status = test_managed_object_nine_grid(host_port_for_nine_grid, tier.to_string());
         let (label, tone) = nine_grid_badge_for_status(&status);
         if let Some(host) = host_for_nine_grid.upgrade() {
             host.set_nine_grid_badge_label(SharedString::from(label));
             host.set_nine_grid_badge_tone(SharedString::from(tone));
+            host.set_nine_grid_running(false);
+            host.set_nine_grid_status(SharedString::from(status.clone()));
         }
         SharedString::from(status)
     });
@@ -348,6 +411,15 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     *saved_settings.borrow_mut() = normalized_settings.clone();
     if let Err(error) = save_storylock_ui_settings(&normalized_settings) {
         eprintln!("failed to normalize StoryLock UI settings: {error}");
+    }
+    if let Err(error) = save_host_ui_settings(&saved_host_settings.borrow()) {
+        eprintln!("failed to save Host UI settings: {error}");
+    }
+    if let Err(error) = retire_legacy_combined_ui_settings_if_split() {
+        eprintln!("failed to retire legacy combined UI settings: {error}");
+    }
+    if let Err(error) = cleanup_legacy_host_config_storylock_templates() {
+        eprintln!("failed to clean legacy StoryLock templates from Host config dir: {error}");
     }
     let core_package_dir = resolve_storylock_core_package_with_conflict_prompt(
         &initial_storylock_core_package_dir(&normalized_settings),
@@ -386,8 +458,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
     let core_window_for_settings = Rc::clone(&core_window);
     let host_for_settings_lock = app.as_weak();
     let shared_status = Rc::new(RefCell::new(String::from("")));
-    let shared_status_for_settings = Rc::clone(&shared_status);
-    let saved_settings_for_settings = Rc::clone(&saved_settings);
+    let saved_host_settings_for_settings = Rc::clone(&saved_host_settings);
     let host_for_main_browse = app.as_weak();
     let host_language_for_main_browse = Rc::clone(&host_language);
     let saved_settings_for_main_browse = Rc::clone(&saved_settings);
@@ -403,9 +474,8 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
         match ensure_storylock_core_package(&package_dir) {
             Ok(()) => {
                 let language = host_language_for_main_browse.borrow().clone();
-                let next_settings = merge_host_settings(
+                let next_settings = merge_storylock_package_settings(
                     &saved_settings_for_main_browse.borrow(),
-                    &language,
                     Some(package_dir.display().to_string()),
                 );
                 if let Err(error) = save_storylock_ui_settings(&next_settings) {
@@ -472,13 +542,8 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 settings.set_language(SharedString::from(
                     host_language_for_settings.borrow().clone(),
                 ));
-                settings.set_core_launch_status(SharedString::from(
-                    shared_status_for_settings.borrow().clone(),
-                ));
-                settings.set_encrypted_data_dir(SharedString::from(
-                    initial_storylock_core_package_dir(&saved_settings_for_settings.borrow())
-                        .display()
-                        .to_string(),
+                settings.set_host_config_file(SharedString::from(
+                    host_ui_settings_path().display().to_string(),
                 ));
 
                 if let Some(host) = host_for_settings.upgrade() {
@@ -491,7 +556,7 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                 let host_for_language = host_for_settings.clone();
                 let host_language_for_language = Rc::clone(&host_language_for_settings);
                 let core_window_for_language = Rc::clone(&core_window_for_settings);
-                let saved_settings_for_language = Rc::clone(&saved_settings_for_settings);
+                let saved_host_settings_for_language = Rc::clone(&saved_host_settings_for_settings);
                 let remote_restart_required_for_language = Rc::clone(&remote_restart_required);
                 let health_url_for_language = config.health_url.clone();
                 let core_package_dir_for_language = core_package_dir.clone();
@@ -500,14 +565,13 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                     let language_string = language.to_string();
                     *host_language_for_language.borrow_mut() = language_string.clone();
                     let next_settings = merge_host_settings(
-                        &saved_settings_for_language.borrow(),
+                        &saved_host_settings_for_language.borrow(),
                         &language_string,
-                        None,
                     );
-                    if let Err(error) = save_storylock_ui_settings(&next_settings) {
-                        eprintln!("failed to save StoryLock UI settings: {error}");
+                    if let Err(error) = save_host_ui_settings(&next_settings) {
+                        eprintln!("failed to save Host UI settings: {error}");
                     }
-                    *saved_settings_for_language.borrow_mut() = next_settings;
+                    *saved_host_settings_for_language.borrow_mut() = next_settings;
 
                     if let Some(settings) = settings_weak.upgrade() {
                         settings.set_language(SharedString::from(language_string.clone()));
@@ -547,56 +611,33 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
                     }
                 });
 
-                let settings_weak_for_browse = settings.as_weak();
+                let settings_weak_for_config_browse = settings.as_weak();
                 let host_for_browse = host_for_settings.clone();
-                let host_language_for_browse = Rc::clone(&host_language_for_settings);
-                let core_window_for_browse = Rc::clone(&core_window_for_settings);
-                let saved_settings_for_browse = Rc::clone(&saved_settings_for_settings);
-                settings.on_browse_encrypted_data_dir(move || {
-                    let Some(settings) = settings_weak_for_browse.upgrade() else {
-                        return;
-                    };
-                    let current_dir =
-                        initial_storylock_core_package_dir(&saved_settings_for_browse.borrow());
-                    let selected_path = pick_storylock_core_package_path(current_dir.as_path());
-                    let Some(selected_path) = selected_path else {
-                        return;
-                    };
-                    let package_dir = resolve_storylock_core_package_path(&selected_path);
-                    match ensure_storylock_core_package(&package_dir) {
-                        Ok(()) => {
-                            settings.set_encrypted_data_dir(SharedString::from(
-                                package_dir.display().to_string(),
-                            ));
-                            let language = host_language_for_browse.borrow().clone();
-                            let next_settings = merge_host_settings(
-                                &saved_settings_for_browse.borrow(),
-                                &language,
-                                Some(package_dir.display().to_string()),
-                            );
-                            if let Err(error) = save_storylock_ui_settings(&next_settings) {
-                                if let Some(host) = host_for_browse.upgrade() {
-                                    host.set_connection_test_status(SharedString::from(format!(
-                                        "Encrypted files path save failed: {error}"
-                                    )));
-                                }
-                                return;
-                            }
-                            *saved_settings_for_browse.borrow_mut() = next_settings;
-                            if let Some(core) = core_window_for_browse.borrow().as_ref() {
-                                initialize_storylock_core_empty_window(core, &package_dir);
-                                core.set_language(SharedString::from(language));
+                settings.on_browse_host_config_file(move || {
+                    let result = browse_host_config_file_path();
+                    match result {
+                        Ok(Some(path)) => {
+                            if let Some(settings) = settings_weak_for_config_browse.upgrade() {
+                                settings
+                                    .set_host_config_file(SharedString::from(path.display().to_string()));
                             }
                             if let Some(host) = host_for_browse.upgrade() {
                                 host.set_connection_test_status(SharedString::from(
-                                    "Package directory selected.",
+                                    "Host config file selected.",
+                                ));
+                            }
+                        }
+                        Ok(None) => {
+                            if let Some(host) = host_for_browse.upgrade() {
+                                host.set_connection_test_status(SharedString::from(
+                                    "Host config file selection cancelled.",
                                 ));
                             }
                         }
                         Err(error) => {
                             if let Some(host) = host_for_browse.upgrade() {
                                 host.set_connection_test_status(SharedString::from(format!(
-                                    "Package load failed: {error}"
+                                    "Host config file selection failed: {error}"
                                 )));
                             }
                         }
@@ -605,18 +646,17 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
 
                 let host_for_settings_lock_close = host_for_settings_lock.clone();
                 let host_language_for_close = Rc::clone(&host_language_for_settings);
-                let saved_settings_for_close = Rc::clone(&saved_settings_for_settings);
+                let saved_host_settings_for_close = Rc::clone(&saved_host_settings_for_settings);
                 let settings_window_for_close = Rc::clone(&settings_window_for_open);
                 let close_settings = Rc::new(move |settings: &SettingsDialog| {
                     let next_settings = merge_host_settings(
-                        &saved_settings_for_close.borrow(),
+                        &saved_host_settings_for_close.borrow(),
                         &host_language_for_close.borrow(),
-                        Some(settings.get_encrypted_data_dir().to_string()),
                     );
-                    if let Err(error) = save_storylock_ui_settings(&next_settings) {
-                        eprintln!("failed to save StoryLock UI settings: {error}");
+                    if let Err(error) = save_host_ui_settings(&next_settings) {
+                        eprintln!("failed to save Host UI settings: {error}");
                     } else {
-                        *saved_settings_for_close.borrow_mut() = next_settings;
+                        *saved_host_settings_for_close.borrow_mut() = next_settings;
                     }
                     let _ = settings.hide();
                     *settings_window_for_close.borrow_mut() = None;
@@ -687,17 +727,16 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
 
     let weak = app.as_weak();
     let host_language_for_close = Rc::clone(&host_language);
-    let saved_settings_for_close = Rc::clone(&saved_settings);
+    let saved_host_settings_for_close = Rc::clone(&saved_host_settings);
     app.on_close_requested(move || {
         let next_settings = merge_host_settings(
-            &saved_settings_for_close.borrow(),
+            &saved_host_settings_for_close.borrow(),
             &host_language_for_close.borrow(),
-            None,
         );
-        if let Err(error) = save_storylock_ui_settings(&next_settings) {
-            eprintln!("failed to save StoryLock UI settings: {error}");
+        if let Err(error) = save_host_ui_settings(&next_settings) {
+            eprintln!("failed to save Host UI settings: {error}");
         }
-        *saved_settings_for_close.borrow_mut() = next_settings;
+        *saved_host_settings_for_close.borrow_mut() = next_settings;
         if let Some(app) = weak.upgrade() {
             let _ = app.hide();
         }
@@ -705,9 +744,9 @@ pub fn run(config: WindowsHostConfig) -> Result<()> {
 
     app.run()?;
     let final_settings =
-        merge_host_settings(&saved_settings.borrow(), &host_language.borrow(), None);
-    if let Err(error) = save_storylock_ui_settings(&final_settings) {
-        eprintln!("failed to save StoryLock UI settings: {error}");
+        merge_host_settings(&saved_host_settings.borrow(), &host_language.borrow());
+    if let Err(error) = save_host_ui_settings(&final_settings) {
+        eprintln!("failed to save Host UI settings: {error}");
     }
     Ok(())
 }
@@ -750,16 +789,12 @@ fn open_storylock_core_in_empty_mode(
             initialize_storylock_core_empty_window(&core, &active_package_dir);
             apply_storylock_ui_settings(&core, &current_settings);
             let host_for_closed = host_weak.clone();
-            let settings_window_for_closed = Rc::clone(&settings_window);
             let shared_status_for_closed = Rc::clone(&shared_status);
             let notify_storylock_closed: Rc<dyn Fn()> = Rc::new(move || {
                 let status = "StoryLock closed".to_string();
                 *shared_status_for_closed.borrow_mut() = status.clone();
                 if let Some(host) = host_for_closed.upgrade() {
                     host.set_connection_test_status(SharedString::from(status.clone()));
-                }
-                if let Some(settings) = settings_window_for_closed.borrow().as_ref() {
-                    settings.set_core_launch_status(SharedString::from(status));
                 }
             });
             let host_for_unlock = host_weak.clone();
@@ -854,16 +889,12 @@ fn open_storylock_core_after_authorization(
             apply_storylock_ui_settings(&core, &current_settings);
             set_storylock_start_page_to_questions(&core);
             let host_for_closed = host_weak.clone();
-            let settings_window_for_closed = Rc::clone(&settings_window);
             let shared_status_for_closed = Rc::clone(&shared_status);
             let notify_storylock_closed: Rc<dyn Fn()> = Rc::new(move || {
                 let status = "StoryLock closed".to_string();
                 *shared_status_for_closed.borrow_mut() = status.clone();
                 if let Some(host) = host_for_closed.upgrade() {
                     host.set_connection_test_status(SharedString::from(status.clone()));
-                }
-                if let Some(settings) = settings_window_for_closed.borrow().as_ref() {
-                    settings.set_core_launch_status(SharedString::from(status));
                 }
             });
             let unlock_package: Rc<dyn Fn()> = Rc::new(|| {});

@@ -26,24 +26,26 @@ export component LearningPage inherits Rectangle {
 
     x: 0px;
     y: 0px;
-    width: 720px;
-    height: 374px;
+    width: 736px;
+    height: 382px;
+    property <brush> progress-track-color: #dfe7eb;
+    property <brush> progress-fill-color: #7fb38d;
 
     if root.mode == 0: VerticalBox {
-        x: 12px;
-        y: 12px;
-        width: 696px;
+        x: 18px;
+        y: 16px;
+        width: 700px;
         height: 350px;
-        spacing: 8px;
+        spacing: 10px;
         SectionPanel {
-            panel-width: 696px;
-            panel-height: 192px;
+            panel-width: 700px;
+            panel-height: 184px;
             VerticalBox {
-                x: 14px;
-                y: 10px;
-                width: 668px;
-                height: 172px;
-                spacing: 8px;
+                x: 18px;
+                y: 14px;
+                width: 664px;
+                height: 156px;
+                spacing: 10px;
                 SectionTitle { label: root.is-zh ? "\u{9884}\u{5b66}\u{4e60}\u{53c2}\u{6570}" : "Pre-Learning Parameters"; }
                 StaticRow { name: root.is-zh ? "\u{8bad}\u{7ec3}\u{53c2}\u{6570}\u{6587}\u{4ef6}" : "Learning File"; value: "learning-policy.json"; value-width: 504px; row-height: 26px; }
                 EditableRow { name: root.is-zh ? "\u{6bcf}\u{9898}\u{8bad}\u{7ec3}\u{6b21}\u{6570}" : "Prompts Per Q"; value <=> root.pre-learning-prompts-per-question; editor-width: 504px; row-height: 28px; }
@@ -52,17 +54,17 @@ export component LearningPage inherits Rectangle {
             }
         }
         SectionPanel {
-            panel-width: 696px;
-            panel-height: 144px;
+            panel-width: 700px;
+            panel-height: 160px;
             VerticalBox {
-                x: 14px;
-                y: 10px;
-                width: 668px;
-                height: 124px;
-                spacing: 6px;
+                x: 18px;
+                y: 14px;
+                width: 664px;
+                height: 132px;
+                spacing: 8px;
                 SectionTitle { label: root.is-zh ? "\u{72b6}\u{6001}" : "Status"; }
-                StaticRow { name: root.is-zh ? "\u{8bad}\u{7ec3}\u{6458}\u{8981}" : "Training Summary"; value: root.learning-plan-summary; value-width: 504px; row-height: 22px; }
-                StaticRow { name: root.is-zh ? "\u{5f53}\u{524d}\u{72b6}\u{6001}" : "Status"; value: root.learning-status; value-width: 504px; row-height: 22px; }
+                StaticRow { name: root.is-zh ? "\u{8bad}\u{7ec3}\u{6458}\u{8981}" : "Training Summary"; value: root.learning-plan-summary; value-width: 504px; row-height: 22px; wrap-value: true; value-height: 38px; }
+                StaticRow { name: root.is-zh ? "\u{5f53}\u{524d}\u{72b6}\u{6001}" : "Status"; value: root.learning-status; value-width: 504px; row-height: 22px; wrap-value: true; value-height: 38px; }
                 Text {
                     text: root.learning-progress-headline;
                     height: 28px;
@@ -71,15 +73,15 @@ export component LearningPage inherits Rectangle {
                     wrap: word-wrap;
                 }
                 Rectangle {
-                    width: 668px;
+                    width: 664px;
                     height: 10px;
                     border-radius: 5px;
-                    background: #dfe7eb;
+                    background: root.progress-track-color;
                     Rectangle {
                         width: parent.width * root.learning-progress-percent / 100;
                         height: 10px;
                         border-radius: 5px;
-                        background: #7fb38d;
+                        background: root.progress-fill-color;
                     }
                 }
                 Text {
@@ -92,34 +94,34 @@ export component LearningPage inherits Rectangle {
             }
         }
         HorizontalBox {
-            spacing: 10px;
-            Rectangle { width: 180px; height: 1px; background: transparent; }
+            spacing: 12px;
+            Rectangle { width: 188px; height: 1px; background: transparent; }
             ActionButton { label: root.is-zh ? "\u{4fdd}\u{5b58}\u{53c2}\u{6570}" : "Save Settings"; primary: true; button-height: 30px; clicked => { root.save-learning-policy(); } }
         }
     }
 
     if root.mode == 1: VerticalBox {
-        x: 12px;
-        y: 12px;
-        width: 696px;
+        x: 18px;
+        y: 16px;
+        width: 700px;
         height: 350px;
-        spacing: 8px;
+        spacing: 10px;
         SectionPanel {
-            panel-width: 696px;
-            panel-height: 242px;
+            panel-width: 700px;
+            panel-height: 232px;
             VerticalBox {
-                x: 14px;
-                y: 10px;
-                width: 668px;
-                height: 222px;
-                spacing: 5px;
+                x: 18px;
+                y: 14px;
+                width: 664px;
+                height: 204px;
+                spacing: 8px;
                 SectionTitle { label: root.is-zh ? "\u{7559}\u{5b58}\u{5b66}\u{4e60}\u{8282}\u{594f}" : "Retention Schedule"; }
                 HorizontalBox {
-                    spacing: 12px;
+                    spacing: 16px;
                     VerticalBox {
-                        width: 328px;
-                        height: 188px;
-                        spacing: 5px;
+                        width: 324px;
+                        height: 178px;
+                        spacing: 6px;
                         EditableRow { name: root.is-zh ? "\u{521d}\u{59cb}\u{5929}\u{6570}" : "Initial Days"; value <=> root.initial-days; editor-width: 164px; row-height: 26px; }
                         EditableRow { name: root.is-zh ? "\u{521d}\u{59cb}\u{9891}\u{7387}" : "Initial Freq"; value <=> root.initial-frequency-days; editor-width: 164px; row-height: 26px; }
                         EditableRow { name: root.is-zh ? "\u{5de9}\u{56fa}\u{5929}\u{6570}" : "Consolid. Days"; value <=> root.consolidation-days; editor-width: 164px; row-height: 26px; }
@@ -127,9 +129,9 @@ export component LearningPage inherits Rectangle {
                         EditableRow { name: root.is-zh ? "\u{9002}\u{5e94}\u{5468}\u{6570}" : "Adapt Weeks"; value <=> root.adaptation-weeks; editor-width: 164px; row-height: 26px; }
                     }
                     VerticalBox {
-                        width: 328px;
-                        height: 188px;
-                        spacing: 5px;
+                        width: 324px;
+                        height: 178px;
+                        spacing: 6px;
                         EditableRow { name: root.is-zh ? "\u{9002}\u{5e94}\u{9891}\u{7387}" : "Adapt Freq"; value <=> root.adaptation-frequency-weeks; editor-width: 164px; row-height: 26px; }
                         EditableRow { name: root.is-zh ? "\u{7a33}\u{5b9a}\u{6708}\u{6570}" : "Stable Months"; value <=> root.stable-months; editor-width: 164px; row-height: 26px; }
                         EditableRow { name: root.is-zh ? "\u{7a33}\u{5b9a}\u{9891}\u{7387}" : "Stable Freq"; value <=> root.stable-frequency-months; editor-width: 164px; row-height: 26px; }
@@ -140,19 +142,21 @@ export component LearningPage inherits Rectangle {
             }
         }
         SectionPanel {
-            panel-width: 696px;
-            panel-height: 116px;
+            panel-width: 700px;
+            panel-height: 128px;
             VerticalBox {
-                x: 14px;
-                y: 10px;
-                width: 668px;
-                height: 96px;
-                spacing: 6px;
+                x: 18px;
+                y: 14px;
+                width: 664px;
+                height: 100px;
+                spacing: 8px;
                 StaticRow {
                     name: root.is-zh ? "\u{5f53}\u{524d}\u{72b6}\u{6001}" : "Status";
                     value: root.learning-status;
                     value-width: 504px;
                     row-height: 22px;
+                    wrap-value: true;
+                    value-height: 38px;
                 }
                 Text {
                     text: root.learning-progress-headline;
@@ -162,15 +166,15 @@ export component LearningPage inherits Rectangle {
                     wrap: word-wrap;
                 }
                 Rectangle {
-                    width: 668px;
+                    width: 664px;
                     height: 10px;
                     border-radius: 5px;
-                    background: #dfe7eb;
+                    background: root.progress-track-color;
                     Rectangle {
                         width: parent.width * root.learning-progress-percent / 100;
                         height: 10px;
                         border-radius: 5px;
-                        background: #7fb38d;
+                        background: root.progress-fill-color;
                     }
                 }
                 Text {
@@ -183,8 +187,8 @@ export component LearningPage inherits Rectangle {
             }
         }
         HorizontalBox {
-            spacing: 10px;
-            Rectangle { width: 180px; height: 1px; background: transparent; }
+            spacing: 12px;
+            Rectangle { width: 188px; height: 1px; background: transparent; }
             ActionButton { label: root.is-zh ? "\u{4fdd}\u{5b58}\u{8282}\u{594f}" : "Save Schedule"; primary: true; button-height: 30px; clicked => { root.save-learning-policy(); } }
         }
     }
@@ -206,27 +210,29 @@ export component ExportPage inherits VerticalBox {
 
     x: 0px;
     y: 0px;
-    width: 720px;
-    height: 374px;
-    spacing: 12px;
+    width: 736px;
+    height: 382px;
+    spacing: 0px;
+    property <brush> progress-track-color: #dfe7eb;
+    property <brush> progress-fill-color: #7fb38d;
 
     VerticalBox {
-        x: 12px;
-        width: 696px;
-        spacing: 8px;
+        x: 18px;
+        width: 700px;
+        spacing: 10px;
         SectionPanel {
-            panel-width: 696px;
-            panel-height: 156px;
+            panel-width: 700px;
+            panel-height: 184px;
             VerticalBox {
-                x: 14px;
-                y: 10px;
-                width: 668px;
-                height: 136px;
-                spacing: 6px;
+                x: 18px;
+                y: 14px;
+                width: 664px;
+                height: 156px;
+                spacing: 8px;
                 SectionTitle { label: root.is-zh ? "\u{5b66}\u{4e60}\u{95e8}\u{7981}" : "Learning Gate"; }
                 StaticTextPanel {
-                    width: 668px;
-                    panel-height: 44px;
+                    width: 664px;
+                    panel-height: 60px;
                     value: (root.is-zh ? "\u{8bad}\u{7ec3}\u{89c4}\u{5219}: " : "Rule: ")
                         + root.learning-plan-summary
                         + "\n"
@@ -241,15 +247,15 @@ export component ExportPage inherits VerticalBox {
                     wrap: word-wrap;
                 }
                 Rectangle {
-                    width: 668px;
+                    width: 664px;
                     height: 10px;
                     border-radius: 5px;
-                    background: #dfe7eb;
+                    background: root.progress-track-color;
                     Rectangle {
                         width: parent.width * root.learning-progress-percent / 100;
                         height: 10px;
                         border-radius: 5px;
-                        background: #7fb38d;
+                        background: root.progress-fill-color;
                     }
                 }
                 Text {
@@ -262,14 +268,14 @@ export component ExportPage inherits VerticalBox {
             }
         }
         HorizontalBox {
-            spacing: 10px;
-            Rectangle { width: 164px; height: 1px; background: transparent; }
+            spacing: 12px;
+            Rectangle { width: 172px; height: 1px; background: transparent; }
             ActionButton { label: root.is-zh ? "\u{5f00}\u{59cb}\u{6d4b}\u{8bd5}" : "Start Test"; primary: true; enabled: true; button-height: 30px; clicked => { root.run-learning(); } }
             ActionButton { label: root.export-ready ? (root.is-zh ? "\u{5bfc}\u{51fa}" : "Export") : (root.is-zh ? "\u{672a}\u{6d4b}\u{8bd5}\u{ff0c}\u{4e0d}\u{53ef}\u{5bfc}\u{51fa}" : "Export Locked"); primary: root.export-ready; enabled: root.export-ready; button-width: 170px; button-height: 30px; clicked => { root.export-package(); } }
         }
         CopyableLogPanel {
-            width: 696px;
-            panel-height: 170px;
+            width: 700px;
+            panel-height: 150px;
             value: (root.is-zh ? "\u{6d4b}\u{8bd5}\u{72b6}\u{6001}: " : "Test Status: ")
                 + root.learning-result
                 + "\n\n"

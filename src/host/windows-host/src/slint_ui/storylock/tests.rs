@@ -76,9 +76,9 @@ fn initializes_storylock_core_package_files() {
             .iter()
             .any(|item| item.as_str() == Some("learning-policy.json"))));
     for required in [
-        "../config/login-sites.json",
-        "../config/signing-actions.json",
-        "../config/agent-tasks.json",
+        "templates/login-sites.json",
+        "templates/signing-actions.json",
+        "templates/agent-tasks.json",
     ] {
         assert!(manifest
             .get("files")
@@ -147,12 +147,20 @@ fn host_storylock_open_uses_twenty_two_question_authorization() {
     let debug_overview_page = host_source
         .split("if root.active-page == 2: VerticalBox {")
         .nth(1)
-        .and_then(|source| source.split("if root.active-page == 3: VerticalBox {").next())
+        .and_then(|source| {
+            source
+                .split("if root.active-page == 3: VerticalBox {")
+                .next()
+        })
         .expect("debug overview page source");
     let connection_test_page = host_source
         .split("if root.active-page == 3: VerticalBox {")
         .nth(1)
-        .and_then(|source| source.split("if root.active-page == 4: VerticalBox {").next())
+        .and_then(|source| {
+            source
+                .split("if root.active-page == 4: VerticalBox {")
+                .next()
+        })
         .expect("connection test page source");
     let nine_grid_page = host_source
         .split("if root.active-page == 4: VerticalBox {")
@@ -181,6 +189,9 @@ fn host_storylock_open_uses_twenty_two_question_authorization() {
     assert!(connection_test_page.contains("connection-test-badge-tone"));
     assert!(nine_grid_page.contains("Nine-Grid Authorization Tests"));
     assert!(nine_grid_page.contains("Run Authorization Tests"));
+    assert!(nine_grid_page.contains("nine-grid-running"));
+    assert!(nine_grid_page.contains("enabled: !root.nine-grid-running;"));
+    assert!(nine_grid_page.contains("Testing..."));
     assert!(nine_grid_page.contains("6-cell Object"));
     assert!(nine_grid_page.contains("22-cell Object"));
     assert!(!nine_grid_page.contains("Test Local Host"));
@@ -189,7 +200,6 @@ fn host_storylock_open_uses_twenty_two_question_authorization() {
     assert!(remote_page.contains("Gateway URL"));
     assert!(remote_page.contains("gateway-url"));
     assert!(remote_page.contains("save-remote-web-config"));
-    assert!(host_source.contains("storylock-badge-label"));
     assert!(host_source.contains("nine-grid-badge-label"));
     assert!(dashboard_source.contains("connection_badge_for_status"));
     assert!(dashboard_source.contains("connection_test_running_label"));
@@ -1983,26 +1993,86 @@ fn storylock_ui_settings_round_trip_language_and_paths() {
 }
 
 #[test]
-fn host_settings_merge_preserves_and_updates_encrypted_data_dir() {
+fn host_and_storylock_settings_use_independent_payloads() {
+    let dir = temp_identity_package_dir();
+    let host_settings_path = dir.join("host-config.json");
+    let storylock_settings_path = dir.join("storylock-config.json");
+    let host_settings = HostUiSettings {
+        language: Some(String::from("zh")),
+    };
+    let storylock_settings = StoryLockUiSettings {
+        language: None,
+        core_data_dir: Some(String::from("D:/storylock/package-a")),
+        export_package_dir: Some(String::from("D:/storylock/package-a-export")),
+        managed_key_package_dir: None,
+    };
+
+    write_host_ui_settings(&host_settings_path, &host_settings).expect("write host settings");
+    write_storylock_ui_settings(&storylock_settings_path, &storylock_settings)
+        .expect("write storylock settings");
+
+    let host_json = serde_json::to_value(
+        read_host_ui_settings(&host_settings_path).expect("read host settings"),
+    )
+    .expect("host settings json");
+    let storylock_json = serde_json::to_value(
+        read_storylock_ui_settings(&storylock_settings_path).expect("read storylock settings"),
+    )
+    .expect("storylock settings json");
+
+    assert_eq!(
+        host_json.get("language").and_then(Value::as_str),
+        Some("zh")
+    );
+    assert!(host_json.get("coreDataDir").is_none());
+    assert!(host_json.get("exportPackageDir").is_none());
+    assert!(storylock_json.get("language").is_none());
+    assert_eq!(
+        storylock_json.get("coreDataDir").and_then(Value::as_str),
+        Some("D:/storylock/package-a")
+    );
+    assert_eq!(
+        storylock_json
+            .get("exportPackageDir")
+            .and_then(Value::as_str),
+        Some("D:/storylock/package-a-export")
+    );
+}
+
+#[test]
+fn host_settings_merge_updates_only_host_language() {
+    let original = HostUiSettings {
+        language: Some(String::from("zh")),
+    };
+
+    let changed = merge_host_settings(&original, "en");
+
+    assert_eq!(changed.language.as_deref(), Some("en"));
+}
+
+#[test]
+fn storylock_package_settings_merge_preserves_language_and_updates_package_dir() {
     let original = StoryLockUiSettings {
         language: Some(String::from("zh")),
         core_data_dir: Some(String::from("E:/storylock/vault-a")),
         export_package_dir: Some(String::from("E:/storylock/export")),
         managed_key_package_dir: None,
     };
-    let language_only = merge_host_settings(&original, "en", None);
-    assert_eq!(language_only.language.as_deref(), Some("en"));
+    let unchanged_path = merge_storylock_package_settings(&original, None);
+    assert_eq!(unchanged_path.language.as_deref(), Some("zh"));
     assert_eq!(
-        language_only.core_data_dir.as_deref(),
+        unchanged_path.core_data_dir.as_deref(),
         Some("E:/storylock/vault-a")
     );
     assert_eq!(
-        language_only.export_package_dir.as_deref(),
+        unchanged_path.export_package_dir.as_deref(),
         Some("E:/storylock/export")
     );
 
-    let changed_path = merge_host_settings(&language_only, "en", Some(String::from("D:/vault-b")));
+    let changed_path =
+        merge_storylock_package_settings(&unchanged_path, Some(String::from("D:/vault-b")));
     assert_eq!(changed_path.core_data_dir.as_deref(), Some("D:/vault-b"));
+    assert_eq!(changed_path.language.as_deref(), Some("zh"));
 }
 
 #[test]
@@ -2023,9 +2093,8 @@ fn encrypted_data_path_resolution_uses_real_storylock_package_directory() {
         template_dir
     );
 
-    let merged = merge_host_settings(
+    let merged = merge_storylock_package_settings(
         &StoryLockUiSettings::default(),
-        "zh",
         Some(root.display().to_string()),
     );
     assert_eq!(
@@ -2035,16 +2104,43 @@ fn encrypted_data_path_resolution_uses_real_storylock_package_directory() {
 }
 
 #[test]
-fn host_settings_page_exposes_encrypted_data_dir_picker() {
+fn host_settings_page_exposes_host_config_file_path() {
     let host_source = include_str!("../host_dashboard.slint");
+    let common_source = include_str!("../common.slint");
     let dashboard_source = include_str!("../dashboard.rs");
+    let settings_source = include_str!("../storylock/core_data/settings.rs");
 
-    assert!(host_source.contains("encrypted-data-dir"));
-    assert!(host_source.contains("browse-encrypted-data-dir"));
+    assert!(host_source.contains("host-config-file"));
+    assert!(host_source.contains("browse-host-config-file"));
+    assert!(host_source.contains("Host Config File"));
+    assert!(host_source.contains("read-only: true;"));
     assert!(host_source.contains("PathBrowseRow"));
-    assert!(dashboard_source.contains("on_browse_encrypted_data_dir"));
-    assert!(dashboard_source.contains("resolve_storylock_core_package_path(&selected_path)"));
-    assert!(dashboard_source.contains("ensure_storylock_core_package(&package_dir)"));
+    assert!(common_source.contains("export component PathBrowseButton"));
+    assert!(common_source.contains("browse-enabled"));
+    assert!(common_source.contains("read-only: root.read-only;"));
+    assert!(dashboard_source.contains("set_host_config_file"));
+    assert!(dashboard_source.contains("on_browse_host_config_file"));
+    assert!(dashboard_source.contains("browse_host_config_file_path"));
+    assert!(dashboard_source.contains("pick_host_config_file_once"));
+    assert!(dashboard_source.contains("host_ui_settings_path()"));
+    assert!(!dashboard_source.contains("set_host_config_file(SharedString::from(\n                    storylock_ui_settings_path()"));
+    assert!(!dashboard_source.contains("Command::new(\"explorer\")"));
+    assert!(settings_source.contains("begin_storylock_path_dialog_once"));
+    assert!(settings_source.contains("STORYLOCK_PATH_DIALOG_SUPPRESS_AFTER_CLOSE"));
+    let package_picker_source = settings_source
+        .split("pub(crate) fn pick_storylock_core_package_path")
+        .nth(1)
+        .and_then(|source| {
+            source
+                .split("pub(crate) fn pick_storylock_folder_once")
+                .next()
+        })
+        .expect("package picker source");
+    assert!(!package_picker_source.contains(".pick_file()"));
+    assert!(settings_source.contains("pub(crate) fn pick_host_config_file_once"));
+    assert!(settings_source.contains(".pick_file()"));
+    assert!(!host_source.contains("StoryLock Package Directory"));
+    assert!(!dashboard_source.contains("settings.get_encrypted_data_dir()"));
 }
 
 #[test]
@@ -2226,11 +2322,29 @@ fn static_rows_support_wrapped_values_for_long_status_text() {
     assert!(common.contains("wrap: root.wrap-value ? word-wrap : no-wrap;"));
     assert!(common.contains("overflow: root.wrap-value ? clip : elide;"));
 
-    assert!(host_source.contains("value: root.core-launch-status; value-width: 500px; wrap-value: true; value-height: 40px;"));
     assert!(host_source.contains("value: root.identity-id;"));
     assert!(host_source.contains("value: root.device-id;"));
     assert!(host_source.contains("wrap-value: true;"));
     assert!(host_source.contains("value-height: 32px;"));
+    assert!(host_source.contains("AuthorizationSummaryRow"));
+    assert!(host_source.contains("Authorized Managed Objects"));
+    assert!(host_source.contains("\\u{6388}\\u{6743}\\u{7ba1}\\u{7406}\\u{5bf9}\\u{8c61}"));
+    assert!(host_source.contains("windows-credential-ref"));
+    assert!(host_source.contains("windows-signature-key"));
+    assert!(host_source.contains("protected-object-set"));
+    assert!(host_source.contains("storylock-local-core"));
+    assert!(host_source.contains("password_fill"));
+    assert!(host_source.contains("signature"));
+    assert!(host_source.contains("batch_read"));
+    assert!(host_source.contains("story_edit"));
+    assert!(host_source.contains("6 / 9 medium"));
+    assert!(host_source.contains("12 / 12 high"));
+    assert!(host_source.contains("22 / 24 local"));
+    assert!(!host_source.contains("Host triggers tests and authorization only"));
+    assert!(!host_source.contains("Standard Object"));
+    assert!(!host_source.contains("Confidential Object"));
+    assert!(!host_source.contains("6 of 9 cells, medium strength"));
+    assert!(!host_source.contains("12 of 12 cells, high strength"));
 
     assert!(learning_export.contains("height: 28px;"));
     assert!(learning_export.contains("wrap: word-wrap;"));

@@ -780,11 +780,7 @@ pub(crate) fn wire_storylock_core_settings_callbacks(
         if let (Some(dialog), Some(core)) = (weak.upgrade(), core_for_browse.upgrade()) {
             copy_dialog_settings_to_core(&dialog, &core);
             let current_dir = storylock_core_package_dir_from_window(&core, &browse_fallback_dir);
-            let mut file_dialog = rfd::FileDialog::new();
-            if current_dir.exists() {
-                file_dialog = file_dialog.set_directory(&current_dir);
-            }
-            if let Some(selected_dir) = file_dialog.pick_folder() {
+            if let Some(selected_dir) = pick_storylock_folder_once(&current_dir, |dialog| dialog) {
                 let package_dir = resolve_storylock_core_package_path(&selected_dir);
                 match ensure_storylock_core_package(&package_dir) {
                     Ok(()) => {
