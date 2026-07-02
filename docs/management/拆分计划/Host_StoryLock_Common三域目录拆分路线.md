@@ -1,10 +1,10 @@
-# Host / StoryLock / Common 三域目录拆分路线
+# Host / StoryLock / Common 三域目录拆分路线（立即执行版）
 
 更新时间：2026-07-03
 
-## 1. 结论
+## 1. 执行结论
 
-采用以下三个顶层目录承载后续代码、文档和自动化脚本是可行的：
+从现在开始，项目按以下三域目录推进：
 
 ```text
 skill/
@@ -13,9 +13,9 @@ skill/
   common/
 ```
 
-这个结构比单纯按 `apps/`、`crates/` 分类更适合当前项目，因为 Host 和 StoryLock 是两个清晰的产品域，而 `common` 是双方协议和共享基础设施的承载层。
+这不是远期规划，而是当前代码、文档、脚本迁移的执行基线。
 
-核心原则：
+三域原则：
 
 1. `host` 承载 Yian Host 的代码、文档、测试、脚本和发布配置。
 2. `storylock` 承载 StoryLock Core 的代码、文档、测试、脚本和包管理配置。
@@ -23,9 +23,7 @@ skill/
 4. Host 不读取 StoryLock 私有数据。
 5. StoryLock 通过本地长连接或 IPC 注册到 Host，返回授权结果和脱敏摘要。
 
-## 2. 目标目录结构
-
-建议最终结构：
+## 2. 立即采用的目标结构
 
 ```text
 skill/
@@ -96,11 +94,9 @@ skill/
       host-status/
 ```
 
-## 3. 三个目录的职责
+## 3. 三域职责
 
 ### host
-
-`host` 是 Yian Host 产品域。
 
 职责：
 
@@ -124,8 +120,6 @@ skill/
 
 ### storylock
 
-`storylock` 是 StoryLock Core 产品域。
-
 职责：
 
 - StoryLock Core 桌面应用
@@ -146,8 +140,6 @@ skill/
 
 ### common
 
-`common` 是公共协议和共享基础设施层。
-
 允许放入：
 
 - Host 与 StoryLock 的本地协作协议
@@ -165,35 +157,11 @@ skill/
 - UI 代码
 - 平台密钥实现
 - 私有配置文件
-- 任何“只是暂时不知道放哪”的杂项文件
+- 临时杂项文件
 
-## 4. Host 与 StoryLock 的关系
+## 4. 立即建立的公共协议目录
 
-Host 已经有 Web 接口，因此 Host 可以独立存在。StoryLock 不应该被 Host 当作一个可读取的数据目录，而应该作为一个独立授权服务接入 Host。
-
-推荐关系：
-
-```text
-StoryLock Core  --WebSocket / Named Pipe-->  Yian Host
-```
-
-运行流程：
-
-1. Host 启动本地 Web/API 服务。
-2. StoryLock Core 独立启动。
-3. StoryLock Core 主动连接 Host 本地会话接口。
-4. StoryLock Core 注册自身能力。
-5. Host 收到远程授权请求。
-6. Host 通过本地连接把请求转发给 StoryLock。
-7. StoryLock 完成挑战和授权判断。
-8. StoryLock 返回授权结果和脱敏摘要。
-9. Host 把结果返回给远程 Agent 或 gateway。
-
-Host 不读取 StoryLock 数据，只转发请求和接收结果。
-
-## 5. common/contracts 建议内容
-
-建议先建立：
+第一批建立：
 
 ```text
 common/contracts/host-storylock-protocol/
@@ -221,120 +189,80 @@ common/contracts/host-storylock-protocol/
 | `redacted.summary.result` | StoryLock -> Host | 返回脱敏摘要 |
 | `storylock.error` | 双向 | 协议错误 |
 
-禁止传输：
+## 5. 立即迁移路线
 
-- 故事原文
-- 故事摘要
-- 问题文本
-- 答案
-- 密码
-- 私钥
-- vault 原始内容
-- 明文签名密钥
+### 阶段 A：目录和 README
 
-允许传输：
+立即执行：
 
-- 在线状态
-- 授权结果
-- 授权 id
-- 授权过期时间
-- 脱敏对象引用
-- 保密级别
-- 访问等级
-- 非敏感错误码
-
-## 6. 迁移路线
-
-### 阶段 0：目录基线建立
-
-目标：建立目录基线，不搬动业务代码。
-
-任务：
-
-- 为 `host/`、`storylock/`、`common/` 增加 README。
-- 在 `common/contracts/host-storylock-protocol/` 建立协议草案。
-- 在 `docs/management/拆分计划/` 记录该三域目录路线。
+- 建立 `host/README.md`
+- 建立 `storylock/README.md`
+- 建立 `common/README.md`
+- 建立 `common/contracts/host-storylock-protocol/README.md`
 
 验收：
 
-- 三个目录职责清晰。
-- 文档能解释哪些内容进入哪个目录。
-- 当前代码仍保持可编译。
+- 三个目录职责明确。
+- README 明确 Host 不读取 StoryLock 私有数据。
 
-### 阶段 1：公共协议先行
+### 阶段 B：协议文档和示例
 
-目标：把 Host 与 StoryLock 的协作接口先沉淀到 `common`。
+立即执行：
 
-任务：
-
-- 建立 `common/contracts/host-storylock-protocol/messages.md`
-- 建立 JSON 示例
-- 后续 Rust DTO 放入 `common/crates/storylock-contract`
+- 建立 `messages.md`
+- 建立 `security-boundary.md`
+- 建立注册、授权请求、授权结果、脱敏摘要 JSON 示例
 
 验收：
 
 - 协议中没有故事、答案、密码、私钥字段。
 - Host 与 StoryLock 的交互可以只靠协议描述清楚。
 
-### 阶段 2：Host 文档和脚本迁移
+### 阶段 C：低风险文档迁移
 
-目标：先迁移低风险内容。
+立即执行：
 
-迁移候选：
+Host 文档迁移候选：
 
 ```text
 docs/design/cn/YianWindowsHost菜单配置说明_*.md -> host/docs/ui/
 docs/management/long-polling升级任务/ -> host/docs/relay/
-scripts/windows/ -> host/scripts/
-src/host/windows-host/ -> 暂不移动，先记录映射
 ```
 
-验收：
-
-- 迁移后文档链接可追踪。
-- 不影响编译。
-- 不影响现有脚本入口。
-
-### 阶段 3：StoryLock 文档和包脚本迁移
-
-目标：把 StoryLock 包、挑战、对象策略文档迁移到 `storylock`。
-
-迁移候选：
+StoryLock 文档迁移候选：
 
 ```text
 docs/design/cn/StoryLock数据包与校验CLI说明_*.md -> storylock/docs/package/
 docs/design/cn/Challenge状态机.md -> storylock/docs/challenge/
-scripts/storylock-package/ -> storylock/scripts/package/
-scripts/story-drafts/ -> storylock/scripts/package/
 ```
 
 验收：
 
-- StoryLock 文档不再散在 Host 管理目录下。
-- 包校验脚本的位置和职责清晰。
+- 迁移后保留索引或映射表。
+- 不影响当前代码编译。
 
-### 阶段 4：公共 schema 和测试夹具迁移
+### 阶段 D：脚本迁移
 
-目标：把真正被 Host 和 StoryLock 共用的内容迁移到 `common`。
-
-迁移候选：
+立即执行：
 
 ```text
-src/shared/storylock-package/ -> common/schemas/storylock-package/
-共享 JSON fixtures -> common/test-fixtures/
-协议 DTO -> common/crates/
+scripts/windows/ -> host/scripts/
+scripts/storylock-package/ -> storylock/scripts/package/
+scripts/story-drafts/ -> storylock/scripts/package/
+跨域验证脚本 -> common/scripts/
 ```
 
 验收：
 
-- `common` 中没有业务私有实现。
-- Host 和 StoryLock 都可以依赖 `common`，但 `common` 不依赖二者。
+- Host 专用脚本只在 `host/scripts`
+- StoryLock 专用脚本只在 `storylock/scripts`
+- 双方共用脚本只在 `common/scripts`
 
-### 阶段 5：代码迁移准备
+### 阶段 E：代码迁移准备
 
-目标：代码迁移前先建立映射，不立即大搬迁。
+立即执行：
 
-当前到目标的映射：
+先建立映射，不一次性大搬迁：
 
 | 当前路径 | 目标路径 |
 | --- | --- |
@@ -344,21 +272,18 @@ src/shared/storylock-package/ -> common/schemas/storylock-package/
 | `src/slint_ui/storylock_core/` | `storylock/src/storylock-core-desktop/src/ui/storylock_core/` |
 | `src/slint_ui/storylock/core_data` | `storylock/src/storylock-core-engine/src/core_data` |
 | `src/slint_ui/storylock/resource_export` | `storylock/src/storylock-core-engine/src/resource_export` |
-| Host 与 StoryLock DTO | `common/crates/storylock-contract` |
+| Host / StoryLock DTO | `common/crates/storylock-contract` |
 
 验收：
 
-- 形成迁移清单。
 - 每次迁移只移动一类文件。
 - 每次迁移后都能编译。
 
-### 阶段 6：代码正式迁移
+### 阶段 F：代码正式迁移
 
-目标：拆成三域工程结构。
+执行顺序：
 
-顺序：
-
-1. 迁移 `common/crates/storylock-contract`
+1. 建立 `common/crates/storylock-contract`
 2. 迁移 StoryLock engine
 3. 迁移 StoryLock desktop
 4. 迁移 Host runtime 和 Host UI
@@ -373,9 +298,9 @@ src/shared/storylock-package/ -> common/schemas/storylock-package/
 - Host 不编译 StoryLock UI。
 - StoryLock 不依赖 Host runtime。
 
-## 7. 根目录 workspace 建议
+## 6. 根 workspace 目标
 
-最终可以在 `skill/Cargo.toml` 建立 workspace：
+最终在 `skill/Cargo.toml` 建立 workspace：
 
 ```toml
 [workspace]
@@ -389,107 +314,26 @@ members = [
 resolver = "2"
 ```
 
-短期不建议马上改 workspace。先完成协议文档和目录 README，再做代码迁移。
+workspace 在第一批目录和协议落地后开始启用。
 
-## 8. 文档迁移规则
+## 7. 风险与强制约束
 
-Host 文档进入：
+| 风险 | 处理 |
+| --- | --- |
+| `common` 变成杂物目录 | 只允许协议、schema、共享测试、跨域脚本 |
+| 代码移动导致编译失败 | 小步迁移，每步编译 |
+| Host 继续读取 StoryLock 数据 | 用长连接协议替换直接读取 |
+| StoryLock 依赖 Host runtime | Host runtime 只能留在 `host` |
+| 文档链接失效 | 迁移时保留索引和映射表 |
 
-```text
-host/docs/
-```
-
-包括：
-
-- Host Web API
-- relay
-- 本地 HTTP 服务
-- Host UI
-- Host 设置
-- Host 发布和安装
-
-StoryLock 文档进入：
-
-```text
-storylock/docs/
-```
-
-包括：
-
-- StoryLock 包格式
-- vault
-- 挑战机制
-- 故事模板
-- 受控对象
-- 学习策略
-- StoryLock Core UI
-
-公共文档进入：
-
-```text
-common/contracts/
-common/schemas/
-```
-
-包括：
-
-- Host / StoryLock 本地协议
-- Gateway / Host 协议
-- JSON schema
-- 脱敏摘要结构
-- 共享错误码
-
-管理性总计划仍保留：
-
-```text
-docs/management/
-```
-
-## 9. 自动化脚本迁移规则
-
-Host 专用脚本：
-
-```text
-host/scripts/
-```
-
-StoryLock 专用脚本：
-
-```text
-storylock/scripts/
-```
-
-公共脚本：
-
-```text
-common/scripts/
-```
-
-判断标准：
-
-- 只服务 Host：放 `host/scripts`
-- 只服务 StoryLock：放 `storylock/scripts`
-- 两边都用，且不包含业务私有逻辑：放 `common/scripts`
-- 发布总控脚本：可以保留 `release/` 或根 `scripts/release/`，但应调用三域内脚本
-
-## 10. 风险与约束
-
-| 风险 | 说明 | 处理 |
-| --- | --- | --- |
-| `common` 变成杂物目录 | 边界变模糊 | 只允许协议、schema、共享测试、跨域脚本 |
-| 过早移动代码 | 编译和路径引用大面积失败 | 先文档、协议、README，再小步迁移 |
-| Host 继续读取 StoryLock 数据 | 安全边界失败 | 用长连接协议替换直接读取 |
-| StoryLock 依赖 Host runtime | StoryLock 无法独立运行 | Host runtime 只能留在 `host` |
-| 文档链接失效 | 管理成本上升 | 迁移文档时保留索引和映射表 |
-
-## 11. 完成定义
+## 8. 完成定义
 
 三域拆分完成时应满足：
 
 - `host/` 可以独立说明、构建、测试、发布 Host。
 - `storylock/` 可以独立说明、构建、测试、发布 StoryLock Core。
 - `common/` 只包含公共协议、schema、测试夹具和共享脚本。
-- Host 与 StoryLock 只通过本地长连接 / IPC / contract 协作。
+- Host 与 StoryLock 只通过本地长连接、IPC 或 contract 协作。
 - Host 不读取 StoryLock 私有数据。
 - StoryLock 不承担 Host relay。
 - 根目录保留统一 workspace 和总控文档。
